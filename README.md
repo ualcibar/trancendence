@@ -111,3 +111,20 @@ This module aims to give users the flexibility to tailor their gaming experience
 across all available games by providing a variety of customization options while
 also offering a default version for those who prefer a straightforward gameplay
 experience.
+
+
+## TODO!
+
+-docker compose
+  -frontend
+  -backend
+  -postgre
+  -game
+
+### TODO this week
+
+-docker-compose
+
+
+
+
