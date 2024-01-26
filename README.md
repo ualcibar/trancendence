@@ -116,10 +116,10 @@ experience.
 ## TODO!
 
 -docker compose<br>
-  -frontend<br>
-  -backend<br>
-  -postgre<br>
-  -game<br>
+\t-frontend<br>
+\t-backend<br>
+\t-postgre<br>
+\t-game<br>
 
 ### TODO this week
 
