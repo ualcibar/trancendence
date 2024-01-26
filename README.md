@@ -115,11 +115,11 @@ experience.
 
 ## TODO!
 
--docker compose
-  -frontend
-  -backend
-  -postgre
-  -game
+-docker compose<br>
+  -frontend<br>
+  -backend<br>
+  -postgre<br>
+  -game<br>
 
 ### TODO this week
 
