@@ -39,3 +39,75 @@ prohibited; it must have the capability to win occasionally.
 This major module aims to enhance the game by introducing an AI opponent that
 adds excitement and competitiveness without relying on the A* algorithm.
 
+
+6- Minor module: GDPR Compliance Options with User Anonymization, Local
+Data Management, and Account Deletion.
+In this minor module, the goal is to introduce GDPR compliance options that allow
+users to exercise their data privacy rights. Key features and objectives include:
+◦ Implement GDPR-compliant features that enable users to request anonymiza-
+tion of their personal data, ensuring that their identity and sensitive informa-
+tion are protected.
+◦ Provide tools for users to manage their local data, including the ability to
+view, edit, or delete their personal information stored within the system.
+◦ Offer a streamlined process for users to request the permanent deletion of
+their accounts, including all associated data, ensuring compliance with data
+protection regulations.
+◦ Maintain clear and transparent communication with users regarding their data
+privacy rights, with easily accessible options to exercise these rights.
+This minor module aims to enhance user privacy and data protection by offering
+GDPR compliance options that empower users to control their personal information
+and exercise their data privacy rights within the system.
+If you are not familiar with the General Data Protection Regulation (GDPR), it
+18
+ft_transcendence Surprise.
+is essential to understand its principles and implications, especially regarding user
+data management and privacy. The GDPR is a regulation that aims to protect the
+personal data and privacy of individuals within the European Union (EU) and the
+European Economic Area (EEA). It sets out strict rules and guidelines for organi-
+zations on how they should handle and process personal data.
+To gain a better understanding of the GDPR and its requirements, it is highly
+recommended to visit the official website of the European Commission on data
+protection1. This website provides comprehensive information about the GDPR,
+including its principles, objectives, and user rights. It also offers additional re-
+sources to delve deeper into the topic and ensure compliance with the regulation.
+If you are unfamiliar with the GDPR, please take the time to visit the provided link
+and familiarize yourself with the regulations before proceeding with this project.
+
+
+7-Major module: Implement Two-Factor Authentication (2FA) and JWT.
+In this major module, the goal is to enhance security and user authentication
+by introducing Two-Factor Authentication (2FA) and utilizing JSON Web Tokens
+(JWT). Key features and objectives include:
+◦ Implement Two-Factor Authentication (2FA) as an additional layer of security
+for user accounts, requiring users to provide a secondary verification method,
+such as a one-time code, in addition to their password.
+◦ Utilize JSON Web Tokens (JWT) as a secure method for authentication and
+authorization, ensuring that user sessions and access to resources are managed
+securely.
+◦ Provide a user-friendly setup process for enabling 2FA, with options for SMS
+codes, authenticator apps, or email-based verification.
+◦ Ensure that JWT tokens are issued and validated securely to prevent unau-
+thorized access to user accounts and sensitive data.
+This major module aims to strengthen user account security by offering Two-Factor
+Authentication (2FA) and enhancing authentication and authorization through the
+use of JSON Web Tokens (JWT).
+
+
+
+8-Minor module: Game Customization Options.
+In this minor module, the goal is to provide customization options for all available
+games on the platform. Key features and objectives include:
+◦ Offer customization features, such as power-ups, attacks, or different maps,
+that enhance the gameplay experience.
+◦ Allow users to choose a default version of the game with basic features if they
+prefer a simpler experience.
+◦ Ensure that customization options are available and applicable to all games
+offered on the platform.
+◦ Implement user-friendly settings menus or interfaces for adjusting game pa-
+rameters.
+◦ Maintain consistency in customization features across all games to provide a
+unified user experience.
+This module aims to give users the flexibility to tailor their gaming experience
+across all available games by providing a variety of customization options while
+also offering a default version for those who prefer a straightforward gameplay
+experience.
