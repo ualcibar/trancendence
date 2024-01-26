@@ -2,7 +2,7 @@ NAME=Dockerfile
 COMPOSE_FILE=src/docker-compose.yml
 
 $(NAME):
-	./src/ip.sh
+#	./src/ip.sh
 	make run
 #	chmod +x ./src/ip.sh
 # 
@@ -28,7 +28,7 @@ down:
 dwst:
 	make down
 	make stop
-	@echo "👋 \033[1;32mThat's all! See you later\033[0m"
+	@echo "\033[1;32mThat's all! See you later\033[0m"
 
 # Cleaning commands
 prune:

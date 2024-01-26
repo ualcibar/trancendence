@@ -36,8 +36,6 @@ RUN addgroup -g 1000 node \
         linux-headers \
         make \
         python3 \
-        bash \
-        tree \
     # use pre-existing gpg directory, see https://github.com/nodejs/docker-node/pull/1895#issuecomment-1550389150
     && export GNUPGHOME="$(mktemp -d)" \
     # gpg keys listed at https://github.com/nodejs/node#release-keys
@@ -106,7 +104,6 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   # smoke test
   && yarn --version
 
-COPY docker-entrypoint.sh /usr/local/bin/
-#ENTRYPOINT ["docker-entrypoint.sh"]
-
-CMD ["/bin/bash", "tail -f", "/dev/null"]
+RUN apk add --no-cache bash
+SHELL ["/bin/bash", "-c"]
+CMD ["tail", "-f", "/dev/null"]

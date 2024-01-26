@@ -4,7 +4,8 @@ services:
   angular:
     container_name: angular
     build: ./frontend
-    
+    ports:
+      - "8888:4200"
   #  postgre:
 #    container_name: db
 #    image: postgres:latest

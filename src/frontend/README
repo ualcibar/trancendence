@@ -1,0 +1,6 @@
+apk add git
+npm install -g @angular/cli
+apk add xdg-utils
+ng new my-app
+cd my-app
+ng serve --open
