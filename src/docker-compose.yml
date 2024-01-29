@@ -9,19 +9,18 @@ services:
       - "8888:4200"
     networks:
       - bridge
-  #  postgre:
-#    container_name: db
-#    image: postgres:latest
-#    restart: always
-#    networks:
-#      - bridge
-#    volumes:
-#     - ./data/postgre:/var/lib/postgresql/data
-#    env_file:
-#      - .env
-#    expose:
-#      - "5432"
-#
+  postgre:
+    container_name: db
+    image: postgres:latest
+    networks:
+      - bridge
+    env_file:
+      - ./database/.env
+    volumes:
+      - ./database/data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
 #  backend:
 #    container_name: backend
 #    build: ./backend
