@@ -128,11 +128,11 @@ cambia el nombre!!!
 -docker-compose
 
 Eneko:
-* <s>docker-compose ports</s>
-* <s>dir mapping</s>
+* [x]docker-compose ports
+* [x]dir mapping
 * add two new containers
   * Djando
-  * <s>Postgres<\s>
+  * [x]Postgres
 
 
 
