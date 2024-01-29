@@ -127,12 +127,12 @@ cambia el nombre!!!
 
 -docker-compose
 <blockquote>
-Eneko:
-- [x] docker-compose ports
-- [x] Frontend mapping
-- [x] Frontend app working
-- [ ] Djando container
-- [x] Postgres
+Eneko:<br>
+- [x] docker-compose ports<br>
+- [x] Frontend mapping <br>
+- [x] Frontend app working<br>
+- [ ] Djando container<br>
+- [x] Postgres<br>
 </blockquote>
 
 
