@@ -56,10 +56,10 @@ and goals include:<br>
   * Implement AI logic and decision-making processes that enable the AI player to make intelligent and strategic moves.
   * Explore alternative algorithms and techniques to create an effective AI player without relying on A*.
   * Ensure that the AI adapts to different gameplay scenarios and user interactions.
-<span style="color:red;">
+```
 Attention: You will need to explain in detail how your AI functions during your evaluation. Creating an AI that does nothing is strictly prohibited; it must have the capability to win occasionally.
 This major module aims to enhance the game by introducing an AI opponent that adds excitement and competitiveness without relying on the A* algorithm.<br>
-</span>
+```
 
 ### GDPR
 <a id="GDPR"></a>
