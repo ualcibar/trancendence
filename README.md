@@ -128,11 +128,11 @@ cambia el nombre!!!
 -docker-compose
 
 Eneko:
-* docker-compose ports    (completed)
-* dir mapping             (completed)
-* add two new containers
-  * Djando
-  * Postgres              (completed)
+- [x] docker-compose ports
+- [x] Frontend mapping
+- [x] Frontend app working
+- [ ] Djando container
+- [x] Postgres     
 
 
 
