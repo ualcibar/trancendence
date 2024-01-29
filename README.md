@@ -125,15 +125,15 @@ cambia el nombre!!!
 
 ### TODO this week
 All:
-> - [ ] finishe setting up docker-compose
+> - [ ] finish setting up docker-compose
 
-Eneko:<br>
+Eneko:
 
 > - [x] docker-compose ports
-> - [x] Frontend mapping
+> - [x] Frontend app mapping
 > - [x] Frontend app working
 > - [ ] Djando container
-> - [x] Postgres
+> - [x] Postgres container
 
 
 
