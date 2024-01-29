@@ -46,7 +46,8 @@
 
 ### AI oponent
 <a id="AIoponent"></a>
-Major module: Introduce an AI Opponent.
+Major module:
+> Introduce an AI Opponent.
 In this major module, the objective is to incorporate an AI player into the game.
 Notably, the use of the A* algorithm is not permitted for this task. Key features
 and goals include:
