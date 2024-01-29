@@ -52,7 +52,7 @@ and goals include:<br>
 
   * Develop an AI opponent that provides a challenging and engaging gameplay experience for users.
   * The AI must replicate human behavior, meaning that in your AI implementation, you must simulate keyboard input. The constraint here is that the AI can only refresh its view of the game once per second, requiring it to anticipate bounces and other actions.
-  * ```The AI must utilize power-ups if you have chosen to implement the Game customization options module.```
+  * The AI must utilize power-ups if you have chosen to implement the Game customization options module.
   * Implement AI logic and decision-making processes that enable the AI player to make intelligent and strategic moves.
   * Explore alternative algorithms and techniques to create an effective AI player without relying on A*.
   * Ensure that the AI adapts to different gameplay scenarios and user interactions.
