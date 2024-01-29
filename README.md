@@ -13,19 +13,21 @@
   
 <a id="Django"></a>
 ### Django
-  1.- • Major module: Use a Framework as backend.
+  • Major module: Use a Framework as backend.
 In this major module, you are required to utilize a specific web framework for your
 backend development, and that framework is Django .
 
 ### Angula
 <a id="Angular"></a>
-  2.- Frontend: Angular
+  Frontend: Angular
+  
 ### Postgre
 <a id="Postgre"></a>
-  3.- Database: PostgreSQL
+  Database: PostgreSQL
+  
 ### User Management
   <a id="UserManagement"></a>
-  4.- Major module: Standard user management, authentication, users across tournaments.
+  Major module: Standard user management, authentication, users across tournaments.
       ◦ Users can subscribe to the website in a secure way.
 ◦ Registered users can log in in a secure way.
 ◦ Users can select a unique display name to play the tournaments.
@@ -35,9 +37,10 @@ backend development, and that framework is Django .
 ◦ User profiles display stats, such as wins and losses.
 ◦ Each user has a Match History including 1v1 games, dates, and relevant
 details, accessible to logged-in users.
+
 ### AI oponent
 <a id="AIoponent"></a>
-  5.- Major module: Introduce an AI Opponent.
+Major module: Introduce an AI Opponent.
 In this major module, the objective is to incorporate an AI player into the game.
 Notably, the use of the A* algorithm is not permitted for this task. Key features
 and goals include:
@@ -61,7 +64,7 @@ adds excitement and competitiveness without relying on the A* algorithm.
 
 ### GDPR
 <a id="GDPR"></a>
-6- Minor module: GDPR Compliance Options with User Anonymization, Local
+Minor module: GDPR Compliance Options with User Anonymization, Local
 Data Management, and Account Deletion.
 In this minor module, the goal is to introduce GDPR compliance options that allow
 users to exercise their data privacy rights. Key features and objectives include:
@@ -96,7 +99,7 @@ and familiarize yourself with the regulations before proceeding with this projec
 
 ### 2FA JWT
 <a id="2FA_JWT"></a>
-7-Major module: Implement Two-Factor Authentication (2FA) and JWT.
+Major module: Implement Two-Factor Authentication (2FA) and JWT.
 In this major module, the goal is to enhance security and user authentication
 by introducing Two-Factor Authentication (2FA) and utilizing JSON Web Tokens
 (JWT). Key features and objectives include:
@@ -116,7 +119,7 @@ use of JSON Web Tokens (JWT).
 
 ### Game Options
 <a id="GameOptions"></a>
-8-Minor module: Game Customization Options.
+Minor module: Game Customization Options.
 In this minor module, the goal is to provide customization options for all available
 games on the platform. Key features and objectives include:
 ◦ Offer customization features, such as power-ups, attacks, or different maps,
