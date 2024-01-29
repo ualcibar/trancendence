@@ -63,7 +63,8 @@ This major module aims to enhance the game by introducing an AI opponent that ad
 
 ### GDPR
 <a id="GDPR"></a>
-Minor module: GDPR Compliance Options with User Anonymization, Local
+Minor module:
+GDPR Compliance Options with User Anonymization, Local
 Data Management, and Account Deletion.
 In this minor module, the goal is to introduce GDPR compliance options that allow
 users to exercise their data privacy rights. Key features and objectives include:
@@ -78,7 +79,8 @@ This website provides comprehensive information about the GDPR, including its pr
 
 ### 2FA JWT
 <a id="2FA_JWT"></a>
-Major module: Implement Two-Factor Authentication (2FA) and JWT.
+Major module:
+Implement Two-Factor Authentication (2FA) and JWT.
 In this major module, the goal is to enhance security and user authentication by introducing Two-Factor Authentication (2FA) and utilizing JSON Web Tokens (JWT). Key features and objectives include:
   *  Implement Two-Factor Authentication (2FA) as an additional layer of security for user accounts, requiring users to provide a secondary verification method, such as a one-time code, in addition to their password.
   *  Utilize JSON Web Tokens (JWT) as a secure method for authentication and authorization, ensuring that user sessions and access to resources are managed securely.
@@ -91,7 +93,8 @@ use of JSON Web Tokens (JWT).
 
 ### Game Options
 <a id="GameOptions"></a>
-Minor module: Game Customization Options.
+Minor module:
+Game Customization Options.
 In this minor module, the goal is to provide customization options for all available
 games on the platform. Key features and objectives include:
 * Offer customization features, such as power-ups, attacks, or different maps, that enhance the gameplay experience.
