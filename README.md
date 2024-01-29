@@ -127,6 +127,10 @@ cambia el nombre!!!
 
 -docker-compose
 
+Eneko:
+* docker-compose ports
+* dir mapping
+
 
 
 
