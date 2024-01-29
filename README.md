@@ -128,8 +128,8 @@ cambia el nombre!!!
 -docker-compose
 
 Eneko:
-* docker-compose ports
-* dir mapping
+* <s>docker-compose ports</s>
+* <s>dir mapping</s>
 
 
 
