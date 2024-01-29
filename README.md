@@ -13,19 +13,19 @@
   
 <a id="Django"></a>
 ### Django
-  • Major module:
+  Major module:
  Use a Framework as backend.
  In this major module, you are required to utilize a specific web framework for your backend development, and that framework is Django .
 
 ### Angular
 <a id="Angular"></a>
-  • Minor module:
+  Minor module:
    Use a front-end framework or toolkit.<br>
    We chose angular as our frontend framework.
   
 ### Postgre
 <a id="Postgre"></a>
-  • Minor module:
+   Minor module:
    Use a database for the backend.
    Database: PostgreSQL
   
@@ -34,36 +34,36 @@
   Major module:
    Standard user management, authentication, users across tournaments.
      Users can subscribe to the website in a secure way.<br>
-     ◦ Registered users can log in in a secure way.<br>
-     ◦ Users can select a unique display name to play the tournaments.<br>
-     ◦ Users can update their information.<br>
-     ◦ Users can upload an avatar, with a default option if none is provided.<br>
-     ◦ Users can add others as friends and view their online status.<br>
-     ◦ User profiles display stats, such as wins and losses.<br>
-     ◦ Each user has a Match History including 1v1 games, dates, and relevant
+     • Registered users can log in in a secure way.<br>
+     • Users can select a unique display name to play the tournaments.<br>
+     • Users can update their information.<br>
+     • Users can upload an avatar, with a default option if none is provided.<br>
+     • Users can add others as friends and view their online status.<br>
+     • User profiles display stats, such as wins and losses.<br>
+     • Each user has a Match History including 1v1 games, dates, and relevant
         details, accessible to logged-in users.
 
 ### AI oponent
 <a id="AIoponent"></a>
 Major module:
-> Introduce an AI Opponent.<br>
+Introduce an AI Opponent.<br>
 In this major module, the objective is to incorporate an AI player into the game.
 Notably, the use of the A* algorithm is not permitted for this task. Key features
 and goals include:<br>
-```
-  - Develop an AI opponent that provides a challenging and engaging gameplay
+
+  • Develop an AI opponent that provides a challenging and engaging gameplay
     experience for users.<br>
-  - The AI must replicate human behavior, meaning that in your AI implementation, you must simulate keyboard input. The constraint here is that the AI
+  • The AI must replicate human behavior, meaning that in your AI implementation, you must simulate keyboard input. The constraint here is that the AI
     can only refresh its view of the game once per second, requiring it to anticipate
     bounces and other actions.<br>
   The AI must utilize power-ups if you have chosen to implement the
     Game customization options module.<br>
-  - Implement AI logic and decision-making processes that enable the AI player
+  • Implement AI logic and decision-making processes that enable the AI player
     to make intelligent and strategic moves.<br>
-  - Explore alternative algorithms and techniques to create an effective AI player
+  • Explore alternative algorithms and techniques to create an effective AI player
     without relying on A*.<br>
-  - Ensure that the AI adapts to different gameplay scenarios and user interactions.
-```
+  • Ensure that the AI adapts to different gameplay scenarios and user interactions.
+
 Attention: You will need to explain in detail how your AI functions
   during your evaluation. Creating an AI that does nothing is strictly
   prohibited; it must have the capability to win occasionally.<br>
