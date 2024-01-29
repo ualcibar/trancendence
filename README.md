@@ -56,10 +56,10 @@ and goals include:<br>
   * Implement AI logic and decision-making processes that enable the AI player to make intelligent and strategic moves.
   * Explore alternative algorithms and techniques to create an effective AI player without relying on A*.
   * Ensure that the AI adapts to different gameplay scenarios and user interactions.
-```
+
 Attention: You will need to explain in detail how your AI functions during your evaluation. Creating an AI that does nothing is strictly prohibited; it must have the capability to win occasionally.
 This major module aims to enhance the game by introducing an AI opponent that adds excitement and competitiveness without relying on the A* algorithm.<br>
-```
+
 
 ### GDPR
 <a id="GDPR"></a>
@@ -94,16 +94,12 @@ use of JSON Web Tokens (JWT).
 Minor module: Game Customization Options.
 In this minor module, the goal is to provide customization options for all available
 games on the platform. Key features and objectives include:
-◦ Offer customization features, such as power-ups, attacks, or different maps,
-that enhance the gameplay experience.
-◦ Allow users to choose a default version of the game with basic features if they
-prefer a simpler experience.
-◦ Ensure that customization options are available and applicable to all games
-offered on the platform.
-◦ Implement user-friendly settings menus or interfaces for adjusting game pa-
-rameters.
-◦ Maintain consistency in customization features across all games to provide a
-unified user experience.
+* Offer customization features, such as power-ups, attacks, or different maps, that enhance the gameplay experience.
+* Allow users to choose a default version of the game with basic features if they prefer a simpler experience.
+* Ensure that customization options are available and applicable to all games offered on the platform.
+* Implement user-friendly settings menus or interfaces for adjusting game parameters.
+* Maintain consistency in customization features across all games to provide a unified user experience.
+
 This module aims to give users the flexibility to tailor their gaming experience
 across all available games by providing a variety of customization options while
 also offering a default version for those who prefer a straightforward gameplay
