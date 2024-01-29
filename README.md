@@ -34,7 +34,7 @@
   Major module:
    Standard user management, authentication, users across tournaments.
      Users can subscribe to the website in a secure way.<br>
-     Markup : * Registered users can log in in a secure way.<br>
+     Markup : - Registered users can log in in a secure way.<br>
      • Users can select a unique display name to play the tournaments.<br>
      • Users can update their information.<br>
      • Users can upload an avatar, with a default option if none is provided.<br>
