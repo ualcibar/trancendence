@@ -17,7 +17,7 @@
 In this major module, you are required to utilize a specific web framework for your
 backend development, and that framework is Django .
 
-### Angula
+### Angular
 <a id="Angular"></a>
   Frontend: Angular
   
