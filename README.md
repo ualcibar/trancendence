@@ -124,9 +124,11 @@ cambia el nombre!!!
 -game<br>
 
 ### TODO this week
+All:
+> - [ ] finishe setting up docker-compose
 
--docker-compose
 Eneko:<br>
+
 > - [x] docker-compose ports
 > - [x] Frontend mapping
 > - [x] Frontend app working
