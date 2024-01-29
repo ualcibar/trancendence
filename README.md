@@ -127,6 +127,7 @@ Eneko:
 > - [x] Frontend app working
 > - [ ] Djando container
 > - [x] Postgres container
+> - [x] Readme 
 
 
 
