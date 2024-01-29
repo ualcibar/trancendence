@@ -130,8 +130,8 @@ cambia el nombre!!!
 Eneko:
 * [x]docker-compose ports
 * [x]dir mapping
-* add two new containers
-  * Djando
+* [ ]add two new containers
+  * [ ]Djando
   * [x]Postgres
 
 
