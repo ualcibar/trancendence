@@ -34,14 +34,14 @@
   <a id="UserManagement"></a>
   Major module:
   > Standard user management, authentication, users across tournaments.
-    > ◦ Users can subscribe to the website in a secure way.<br>
-    > ◦ Registered users can log in in a secure way.<br>
-    > ◦ Users can select a unique display name to play the tournaments.<br>
-    > ◦ Users can update their information.<br>
-    > ◦ Users can upload an avatar, with a default option if none is provided.<br>
-    > ◦ Users can add others as friends and view their online status.<br>
-    > ◦ User profiles display stats, such as wins and losses.<br>
-    > ◦ Each user has a Match History including 1v1 games, dates, and relevant
+     Users can subscribe to the website in a secure way.<br>
+     ◦ Registered users can log in in a secure way.<br>
+     ◦ Users can select a unique display name to play the tournaments.<br>
+     ◦ Users can update their information.<br>
+     ◦ Users can upload an avatar, with a default option if none is provided.<br>
+     ◦ Users can add others as friends and view their online status.<br>
+     ◦ User profiles display stats, such as wins and losses.<br>
+     ◦ Each user has a Match History including 1v1 games, dates, and relevant
         details, accessible to logged-in users.
 
 ### AI oponent
