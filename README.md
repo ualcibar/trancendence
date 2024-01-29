@@ -20,24 +20,29 @@
 
 ### Angular
 <a id="Angular"></a>
-  Frontend: Angular
+  • Minor module:
+  > Use a front-end framework or toolkit.
+  > We chose angular as our frontend framework.
   
 ### Postgre
 <a id="Postgre"></a>
-  Database: PostgreSQL
+  • Minor module:
+  > Use a database for the backend.
+  > Database: PostgreSQL
   
 ### User Management
   <a id="UserManagement"></a>
-  Major module: Standard user management, authentication, users across tournaments.
-      ◦ Users can subscribe to the website in a secure way.
-◦ Registered users can log in in a secure way.
-◦ Users can select a unique display name to play the tournaments.
-◦ Users can update their information.
-◦ Users can upload an avatar, with a default option if none is provided.
-◦ Users can add others as friends and view their online status.
-◦ User profiles display stats, such as wins and losses.
-◦ Each user has a Match History including 1v1 games, dates, and relevant
-details, accessible to logged-in users.
+  Major module:
+  Standard user management, authentication, users across tournaments.
+    ◦ Users can subscribe to the website in a secure way.
+    ◦ Registered users can log in in a secure way.
+    ◦ Users can select a unique display name to play the tournaments.
+    ◦ Users can update their information.
+    ◦ Users can upload an avatar, with a default option if none is provided.
+    ◦ Users can add others as friends and view their online status.
+    ◦ User profiles display stats, such as wins and losses.
+    ◦ Each user has a Match History including 1v1 games, dates, and relevant
+        details, accessible to logged-in users.
 
 ### AI oponent
 <a id="AIoponent"></a>
