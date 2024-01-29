@@ -76,19 +76,12 @@ If you are not familiar with the General Data Protection Regulation (GDPR), it i
 ### 2FA JWT
 <a id="2FA_JWT"></a>
 Major module: Implement Two-Factor Authentication (2FA) and JWT.
-In this major module, the goal is to enhance security and user authentication
-by introducing Two-Factor Authentication (2FA) and utilizing JSON Web Tokens
-(JWT). Key features and objectives include:
-◦ Implement Two-Factor Authentication (2FA) as an additional layer of security
-for user accounts, requiring users to provide a secondary verification method,
-such as a one-time code, in addition to their password.
-◦ Utilize JSON Web Tokens (JWT) as a secure method for authentication and
-authorization, ensuring that user sessions and access to resources are managed
-securely.
-◦ Provide a user-friendly setup process for enabling 2FA, with options for SMS
-codes, authenticator apps, or email-based verification.
-◦ Ensure that JWT tokens are issued and validated securely to prevent unau-
-thorized access to user accounts and sensitive data.
+In this major module, the goal is to enhance security and user authentication by introducing Two-Factor Authentication (2FA) and utilizing JSON Web Tokens (JWT). Key features and objectives include:
+  *  Implement Two-Factor Authentication (2FA) as an additional layer of security for user accounts, requiring users to provide a secondary verification method, such as a one-time code, in addition to their password.
+  *  Utilize JSON Web Tokens (JWT) as a secure method for authentication and authorization, ensuring that user sessions and access to resources are managed securely.
+  *  Provide a user-friendly setup process for enabling 2FA, with options for SMS codes, authenticator apps, or email-based verification.
+  *  Ensure that JWT tokens are issued and validated securely to prevent unauthorized access to user accounts and sensitive data.
+
 This major module aims to strengthen user account security by offering Two-Factor
 Authentication (2FA) and enhancing authentication and authorization through the
 use of JSON Web Tokens (JWT).
