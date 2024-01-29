@@ -126,13 +126,14 @@ cambia el nombre!!!
 ### TODO this week
 
 -docker-compose
-
+<blockquote>
 Eneko:
 - [x] docker-compose ports
 - [x] Frontend mapping
 - [x] Frontend app working
 - [ ] Djando container
-- [x] Postgres     
+- [x] Postgres
+</blockquote>
 
 
 
