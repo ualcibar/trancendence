@@ -53,22 +53,14 @@ and goals include:<br>
 
   • Develop an AI opponent that provides a challenging and engaging gameplay
     experience for users.<br>
-  • The AI must replicate human behavior, meaning that in your AI implementation, you must simulate keyboard input. The constraint here is that the AI
-    can only refresh its view of the game once per second, requiring it to anticipate
-    bounces and other actions.<br>
-  The AI must utilize power-ups if you have chosen to implement the
-    Game customization options module.<br>
-  • Implement AI logic and decision-making processes that enable the AI player
-    to make intelligent and strategic moves.<br>
-  • Explore alternative algorithms and techniques to create an effective AI player
-    without relying on A*.<br>
+  • The AI must replicate human behavior, meaning that in your AI implementation, you must simulate keyboard input. The constraint here is that the AI can only refresh its view of the game once per second, requiring it to anticipate bounces and other actions.<br>
+  The AI must utilize power-ups if you have chosen to implement the Game customization options module.<br>
+  • Implement AI logic and decision-making processes that enable the AI player to make intelligent and strategic moves.<br>
+  • Explore alternative algorithms and techniques to create an effective AI player without relying on A*.<br>
   • Ensure that the AI adapts to different gameplay scenarios and user interactions.
 
-Attention: You will need to explain in detail how your AI functions
-  during your evaluation. Creating an AI that does nothing is strictly
-  prohibited; it must have the capability to win occasionally.<br>
-This major module aims to enhance the game by introducing an AI opponent that
-adds excitement and competitiveness without relying on the A* algorithm.<br>
+Attention: You will need to explain in detail how your AI functions during your evaluation. Creating an AI that does nothing is strictly prohibited; it must have the capability to win occasionally.
+This major module aims to enhance the game by introducing an AI opponent that adds excitement and competitiveness without relying on the A* algorithm.<br>
 
 ### GDPR
 <a id="GDPR"></a>
