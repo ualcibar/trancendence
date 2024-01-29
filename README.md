@@ -15,8 +15,7 @@
 ### Django
   • Major module:
  Use a Framework as backend.
- In this major module, you are required to utilize a specific web framework for your
- backend development, and that framework is Django .
+ In this major module, you are required to utilize a specific web framework for your backend development, and that framework is Django .
 
 ### Angular
 <a id="Angular"></a>
