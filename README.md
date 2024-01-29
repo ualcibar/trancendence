@@ -14,26 +14,26 @@
 <a id="Django"></a>
 ### Django
   • Major module:
-> Use a Framework as backend.
-> In this major module, you are required to utilize a specific web framework for your
-> backend development, and that framework is Django .
+ Use a Framework as backend.
+ In this major module, you are required to utilize a specific web framework for your
+ backend development, and that framework is Django .
 
 ### Angular
 <a id="Angular"></a>
   • Minor module:
-  > Use a front-end framework or toolkit.<br>
-  > We chose angular as our frontend framework.
+   Use a front-end framework or toolkit.<br>
+   We chose angular as our frontend framework.
   
 ### Postgre
 <a id="Postgre"></a>
   • Minor module:
-  > Use a database for the backend.
-  > Database: PostgreSQL
+   Use a database for the backend.
+   Database: PostgreSQL
   
 ### User Management
   <a id="UserManagement"></a>
   Major module:
-  > Standard user management, authentication, users across tournaments.
+   Standard user management, authentication, users across tournaments.
      Users can subscribe to the website in a secure way.<br>
      ◦ Registered users can log in in a secure way.<br>
      ◦ Users can select a unique display name to play the tournaments.<br>
