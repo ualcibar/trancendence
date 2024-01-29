@@ -50,7 +50,7 @@ Major module:
 > Introduce an AI Opponent.<br>
 In this major module, the objective is to incorporate an AI player into the game.
 Notably, the use of the A* algorithm is not permitted for this task. Key features
-and goals include:
+and goals include:<br>
 ◦ Develop an AI opponent that provides a challenging and engaging gameplay
 experience for users.<br>
 ◦ The AI must replicate human behavior, meaning that in your AI implementation, you must simulate keyboard input. The constraint here is that the AI
