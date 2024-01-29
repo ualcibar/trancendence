@@ -68,15 +68,15 @@ Minor module: GDPR Compliance Options with User Anonymization, Local
 Data Management, and Account Deletion.
 In this minor module, the goal is to introduce GDPR compliance options that allow
 users to exercise their data privacy rights. Key features and objectives include:
-◦ Implement GDPR-compliant features that enable users to request anonymiza-
+•  Implement GDPR-compliant features that enable users to request anonymiza-
 tion of their personal data, ensuring that their identity and sensitive informa-
 tion are protected.
-◦ Provide tools for users to manage their local data, including the ability to
+•  Provide tools for users to manage their local data, including the ability to
 view, edit, or delete their personal information stored within the system.
-◦ Offer a streamlined process for users to request the permanent deletion of
+•  Offer a streamlined process for users to request the permanent deletion of
 their accounts, including all associated data, ensuring compliance with data
 protection regulations.
-◦ Maintain clear and transparent communication with users regarding their data
+•  Maintain clear and transparent communication with users regarding their data
 privacy rights, with easily accessible options to exercise these rights.
 This minor module aims to enhance user privacy and data protection by offering
 GDPR compliance options that empower users to control their personal information
