@@ -66,34 +66,11 @@ Minor module: GDPR Compliance Options with User Anonymization, Local
 Data Management, and Account Deletion.
 In this minor module, the goal is to introduce GDPR compliance options that allow
 users to exercise their data privacy rights. Key features and objectives include:
-•  Implement GDPR-compliant features that enable users to request anonymiza-
-tion of their personal data, ensuring that their identity and sensitive informa-
-tion are protected.
-•  Provide tools for users to manage their local data, including the ability to
-view, edit, or delete their personal information stored within the system.
-•  Offer a streamlined process for users to request the permanent deletion of
-their accounts, including all associated data, ensuring compliance with data
-protection regulations.
-•  Maintain clear and transparent communication with users regarding their data
-privacy rights, with easily accessible options to exercise these rights.
-This minor module aims to enhance user privacy and data protection by offering
-GDPR compliance options that empower users to control their personal information
-and exercise their data privacy rights within the system.
-If you are not familiar with the General Data Protection Regulation (GDPR), it
-18
-ft_transcendence Surprise.
-is essential to understand its principles and implications, especially regarding user
-data management and privacy. The GDPR is a regulation that aims to protect the
-personal data and privacy of individuals within the European Union (EU) and the
-European Economic Area (EEA). It sets out strict rules and guidelines for organi-
-zations on how they should handle and process personal data.
-To gain a better understanding of the GDPR and its requirements, it is highly
-recommended to visit the official website of the European Commission on data
-protection1. This website provides comprehensive information about the GDPR,
-including its principles, objectives, and user rights. It also offers additional re-
-sources to delve deeper into the topic and ensure compliance with the regulation.
-If you are unfamiliar with the GDPR, please take the time to visit the provided link
-and familiarize yourself with the regulations before proceeding with this project.
+  * Implement GDPR-compliant features that enable users to request anonymization of their personal data, ensuring that their identity and sensitive informa tion are protected.
+  * Provide tools for users to manage their local data, including the ability to view, edit, or delete their personal information stored within the system.
+  * Offer a streamlined process for users to request the permanent deletion oftheir accounts, including all associated data, ensuring compliance with data protection regulations.
+  * Maintain clear and transparent communication with users regarding their data privacy rights, with easily accessible options to exercise these rights. This minor module aims to enhance user privacy and data protection by offering GDPR compliance options that empower users to control their personal information and exercise their data privacy rights within the system.
+If you are not familiar with the General Data Protection Regulation (GDPR), it is essential to understand its principles and implications, especially regarding user data management and privacy. The GDPR is a regulation that aims to protect the  personal data and privacy of individuals within the European Union (EU) and the European Economic Area (EEA). It sets out strict rules and guidelines for organizations on how they should handle and process personal data. To gain a better understanding of the GDPR and its requirements, it is highly recommended to visit the official website of the European Commission on data protection1. This website provides comprehensive information about the GDPR, including its principles, objectives, and user rights. It also offers additional resources to delve deeper into the topic and ensure compliance with the regulation. If you are unfamiliar with the GDPR, please take the time to visit the provided link and familiarize yourself with the regulations before proceeding with this project.
 
 ### 2FA JWT
 <a id="2FA_JWT"></a>
