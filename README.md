@@ -21,7 +21,7 @@
 ### Angular
 <a id="Angular"></a>
   • Minor module:
-  > Use a front-end framework or toolkit.
+  > Use a front-end framework or toolkit.<br>
   > We chose angular as our frontend framework.
   
 ### Postgre
