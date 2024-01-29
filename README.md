@@ -12,15 +12,18 @@
 - [Game Options](#GameOptions)
   
 <a id="Django"></a>
+### Django
   1.- • Major module: Use a Framework as backend.
 In this major module, you are required to utilize a specific web framework for your
 backend development, and that framework is Django .
 
+### Angula
 <a id="Angular"></a>
   2.- Frontend: Angular
-  
+### Postgre
 <a id="Postgre"></a>
   3.- Database: PostgreSQL
+### User Management
   <a id="UserManagement"></a>
   4.- Major module: Standard user management, authentication, users across tournaments.
       ◦ Users can subscribe to the website in a secure way.
@@ -32,6 +35,7 @@ backend development, and that framework is Django .
 ◦ User profiles display stats, such as wins and losses.
 ◦ Each user has a Match History including 1v1 games, dates, and relevant
 details, accessible to logged-in users.
+### AI oponent
 <a id="AIoponent"></a>
   5.- Major module: Introduce an AI Opponent.
 In this major module, the objective is to incorporate an AI player into the game.
@@ -55,6 +59,7 @@ prohibited; it must have the capability to win occasionally.
 This major module aims to enhance the game by introducing an AI opponent that
 adds excitement and competitiveness without relying on the A* algorithm.
 
+### GDPR
 <a id="GDPR"></a>
 6- Minor module: GDPR Compliance Options with User Anonymization, Local
 Data Management, and Account Deletion.
@@ -89,6 +94,7 @@ sources to delve deeper into the topic and ensure compliance with the regulation
 If you are unfamiliar with the GDPR, please take the time to visit the provided link
 and familiarize yourself with the regulations before proceeding with this project.
 
+### 2FA JWT
 <a id="2FA_JWT"></a>
 7-Major module: Implement Two-Factor Authentication (2FA) and JWT.
 In this major module, the goal is to enhance security and user authentication
@@ -108,7 +114,7 @@ This major module aims to strengthen user account security by offering Two-Facto
 Authentication (2FA) and enhancing authentication and authorization through the
 use of JSON Web Tokens (JWT).
 
-
+### Game Options
 <a id="GameOptions"></a>
 8-Minor module: Game Customization Options.
 In this minor module, the goal is to provide customization options for all available
