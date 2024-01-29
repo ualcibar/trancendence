@@ -1,11 +1,14 @@
 version: '3'
 services:
-
   angular:
     container_name: angular
     build: ./frontend
+    volumes:
+      - ./frontend:/usr/src/app/
     ports:
       - "8888:4200"
+    networks:
+      - bridge
   #  postgre:
 #    container_name: db
 #    image: postgres:latest

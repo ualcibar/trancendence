@@ -104,6 +104,7 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   # smoke test
   && yarn --version
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash git xdg-utils
+RUN npm install -g @angular/cli
 SHELL ["/bin/bash", "-c"]
 CMD ["tail", "-f", "/dev/null"]
