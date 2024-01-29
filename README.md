@@ -115,6 +115,8 @@ experience.
 
 ## TODO!
 
+cambia el nombre!!!
+
 -docker compose<br>
 -frontend<br>
 -backend<br>
@@ -124,6 +126,10 @@ experience.
 ### TODO this week
 
 -docker-compose
+
+Eneko:
+* docker-compose ports
+* dir mapping
 
 
 
