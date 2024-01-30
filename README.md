@@ -126,9 +126,10 @@ All:
 Eneko:
 
 > - [x] docker-compose ports
-> - [x] Frontend app mapping
-> - [x] Frontend app working
-> - [ ] Djando container
+> - [x] Frontend container
+> - [X] Djando container
+> - [X] Django running and connected to postgre
+> - [X] Angular running
 > - [x] Postgres container
 > - [x] Readme 
 
