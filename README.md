@@ -113,7 +113,7 @@ experience.
 
 
 > - [ ] cambia el nombre!!!
-> - [ ] register and login views angular
+> - [ ] register and login components angular
 > - [ ] register and login endpoints in django
 
 
