@@ -123,6 +123,10 @@ cambia el nombre!!!
 All:
 > - [ ] finish setting up docker-compose
 
+xmatute:
+> - [ ] El juego en TS
+
+
 Eneko:
 
 > - [x] docker-compose ports
