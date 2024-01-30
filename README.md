@@ -132,6 +132,7 @@ Eneko:
 > - [x] Postgres container
 > - [x] Readme 
 
-
-
+Unai:
+> - [ ] Activar CORS en Django
+> - [ ] Hacer un botón con conexión a backend
 
