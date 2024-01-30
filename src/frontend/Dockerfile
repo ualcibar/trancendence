@@ -107,4 +107,4 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 RUN apk add --no-cache bash git xdg-utils
 RUN npm install -g @angular/cli
 SHELL ["/bin/bash", "-c"]
-CMD ["tail", "-f", "/dev/null"]
+CMD ["npm run dev"]
