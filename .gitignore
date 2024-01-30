@@ -1,2 +1,5 @@
 src/frontend/.gitignore
 src/database/.gitignore
+
+# Archivos específicos de sistema operativo:
+.DS_Store
