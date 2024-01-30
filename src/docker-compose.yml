@@ -6,7 +6,7 @@ services:
     volumes:
       - ./frontend:/usr/src/app/
     ports:
-      - "8888:4200"
+      - "4200:4200"
     networks:
       - bridge
   postgre:
@@ -33,7 +33,7 @@ services:
     networks:
       - bridge
     ports:
-      - "5000:8000"
+      - "8000:8000"
     depends_on:
       - postgre
 #

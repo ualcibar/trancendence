@@ -153,6 +153,12 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt .
 
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apk add bash --no-cache
-CMD ["/bin/bash", "-c", "tail -f /dev/null"]
+
+
+COPY start.sh .
+RUN chmod 777 start.sh
+CMD ["./start.sh"]
+#CMD ["/bin/bash", "-c", "tail -f /dev/null"]
