@@ -1,2 +1,2 @@
-src/frontend/.gitignore
-src/database/.gitignore
+#src/frontend/.gitignore
+#src/database/.gitignore
