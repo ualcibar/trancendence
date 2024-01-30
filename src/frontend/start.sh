@@ -1,4 +1,6 @@
 #!/bin/bash
 
+npm install
 npm install -g @angular/cli
-tail -f /dev/null
+npm run dev
+#tail -f /dev/null

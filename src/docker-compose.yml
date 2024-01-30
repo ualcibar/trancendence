@@ -25,6 +25,8 @@ services:
     container_name: backend
     build: ./backend
     restart: always
+    volumes:
+      - ./backend:/usr/src/app/
     networks:
       - bridge
     ports:
