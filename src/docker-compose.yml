@@ -21,22 +21,16 @@ services:
     expose:
       - "5432"
 
-#  backend:
-#    container_name: backend
-#    build: ./backend
-#    restart: always
-#    networks:
-#      - bridge
-#    volumes:
-#      -  ./backend:/app
-#      -  /usr/src/app/node_modules
-#      - ./backend/media/:/media/
-#    env_file:
-#      - .env
-#    ports:
-#      - "5000:5000"
-#    depends_on:
-#      - postgre
+  backend:
+    container_name: backend
+    build: ./backend
+    restart: always
+    networks:
+      - bridge
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgre
 #
 #  frontend:
 #    container_name: frontend
