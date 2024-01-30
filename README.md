@@ -111,24 +111,24 @@ experience.
 
 ## TODO!
 
-cambia el nombre!!!
 
--docker compose<br>
--frontend<br>
--backend<br>
--postgre<br>
--game<br>
+> - [ ] cambia el nombre!!!
+> - [ ] register and login components angular
+> - [ ] register and login endpoints in django
+
 
 ### TODO this week
 All:
 > - [ ] finish setting up docker-compose
 
+xmatute:
+> - [ ] El juego en TS
+
+
 Eneko:
 
-> - [x] docker-compose ports
-> - [x] Frontend app mapping
-> - [x] Frontend app working
-> - [ ] Djando container
+> - [X] Django running and connected to postgre
+> - [X] Angular running
 > - [x] Postgres container
 > - [x] Readme 
 
