@@ -111,13 +111,11 @@ experience.
 
 ## TODO!
 
-cambia el nombre!!!
 
--docker compose<br>
--frontend<br>
--backend<br>
--postgre<br>
--game<br>
+> - [ ] cambia el nombre!!!
+> - [ ] register and login views angular
+> - [ ] register and login endpoints in django
+
 
 ### TODO this week
 All:
