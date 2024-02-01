@@ -3,11 +3,37 @@
 import os
 import sys
 import django
+import time
+import subprocess
+
+
+def ping():
+    try:
+        subprocess.run(['ping', '-c', '1', 'localhost:5432'], check=True, stdout=subprocess.PIPE)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def wait_for_postgres():
+    """
+    Wait for PostgreSQL database to start by attempting to ping it.
+    """
+    delay = 1
+    retries = 60 #timeout of 60 secs more or less
+    while retries > 0:
+        if ping():
+            print("Database is now reachable.")
+            return
+        print("Database is not yet reachable. Retrying...")
+        time.sleep(delay)
+    print("Unable to connect to the database.")
+
 
 def create_superuser():
-    from django.contrib.auth.models import User
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'nothing@gmail.com', '1234')
+    from polls.models import CustomUser
+    if not CustomUser.objects.filter(username='admin').exists():
+        CustomUser.objects.create_superuser(username='admin', password='1234')
         print("Superuser created successfully.")
     else:
         print("Superuser already exists.")
@@ -31,4 +57,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
