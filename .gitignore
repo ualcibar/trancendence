@@ -1,2 +1,3 @@
 #src/frontend/.gitignore
 #src/database/.gitignore
+src/backend/mysite/myenv/
