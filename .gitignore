@@ -1,2 +1,13 @@
+<<<<<<< HEAD
 #src/frontend/.gitignore
 #src/database/.gitignore
+=======
+src/frontend/.gitignore
+src/database/.gitignore
+
+# Archivos específicos de sistema operativo:
+.DS_Store
+
+# Archivos de configuración del sistema: 
+.vscode/
+>>>>>>> xmatutest
