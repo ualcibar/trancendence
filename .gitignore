@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 #src/frontend/.gitignore
 #src/database/.gitignore
+<<<<<<< HEAD
 =======
 src/frontend/.gitignore
 src/database/.gitignore
@@ -11,3 +12,6 @@ src/database/.gitignore
 # Archivos de configuración del sistema: 
 .vscode/
 >>>>>>> xmatutest
+=======
+src/backend/mysite/myenv/
+>>>>>>> 24905f3df9352286f4c3ae4c6a55128cacf0e261

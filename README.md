@@ -108,31 +108,3 @@ across all available games by providing a variety of customization options while
 also offering a default version for those who prefer a straightforward gameplay
 experience.
 
-
-## TODO!
-
-
-> - [ ] cambia el nombre!!!
-> - [ ] register and login components angular
-> - [ ] register and login endpoints in django
-
-
-### TODO this week
-All:
-> - [ ] finish setting up docker-compose
-
-xmatute:
-> - [ ] El juego en TS
-
-
-Eneko:
-
-> - [X] Django running and connected to postgre
-> - [X] Angular running
-> - [x] Postgres container
-> - [x] Readme 
-
-Unai:
-> - [ ] Activar CORS en Django
-> - [ ] Hacer un botón con conexión a backend
-
