@@ -3,31 +3,6 @@
 import os
 import sys
 import django
-import time
-import subprocess
-
-
-def ping():
-    try:
-        subprocess.run(['ping', '-c', '1', 'localhost:5432'], check=True, stdout=subprocess.PIPE)
-        return True
-    except subprocess.CalledProcessError:
-        return False
-
-
-def wait_for_postgres():
-    """
-    Wait for PostgreSQL database to start by attempting to ping it.
-    """
-    delay = 1
-    retries = 60 #timeout of 60 secs more or less
-    while retries > 0:
-        if ping():
-            print("Database is now reachable.")
-            return
-        print("Database is not yet reachable. Retrying...")
-        time.sleep(delay)
-    print("Unable to connect to the database.")
 
 
 def create_superuser():
