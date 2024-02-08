@@ -17,10 +17,13 @@ services:
     env_file:
       - ./database/.env
       - ./.env
-    volumes:
-      - ./database/data:/var/lib/postgresql/data
     expose:
       - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U patata"]
+      interval: 5s
+      timeout: 100s
+      retries: 100
 
   backend:
     container_name: backend
@@ -35,7 +38,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - postgre
+      postgre:
+        condition: service_healthy
 #
 #  frontend:
 #    container_name: frontend
