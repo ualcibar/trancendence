@@ -39,9 +39,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     loses = models.PositiveIntegerField(default=0, null=False, blank=True)
     total = models.PositiveIntegerField(default=0, null=False, blank=True)
 
-    objects = CustomUserManager('self', symmetrical=True)
+    objects = CustomUserManager()
 
-    friends = models.ManytoMany(CustomUser)
+    friends = models.ManyToManyField('self', symmetrical=True)
 
     USERNAME_FIELD = 'username'
     # Add any additional required fields
@@ -173,7 +173,7 @@ class Tournament(models.Model):
             related_name='f_game',
             )
     date = models.DateField()
-    tournamentPlayers = models.ManyToMany(CustomUser, symmetrical=False)
+    tournamentPlayers = models.ManyToManyField(CustomUser, symmetrical=False)
 
     def __str__(self):
         return f"{self.title} winner: {self.final.winner}"
