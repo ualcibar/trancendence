@@ -26,7 +26,6 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     django.setup()  # Initialize Django
-    wait_for_postgres()
     create_superuser()
     execute_from_command_line(sys.argv)
 
