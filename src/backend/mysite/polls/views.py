@@ -14,8 +14,8 @@ def index(request):
 @require_POST
 def register(request):
     data = json.loads(request.body)
-    username = data.get('username')
-    password = data.get('password')
+    username = data.get('username', '')
+    password = data.get('password', '')
     if username and password:
         user = CustomUser.objects.create_user(username=username, password=password)
         return JsonResponse({'message': 'User registered successfully'}, status=201)
