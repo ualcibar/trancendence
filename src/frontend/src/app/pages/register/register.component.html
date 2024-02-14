@@ -5,13 +5,7 @@
 			<img class="h-48 w-full object-cover md:h-full md:w-48" src="../../assets/img/transcendence_logo.png" alt="Modern building architecture">
 		</div>
 		<div class="p-8 w-full">
-			<p class="text-center text-3xl font-semibold">Register
-				<span class="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-red-500 relative inline-block">
-					<span class="relative text-white">
-					today
-					</span>
-				</span>!
-			</p>
+			<p class="text-center text-3xl font-semibold">Register to <a class="underline text-cyan-700 decoration-cyan-600">PataPong</a></p>
 			<br/>
 			<form #registerForm="ngForm" (ngSubmit)="registerAcc()">
 				<div class="mb-3">
@@ -22,14 +16,34 @@
 					<label for="passwordInput" class="form-label">Password</label>
 					<input name="password" [(ngModel)]="user.password" type="password" class="form-control" id="passwordInput">
 				</div>
-				<button type="submit" class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-					Register now
-				</button>
+				<div class="flex">
+					<button type="submit" class="mr-3 bg-yellow-400 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
+						<div>
+							<div class="text-xs font-medium uppercase text-black">Register</div>
+						</div>
+					</button>
+					<button type="button" class="mr-3 bg-42 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-42-selected hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
+						<div class="p-2">
+							<img class="h-7 w-7 filter invert" src="../../../assets/img/42_Logo.svg.png">
+						</div>
+						<div>
+							<div class="text-xs text-white font-medium uppercase text-black">Register with 42</div>
+						</div>
+					</button>
+				</div>
 			</form>
 		</div>
 	</div>
 </div>
 
-<div *ngIf="errorMessage" class="alert alert-danger">
-	{{ errorMessage }}
+<div  *ngIf="errorMessage" class="pt-6 flex items-center justify-center">
+	<div class="alert alert-danger max-auto max-w-xl">
+		<i class="bi bi-x-circle"></i> {{ errorMessage }}
+	</div>
+</div>
+
+<div *ngIf="successMessage" class="pt-6 flex items-center justify-center">
+	<div class="alert alert-success max-auto max-w-xl">
+		<i class="bi bi-check-circle"></i> {{ successMessage }}
+	</div>
 </div>

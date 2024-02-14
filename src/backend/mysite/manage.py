@@ -26,7 +26,7 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     django.setup()  # Initialize Django
-    #create_superuser()
+    create_superuser()
     execute_from_command_line(sys.argv)
 
 
