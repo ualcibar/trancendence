@@ -13,6 +13,7 @@ export class RegisterComponent {
   };
 
   errorMessage: string = '';
+  successMessage: string = '';
 
   constructor(private http: HttpClient) {}
 
@@ -32,6 +33,7 @@ export class RegisterComponent {
     this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
       response => {
         console.log('Sent data: ', response);
+        this.successMessage = response.message;
       },
       error => {
         console.error('An error ocurred trying to contact the registration server: ', error);
