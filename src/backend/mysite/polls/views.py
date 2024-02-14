@@ -5,12 +5,12 @@ from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from .models import CustomUser
 import json
-
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     return HttpResponse("hello world")
 
-
+@csrf_exempt
 @require_POST
 def register(request):
     data = json.loads(request.body)
@@ -22,7 +22,7 @@ def register(request):
     else:
         return JsonResponse({'error': 'Username and password are required'}, status=400)
 
-
+@csrf_exempt
 @require_POST
 def user_login(request):
     if request.method == 'POST':
