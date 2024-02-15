@@ -17,9 +17,14 @@
 					<input name="password" [(ngModel)]="user.password" type="password" class="form-control" id="passwordInput">
 				</div>
 				<div class="flex">
-					<button type="submit" class="mr-3 bg-yellow-400 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
+					<button type="submit"class="mr-3 bg-yellow-400 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
 						<div>
 							<div class="text-xs font-medium uppercase text-black">Login</div>
+						</div>
+					</button>
+					<button type="button" (click)="logout()" class="mr-3 bg-yellow-400 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
+						<div>
+							<div class="text-xs font-medium uppercase text-black">Logout</div>
 						</div>
 					</button>
 					<button type="button" class="mr-3 bg-42 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-42-selected hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
@@ -36,13 +41,13 @@
 	</div>
 </div>
 
-<div  *ngIf="errorMessage" class="pt-6 flex items-center justify-center">
+<div *ngIf="errorMessage" class="pt-6 flex items-center justify-center">
 	<div class="alert alert-danger max-auto max-w-xl">
 		<i class="bi bi-x-circle"></i> {{ errorMessage }}
 	</div>
 </div>
 
-<div  *ngIf="successMessage" class="pt-6 flex items-center justify-center">
+<div *ngIf="successMessage" class="pt-6 flex items-center justify-center">
 	<div class="alert alert-success max-auto max-w-xl">
 		<i class="bi bi-check-circle"></i> {{ successMessage }}
 	</div>

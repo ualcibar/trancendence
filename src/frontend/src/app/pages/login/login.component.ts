@@ -17,15 +17,8 @@ export class LoginComponent {
 
   constructor(private http: HttpClient) {}
 
-  mostrarModal: boolean = false;
-
-  mostrarToast() {
-    this.mostrarModal = true;
-    console.log("lol");
-  }
-
-  cerrarModal() {
-    this.mostrarModal = false;
+  logout(): void {
+    const backendURL = 'http://localhost:8000/polls/logout';
   }
 
   loginAcc() {
@@ -44,6 +37,7 @@ export class LoginComponent {
     this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
       response => {
         console.log('Sent data: ', response);
+        console.log('Response: ', response.sessionid);
         this.successMessage = response.message;
       },
       error => {
