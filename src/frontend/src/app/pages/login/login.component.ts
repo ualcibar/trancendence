@@ -18,6 +18,17 @@ export class LoginComponent {
   constructor(private http: HttpClient) {}
 
   mostrarModal: boolean = false;
+  imLoggedIn() {
+    const backendURL = 'http://localhost:8000/polls/imLoggedIn/';
+    this.http.get<any>(backendURL).subscribe(
+      response => {
+        console.log('Sent data: ', response);
+      },
+      error => {
+        console.error('An error ocurred trying to contact the registration server: ', error);
+      }
+    );
+  }
 
   mostrarToast() {
     this.mostrarModal = true;

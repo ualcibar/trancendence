@@ -1,17 +1,28 @@
-from django.http import HttpResponse
 # Create your views here.
-from django.views.decorators.http import require_POST
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
-from .models import CustomUser
-import json
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+from rest_framework.decorators import api_view
+
+from .models import CustomUser
+
+import json
 
 def index(request):
     return HttpResponse("hello world")
 
+@login_required
 @csrf_exempt
-@require_POST
+@api_view(['GET'])
+def imLoggedIn(request):
+    return JsonResponse({'message': 'you are logged'}, status=201)
+
+@csrf_exempt
+@api_view(['POST'])
 def register(request):
     data = json.loads(request.body)
     username = data.get('username', '')
@@ -23,7 +34,7 @@ def register(request):
         return JsonResponse({'error': 'Username and password are required'}, status=400)
 
 @csrf_exempt
-@require_POST
+@api_view(['POST'])
 def user_login(request):
     if request.method == 'POST':
         data = json.loads(request.body)
