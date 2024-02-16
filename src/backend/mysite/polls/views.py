@@ -40,7 +40,7 @@ def user_login(request):
         if username and password:
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                #login(request, user)
+                login(request, user)
                 refresh = RefreshToken.for_user(user)
                 data = {
                     'refresh': str(refresh),

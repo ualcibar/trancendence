@@ -17,10 +17,6 @@ export class LoginComponent {
 
   constructor(private http: HttpClient) {}
 
-  logout(): void {
-    const backendURL = 'http://localhost:8000/polls/logout';
-  }
-
   loginAcc() {
     const backendURL = 'http://localhost:8000/polls/login/';
     const jsonToSend = {
@@ -31,7 +27,8 @@ export class LoginComponent {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type' : 'application/json'
-      })
+      }),
+      withCredentials: true
     };
 
     this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
