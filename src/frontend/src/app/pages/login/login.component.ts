@@ -17,6 +17,7 @@ export class LoginComponent {
 
   constructor(private http: HttpClient) {}
 
+<<<<<<< HEAD
   mostrarModal: boolean = false;
   imLoggedIn() {
     const backendURL = 'http://localhost:8000/polls/imLoggedIn/';
@@ -38,6 +39,8 @@ export class LoginComponent {
   cerrarModal() {
     this.mostrarModal = false;
     }
+=======
+>>>>>>> b77350c40d324285a14dd9bef58d3f560847596e
   loginAcc() {
     const backendURL = 'http://localhost:8000/polls/login/';
     const jsonToSend = {
@@ -48,7 +51,8 @@ export class LoginComponent {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type' : 'application/json'
-      })
+      }),
+      withCredentials: true
     };
 
     this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(

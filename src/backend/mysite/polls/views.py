@@ -44,7 +44,18 @@ def user_login(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+<<<<<<< HEAD
                 return JsonResponse({'message': 'Login successful'}, status=200)
+=======
+                refresh = RefreshToken.for_user(user)
+                data = {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+                return JsonResponse({'message': 'Login successful', 'data': data}, status=200)
+                #request.session["username"] = user.username
+                #return JsonResponse({'message': 'Login successful', 'sessionid': request.session.session_key}, status=200)
+>>>>>>> b77350c40d324285a14dd9bef58d3f560847596e
             else:
                 return JsonResponse({'error': 'Invalid credentials'}, status=401)
         else:
