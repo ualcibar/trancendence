@@ -108,3 +108,4 @@ across all available games by providing a variety of customization options while
 also offering a default version for those who prefer a straightforward gameplay
 experience.
 
+THREE  practice sample page https://codesandbox.io/p/sandbox/gpgpu-curl-noise-dof-zgsyn?file=%2Fsrc%2FApp.js
