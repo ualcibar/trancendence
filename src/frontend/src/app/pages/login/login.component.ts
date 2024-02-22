@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component} from '@angular/core';
+import { Router} from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -15,17 +17,19 @@ export class LoginComponent {
   errorMessage: string = '';
   successMessage: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private auth : AuthService, private router: Router) {}
 
   mostrarModal: boolean = false;
-
-  mostrarToast() {
-    this.mostrarModal = true;
-    console.log("lol");
-  }
-
-  cerrarModal() {
-    this.mostrarModal = false;
+  imLoggedIn() {
+    const backendURL = 'http://localhost:8000/polls/imLoggedIn';
+    this.http.get<any>(backendURL, {withCredentials: true}).subscribe(
+      response => {
+        console.log('Sent data: ', response);
+      },
+      error => {
+        console.error('An error ocurred trying to contact the registration server: ', error);
+      }
+    );
   }
 
   loginAcc() {
@@ -38,13 +42,17 @@ export class LoginComponent {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type' : 'application/json'
-      })
+      }),
+      withCredentials: true
     };
 
     this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
       response => {
         console.log('Sent data: ', response);
+        console.log('Response: ', response.sessionid);
         this.successMessage = response.message;
+        this.auth.login();
+        this.router.navigate(['/']);
       },
       error => {
         console.error('An error ocurred trying to contact the registration server: ', error);

@@ -58,13 +58,9 @@ cleanVolumes:
 
 re:
 	@echo "\033[1;31m⚠ THIS WILL RESET EVERYTHING, EVEN THE VOLUMES CONTENT!\n\033[1;33m¿Are you sure? \033[0m"
-	@if [[ -z "$(CI)" ]]; then \
-		REPLY="" ; \
-		read -p "[y/n] > " -r ; \
-		if [[ ! $$REPLY =~ ^[Yy]$$ ]]; then \
-			printf $(_ERROR) "\n\033[1;32mOK, process was cancelled.\033[0m\n" ; \
-			exit 1 ; \
-		fi \
+	@read -p "[y/n] > " -n 1 -r && echo $$REPLY && \
+	if [ $$REPLY != "y" ]; then \
+		echo "\n\033[1;32mOK, process was cancelled.\033[0m\n"; exit 1; \
 	fi
 	@echo "\n🔁 \033[1;33mResetting everything... \033[0m"
 	make clean
