@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component} from '@angular/core';
+import { Router} from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +17,7 @@ export class LoginComponent {
   errorMessage: string = '';
   successMessage: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private auth : AuthService, private router: Router) {}
 
   mostrarModal: boolean = false;
   imLoggedIn() {
@@ -30,14 +32,6 @@ export class LoginComponent {
     );
   }
 
-  mostrarToast() {
-    this.mostrarModal = true;
-    console.log("lol");
-  }
-
-  cerrarModal() {
-    this.mostrarModal = false;
-    }
   loginAcc() {
     const backendURL = 'http://localhost:8000/polls/login/';
     const jsonToSend = {
@@ -57,6 +51,8 @@ export class LoginComponent {
         console.log('Sent data: ', response);
         console.log('Response: ', response.sessionid);
         this.successMessage = response.message;
+        this.auth.login();
+        this.router.navigate(['/']);
       },
       error => {
         console.error('An error ocurred trying to contact the registration server: ', error);
