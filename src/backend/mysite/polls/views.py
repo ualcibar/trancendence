@@ -1,29 +1,48 @@
 # Create your views here.
 from django.http import HttpResponse
-from django.views.decorators.http import require_POST, require_GET
-from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
+
+from django.conf import settings
+
 from django.views.decorators.csrf import csrf_exempt
+
+from django.contrib.auth import authenticate
+
+from django.middleware import csrf
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from .authenticate import CustomAuthentication
 
 from .models import CustomUser
 
 import json
+import logging
+
+logger = logging.getLogger('polls')
+
 
 @api_view(['GET'])
+@authentication_classes([CustomAuthentication])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
 def index(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'you are not logged in'}, status=403)
     return HttpResponse("hello world")
 
-@permission_classes([IsAuthenticated])
+
 @api_view(['GET'])
-@csrf_exempt
+@authentication_classes([CustomAuthentication])
 def imLoggedIn(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'you are not logged in'}, status=403)
+    logger.debug('im logged called')
     return JsonResponse({'message': 'you are logged'}, status=201)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -36,6 +55,7 @@ def register(request):
         return JsonResponse({'message': 'User registered successfully'}, status=201)
     else:
         return JsonResponse({'error': 'Username and password are required'}, status=400)
+
 
 #@csrf_exempt
 #@api_view(['POST'])
@@ -60,6 +80,15 @@ def register(request):
 #                return JsonResponse({'error': 'Invalid credentials'}, status=401)
 #        else:
 #            return JsonResponse({'error': 'Username and password are required'}, status=400)
+
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
 
 class LoginView(APIView):
     def post(self, request, format=None):

@@ -19,8 +19,8 @@ export class LoginComponent {
 
   mostrarModal: boolean = false;
   imLoggedIn() {
-    const backendURL = 'http://localhost:8000/polls/imLoggedIn/';
-    this.http.get<any>(backendURL).subscribe(
+    const backendURL = 'http://localhost:8000/polls/imLoggedIn';
+    this.http.get<any>(backendURL, {withCredentials: true}).subscribe(
       response => {
         console.log('Sent data: ', response);
       },
