@@ -43,6 +43,12 @@ def imLoggedIn(request):
     logger.debug('im logged called')
     return JsonResponse({'message': 'you are logged'}, status=201)
 
+@csrf_exempt
+@api_view(['POST'])
+def logout(request):
+    response = JsonResponse({'message': 'test'}, status=201)
+    response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE']) 
+    return response
 
 @csrf_exempt
 @api_view(['POST'])

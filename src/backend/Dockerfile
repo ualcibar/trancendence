@@ -7,7 +7,6 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apk add bash --no-cache
 
-
 COPY start.sh .
 RUN chmod 777 start.sh
 CMD ["./start.sh"]

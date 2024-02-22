@@ -20,6 +20,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("register/", views.register, name="register"),
     path("login/", views.LoginView.as_view(), name='token_obtain_pair'),
+    path("logout/", views.logout, name='logout'),
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
     path('verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
