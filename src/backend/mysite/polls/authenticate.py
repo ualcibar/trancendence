@@ -11,7 +11,6 @@ logger = logging.getLogger('polls')
 
 class CustomAuthentication(JWTAuthentication):
     def authenticate(self, request):
-        logger.debug('authenticate called')
         header = self.get_header(request)
         if header is None:
             logger.debug('checking for cookies')
@@ -21,7 +20,5 @@ class CustomAuthentication(JWTAuthentication):
         if raw_token is None:
             logger.debug('get the fuck out')
             return None
-        logger.debug('you fucking suck')
         validated_token = self.get_validated_token(raw_token)
-        logger.debug('authentificated')
         return self.get_user(validated_token), validated_token
