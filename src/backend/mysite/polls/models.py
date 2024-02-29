@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-
+import uuid
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
@@ -8,6 +8,25 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Password and username are required')
         user = self.model(username=username, **extra_fields)
         user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create42user(self, meInfo):
+        '''
+    check if the login is used
+    if CustomUser.objects.filter(username=response['login']) != None:
+        return error
+    check if the user id is being used
+    if CustomUser.objects.filter(42user=true, 42id=reponse['42id']) != None:
+        return error
+    create a user for 42 oauth
+    user = CustomUser.objects.create_user42(username=response['login'], token, refreshtoken, 42id)
+    if user == None:
+        return error
+    '''
+        if not meInfo['login']:
+            raise ValueError('login is required')
+        user = self.model(username=meInfo['login'], is_42_user=True, id42=meInfo['id'])
         user.save(using=self._db)
         return user
 
@@ -25,13 +44,23 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     # Add custom fields here
+    '''
+    id unique id uuid
+    password passwword
+    '''
     username = models.CharField(max_length=20, unique=True, blank=False,
                                 null=False)
 
     # avatar = models.ImageField(upload_to='avatars/', blank=True, null=False)
     # install pyllow to make it work
 
+    is_42_user = models.BooleanField(default=False, null=False)
+    id42 = models.UUIDField(None, null=True, editable=True, unique=True)
+    token42 = models.CharField(max_length=255, default=None, null=True)
+    refresh_token42 = models.CharField(default=None, max_length=255, null=True)
+
     is_active = models.BooleanField(default=True, null=False)
+
     is_staff = models.BooleanField(default=False, null=False)
     is_superuser = models.BooleanField(default=False, null=False)
 
@@ -52,6 +81,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             ('disconnected', 'Disconnected'),
             ('ingame', 'In Game'),
             ]
+
     status = models.CharField(
             max_length=20,
             choices=STATUS_CHOICES,
