@@ -14,5 +14,6 @@ urlpatterns = [
     path('register42/', views.registerWith42Token, name='register42'),
     path("logout/", views.logout, name='logout'),
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
+    path("getInfo/", views.getInfo, name="get_info"),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

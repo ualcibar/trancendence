@@ -40,12 +40,11 @@ export class RegisterComponent implements OnInit {
 
         this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
             response => {
-                console.log('Sent data: ', response);
                 this.successMessage = response.message;
             },
             error => {
-                console.error('An error ocurred trying to contact the registration server: ', error);
-                this.errorMessage = 'An error occurred: ' + error.message;
+                console.error('An error ocurred trying to contact the registration server:', error.status);
+                this.errorMessage = error.error.reason;
             }
         );
     }

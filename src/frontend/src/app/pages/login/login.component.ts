@@ -33,7 +33,7 @@ export class LoginComponent {
         console.log('Sent data: ', response);
       },
       error => {
-        console.error('An error ocurred trying to contact the registration server: ', error);
+        console.error('An error ocurred trying to contact the registration server:', error.status);
       }
     );
   }
@@ -54,15 +54,13 @@ export class LoginComponent {
 
     this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
       response => {
-        console.log('Sent data: ', response);
-        console.log('Response: ', response.sessionid);
         this.successMessage = response.message;
         this.auth.login();
         this.router.navigate(['/']);
       },
       error => {
-        console.error('An error ocurred trying to contact the registration server: ', error);
-        this.errorMessage = 'An error occurred: ' + error.message;
+        console.error('An error ocurred trying to contact the registration server:', error.status);
+        this.errorMessage = error.error.message;
       }
     );
   }

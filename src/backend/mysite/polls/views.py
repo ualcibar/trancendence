@@ -4,7 +4,6 @@ from django.http import JsonResponse
 
 from django.conf import settings
 
-from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth import authenticate
 
@@ -26,7 +25,6 @@ import logging
 
 logger = logging.getLogger('polls')
 
-
 def getOauth2Token(code):
     sendJson = {'code': code}
     sendJson ['client_id'] = 'u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87'
@@ -39,7 +37,13 @@ def getOauth2Token(code):
     return requests.post(url, json=sendJson, headers=headers)
 
 
-@csrf_exempt
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+def getInfo(request): 
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'you are not logged in'}, status=403)
+    return JsonResponse({'username': request.user.username}, status=200)
+
 @api_view(['POST'])
 def loginWith42Token(request):
     logger.debug('login with 42')
@@ -86,7 +90,6 @@ def loginWith42Token(request):
         return Response({"Invalid": "Invalid username!!"}, status=status.HTTP_404_NOT_FOUND)
 
 
-@csrf_exempt
 @api_view(['POST'])
 def registerWith42Token(request):
     logger.debug('42register')
@@ -121,7 +124,6 @@ def imLoggedIn(request):
     return JsonResponse({'message': 'you are logged'}, status=201)
 
 
-@csrf_exempt
 @api_view(['POST'])
 def logout(request):
     response = JsonResponse({'message': 'test'}, status=201)
@@ -129,7 +131,6 @@ def logout(request):
     return response
 
 
-@csrf_exempt
 @api_view(['POST'])
 def register(request):
     data = json.loads(request.body)
@@ -140,7 +141,7 @@ def register(request):
             username=username, password=password)
         return JsonResponse({'message': 'User registered successfully'}, status=201)
     else:
-        return JsonResponse({'error': 'Username and password are required'}, status=400)
+        return JsonResponse({'reason': 'Username and password are required'}, status=400)
 
 
 # @csrf_exempt
@@ -199,6 +200,6 @@ class LoginView(APIView):
                 response.data = {"Success": "Login successfully", "data": data}
                 return response
             else:
-                return Response({"No active": "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"message": "This account is not active!!"}, status=500)
         else:
-            return Response({"Invalid": "Invalid username or password!!"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "Invalid username or password!!"}, status=500)
