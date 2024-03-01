@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenVerifyView
 
 from . import views
 
@@ -8,20 +7,12 @@ from rest_framework_simplejwt.views import (
 )
 
 
-#class CustomTokenObtainPairView(TokenObtainPairView):
-#   def post(self, request, *args, **kwargs):
-#       response = super().post(request, *args, **kwargs)
-#        if 'access' in response.data:
-#            response.set_cookie('your-cookie-name', response.data['access'], httponly=True)
-#        return response
-
-
 urlpatterns = [
-    path("", views.index, name="index"),
     path("register/", views.register, name="register"),
     path("login/", views.LoginView.as_view(), name='token_obtain_pair'),
+    path('login42/', views.loginWith42Token, name='login42'),
+    path('register42/', views.registerWith42Token, name='register42'),
     path("logout/", views.logout, name='logout'),
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
-    path('verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
