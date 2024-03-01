@@ -3,11 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { Router} from '@angular/router';
+import { ChatComponent } from '../../components/chat/chat.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [],
+  imports: [ChatComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

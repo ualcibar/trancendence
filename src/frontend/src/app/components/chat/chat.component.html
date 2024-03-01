@@ -1,0 +1,11 @@
+<div class="chat-container">
+    <div class="message-box" #messageBox>
+        <div *ngFor="let message of messages" class="message">{{ message }}</div>
+    </div>
+    <div class="input-box">
+        <textarea [(ngModel)]="newMessage" placeholder="Type a message..."
+            (keydown.shift.enter)="handleShiftEnter($event)"
+            (keydown.enter)="sendMessage()"></textarea>
+        <button (click)="sendMessage()">Send</button>
+    </div>
+</div>

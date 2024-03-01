@@ -18,7 +18,7 @@ export class RegisterComponent implements OnInit {
     constructor(private http: HttpClient) {}
 
     ngOnInit(): void {
-        console.log("unai sucks");
+        console.log("unai sucks");//so true
     }
 
     register42Api() {
