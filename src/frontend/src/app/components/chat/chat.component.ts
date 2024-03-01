@@ -3,6 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 
+class Message {
+  message : string = '';
+  sender: string = '';
+  date: string = '';
+}
+
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -11,8 +17,10 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit{
-  messages: string[] = [];
+  globalChatMessages : Message[] = [];
+  messages: string[] = ['message1', 'patata', 'roblox pay to win'];
   newMessage: string = '';
+  userChats: string[] = ['eneko', 'patata', 'gasteDineroEnRoblox'];
   @ViewChild('messageBox') messageBox!: ElementRef;
 
   constructor(private http: HttpClient) {}
@@ -24,7 +32,7 @@ export class ChatComponent implements OnInit{
 
   sendMessage() {
     if (this.newMessage.trim() !== '') {
-      this.messages.push(this.newMessage);
+      this.globalChatMessages.push({message: this.newMessage, sender: "me", date:"now"});
       this.newMessage = '';
       setTimeout(() => {
         this.scrollToBottom();
