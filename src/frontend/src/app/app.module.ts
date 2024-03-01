@@ -11,6 +11,9 @@ import { AppRoutingModule } from './app-routing.module';
 import { RegisterComponent } from './pages/register/register.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { CommonModule } from '@angular/common';
+import { ChatComponent } from './components/chat/chat.component';
+import { HomeComponent } from './pages/home/home.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +22,7 @@ import { ProfileComponent } from './pages/profile/profile.component';
     FooterComponent,
     RegisterComponent,
     LoginComponent,
-    ProfileComponent
+    ProfileComponent,
   ],
   imports: [
     BrowserModule,
@@ -27,7 +30,8 @@ import { ProfileComponent } from './pages/profile/profile.component';
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    CommonModule
   ],
   providers: [],
   bootstrap: [AppComponent]
