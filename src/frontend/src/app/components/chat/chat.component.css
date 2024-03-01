@@ -34,3 +34,19 @@
 .input-box button {
     flex: none; /* Button does not grow */
 }
+.border-transparent {
+    border-color: rgba(255, 255, 255, 0.4); /* Red border color with 50% transparency */
+}
+
+.custom-textarea:focus {
+    outline: none;
+}
+
+.custom-textarea {
+    border: none; /* Elimina el borde del textarea */
+}
+
+
+.custom-textarea::placeholder {
+    color: #6c757d; /* Cambia el color del placeholder según tus preferencias */
+}
