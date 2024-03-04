@@ -14,10 +14,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 
 from .authenticate import CustomAuthentication
-
-from .models import CustomUser
+from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer
+from .models import CustomUser, Game, Tournament, CustomUserManager
 
 import requests
 import json
@@ -203,3 +204,30 @@ class LoginView(APIView):
                 return Response({"message": "This account is not active!!"}, status=500)
         else:
             return Response({"message": "Invalid username or password!!"}, status=500)
+
+class CustomUserView(APIView):
+    def get(self, request, user_id):
+        try:
+            usuario = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CustomUserSerializer(usuario)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, user_id):
+        serializer = CustomUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class GameHistoryView(APIView):
+    def get(self, request, user_id):
+        player1_games = Game.objects.filter(player1_id=user_id)
+        player2_games = Game.objects.filter(player2_id=user_id)
+
+        all_games = player1_games | player2_games
+        serialized_games = GameSerializer(all_games, many = True)
+        return Response(serialized_games, status=status.HTTP_200_OK)
+    
+    def post
