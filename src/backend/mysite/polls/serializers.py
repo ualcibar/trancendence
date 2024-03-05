@@ -1,6 +1,16 @@
-from django.core import serializers
+from rest_framework import serializers
 from .models import Avatar, CustomUser, Friend, Tournament, Game
 
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('username','wins','loses','total')
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
+    
 class GameSerializer(serializers.ModelSerializer):
     player1 = serializers.StringRelatedField(read_only=True)
     player2 = serializers.StringRelatedField(read_only=True)
@@ -8,16 +18,7 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = [
-            'id',
-            'player1',
-            'player2',
-            'goalsPlayer1',
-            'goalsPlayer2',
-            'winner',
-            'tournamentGame',
-            'date',
-        ]
+        fields = '__all__'
 
 class TournamentSerializer(serializers.ModelSerializer):
     quarterfinal1 = GameSerializer(read_only=True)
@@ -31,30 +32,4 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = [
-            'id',
-            'title',
-            'playerNum',
-            'quarterfinal1',
-            'quarterfinal2',
-            'quarterfinal3',
-            'quarterfinal4',
-            'semifinal1',
-            'semifinal2',
-            'final',
-            'date',
-            'tournamentPlayers',
-        ]
-    
-class CustomUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser()
-        fields = [
-            'id',
-            'username',
-            'wins',
-            'loses',
-            'total',
-            'friends',
-            'status',
-        ]
+        fields = '__all__'

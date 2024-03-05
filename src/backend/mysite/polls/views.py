@@ -14,10 +14,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 
 from .authenticate import CustomAuthentication
-
-from .models import CustomUser
+from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer
+from .models import CustomUser, Game, Tournament, CustomUserManager
 
 import requests
 import json
@@ -203,3 +204,60 @@ class LoginView(APIView):
                 return Response({"message": "This account is not active!!"}, status=500)
         else:
             return Response({"message": "Invalid username or password!!"}, status=500)
+
+class CustomUserView(APIView):
+    def get(self, request, user_id):
+        try:
+            usuario = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CustomUserSerializer(usuario)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, user_id):
+        serializer = CustomUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class GameHistoryView(APIView):
+    def get(self, request, user_id):
+        player1_games = Game.objects.filter(player1_id=user_id)
+        player2_games = Game.objects.filter(player2_id=user_id)
+
+        all_games = player1_games | player2_games
+        serialized_games = GameSerializer(all_games, many = True)
+        return Response(serialized_games, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        serializer = GameSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+    
+class FriendsListView(APIView):
+    def get(self, request, user_id):
+        user = CustomUser.objects.get(id=user_id)
+        friends = user.friends.all()
+        serializer = CustomUserSerializer(friends, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    # falta post
+    def post(self, request, user_id):
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        friend_ids = request.data.get('friend_ids', [])
+        user2 = CustomUser.objects.get(id=user_id)
+
+        if not friend_ids or user2.DoesNotExist:
+            return Response({"error": "Friend IDs are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        friends = CustomUser.objects.filter(id__in=friend_ids)
+        user.friends.add(*friends)
+        user.save()
+
+        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)   
