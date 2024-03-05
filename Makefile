@@ -12,10 +12,10 @@ build:
 	@echo "\033[1;33mBuilding containers...\033[0m"
 	docker compose -f $(COMPOSE_FILE) build
 build_con:
-	@echo "\033[1;33mBuilding \033[1;32m$(contenedor) \033[1;33mcontainer...\033[0m"
-	docker compose -f $(COMPOSE_FILE) build $(contenedor)
-	@echo "\033[1;33mRaising up \033[1;32m$(contenedor) \033[1;33mcontainer...\033[0m"
-	docker compose -f $(COMPOSE_FILE) restart $(contenedor)
+	@echo "\033[1;33mBuilding \033[1;32m$(c) \033[1;33mcontainer...\033[0m"
+	docker compose -f $(COMPOSE_FILE) build $(c)
+	@echo "\033[1;33mRaising up \033[1;32m$(c) \033[1;33mcontainer...\033[0m"
+	docker compose -f $(COMPOSE_FILE) restart $(c)
 	@echo "\033[1;32mDone!\033[0m"
 up:
 	@echo "\033[1;33mRaising up containers...\033[0m"
