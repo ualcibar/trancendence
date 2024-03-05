@@ -22,7 +22,7 @@ export class ChatComponent implements OnInit{
   newMessage: string = '';
   userChats: string[] = ['eneko', 'patata', 'gasteDineroEnRoblox'];
 
-  webSocketUrl = 'ws://localhost:8000/chat/global';
+  webSocketUrl = 'ws://localhost:8000/chat/global/';
 
   webSocket : WebSocket;
 
@@ -42,7 +42,7 @@ export class ChatComponent implements OnInit{
     // Event handler for incoming messages from the WebSocket server
     this.webSocket.onmessage = (event) => {
       console.log('Received message from server:', event.data);
-      this.globalChatMessages.push({message: event.data['message'], sender: 'whoknows', date:'befornow'});
+      this.globalChatMessages.push({message: event.data['message'], sender: event.data.user, date:'befornow'});
     };
 
     // Event handler for WebSocket errors
@@ -67,7 +67,7 @@ export class ChatComponent implements OnInit{
       } else {
         console.error('WebSocket connection is not open');
       }
-      this.globalChatMessages.push({message: this.newMessage, sender: "me", date:"now"});
+      //this.globalChatMessages.push({message: this.newMessage, sender: "me", date:"now"});
       this.newMessage = '';
       setTimeout(() => {
         //this.scrollToBottom();
