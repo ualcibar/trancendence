@@ -251,8 +251,9 @@ class FriendsListView(APIView):
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
         friend_ids = request.data.get('friend_ids', [])
+        user2 = CustomUser.objects.get(id=user_id)
 
-        if not friend_ids:
+        if not friend_ids or user2.DoesNotExist:
             return Response({"error": "Friend IDs are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         friends = CustomUser.objects.filter(id__in=friend_ids)
