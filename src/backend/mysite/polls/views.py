@@ -230,4 +230,33 @@ class GameHistoryView(APIView):
         serialized_games = GameSerializer(all_games, many = True)
         return Response(serialized_games, status=status.HTTP_200_OK)
     
-    def post
+    def post(self, request):
+        serializer = GameSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+    
+class FriendsListView(APIView):
+    def get(self, request, user_id):
+        user = CustomUser.objects.get(id=user_id)
+        friends = user.friends.all()
+        serializer = CustomUserSerializer(friends, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    # falta post
+    def post(self, request, user_id):
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        friend_ids = request.data.get('friend_ids', [])
+
+        if not friend_ids:
+            return Response({"error": "Friend IDs are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        friends = CustomUser.objects.filter(id__in=friend_ids)
+        user.friends.add(*friends)
+        user.save()
+
+        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)   
