@@ -1,30 +1,34 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
+from rest_framework_simplejwt.tokens import TokenError, AccessToken
+from channels.exceptions import DenyConnection
 
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from asgiref.sync import async_to_sync
-
-
 
 class ChatConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.room_group_name = None
         self.user = None
-        
+        self.auth = JWTAuthentication()
     def connect(self):
+        jwt_token = self.scope['query_string'].decode().split('=')[1]
+        token = self.auth.get_validated_token(jwt_token)
+        if token is None:
+            raise DenyConnection('User is not authenticated.')
+        try:
+            self.user = self.auth.get_user(token)
+        except:
+            raise DenyConnection('User is not authenticated.')
+
         self.room_group_name = 'global'
-        self.user = self.scope['user']
 
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
 
         self.accept()
-        self.send(text_data=json.dumps({
-            'type':'connection_established',
-            'message':'You are now connected'
-        }))
 
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)

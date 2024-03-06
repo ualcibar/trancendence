@@ -9,6 +9,19 @@ class Message {
   date: string = '';
 }
 
+function getCookie(name: string): string|null {
+	const nameLenPlus = (name.length + 1);
+	return document.cookie
+		.split(';')
+		.map(c => c.trim())
+		.filter(cookie => {
+			return cookie.substring(0, nameLenPlus) === `${name}=`;
+		})
+		.map(cookie => {
+			return decodeURIComponent(cookie.substring(nameLenPlus));
+		})[0] || null;
+}
+
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -18,7 +31,6 @@ class Message {
 })
 export class ChatComponent implements OnInit{
   globalChatMessages : Message[] = [];
-  messages: string[] = ['message1', 'patata', 'roblox pay to win'];
   newMessage: string = '';
   userChats: string[] = ['eneko', 'patata', 'gasteDineroEnRoblox'];
 
@@ -29,6 +41,11 @@ export class ChatComponent implements OnInit{
   @ViewChild('messageBox') messageBox!: ElementRef;
 
   constructor(private http: HttpClient) {
+    const jwtToken = getCookie('access_token');
+    if (jwtToken == null){
+      console.log('failed to get cookie access token, log in');
+    }
+    this.webSocketUrl = `ws://localhost:8000/chat/global/?token=${jwtToken}`;
     this.webSocket = new WebSocket(this.webSocketUrl);
     this.webSocket.onopen = () => {
       console.log('WebSocket connection opened');
@@ -41,8 +58,13 @@ export class ChatComponent implements OnInit{
 
     // Event handler for incoming messages from the WebSocket server
     this.webSocket.onmessage = (event) => {
-      console.log('Received message from server:', event.data);
-      this.globalChatMessages.push({message: event.data['message'], sender: event.data.user, date:'befornow'});
+      const evenData = JSON.parse(event.data);
+      const actualHourDate = new Date();
+      const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
+      this.globalChatMessages.push({message: evenData.message, sender: evenData.user, date:actualHour});
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 0);
     };
 
     // Event handler for WebSocket errors
@@ -54,6 +76,10 @@ export class ChatComponent implements OnInit{
   ngOnInit(): void {
     // Scroll to the bottom of the message box when component initializes
     this.scrollToBottom();
+  }
+
+  isConnected(){
+    return this.webSocket.readyState === WebSocket.OPEN;
   }
 
   sendMessage() {
@@ -69,9 +95,6 @@ export class ChatComponent implements OnInit{
       }
       //this.globalChatMessages.push({message: this.newMessage, sender: "me", date:"now"});
       this.newMessage = '';
-      setTimeout(() => {
-        //this.scrollToBottom();
-      }, 0);
     }
   }
   handleShiftEnter(event : any): void {
@@ -80,11 +103,11 @@ export class ChatComponent implements OnInit{
       this.newMessage += '\n'; // Insert a newline character in the message
     }
   }
+
+  // Función para hacer autoscroll hacia abajo
   private scrollToBottom(): void {
-    try {
-      this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;
-    } catch (err) {
-      console.error(err);
-    }
+    const scrollableDiv = document.querySelector('.overflow-y-scroll');
+    if (scrollableDiv != null)
+      scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
   }
 }
