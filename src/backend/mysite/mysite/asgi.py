@@ -15,22 +15,33 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 
 application = get_asgi_application()
 """
-
-
-from django.urls import path
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-import chat.routing
-from django.core.asgi import get_asgi_application
 import os
+import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
+django.setup()
+
+from django.urls import path
+from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+
+import chat.routing
+from polls.authenticate import CustomAuthentication, JWTAuthMiddleware 
+
 
 application = ProtocolTypeRouter({
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            chat.routing.websocket_urlpatterns
-        )
-    ),
     "http": get_asgi_application(),
+    'websocket': AuthMiddlewareStack(
+            URLRouter(
+                chat.routing.websocket_urlpatterns
+            )
+    ),
 })
+
+#application = ProtocolTypeRouter({
+#    "websocket": URLRouter(
+#            chat.routing.websocket_urlpatterns
+#    ),
+#    "http": get_asgi_application(),
+#})
