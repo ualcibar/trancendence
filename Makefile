@@ -42,7 +42,7 @@ status:
 	docker ps -a
 clean:
 	@echo "\033[1;31m⚠ THIS WILL DELETE ALL CONTAINERS DATA (including networks and images)!\n\033[1;33m¿Are you sure? \033[0m"
-	@read -r -p "[y/n] > " REPLY && \
+#	@read -r -p "[y/n] > " REPLY && \
 	if [ "$$REPLY" != "y" ]; then \
 		echo "\n\033[1;32mOK, process was cancelled.\033[0m\n"; exit 1; \
 	fi
