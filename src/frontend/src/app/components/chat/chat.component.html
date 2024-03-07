@@ -1,18 +1,21 @@
-<div *ngIf="isConnected()">
-	<div class="flex max-w-screen-xl h-50real mx-auto bg-cyan-950 text-white place-content-center rounded-xl shadow-md">
+<!-- <div *ngIf="isConnected()"> -->
+	<div class="flex max-w-screen-xl h-50real mx-auto bg-cyan-950 text-white place-content-center rounded-xl shadow-md subpixel-antialiased">
 		<div class="w-64 h-50real bg-cyan-800 rounded-l-lg flex flex-col">
-			<h1 class="text-2xl font-bold text-center">Channels</h1>
+			<div class="text-2xl font-bold text-center bg-cyan-900 rounded-tl-lg">
+				<h1 class="m-3"><i class="bi bi-chat-dots-fill"></i> Channels</h1>
+			</div>
 			<div class="flex flex-col flex-1">
-				<button class="btn text-2xl text-start">#global</button>
-				<!-- ngFor for every user chat -->
-				<div *ngFor="let userChat of userChats" class="btn text-2xl text-start">{{ userChat }}</div>
+				<div *ngFor="let userChat of getKeys()">
+					<button *ngIf="userChat == current_chat_name" (click)="changeChannel(userChat)" class="btn w-full rounded-none bg-yellow-600 text-2xl hover:bg-yellow-600 hover:text-slate-950 text-start">{{ userChat }}</button>
+					<button *ngIf="userChat != current_chat_name" (click)="changeChannel(userChat)" class="btn w-full rounded-none text-2xl text-start">{{ userChat }}</button>
+				</div>
 			</div>
 		</div>
 		<div class="flex-1 h-full flex flex-col">
 			<div class="overflow-y-scroll">
 				<div class="flex-1 w-1/2  items-start gap-2.5 p-2">
 					<div class="items-start gap-5">
-						<div *ngFor="let message of globalChatMessages" class="mb-3 bg-cyan-900 rounded">
+						<div *ngFor="let message of chatMessages.get(current_chat_name)" class="mb-3 bg-cyan-900 rounded">
 							<div class="flex items-center font-bold">
 								<div class="rounded-full w-6 h-6 m-2 bg-black flex-shrink-0"></div>
 								<div class="flex-1">{{ message.sender}}</div>
@@ -28,8 +31,8 @@
 					(keydown.shift.enter)="handleShiftEnter($event)" (keydown.enter)="sendMessage()"
 					class="custom-textarea form-control w-full h-12 max-h-96 border-transparent outline-none bg-transparent px-3 py-2.5"
 					style="resize: none;overflow-y: visible; color: white;"></textarea>
-				<button (click)="sendMessage()" class="btn btn-success max-h-10 flex-1 rounded-xl mr-1">Send</button>
+				<button (click)="sendMessage()" class="btn btn-success max-h-10 flex items-center rounded-xl mr-1"><i class="bi bi-send-fill mr-1"></i> Send</button>
 			</div>
 		</div>
 	</div>
-</div>
+<!-- </div> -->

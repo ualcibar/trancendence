@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Avatar, CustomUser, Friend, Tournament, Game
+from .models import  CustomUser,  Tournament, Game
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:

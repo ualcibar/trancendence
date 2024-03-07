@@ -14,6 +14,8 @@ class ChatConsumer(WebsocketConsumer):
         self.room_group_name = None
         self.user = None
         self.auth = JWTAuthentication()
+        self.user_inbox = None 
+
     def connect(self):
         jwt_token = self.scope['query_string'].decode().split('=')[1]
         token = self.auth.get_validated_token(jwt_token)
@@ -25,40 +27,56 @@ class ChatConsumer(WebsocketConsumer):
             raise DenyConnection('User is not authenticated.')
 
         self.room_group_name = 'global'
-
+        self.user_inbox = f'inbox_{self.user.username}'
+        async_to_sync(self.channel_layer.group_add)( self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
 
         self.accept()
 
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
+        async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
-        #if not self.user.is_authenticated:  # new
-        #    return                          # new
+        if message.startswith('/pm '):
+            bundle = message.split(' ', 2)
+            target_user = bundle[1]
+            private_message = bundle[2]
 
-
-        # Broadcast the received message to all clients in the channel
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,  # Channel name (you can use any name)
-            {
-                "type": "chat_message",
-                "user": self.user.username,
-                "message": message
-            }
-        )
+            async_to_sync(self.channel_layer.group_send)(
+                f'inbox_{target_user}',  
+                {
+                    "type": "private_message",
+                    "user": self.user.username,
+                    "message": private_message
+                }
+            )
+            async_to_sync(self.channel_layer.group_send)(
+                f'inbox_{self.user}',  
+                {
+                    "type": "private_message_delivered",
+                    "user": self.user.username,
+                    "message": private_message
+                }
+            )
+        else:
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    "type": "chat_message",
+                    "user": self.user.username,
+                    "message": message
+                }
+            )
 
     def chat_message(self, event):
         self.send(text_data=json.dumps(event))
 
+    def private_message(self, event):
+        self.send(text_data=json.dumps(event))
 
-#message = event['message']
-
-#        self.send(text_data=json.dumps({
-#            'type' : 'chat',
-#            'message' : message,
-#            'user' : event['user']
-#        }))
+    def private_message_delivered(self, event):
+        self.send(text_data=json.dumps(event))
