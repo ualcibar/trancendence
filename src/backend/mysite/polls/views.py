@@ -214,13 +214,7 @@ class CustomUserView(APIView):
         serializer = CustomUserSerializer(usuario)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, user_id):
-        serializer = CustomUserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+   
 class GameHistoryView(APIView):
     def get(self, request, user_id):
         player1_games = Game.objects.filter(player1_id=user_id)
@@ -243,7 +237,7 @@ class FriendsListView(APIView):
         friends = user.friends.all()
         serializer = CustomUserSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    # falta post
+    
     def post(self, request, user_id):
         try:
             user = CustomUser.objects.get(id=user_id)
