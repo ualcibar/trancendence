@@ -109,3 +109,8 @@ also offering a default version for those who prefer a straightforward gameplay
 experience.
 
 THREE  practice sample page https://codesandbox.io/p/sandbox/gpgpu-curl-noise-dof-zgsyn?file=%2Fsrc%2FApp.js
+
+
+# COLORS
+https://www.colourlovers.com/palette/4588091/Outrun <br>
+https://www.pinterest.es/pin/70437487599755/
