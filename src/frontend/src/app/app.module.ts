@@ -6,6 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import {MatAutocompleteModule} from '@angular/material/autocomplete'
 
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -34,7 +35,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     HttpClientModule,
     CommonModule,
     MatInputModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatAutocompleteModule
   ],
   providers: [
     provideAnimationsAsync()

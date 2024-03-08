@@ -45,7 +45,7 @@ export class HomeComponent implements OnInit{
                             console.log('Sent data: ', response);
                         },
                         error => {
-                            console.error('failed to login using 43', error);
+                            console.error('Failed to login using 42: ', error);
                         }
                     );
                 }else if (state == 'register'){
@@ -61,7 +61,7 @@ export class HomeComponent implements OnInit{
                             console.log('Sent data: ', response);
                         },
                         error => {
-                            console.error('failed to register using 43', error);
+                            console.error('Failed to register using 42: ', error);
                         }
                     );
 

@@ -19,7 +19,7 @@ import { AfterViewInit, Renderer2 } from '@angular/core';
     ReactiveFormsModule,
     AsyncPipe,],
   templateUrl: './search-bar.component.html',
-  styleUrl: './search-bar.component.css'
+
 })
 export class SearchBarComponent implements OnInit, AfterViewInit{
   @Output() escapeKeyPressed: EventEmitter<void> = new EventEmitter<void>();
@@ -27,7 +27,8 @@ export class SearchBarComponent implements OnInit, AfterViewInit{
   @Input() fields : string[] = [];
 
   myControl = new FormControl<string>('');
-  filteredOptions: Observable<string[]>;
+  filteredOptions$: Observable<string[]>;
+  errorMessage: string = '';
 
   @ViewChild('inputField') inputField!: ElementRef;
 
@@ -38,12 +39,11 @@ export class SearchBarComponent implements OnInit, AfterViewInit{
 
   onBlur() {
     // Emit the outOfFocus event when the input field loses focus
-    console.log('on blur');
     this.escapeKeyPressed.emit();
   }
 
   constructor(private renderer: Renderer2){
-    this.filteredOptions = this.myControl.valueChanges.pipe(
+    this.filteredOptions$ = this.myControl.valueChanges.pipe(
       startWith(''),
       map(value => {
         return value ? this._filter(value as string) : this.fields.slice();
@@ -52,7 +52,7 @@ export class SearchBarComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit() {
-    this.filteredOptions = this.myControl.valueChanges.pipe(
+    this.filteredOptions$ = this.myControl.valueChanges.pipe(
       startWith(''),
       map(value => {
         return value ? this._filter(value as string) : this.fields.slice();
@@ -61,12 +61,9 @@ export class SearchBarComponent implements OnInit, AfterViewInit{
   }
   // Method to handle Escape key press event
   onKeyPress(event : any) {
-    console.log('key pressed');
     if (event.key === "Escape") {
-      console.log('child key');
       this.escapeKeyPressed.emit();
     }if (event.key === "Enter") {
-      console.log('child key');
       if (this.myControl.value)
         this.selectedField.emit(this.myControl.value);
       else
@@ -76,6 +73,18 @@ export class SearchBarComponent implements OnInit, AfterViewInit{
 
   onEnter() {
     this.selectedField.emit();
+  }
+
+  onFormSubmit() {
+    if (this.myControl.value) {
+      this.selectedField.emit(this.myControl.value);
+    } else {
+      this.errorMessage = 'You must type a username!';
+    }
+  }
+  autocomplete(username : string){
+    this.myControl.setValue(username);
+    this.inputField.nativeElement.focus();
   }
   private _filter(name: string): string[] {
     const filterValue = name.toLowerCase();

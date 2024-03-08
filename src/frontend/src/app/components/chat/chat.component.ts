@@ -36,7 +36,7 @@ export class ChatComponent implements OnInit{
   chatMessages : Map<string, Message[]> = new Map<string, Message[]>();
   newMessage: string = '';
   current_chat_name : string= '#global';
-  users: string[] = ['eneko', 'ullorent', 'patata'];
+  users: Set<string> = new Set<string>();
 
   webSocketUrl = 'ws://localhost:8000/chat/global/';
 
@@ -62,7 +62,6 @@ export class ChatComponent implements OnInit{
   initializeSocket(){
     this.ngZone.run(() => {
     this.chatMessages.set('#global',[]);
-    this.chatMessages.set('ecamara',[]);
     });
     // Event handler for when the WebSocket connection is closed
     this.webSocket.onclose = () => {
@@ -89,15 +88,15 @@ export class ChatComponent implements OnInit{
         } else if (evenData.type == 'private_message_delivered'){
           targetChannel = this.current_chat_name;
           message = evenData.message;
-        } else if (evenData.type == 'user_list'){
-		  this.users = evenData.users;
-		  return;
-        } else if (evenData.type == 'user_join'){
-		  this.users = evenData.users;
-		  return;
-        } else if (evenData.type == 'user_leave'){
-		  this.users = evenData.users;
-		  return;
+        } else if (evenData.type == 'user_list') {
+          this.users = new Set(evenData.users);
+          return;
+        } else if (evenData.type == 'user_join') {
+          this.users.add(evenData.user);
+          return;
+        } else if (evenData.type == 'user_leave') {
+          this.users.delete(evenData.user);
+          return;
         }
         else if (evenData.message.startsWith('/global ')) {
           targetChannel = '#global';
@@ -188,10 +187,9 @@ export class ChatComponent implements OnInit{
 		}
 	}
 	getUsers() : string[]{
-		while(this.usersReceived){
-		}
-		return this.users;	
-	}
+    console.log(this.users);
+    return Array.from(this.users);
+  }
 	// Función para hacer autoscroll hacia abajo
 	private scrollToBottom(): void {
 		const scrollableDiv = document.querySelector('.overflow-y-scroll');

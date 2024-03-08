@@ -7,6 +7,7 @@ from channels.exceptions import DenyConnection
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from asgiref.sync import async_to_sync
+from chat.models import Room
 
 class ChatConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -14,20 +15,22 @@ class ChatConsumer(WebsocketConsumer):
         self.room_group_name = None
         self.user = None
         self.auth = JWTAuthentication()
-        self.user_inbox = None 
+        self.user_inbox = None
+        self.room = None 
 
     def connect(self):
         jwt_token = self.scope['query_string'].decode().split('=')[1]
-        token = self.auth.get_validated_token(jwt_token)
-        if token is None:
-            raise DenyConnection('User is not authenticated.')
         try:
+            token = self.auth.get_validated_token(jwt_token)
+            if token is None:
+                raise DenyConnection('User is not authenticated.')
             self.user = self.auth.get_user(token)
         except:
             raise DenyConnection('User is not authenticated.')
 
         self.room_group_name = 'global'
         self.user_inbox = f'inbox_{self.user.username}'
+        self.room = Room.objects.get_or_create(name='global')
         async_to_sync(self.channel_layer.group_add)( self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
 
@@ -40,7 +43,12 @@ class ChatConsumer(WebsocketConsumer):
                 'user': self.user.username,
             }
         )
-        self.room.online.add(self.user)
+        self.send(json.dumps({
+            'type': 'user_list',
+            'users': [user.username for user in self.room[0].online.all()],
+        }))
+
+        self.room[0].join(self.user)
 
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_send)(
@@ -50,7 +58,7 @@ class ChatConsumer(WebsocketConsumer):
                 'user': self.user.username,
             }
         )
-        self.room.online.remove(self.user)
+        self.room[0].leave(self.user)
         async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
         async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
 

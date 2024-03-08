@@ -1,17 +1,25 @@
 <div class="alert alert-secondary alert-dismissible" (keydown)="onKeyPress($event)">
-	<h1><i class="bi bi-person-lines-fill"></i> Select a user to chat with</h1> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="bi bi-x-lg"></i></button>
-	<div class="flex items-baseline">
-		<form autofocus (keydown)="onKeyPress($event)">
-			<mat-form-field style="margin-bottom: -25px;">
-				<mat-label>Select a user</mat-label>
-				<input #inputField  type="text" matInput [formControl]="myControl" [matAutocomplete]="auto" autofocus>
-				<mat-autocomplete #auto="matAutocomplete">
-					@for (option of filteredOptions | async; track option) {
-					<mat-option [value]="option">{{option}}</mat-option>
-					}
-				</mat-autocomplete>
-			</mat-form-field>
-			<button type="submit" class="btn btn-success bg-green-700 ml-2 mb-3"><i class="bi bi-plus-circle"></i> Add</button>
-		</form>
+	<h1 class="text-xl"><i class="bi bi-person-lines-fill"></i> Select a user to chat with</h1>
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" (click)="onBlur()"><i class="bi bi-x-lg"></i></button>
+	<form autofocus (keydown)="onKeyPress($event)" (submit)="onFormSubmit()" class="mt-2">
+		<div class="flex place-items-baseline min-w-80 space-y-0">
+			<form class="flex">
+				<input #inputField class="form-control me-2 w-80 max-h-12" [formControl]="myControl" type="text" autofocus placeholder="username">
+				<button type="submit" (click)="onFormSubmit()" class="btn max-h-10 w-20 space-y-0 btn-success bg-green-700"><i class="bi bi-plus-circle"></i>
+					Add</button>
+			</form>
+		</div>
+		<div class="mt-1 space-y-0">
+			<div *ngFor="let option of filteredOptions$ | async">
+				<div *ngIf="option != myControl.value" (click)="autocomplete(option)" class="btn card space-y-0 bg-cyan-900 hover:bg-cyan-800 max-w-80 rounded-none max-h-10">
+					<div class="flex justify-content-between text-white">
+						{{option}} <i class="bi bi-plus-circle-fill ml-2 inset-y-0 right-0"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	<div *ngIf="errorMessage" class="alert alert-warning" style="margin-bottom: -10px;" role="alert">
+		<i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
 	</div>
 </div>

@@ -48,10 +48,8 @@ export class AuthService implements OnInit{
     var accessToken = localStorage.getItem('access_token');
     // Logic to perform logout
     if (accessToken) {
-      console.log("hay token");
       localStorage.removeItem('access_token');
     }
-    console.log("no hay token :(");
     this.isLoggedInSubject.next(false);
   }
 }
