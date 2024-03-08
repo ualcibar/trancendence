@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 
+import { SearchBarComponent } from '../search-bar/search-bar.component';
+
 class Message {
   message : string = '';
   sender: string = '';
@@ -25,7 +27,7 @@ function getCookie(name: string): string|null {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SearchBarComponent],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
@@ -34,10 +36,14 @@ export class ChatComponent implements OnInit{
   chatMessages : Map<string, Message[]> = new Map<string, Message[]>();
   newMessage: string = '';
   current_chat_name : string= '#global';
+  users: string[] = ['eneko', 'ullorent', 'patata'];
 
   webSocketUrl = 'ws://localhost:8000/chat/global/';
 
   webSocket : WebSocket;
+
+  showSearchBar : boolean = false;
+	usersReceived : boolean = false;
 
   @ViewChild('messageBox') messageBox!: ElementRef;
 
@@ -83,6 +89,15 @@ export class ChatComponent implements OnInit{
         } else if (evenData.type == 'private_message_delivered'){
           targetChannel = this.current_chat_name;
           message = evenData.message;
+        } else if (evenData.type == 'user_list'){
+		  this.users = evenData.users;
+		  return;
+        } else if (evenData.type == 'user_join'){
+		  this.users = evenData.users;
+		  return;
+        } else if (evenData.type == 'user_leave'){
+		  this.users = evenData.users;
+		  return;
         }
         else if (evenData.message.startsWith('/global ')) {
           targetChannel = '#global';
@@ -124,39 +139,63 @@ export class ChatComponent implements OnInit{
   }
 
   sendMessage() {
-    if (this.newMessage.trim() !== '') {
-      if (this.webSocket.readyState === WebSocket.OPEN) {
-        if (this.webSocket.readyState === WebSocket.OPEN) {
-          let messageObject;
-          if (this.current_chat_name == '#global')
-            messageObject = { message: `/global ${this.newMessage}` }; // Create a JavaScript object
-          else
-            messageObject = { message: `/pm ${this.current_chat_name} ${this.newMessage}` }; // Create a JavaScript object
-          const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
-          this.webSocket.send(jsonMessage); // Send the JSON string over the WebSocket connection
-        }
-      } else {
-        console.error('WebSocket connection is not open');
-      }
-      //this.globalChatMessages.push({message: this.newMessage, sender: "me", date:"now"});
-      this.newMessage = '';
-    }
-  }
-  handleShiftEnter(event : any): void {
-    if (event.shiftKey && event.key === 'Enter') {
-      event.preventDefault(); // Prevent inserting a newline character
-      this.newMessage += '\n'; // Insert a newline character in the message
-    }
-  }
+	  if (this.newMessage.trim() !== '') {
+		  if (this.webSocket.readyState === WebSocket.OPEN) {
+			  let messageObject;
+			  if (this.current_chat_name == '#global')
+				  messageObject = { message: `/global ${this.newMessage}` }; // Create a JavaScript object
+			  else
+				  messageObject = { message: `/pm ${this.current_chat_name} ${this.newMessage}` }; // Create a JavaScript object
+			  const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
+			  this.webSocket.send(jsonMessage); // Send the JSON string over the WebSocket connection
+		  } else {
+			  console.error('WebSocket connection is not open');
+		  }
+		  //this.globalChatMessages.push({message: this.newMessage, sender: "me", date:"now"});
+		  this.newMessage = '';
+	  }
+	}
+	handleShiftEnter(event: any): void {
+		if (event.shiftKey && event.key === 'Enter') {
+			event.preventDefault(); // Prevent inserting a newline character
+			this.newMessage += '\n'; // Insert a newline character in the message
+		}
+	}
 
-  changeChannel(channel : string): void{
-    this.current_chat_name = channel;
-  }
+	changeChannel(channel: string): void {
+		this.current_chat_name = channel;
+	}
 
-  // Función para hacer autoscroll hacia abajo
-  private scrollToBottom(): void {
-    const scrollableDiv = document.querySelector('.overflow-y-scroll');
-    if (scrollableDiv != null)
-      scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-  }
+	togleSearchBar() {
+		this.showSearchBar = !this.showSearchBar;
+	}
+	scapekey() {
+		console.log('scape pressed');
+		this.showSearchBar = false;
+	}
+	fieldSelected(username: string) {
+		this.ngZone.run(() => {
+			this.chatMessages.set(username, []);
+		});
+		this.showSearchBar = false;
+	}
+
+	getOnlineUsers(){
+		if (this.webSocket.readyState === WebSocket.OPEN) {
+			let messageObject = { message: "/list" }; // Create a JavaScript object
+			const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
+			this.webSocket.send(jsonMessage); // Send the JSON string over the WebSocket connection
+		}
+	}
+	getUsers() : string[]{
+		while(this.usersReceived){
+		}
+		return this.users;	
+	}
+	// Función para hacer autoscroll hacia abajo
+	private scrollToBottom(): void {
+		const scrollableDiv = document.querySelector('.overflow-y-scroll');
+		if (scrollableDiv != null)
+			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+	}
 }

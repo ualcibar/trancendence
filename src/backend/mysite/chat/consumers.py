@@ -33,9 +33,27 @@ class ChatConsumer(WebsocketConsumer):
 
         self.accept()
 
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'user_join',
+                'user': self.user.username,
+            }
+        )
+        self.room.online.add(self.user)
+
     def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'user_leave',
+                'user': self.user.username,
+            }
+        )
+        self.room.online.remove(self.user)
         async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
         async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
+
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -62,6 +80,11 @@ class ChatConsumer(WebsocketConsumer):
                     "message": private_message
                 }
             )
+        elif message == '/list':
+            self.send(json.dumps({
+            'type': 'user_list',
+            'users': [user.username for user in self.room.online.all()],
+            }))
         else:
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
@@ -80,3 +103,16 @@ class ChatConsumer(WebsocketConsumer):
 
     def private_message_delivered(self, event):
         self.send(text_data=json.dumps(event))
+
+    def user_join(self, event):
+        self.send(text_data=json.dumps(event))
+
+    def user_leave(self, event):
+        self.send(text_data=json.dumps(event))
+
+    def get_connected_users(self, event):
+        # Send the list of connected users to the client
+        self.send(text_data=json.dumps({
+            'type': 'connected_users',
+            'users': event['users']
+        }))

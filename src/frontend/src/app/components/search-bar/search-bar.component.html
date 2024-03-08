@@ -1,0 +1,17 @@
+<div class="alert alert-secondary alert-dismissible" (keydown)="onKeyPress($event)">
+	<h1><i class="bi bi-person-lines-fill"></i> Select a user to chat with</h1> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+	<div class="flex items-baseline">
+		<form autofocus (keydown)="onKeyPress($event)">
+			<mat-form-field style="margin-bottom: -25px;">
+				<mat-label>Select a user</mat-label>
+				<input #inputField  type="text" matInput [formControl]="myControl" [matAutocomplete]="auto" autofocus>
+				<mat-autocomplete #auto="matAutocomplete">
+					@for (option of filteredOptions | async; track option) {
+					<mat-option [value]="option">{{option}}</mat-option>
+					}
+				</mat-autocomplete>
+			</mat-form-field>
+			<button type="submit" class="btn btn-success bg-green-700 ml-2 mb-3"><i class="bi bi-plus-circle"></i> Add</button>
+		</form>
+	</div>
+</div>

@@ -1,3 +1,3 @@
 from django.db import models
+from polls.models import CustomUser
 
-# Create your models here.
