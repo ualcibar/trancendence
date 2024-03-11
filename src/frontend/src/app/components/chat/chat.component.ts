@@ -196,4 +196,5 @@ export class ChatComponent implements OnInit{
 		if (scrollableDiv != null)
 			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
 	}
+
 }
