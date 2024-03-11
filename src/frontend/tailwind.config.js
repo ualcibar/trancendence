@@ -8,7 +8,7 @@ module.exports = {
       colors: {
         '42': '#292D39',
         '42-selected': '#3e4559',
-        'background': '#1C0658',
+        'background': '#2d1965',
         'color-1': '#6c757d',
         'color-2': '#F4D676',
         'color-3': '#f8f9fa',

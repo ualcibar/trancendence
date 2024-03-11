@@ -5,10 +5,13 @@ import { AuthService } from '../../services/auth.service';
 import { Router} from '@angular/router';
 import { ChatComponent } from '../../components/chat/chat.component';
 
+import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
+
+
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ChatComponent],
+  imports: [ChatComponent, LobbySearchComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
