@@ -34,10 +34,9 @@ from polls.authenticate import CustomAuthentication, JWTAuthMiddleware
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     'websocket': AuthMiddlewareStack(
-            URLRouter(
-                chat.routing.websocket_urlpatterns,
-                matchmaking.routing.websocket_urlpatterns,
-            )
+        URLRouter(
+            chat.routing.websocket_urlpatterns + matchmaking.routing.websocket_urlpatterns
+        ),
     ),
 })
 

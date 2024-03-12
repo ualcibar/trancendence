@@ -1,1 +1,7 @@
-<app-lobby-search></app-lobby-search>
+<button (click)="toggleActive()">toggle</button>
+<div *ngIf="active == 'lobby'">
+    <app-lobby-search></app-lobby-search>
+</div>
+<div *ngIf="active === 'chat'">
+    <app-chat></app-chat>
+</div>

@@ -24,7 +24,7 @@
 			<div class="overflow-y-scroll">
 				<div class="flex-1 w-1/2 items-start gap-2.5 p-2">
 					<div class="items-start gap-5">
-						<div *ngFor="let message of chatMessages.get(current_chat_name)" class="mb-3 bg-cyan-900 rounded">
+						<div *ngFor="let message of getChatMessages(current_chat_name)" class="mb-3 bg-cyan-900 rounded">
 							<div class="flex items-center font-bold">
 								<div class="rounded-full w-6 h-6 m-2 bg-black flex-shrink-0"></div>
 								<div class="flex-1">{{ message.sender}}</div>

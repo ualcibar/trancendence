@@ -36,7 +36,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.accept()
 
         self.send(json.dumps({
-            'type': 'match_tournamet_list',
+            'type': 'match_tournament_list',
             'matches': [user.username for user in self.room[0].online.all()],
             'tournamets': [user.username for user in self.room[0].online.all()],
         }))
@@ -94,24 +94,17 @@ class MatchMakingConsumer(WebsocketConsumer):
                     }
                 )
 
-    def chat_message(self, event):
+    def match_tournament_list(self, event):
         self.send(text_data=json.dumps(event))
-
-    def private_message(self, event):
+    
+    def new_tournament(self, event):
         self.send(text_data=json.dumps(event))
-
-    def private_message_delivered(self, event):
+    
+    def del_match(self, event):
         self.send(text_data=json.dumps(event))
 
     def user_join(self, event):
         self.send(text_data=json.dumps(event))
 
-    def user_leave(self, event):
+    def del_tournament(self, event):
         self.send(text_data=json.dumps(event))
-
-    def get_connected_users(self, event):
-        # Send the list of connected users to the client
-        self.send(text_data=json.dumps({
-            'type': 'connected_users',
-            'users': event['users']
-        }))
