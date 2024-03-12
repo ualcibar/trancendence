@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import {MatAutocompleteModule} from '@angular/material/autocomplete'
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { AfterViewInit, Renderer2 } from '@angular/core';
@@ -14,8 +12,6 @@ import { AfterViewInit, Renderer2 } from '@angular/core';
   imports: [CommonModule,
     FormsModule,
     MatFormFieldModule,
-    MatInputModule,
-    MatAutocompleteModule,
     ReactiveFormsModule,
     AsyncPipe,],
   templateUrl: './search-bar.component.html',

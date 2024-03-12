@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 
 import { SearchBarComponent } from '../search-bar/search-bar.component';
-
+import { ChatService } from '../../services/chat.service';
 class Message {
   message : string = '';
   sender: string = '';
@@ -32,23 +32,22 @@ function getCookie(name: string): string|null {
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit{
-  //globalChatMessages : Message[] = [];
-  chatMessages : Map<string, Message[]> = new Map<string, Message[]>();
   newMessage: string = '';
   current_chat_name : string= '#global';
-  users: Set<string> = new Set<string>();
+  //globalChatMessages : Message[] = [];
+  /*chatMessages : Map<string, Message[]> = new Map<string, Message[]>();*/
+  /* users: Set<string> = new Set<string>();
 
   webSocketUrl = 'ws://localhost:8000/chat/global/';
 
-  webSocket : WebSocket;
+  webSocket : WebSocket;*/
 
   showSearchBar : boolean = false;
-	usersReceived : boolean = false;
 
   @ViewChild('messageBox') messageBox!: ElementRef;
 
-  constructor(private http: HttpClient, private ngZone: NgZone) {
-    const jwtToken = getCookie('access_token');
+  constructor(private http: HttpClient, private ngZone: NgZone, private chatService : ChatService) {
+    /*const jwtToken = getCookie('access_token');
     if (jwtToken == null){
       console.log('failed to get cookie access token, log in');
     }
@@ -56,11 +55,11 @@ export class ChatComponent implements OnInit{
     this.webSocket = new WebSocket(this.webSocketUrl);
     this.webSocket.onopen = () => {
       console.log('WebSocket connection opened');
-    };
+    };*/
   }
 
   initializeSocket(){
-    this.ngZone.run(() => {
+    /*this.ngZone.run(() => {
     this.chatMessages.set('#global',[]);
     });
     // Event handler for when the WebSocket connection is closed
@@ -115,16 +114,17 @@ export class ChatComponent implements OnInit{
           this.scrollToBottom();
         }, 0);
       });
+      
     };
 
     // Event handler for WebSocket errors
     this.webSocket.onerror = (error) => {
       console.error('WebSocket error:', error);
-    };
+    };*/
   }
 
   getKeys() : string[]{
-    return Array.from(this.chatMessages.keys());
+    return this.chatService.getKeys();
   }
 
   ngOnInit(): void {
@@ -133,26 +133,11 @@ export class ChatComponent implements OnInit{
     this.scrollToBottom();
   }
 
-  isConnected(){
-    return this.webSocket.readyState === WebSocket.OPEN;
-  }
-
   sendMessage() {
 	  if (this.newMessage.trim() !== '') {
-		  if (this.webSocket.readyState === WebSocket.OPEN) {
-			  let messageObject;
-			  if (this.current_chat_name == '#global')
-				  messageObject = { message: `/global ${this.newMessage}` }; // Create a JavaScript object
-			  else
-				  messageObject = { message: `/pm ${this.current_chat_name} ${this.newMessage}` }; // Create a JavaScript object
-			  const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
-			  this.webSocket.send(jsonMessage); // Send the JSON string over the WebSocket connection
-		  } else {
-			  console.error('WebSocket connection is not open');
-		  }
-		  //this.globalChatMessages.push({message: this.newMessage, sender: "me", date:"now"});
-		  this.newMessage = '';
-	  }
+      this.chatService.sendMessage(this.newMessage, this.current_chat_name);
+      this.newMessage = '';
+    }
 	}
 	handleShiftEnter(event: any): void {
 		if (event.shiftKey && event.key === 'Enter') {
@@ -174,24 +159,18 @@ export class ChatComponent implements OnInit{
 	}
 	fieldSelected(username: string) {
 		this.ngZone.run(() => {
-			this.chatMessages.set(username, []);
+      this.chatService.addChat(username);
 		});
 		this.showSearchBar = false;
 	}
-
-	getOnlineUsers(){
-		if (this.webSocket.readyState === WebSocket.OPEN) {
-			let messageObject = { message: "/list" }; // Create a JavaScript object
-			const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
-			this.webSocket.send(jsonMessage); // Send the JSON string over the WebSocket connection
-		}
-	}
 	getUsers() : string[]{
-    console.log(this.users);
-    return Array.from(this.users);
+    return Array.from(this.chatService.getUsers());
   }
-	// Función para hacer autoscroll hacia abajo
-	private scrollToBottom(): void {
+  getChatMessages(chat : string) : Message[]{
+    return this.chatService.getChatMessages(chat);
+  }
+	
+  private scrollToBottom(): void {
 		const scrollableDiv = document.querySelector('.overflow-y-scroll');
 		if (scrollableDiv != null)
 			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;

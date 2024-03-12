@@ -6,17 +6,18 @@ import { Router} from '@angular/router';
 import { ChatComponent } from '../../components/chat/chat.component';
 
 import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
-
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ChatComponent, LobbySearchComponent],
+  imports: [ChatComponent, LobbySearchComponent, CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 
 export class HomeComponent implements OnInit{
+    active : string = "lobby";
     constructor(private route: ActivatedRoute, private http: HttpClient, private auth: AuthService,  private router: Router) { }
     ngOnInit(): void {
         // Your initialization code here
@@ -78,6 +79,12 @@ export class HomeComponent implements OnInit{
                 // Handle error or redirect to an error page
             }
         });
+    }
+    toggleActive(){
+        if (this.active == 'lobby')
+            this.active = 'chat';
+        else
+            this.active = 'lobby';
     }
 }
 
