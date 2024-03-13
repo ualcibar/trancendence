@@ -35,7 +35,8 @@ export class TournamentMatchMenuComponent {
       this.gameSettings.gameType = "Match";
   }
   createMatchTournament(){
-    this.new_match_tournament.emit(this.gameSettings);
+    this.matchmakingService.newGame(this.gameSettings);
+    //this.new_match_tournament.emit(this.gameSettings);
     this.escapeKeyPressed.emit();
   }
 

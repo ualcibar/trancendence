@@ -37,8 +37,8 @@ class MatchMakingConsumer(WebsocketConsumer):
 
         self.send(json.dumps({
             'type': 'match_tournament_list',
-            'matches': [user.username for user in self.room[0].online.all()],
-            'tournamets': [user.username for user in self.room[0].online.all()],
+            'matches': [],
+            'tournamets': [],
         }))
 
     def disconnect(self, close_code):
@@ -48,12 +48,14 @@ class MatchMakingConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        operation = text_data_json['operation']
-
+        operation = text_data_json['message']
         if operation.startswith('/new_match '):
             bundle = operation.split(' ', 1)
-            new_match_name = bundle[1]
-            self.matches.push(new_match_name)
+            try:
+                new_match_name = json.loads(bundle[1])['name']
+            except:
+                return
+            #self.matches.push(new_match_name) mañana
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
                 {
@@ -61,9 +63,13 @@ class MatchMakingConsumer(WebsocketConsumer):
                     'new_match_name': new_match_name,
                 }
             )
+            print('new match success')
         elif operation.startswith('/new_tournament'):
             bundle = operation.split(' ', 1)
-            new_tournament_name = bundle[1]
+            try:
+                new_tournament_name = json.loads(bundle[1])['name']
+            except:
+                return
             self.matches.append(new_tournament_name)
             self.send(json.dumps({
                 'type': 'new_tournament',

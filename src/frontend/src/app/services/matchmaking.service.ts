@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import {AuthService} from './auth.service';
 
+enum GameType {
+  Tournament = 'Tournament',
+  Match = 'Match',
+}
+
 export class GameSettings{
   gameType : string;
   name : string;
@@ -26,6 +31,7 @@ export class MatchmakingService {
   constructor(private authService : AuthService) {
     this.entries.set('Matches', ['hola', 'hola', 'hola', 'hola']);
     this.entries.set('Tournaments',['hola2', 'hola3', 'hola3', 'hola4']);
+    this.connectToServer();
   }
   
   connectToServer() {
@@ -33,7 +39,7 @@ export class MatchmakingService {
     if (jwtToken == null) {
       console.log('failed to get cookie access token, log in');
     }
-    this.webSocketUrl = `ws://localhost:8000/chat/global/?token=${jwtToken}`;
+    this.webSocketUrl = `ws://localhost:8000/matchmaking/?token=${jwtToken}`;
     this.webSocket = new WebSocket(this.webSocketUrl);
     this.webSocket.onopen = () => {
       console.log('WebSocket connection opened');
@@ -94,6 +100,20 @@ export class MatchmakingService {
     return Array.from(this.entries.keys());
   }
   newGame(gameSettings : GameSettings){
-
+    console.log('new game called');
+    if (this.isConnected()){
+      let messageObject;
+      if (gameSettings.gameType === GameType.Tournament){
+        messageObject = { message: `/new_tournament ${JSON.stringify(gameSettings)}` };
+      } else if (gameSettings.gameType === GameType.Match){
+        messageObject = { message: `/new_match ${JSON.stringify(gameSettings)}` };
+      }else
+        return;
+      const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
+      if(this.webSocket){
+        this.webSocket.send(jsonMessage);
+        console.log('new match tournament message send');
+      }
+    }
   }
 }
