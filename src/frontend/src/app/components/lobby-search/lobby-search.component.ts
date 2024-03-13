@@ -151,6 +151,7 @@ export class LobbySearchComponent {
 	toggleMatchTournamentMenu() {
 		this.showMatchTournamentMenu = !this.showMatchTournamentMenu;
 	}
+
 	scapekey() {
 		console.log('scape pressed');
 		this.showMatchTournamentMenu = false;
@@ -179,6 +180,7 @@ export class LobbySearchComponent {
   }
   
   new_match_tournament(newGame : any){
+    console.log('new match called from component');
     this.matchMakingService.newGame(newGame);
   }
 

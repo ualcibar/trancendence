@@ -19,9 +19,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 ASGI_APPLICATION = 'mysite.asgi.application'
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -108,10 +106,11 @@ DATABASES = {
     }
 }
 
+# CORS
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = ['http://localhost:4200']
 CSRF_TRUSTED_ORIGINS = ['http://localhost:4200']
-#CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 
 
 SIMPLE_JWT = {

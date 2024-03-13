@@ -1,3 +1,7 @@
+i {
+	transition-duration: 90ms;
+}
+
 .btn {
 	background-color: rgb(147, 51, 234);
 	color: white;
