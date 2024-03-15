@@ -1,6 +1,6 @@
 <app-tournament-match-menu (gameCreated)="new_match_tournament($event)" (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center" *ngIf="showMatchTournamentMenu"></app-tournament-match-menu>
 
-<div class="flex h-screen items-center justify-center place-content-center">
+<div class="flex items-center justify-center place-content-center">
 	<div [class]="showMatchTournamentMenu ? 'blur-lg' : ''" class="items-center">
 		<h1 class="text-white text-4xl mb-8 text-center">Search for a game</h1>
 		<div class="text-center">
