@@ -1,0 +1,10 @@
+To run the program you must use
+ng serve --host 0.0.0.0
+
+it will be visible at localhost:8888 in the machine or localhost:4200 inside the container
+
+commands to generate new app
+
+ng new my-app
+cd my-app
+ng serve --host 0.0.0.

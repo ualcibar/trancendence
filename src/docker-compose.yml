@@ -1,14 +1,15 @@
 version: '3'
 services:
-  angular:
-    container_name: angular
+  frontend:
+    container_name: frontend
     build: ./frontend
     volumes:
-      - ./frontend:/usr/src/app/
+      - ./frontend/angular:/usr/src/app/
     ports:
-      - "4200:4200"
+      - "4200:80"
     networks:
       - bridge
+
   postgre:
     container_name: db
     image: postgres:latest
@@ -35,8 +36,6 @@ services:
       - ./.env
     networks:
       - bridge
-    ports:
-      - "8000:8000"
     depends_on:
       postgre:
         condition: service_healthy

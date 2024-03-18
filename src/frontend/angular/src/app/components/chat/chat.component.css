@@ -1,0 +1,52 @@
+.chat-container {
+    width: 300px; /* Adjust width as needed */
+    height: 200px; /* Adjust height as needed */
+    border: 1px solid #ccc;
+    overflow-y: auto; /* Enable vertical scrolling */
+    display: flex;
+    flex-direction: column;
+}
+
+.message-box {
+    padding: 10px;
+    flex: 1; /* Message box takes remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.message {
+    margin-bottom: 10px;
+}
+
+.input-box {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    bottom: 0;
+    background-color: #fff; /* Adjust background color as needed */
+}
+
+.input-box input {
+    flex: 1; /* Input field takes remaining space */
+    margin-right: 10px;
+}
+
+.input-box button {
+    flex: none; /* Button does not grow */
+}
+.border-transparent {
+    border-color: rgba(255, 255, 255, 0.4); /* Red border color with 50% transparency */
+}
+
+.custom-textarea:focus {
+    outline: none;
+}
+
+.custom-textarea {
+    border: none; /* Elimina el borde del textarea */
+}
+
+
+.custom-textarea::placeholder {
+    color: #6c757d; /* Cambia el color del placeholder según tus preferencias */
+}
