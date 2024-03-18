@@ -1,12 +1,13 @@
 FROM node:20-alpine
 
-RUN apk update && apk add bash
+RUN apk update && apk add bash nginx openrc certbot certbot-nginx openssl
 
 WORKDIR /usr/src/app
 
-COPY start.sh .
+# RUN chmod 777 start.sh
 
-RUN chmod 777 start.sh
+COPY nginx/nginx.conf /etc/nginx
+
 #CMD ["bash", "-c", "tail -f /dev/null"]
 CMD ["./start.sh"]
 

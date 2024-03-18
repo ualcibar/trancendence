@@ -49,7 +49,7 @@ clean:
 	make stop
 	make down
 	@echo "\n\033[1;33mCleaning... \033[0m"
-	docker rmi -f postgres:latest src-backend src-angular
+	docker rmi -f postgres:latest src-backend src-frontend
 	docker system prune -f
 cleanVolumes:
 	docker volume ls -q
