@@ -24,7 +24,7 @@ export class AuthService implements OnInit{
     this.amILoggedIn().subscribe(value => {
       this.isLoggedInSubject.next(value);
     });
-    const backendURL = 'http://localhost:8000/polls/getInfo';
+    const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
       response => {
         this.userinfo = new UserInfo(response['username'], true);
@@ -36,7 +36,7 @@ export class AuthService implements OnInit{
   }
 
   updateUserInfo(){
-    const backendURL = 'http://localhost:8000/polls/getInfo';
+    const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
       response => {
         this.userinfo = new UserInfo(response['username'], true);
@@ -54,7 +54,7 @@ export class AuthService implements OnInit{
   }
 
   amILoggedIn(): Observable<boolean>{
-    const backendURL = 'http://localhost:8000/polls/imLoggedIn';
+    const backendURL = 'api/polls/imLoggedIn';
     return this.http.get<any>(backendURL, { withCredentials: true })
       .pipe(
         map(response => true), // Map successful response to true
@@ -67,7 +67,7 @@ export class AuthService implements OnInit{
   }
 
   logout() {
-    const backendURL = 'http://localhost:8000/polls/logout/';
+    const backendURL = 'api/polls/logout/';
     this.http.post<any>(backendURL, {},{withCredentials: true}).subscribe(
       response => {
         console.log('Sent data: ', response);

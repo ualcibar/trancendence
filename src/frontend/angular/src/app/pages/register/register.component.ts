@@ -26,7 +26,7 @@ export class RegisterComponent implements OnInit {
     }
 
     registerAcc() {
-        const backendURL = 'http://localhost:8000/polls/register/';
+        const backendURL = '/api/polls/register/';
             const jsonToSend = {
             username: this.user.username,
             password: this.user.password

@@ -27,7 +27,7 @@ export class LoginComponent {
 
 
   imLoggedIn() {
-    const backendURL = 'http://localhost:8000/polls/imLoggedIn';
+    const backendURL = '/api/polls/imLoggedIn';
     this.http.get<any>(backendURL, {withCredentials: true}).subscribe(
       response => {
         console.log('Sent data: ', response);
@@ -39,7 +39,7 @@ export class LoginComponent {
   }
 
   loginAcc() {
-    const backendURL = 'http://localhost:8000/polls/login/';
+    const backendURL = '/api/polls/login/';
     const jsonToSend = {
       username: this.user.username,
       password: this.user.password

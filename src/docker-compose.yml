@@ -6,9 +6,13 @@ services:
     volumes:
       - ./frontend/angular:/usr/src/app/
     ports:
-      - "4200:80"
+      - "80:80"
+      - "443:443"
     networks:
       - bridge
+    depends_on:
+      backend:
+        condition: service_healthy
 
   postgre:
     container_name: db
@@ -36,6 +40,11 @@ services:
       - ./.env
     networks:
       - bridge
+    healthcheck:
+      test: ["CMD", "echo", "OK!"]
+      interval: 3s
+      timeout: 100s
+      retries: 5
     depends_on:
       postgre:
         condition: service_healthy

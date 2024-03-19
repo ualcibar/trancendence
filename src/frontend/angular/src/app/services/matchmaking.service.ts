@@ -23,7 +23,7 @@ export class GameSettings{
   providedIn: 'root'
 })
 export class MatchmakingService {
-  webSocketUrl = 'ws://localhost:8000/matchmaking/';
+  webSocketUrl = 'wss://localhost/ws/matchmaking/';
   webSocket : WebSocket | null = null;
   connected : boolean = false;
   
@@ -39,7 +39,7 @@ export class MatchmakingService {
     if (jwtToken == null) {
       console.log('failed to get cookie access token, log in');
     }
-    this.webSocketUrl = `ws://localhost:8000/matchmaking/?token=${jwtToken}`;
+    this.webSocketUrl = `${this.webSocketUrl}?token=${jwtToken}`;
     this.webSocket = new WebSocket(this.webSocketUrl);
     this.webSocket.onopen = () => {
       console.log('WebSocket connection opened');

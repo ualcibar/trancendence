@@ -10,7 +10,7 @@ export class ProfileComponent implements OnInit{
   constructor(private http: HttpClient){}
   username = "anonimous";
   getInfo() {
-    const backendURL = 'http://localhost:8000/polls/getInfo';
+    const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
       response => {
         this.username = response['username'];

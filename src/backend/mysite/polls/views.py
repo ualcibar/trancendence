@@ -30,9 +30,8 @@ def getOauth2Token(code):
     sendJson = {'code': code}
     sendJson ['client_id'] = 'u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87'
     sendJson['client_secret'] = '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'
-    sendJson['redirect_uri'] = 'http://localhost:4200'
+    sendJson['redirect_uri'] = 'https://localhost'
     sendJson['grant_type'] = 'authorization_code'
-    sendJson['redirect_uri'] = 'http://localhost:4200'
     url = 'https://api.intra.42.fr/oauth/token'
     headers = {'Content-Type': 'application/json'}
     return requests.post(url, json=sendJson, headers=headers)
