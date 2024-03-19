@@ -5,7 +5,7 @@ COPY requirements.txt .
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-RUN apk add bash --no-cache
+RUN apk add bash curl --no-cache
 
 COPY start.sh .
 RUN chmod 777 start.sh

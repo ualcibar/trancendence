@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-_7bx-6w6@^op@lvejrz#ww+hvvj+x)c^ks1)29@j-!6@#y=q#0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', 'backend']
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -109,8 +110,8 @@ DATABASES = {
 # CORS
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ['http://localhost:4200']
-CSRF_TRUSTED_ORIGINS = ['http://localhost:4200']
+CORS_ALLOWED_ORIGINS = ['http://localhost:4200', 'http://0.0.0.0:4200', 'https://localhost']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:4200', 'http://0.0.0.0:4200', 'https://localhost']
 
 
 SIMPLE_JWT = {
@@ -219,7 +220,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 
-STATIC_URL = "/static/"
+STATIC_URL = "/api/static/"
 
 
 STATIC_ROOT = BASE_DIR / 'staticfiles/'
