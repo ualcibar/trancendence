@@ -48,24 +48,7 @@ services:
     depends_on:
       postgre:
         condition: service_healthy
-#
-#  frontend:
-#    container_name: frontend
-#    build: ./frontend
-#    #restart: always
-#    networks:
-#      - bridge
-#    volumes:
-#      - ./frontend:/usr/src/app/src
-#      #- ./frontend:/usr/share/nginx/html
-#      -  /usr/src/app/node_modules
-#    env_file:
-#      - frontend/.env
-#    ports:
-#      -  "5174:5174"
-#    depends_on:
-#      - backend
-#    #command: /bin/sh -c "while sleep 1000; do :; done"
+
 #
 #  matchmaking:
 #    container_name: matchmaking
