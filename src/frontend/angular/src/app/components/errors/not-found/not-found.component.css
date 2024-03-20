@@ -1,0 +1,18 @@
+/* Error div */
+#error {
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 60rem;
+}
+
+div {
+	background-color: #6c53ce;
+}
+
+/* Icons */
+i {
+	font-size: 15rem;
+	line-height: 1;
+}

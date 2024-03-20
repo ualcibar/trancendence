@@ -1,5 +1,5 @@
 import { Component, OnInit} from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-profile',
@@ -8,15 +8,21 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class ProfileComponent implements OnInit{
   constructor(private http: HttpClient){}
-  username = "anonimous";
+  username = "N/A";
+  forbiddenAccess = false;
+  loading = true;
+
   getInfo() {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
       response => {
         this.username = response['username'];
+        this.loading = false;
       },
       error => {
-        console.error('An error ocurred trying to contact the registration server: ', error);
+        console.error('An error ocurred trying to contact the user authentification server: ', error.status);
+        this.forbiddenAccess = true;
+        this.loading = false;
       }
     );
   }

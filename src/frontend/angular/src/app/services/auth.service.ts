@@ -1,4 +1,4 @@
-import { Injectable, OnInit} from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { BehaviorSubject, Observable, of} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
@@ -83,6 +83,7 @@ export class AuthService implements OnInit{
     }
     this.isLoggedInSubject.next(false);
   }
+
   getCookie(name: string): string | null {
     const nameLenPlus = (name.length + 1);
     return document.cookie

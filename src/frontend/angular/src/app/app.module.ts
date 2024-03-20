@@ -14,6 +14,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { RegisterComponent } from './pages/register/register.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { ForbiddenComponent } from './components/errors/forbidden/forbidden.component';
+
 import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
@@ -24,7 +26,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     FooterComponent,
     RegisterComponent,
     LoginComponent,
-    ProfileComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,
@@ -36,7 +38,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     CommonModule,
     MatInputModule,
     MatFormFieldModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    ForbiddenComponent
   ],
   providers: [
     provideAnimationsAsync()
