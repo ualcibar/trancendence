@@ -1,25 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, NgZone, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
-import {Observable} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import { TournamentMatchMenuComponent } from '../tournament-match-menu/tournament-match-menu.component';
 import { GameSettings, MatchmakingService } from '../../services/matchmaking.service';
 
-function getCookie(name: string): string|null {
-	const nameLenPlus = (name.length + 1);
-	return document.cookie
-		.split(';')
-		.map(c => c.trim())
-		.filter(cookie => {
-			return cookie.substring(0, nameLenPlus) === `${name}=`;
-		})
-		.map(cookie => {
-			return decodeURIComponent(cookie.substring(nameLenPlus));
-		})[0] || null;
-}
 
 @Component({
   selector: 'app-lobby-search',
@@ -33,17 +21,15 @@ function getCookie(name: string): string|null {
   templateUrl: './lobby-search.component.html',
   styleUrl: './lobby-search.component.css'
 })
-export class LobbySearchComponent {
+export class LobbySearchComponent implements OnInit, OnDestroy{
   //globalChatMessages : Message[] = [];
-  current_entry : string= 'Matches';
+  current_entry : string= 'Match';
 //  entries : Map<string, string[]> = new Map<string, string[]>;
   filtered_matches$ : Observable<GameSettings[]>;
 
+  private dataChangedSubscription: Subscription;
   myControl = new FormControl<string>('');
   @ViewChild('inputField') inputField!: ElementRef;
-  webSocketUrl = 'ws://localhost:8000/matchmaking/';
-
-  //webSocket : WebSocket;
 
   showMatchTournamentMenu : boolean = false;
 
@@ -56,72 +42,30 @@ export class LobbySearchComponent {
         return value ? this._filter(value as string) : this.getMatches(this.current_entry).slice();
       }),
     );
+    this.dataChangedSubscription = this.matchMakingService.dataChanged$.subscribe(() => {
+      this.filtered_matches$ = this.myControl.valueChanges.pipe(
+        startWith(''),
+        map(value => {
+          return value ? this._filter(value as string) : this.getMatches(this.current_entry).slice();
+        }),
+      );
+    });
   }
-
-  initializeSocket(){
-    // Event handler for when the WebSocket connection is closed
-    /*
-    this.webSocket.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-
-    // Event handler for incoming messages from the WebSocket server
-    this.webSocket.onmessage = (event) => {
-      this.ngZone.run(() => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'new_match'){
-          const matches = this.entries.get('Matches');
-          if (matches)
-            matches.push(data.new_match_name);        
-        }
-        else if (data.type === 'new_tournament'){
-          const tournaments = this.entries.get('Tournaments');
-          if (tournaments)
-            tournaments.push(data.new_tournament_name);        
-        }
-        else if(data.type === 'del_tournament'){
-          const tournaments = this.entries.get('Tournaments');
-          if (tournaments){
-            const index = tournaments.indexOf(data.del_tournament_name);
-            if (index !== -1) {
-              tournaments.splice(index, 1);
-            }
-          }
-        }
-        else if (data.type === 'del_match'){
-          const matches = this.entries.get('Matches');
-          if (matches){
-            const index = matches.indexOf(data.del_match_name);
-            if (index !== -1) {
-              matches.splice(index, 1);
-            }
-          }
-        }
-        else if (data.type === 'match_tournamet_list'){
-          this.entries.set('Matches', data.matches);
-          this.entries.set('Tournaments', data.tournaments);
-        }
-
-      });
-    };
-
-    // Event handler for WebSocket errors
-    this.webSocket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };*/
-  }
-
 
   ngOnInit(): void {
-    // Scroll to the bmttom of the message box when component initializes
-   // this.entries.set('Matches');
-   // this.entries.set('Tournaments',[]);
-    this.initializeSocket();
+    this.refresh();
+  }
+  ngOnDestroy(): void {
+    if (this.dataChangedSubscription) {
+      this.dataChangedSubscription.unsubscribe();
+    }
+  }
+  refresh(){
+    this.matchMakingService.reloadMatchesTournamets();
   }
 
   isConnected(){
     return this.matchMakingService.isConnected();
-//    return this.webSocket.readyState === WebSocket.OPEN;
   }
 
   sendMessage() {
@@ -150,14 +94,6 @@ export class LobbySearchComponent {
 	fieldSelected(username: string) {
 		this.showMatchTournamentMenu= false;
 	}
-
-	// getOnlineUsers(){
-	// 	if (this.webSocket.readyState === WebSocket.OPEN) {
-	// 		let messageObject = { message: "/list" }; // Create a JavaScript object
-	// 		const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
-	// 		this.webSocket.send(jsonMessage); // Send the JSON string over the WebSocket connection
-	// 	}
-	// }
 
   getMatches(entry : string) : GameSettings[]{
     const matches : GameSettings[] | null = this.matchMakingService.getEntry(entry);

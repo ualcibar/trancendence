@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from asgiref.sync import async_to_sync
 from chat.models import Room
 from matchmaking.models import MatchPreview
-
+from matchmaking.serializers import MatchPreviewSerializer
 import logging
 
 logger = logging.getLogger('std')
@@ -41,7 +41,7 @@ class MatchMakingConsumer(WebsocketConsumer):
 
         self.send(json.dumps({
             'type': 'match_tournament_list',
-            'matches': [match.name for match in MatchPreview.objects.filter(public=True)],
+            'matches': [MatchPreviewSerializer(match).data for match in MatchPreview.objects.filter(public=True)],
             'tournamets': [],
         }))
 
@@ -115,6 +115,12 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'del_tournament_name': tournament_name,
                     }
                 )
+        elif operation.startswith('/match_tournament_list'):
+            self.send(json.dumps({
+                'type': 'match_tournament_list',
+                'matches': [MatchPreviewSerializer(match).data for match in MatchPreview.objects.filter(public=True)],
+                'tournamets': [],
+            }))
 
     def match_tournament_list(self, event):
         self.send(text_data=json.dumps(event))

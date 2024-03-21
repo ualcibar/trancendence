@@ -34,14 +34,6 @@ function getCookie(name: string): string|null {
 export class ChatComponent implements OnInit{
   newMessage: string = '';
   current_chat_name : string= '#global';
-  //globalChatMessages : Message[] = [];
-  /*chatMessages : Map<string, Message[]> = new Map<string, Message[]>();*/
-  /* users: Set<string> = new Set<string>();
-
-  webSocketUrl = 'ws://localhost:8000/chat/global/';
-
-  webSocket : WebSocket;*/
-
   showSearchBar : boolean = false;
 
   @ViewChild('messageBox') messageBox!: ElementRef;
@@ -55,7 +47,6 @@ export class ChatComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    // Scroll to the bottom of the message box when component initializes
     this.scrollToBottom();
   }
 
