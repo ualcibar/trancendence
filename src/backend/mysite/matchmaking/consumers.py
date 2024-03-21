@@ -8,6 +8,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from asgiref.sync import async_to_sync
 from chat.models import Room
+from matchmaking.models import MatchPreview
+
+import logging
+
+logger = logging.getLogger('std')
 
 class MatchMakingConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -16,8 +21,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.user = None
         self.auth = JWTAuthentication()
         self.user_inbox = None
-        matches = []
-
+        self.match = None
     def connect(self):
         jwt_token = self.scope['query_string'].decode().split('=')[1]
         try:
@@ -37,7 +41,7 @@ class MatchMakingConsumer(WebsocketConsumer):
 
         self.send(json.dumps({
             'type': 'match_tournament_list',
-            'matches': [],
+            'matches': [match.name for match in MatchPreview.objects.filter(public=True)],
             'tournamets': [],
         }))
 
@@ -47,23 +51,35 @@ class MatchMakingConsumer(WebsocketConsumer):
 
 
     def receive(self, text_data):
+        logger.debug('message recieved')
         text_data_json = json.loads(text_data)
         operation = text_data_json['message']
         if operation.startswith('/new_match '):
-            bundle = operation.split(' ', 1)
+            logger.debug('new match requested')
             try:
-                new_match_name = json.loads(bundle[1])['name']
-            except:
+                bundle = json.loads(operation.split(' ', 1)[1])
+                logger.debug(f'new match name = {bundle['name']}')
+                self.match = MatchPreview.objects.create(
+                    name=bundle['name'],
+                    tags=bundle['tags'],
+                    public=bundle['publicGame'],
+                    host=self.user,
+                )
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        'type': 'new_match',
+                        'match': {
+                            'name': bundle['name'],
+                            'tags': bundle['tags'],
+                            'host': self.user.username
+                        },
+                    }
+                )
+                logger.debug('new match success')
+            except Exception as e:
+                logger.debug(f'failed to make match {e}')
                 return
-            #self.matches.push(new_match_name) mañana
-            async_to_sync(self.channel_layer.group_send)(
-                self.room_group_name,
-                {
-                    'type': 'new_match',
-                    'new_match_name': new_match_name,
-                }
-            )
-            print('new match success')
         elif operation.startswith('/new_tournament'):
             bundle = operation.split(' ', 1)
             try:
@@ -113,4 +129,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(event))
 
     def del_tournament(self, event):
+        self.send(text_data=json.dumps(event))
+
+    def new_match(self, event):
         self.send(text_data=json.dumps(event))

@@ -6,7 +6,7 @@ import { AsyncPipe } from '@angular/common';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import { TournamentMatchMenuComponent } from '../tournament-match-menu/tournament-match-menu.component';
-import { MatchmakingService } from '../../services/matchmaking.service';
+import { GameSettings, MatchmakingService } from '../../services/matchmaking.service';
 
 function getCookie(name: string): string|null {
 	const nameLenPlus = (name.length + 1);
@@ -37,7 +37,7 @@ export class LobbySearchComponent {
   //globalChatMessages : Message[] = [];
   current_entry : string= 'Matches';
 //  entries : Map<string, string[]> = new Map<string, string[]>;
-  filtered_matches$ : Observable<string[]>;
+  filtered_matches$ : Observable<GameSettings[]>;
 
   myControl = new FormControl<string>('');
   @ViewChild('inputField') inputField!: ElementRef;
@@ -50,15 +50,6 @@ export class LobbySearchComponent {
   @ViewChild('messageBox') messageBox!: ElementRef;
 
   constructor(private http: HttpClient, private ngZone: NgZone, private matchMakingService : MatchmakingService) {
-    /*const jwtToken = getCookie('access_token');
-    if (jwtToken == null){
-      console.log('failed to get cookie access token, log in');
-    }
-    this.webSocketUrl = `ws://localhost:8000/chat/global/?token=${jwtToken}`;
-    this.webSocket = new WebSocket(this.webSocketUrl);
-    this.webSocket.onopen = () => {
-      console.log('WebSocket connection opened');
-    };*/
     this.filtered_matches$ = this.myControl.valueChanges.pipe(
       startWith(''),
       map(value => {
@@ -168,8 +159,8 @@ export class LobbySearchComponent {
 	// 	}
 	// }
 
-  getMatches(entry : string) : string[]{
-    const matches : string[] | null = this.matchMakingService.getEntry(entry);
+  getMatches(entry : string) : GameSettings[]{
+    const matches : GameSettings[] | null = this.matchMakingService.getEntry(entry);
     if (matches)
       return matches;
     return [];
@@ -190,8 +181,8 @@ export class LobbySearchComponent {
 		if (scrollableDiv != null)
 			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
 	}
-  private _filter(name: string): string[] {
+  private _filter(name: string): GameSettings[] {
     const filterValue = name.toLowerCase();
-    return this.getMatches(this.current_entry).filter(field => field.toLowerCase().includes(filterValue));
+    return this.getMatches(this.current_entry).filter(field => field.name.toLowerCase().includes(filterValue));
   }
 }

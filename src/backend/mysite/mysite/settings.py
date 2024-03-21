@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-    'chat.apps.ChatConfig'
+    'chat.apps.ChatConfig',
+    'matchmaking.apps.MatchmakingConfig'
 ]
 
 MIDDLEWARE = [
@@ -181,6 +182,11 @@ LOGGING = {
     'loggers': {
         'polls': {
             'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'std': {
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },

@@ -19,8 +19,8 @@ export class ChatService {
   users: Set<string> = new Set<string>();
   connected : boolean = false;
 
-  // webSocketUrl = 'wss://localhost/chat/global/';
-  webSocketUrl = 'disabled';
+  webSocketUrl = 'wss://localhost/chat/global/';
+  //webSocketUrl = 'disabled';
 
   webSocket : WebSocket;
 
@@ -32,8 +32,7 @@ export class ChatService {
       console.log('failed to get cookie access token, log in');
     }
 
-    this.webSocketUrl = `${this.webSocketUrl}?token=${jwtToken}`;
-    this.webSocket = new WebSocket(this.webSocketUrl);
+    this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
 
     this.webSocket.onopen = () => {
       console.log('WebSocket connection opened');
@@ -120,8 +119,11 @@ export class ChatService {
   }
   getChatMessages(chat : string): Message[]{
     const messages = this.chatMessages.get(chat);
-    if (messages)
+    if (messages){
+      console.log(`chat : ${chat} messages: ${messages}`);
       return messages;
+    }
+    console.log(`no chat : ${chat}`);
     return [];
   }
 }
