@@ -1,22 +1,27 @@
 import { Injectable } from '@angular/core';
 import {AuthService} from './auth.service';
-
-enum GameType {
+import { Subject, Observable, interval } from 'rxjs';
+export enum GameType {
   Tournament = 'Tournament',
   Match = 'Match',
 }
 
 export class GameSettings{
-  gameType : string;
+  gameType : GameType;
   name : string;
   tags : string;
-  publicPrivate : string;
-  constructor (gameType : string, name : string, tags : string, publicPrivate : string){
+  publicGame : boolean;
+  constructor (gameType : GameType, name : string, tags : string, publicGame: boolean){
     this.gameType =gameType;
     this.name = name;
     this.tags = tags;
-    this.publicPrivate = publicPrivate;
+    this.publicGame= publicGame;
   }
+}
+
+export enum MatchmakingUptate{
+  Match,
+  Tournament
 }
 
 @Injectable({
@@ -27,10 +32,13 @@ export class MatchmakingService {
   webSocket : WebSocket | null = null;
   connected : boolean = false;
   
-  entries : Map<string, string[]> = new Map<string, string[]>;
+  private dataChangedSubject: Subject<void> = new Subject<void>();
+  dataChanged$: Observable<void> = this.dataChangedSubject.asObservable();
+
+  entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
   constructor(private authService : AuthService) {
-    this.entries.set('Matches', ['hola', 'hola', 'hola', 'hola']);
-    this.entries.set('Tournaments',['hola2', 'hola3', 'hola3', 'hola4']);
+    this.entries.set(GameType.Match, []);
+    this.entries.set(GameType.Tournament,[]);
     this.connectToServer();
   }
   
@@ -53,18 +61,13 @@ export class MatchmakingService {
     };
     this.webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'new_match') {
-        const matches = this.entries.get('Matches');
-        if (matches)
-          matches.push(data.new_match_name);
-      }
-      else if (data.type === 'new_tournament') {
-        const tournaments = this.entries.get('Tournaments');
-        if (tournaments)
-          tournaments.push(data.new_tournament_name);
-      }
+      console.log(`message recieved ${data}`);
+      if (data.type === 'new_match')
+        this.entries.get(GameType.Match)?.push(new GameSettings(GameType.Match, data.match.name, data.match.tags, true));
+      else if (data.type === 'new_tournament') 
+        this.entries.get(GameType.Tournament)?.push(data.new_tournament_name)
       else if (data.type === 'del_tournament') {
-        const tournaments = this.entries.get('Tournaments');
+        const tournaments = this.entries.get(GameType.Tournament);
         if (tournaments) {
           const index = tournaments.indexOf(data.del_tournament_name);
           if (index !== -1) {
@@ -73,7 +76,7 @@ export class MatchmakingService {
         }
       }
       else if (data.type === 'del_match') {
-        const matches = this.entries.get('Matches');
+        const matches = this.entries.get(GameType.Match);
         if (matches) {
           const index = matches.indexOf(data.del_match_name);
           if (index !== -1) {
@@ -81,17 +84,28 @@ export class MatchmakingService {
           }
         }
       }
-      else if (data.type === 'match_tournamet_list') {
-        this.entries.set('Matches', data.matches);
-        this.entries.set('Tournaments', data.tournaments);
+      else if (data.type === 'match_tournament_list') {
+        console.log(`list ${data.matches} ${data.tournaments}`);
+        this.entries.set(GameType.Match, data.matches);
+        this.entries.set(GameType.Tournament, data.tournaments);
       }
+      else
+        return;
+      this.dataChangedSubject.next();
     }
   }
   isConnected() : boolean{
     return this.connected && this.webSocket?.readyState === WebSocket.OPEN;
   }
-  getEntry(entry_name : string) : string[] | null{
-    const entry = this.entries.get(entry_name);
+  getEntry(entry_name : string) : GameSettings[] | null{
+    let type; 
+    if (entry_name === GameType.Match)
+      type = GameType.Match;  
+    else if (entry_name === GameType.Tournament)
+      type = GameType.Tournament;  
+    else
+      return null;
+    const entry = this.entries.get(type);
     if (entry)
       return entry;
     return null;
@@ -114,6 +128,13 @@ export class MatchmakingService {
         this.webSocket.send(jsonMessage);
         console.log('new match tournament message send');
       }
+    }
+  }
+  reloadMatchesTournamets(){
+    console.log('reload called');
+    if (this.isConnected()){
+      let messageObject = {message : '/match_tournament_list'}
+      this.webSocket?.send(JSON.stringify(messageObject));
     }
   }
 }

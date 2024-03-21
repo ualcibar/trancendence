@@ -11,7 +11,7 @@
 				<input #inputField class="form-control me-2 w-full max-h-12" [formControl]="myControl" type="text" autofocus placeholder="name #tag">
 				<div class="flex-1 items-start gap-2.5 p-2 min-h-80 max-h-80 overflow-y-scroll items-start gap-5">
 					<div *ngFor="let match of filtered_matches$ | async" class="flex items-center font-bold">
-						<div class="flex-1">{{ match }}</div>
+						<div class="flex-1">{{ match.name }}</div>
 						<button class="btn justify-end">join</button>
 					</div>
 				</div>
@@ -19,6 +19,9 @@
 		</div>
 		<div class="text-center mt-4">
 			<button (click)="toggleMatchTournamentMenu()" type="button" class="mr-2 focus:outline-none text-center text-white focus:ring-4 focus:ring-purple-300 bg-purple-800 font-medium rounded-lg w-80 text-sm px-5 py-2.5 mb-2">Create a new custom game</button>
+		</div>
+		<div class="text-center mt-4">
+			<button (click)="refresh()" type="button" class="mr-2 focus:outline-none text-center text-white focus:ring-4 focus:ring-purple-300 bg-purple-800 font-medium rounded-lg w-80 text-sm px-5 py-2.5 mb-2">Refresh</button>
 		</div>
 	</div>
 </div>
