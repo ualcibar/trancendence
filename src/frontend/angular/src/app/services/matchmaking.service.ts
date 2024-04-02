@@ -29,7 +29,8 @@ export enum MatchmakingUptate{
 })
 export class MatchmakingService {
   webSocketUrl = 'wss://localhost/ws/matchmaking/';
-  webSocket : WebSocket | null = null;
+  webSocket : WebSocket | undefined;
+  peerConnection : RTCPeerConnection | undefined;
   connected : boolean = false;
   
   private dataChangedSubject: Subject<void> = new Subject<void>();
@@ -88,6 +89,27 @@ export class MatchmakingService {
         console.log(`list ${data.matches} ${data.tournaments}`);
         this.entries.set(GameType.Match, data.matches);
         this.entries.set(GameType.Tournament, data.tournaments);
+      } else if (data.type.startsWith('webrtc/')) {
+        const webrtcOper = data.type.substring(7);
+        if (webrtcOper === "all_users"){// (allUsers: Array<{ id: string; email: string }>) => {
+          let len = data.allUsers.length;
+          if (len > 0) {
+            this.createOffer();
+          }
+        } else if (webrtcOper === "getOffer"){//(sdp: RTCSessionDescription) => {
+        //console.log(sdp);
+          console.log("get offer");
+          this.createAnswer(data.sdp);
+        } else if(webrtcOper === "getAnswer"){//, (sdp: RTCSessionDescription) => {
+          console.log("get answer");
+          this.peerConnection?.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          //console.log(sdp);
+        } else if (webrtcOper === "getCandidate"){//, (candidate: RTCIceCandidateInit) => {
+          this.peerConnection?.addIceCandidate(new RTCIceCandidate(data.candidate)).then(() => {
+            console.log("candidate add success");
+          });
+        }else
+          return;
       }
       else
         return;
@@ -135,6 +157,50 @@ export class MatchmakingService {
     if (this.isConnected()){
       let messageObject = {message : '/match_tournament_list'}
       this.webSocket?.send(JSON.stringify(messageObject));
+    }
+  }
+
+  createOffer(){
+    console.log("create offer");
+    this.peerConnection
+      ?.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: false })
+      .then(sdp => {
+        this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp));
+        if (this.webSocket?.readyState === WebSocket.OPEN){
+          const message = JSON.stringify({message : `webrtc/offer ${sdp}`});
+          this.sendMessage(message);
+        }
+        //newSocket.emit("offer", sdp);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+  createAnswer(sdp: RTCSessionDescription){
+    this.peerConnection?.setRemoteDescription(new RTCSessionDescription(sdp)).then(() => {
+        this.peerConnection?.createAnswer({
+          offerToReceiveVideo: false,
+          offerToReceiveAudio: false,
+         })
+          .then(sdp1 => {
+                this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp1));
+                const message = JSON.stringify({message : `webrtc/answer ${sdp1}`});
+                this.sendMessage(message);
+                //this.sendMessage("answer", sdp1);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    });
+  }
+  sendMessage(message : string): boolean {
+    if (this.isConnected()) {
+      const jsonMessage = JSON.stringify(message); // Convert the object to JSON string
+      this.webSocket?.send(jsonMessage); // Send the JSON string over the WebSocket connection
+      return true;
+    } else {
+      console.error('WebSocket connection is not open');
+      return false;
     }
   }
 }

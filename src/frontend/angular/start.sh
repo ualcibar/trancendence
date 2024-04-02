@@ -9,8 +9,8 @@ rc-service nginx status
 
 echo ""
 echo "Initializing Angular..."
-npm install -g @angular/cli
 npm install
+npm install -g @angular/cli
 npm fund
 
 npm run dev

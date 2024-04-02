@@ -7,6 +7,10 @@ class Message {
   message : string = '';
   sender: string = '';
   date: string = '';
+
+  toString(): string{
+    return `message : ${this.message}, sender ${this.sender}`;
+  }
 }
 
 @Injectable({
@@ -120,7 +124,9 @@ export class ChatService {
   getChatMessages(chat : string): Message[]{
     const messages = this.chatMessages.get(chat);
     if (messages){
-      console.log(`chat : ${chat} messages: ${messages}`);
+      for (const message in messages){
+        console.log(`chat : ${chat} message: ${message}`);
+      }
       return messages;
     }
     console.log(`no chat : ${chat}`);
