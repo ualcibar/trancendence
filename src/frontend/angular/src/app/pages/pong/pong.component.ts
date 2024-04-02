@@ -4,6 +4,16 @@ import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { left } from '@popperjs/core';
 
 
+export const colorPalette = {
+  darkestPurple: 0x1C0658,
+  swingPurple: 0x5C2686,
+  roseGarden: 0xFF1690,
+  josefYellow: 0xF4D676,
+  leadCyan: 0x36CDC4,
+  white: 0xFFFFFF,
+  black: 0x000000,
+};
+
 @Component({
   selector: 'app-pong',
   templateUrl: './pong.component.html',
@@ -42,7 +52,7 @@ export class PongComponent implements AfterViewInit {
     // INIT LIGHT
     {
   
-      const color = 0xFFFFFF;
+      const color = colorPalette.white;
       const intensity = 3;
       const light = new THREE.DirectionalLight( color, intensity );
       light.position.set( - 1, 2, 4 );
@@ -55,19 +65,26 @@ export class PongComponent implements AfterViewInit {
     const widthSegments = 32;
     const heightSegments = 16;
     const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-    const ballMaterial = new THREE.MeshPhongMaterial({color: 0x44aa88});
+    const ballMaterial = new THREE.MeshPhongMaterial({color: colorPalette.roseGarden});
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
     let ballSpeed = 0.01;
     let ballAngle = Math.PI * Math.random() / 10;
 
+    // INIT BALL LIGHT
+    const color = colorPalette.roseGarden;
+    const intensity = 1;
+    const light = new THREE.PointLight( color, intensity );
+    light.position.set( 0, 0, 0 );
+    scene.add( light );
+
     // INIT PADDLES
-    const paddleWidth = 0.2;
+    const paddleWidth = 0.3;
     const paddleHeight = 0.02;
-    const paddleDepth = 0.02;
+    const paddleDepth = 0.1;
     const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
-    const paddleMaterial = new THREE.MeshPhongMaterial({color: 0x44aa88});
+    const paddleMaterial = new THREE.MeshPhongMaterial({color: colorPalette.leadCyan});
     const leftPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
     leftPaddle.position.x = -1;
     leftPaddle.rotation.z = Math.PI / 2;
@@ -77,12 +94,21 @@ export class PongComponent implements AfterViewInit {
     scene.add(leftPaddle);
     scene.add(rightPaddle);
     
+    // INIT PADDLE LIGHT
+    const paddleLight1 = new THREE.PointLight( colorPalette.leadCyan, intensity );
+    paddleLight1.position.set( -1, 0, 0 );
+    scene.add( paddleLight1 );
+    const paddleLight2 = new THREE.PointLight( colorPalette.leadCyan, intensity );
+    paddleLight2.position.set( 1, 0, 0 );
+    scene.add( paddleLight2 );
+
+
     // INIT WALLS
     const wallWidth = 2;
     const wallHeight = 0.02;
-    const wallDepth = 0.02;
+    const wallDepth = 0.2;
     const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
-    const wallMaterial = new THREE.MeshPhongMaterial({color: 0x44aa88});
+    const wallMaterial = new THREE.MeshPhongMaterial({color: colorPalette.darkestPurple});
     const topWall = new THREE.Mesh(wallGeometry, wallMaterial);
     topWall.position.y = 1;
     const bottomWall = new THREE.Mesh(wallGeometry, wallMaterial);
@@ -132,19 +158,37 @@ export class PongComponent implements AfterViewInit {
         rightPaddle.position.y = -1;
       }
 
+      // MOVE LIGHT
+      light.position.x = ball.position.x;
+      light.position.y = ball.position.y;
+      paddleLight1.position.y = leftPaddle.position.y;
+      paddleLight2.position.y = rightPaddle.position.y;
 
 
       // COLLISION BALL
-      if (ball.position.y < -1 || ball.position.y > 1) {
+      const pseudoLimit = 1 - radius;
+      if (ball.position.y < -pseudoLimit || ball.position.y > pseudoLimit) {
         ballAngle = -ballAngle;
       }
-      if (ball.position.x < -1 && ball.position.y > leftPaddle.position.y - paddleWidth / 2 && ball.position.y < leftPaddle.position.y + paddleWidth / 2) {
-        ballAngle = Math.PI - ballAngle;
-        ball.position.x = -1;
+      if (ball.position.x < - pseudoLimit && ball.position.y > leftPaddle.position.y - paddleWidth / 2 && ball.position.y < leftPaddle.position.y + paddleWidth / 2) {
+        const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
+        ballAngle = Math.PI - ballAngle + yDifference * Math.PI / 4;
+        ball.position.x = -pseudoLimit;
+        ballSpeed += 0.001;
       }
-      if (ball.position.x > 1 && ball.position.y > rightPaddle.position.y - paddleWidth / 2 && ball.position.y < rightPaddle.position.y + paddleWidth / 2) {
-        ballAngle = Math.PI - ballAngle;
-        ball.position.x = 1;
+      if (ball.position.x > pseudoLimit && ball.position.y > rightPaddle.position.y - paddleWidth / 2 && ball.position.y < rightPaddle.position.y + paddleWidth / 2) {
+        const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
+        ballAngle = Math.PI - ballAngle - yDifference * Math.PI / 4;
+        ball.position.x = pseudoLimit;
+        ballSpeed += 0.001;
+      }
+
+      // NORMALIZE ANGLE
+      while (ballAngle < 0) {
+        ballAngle += 2 * Math.PI;
+      }
+      while (ballAngle > 2 * Math.PI) {
+        ballAngle -= 2 * Math.PI;
       }
 
       // CHECK WINNER
