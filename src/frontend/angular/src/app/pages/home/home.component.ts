@@ -6,19 +6,20 @@ import { Router} from '@angular/router';
 import { ChatComponent } from '../../components/chat/chat.component';
 
 import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
-import { LobbyComponent } from '../../components/lobby/lobby.component';
+import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.component';
+import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyComponent],
+  imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyMatchComponent, LobbyTournamentComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 
 export class HomeComponent implements OnInit{
-    active : string = "lobby";
+    active : string = "lobby-match";
     constructor(private route: ActivatedRoute, private http: HttpClient, private auth: AuthService,  private router: Router) { }
     ngOnInit(): void {
         // Your initialization code here
@@ -83,8 +84,8 @@ export class HomeComponent implements OnInit{
     }
     toggleActive(){
         if (this.active == 'lobby-search')
-            this.active = 'lobby';
-        else if (this.active == 'lobby')
+            this.active = 'lobby-match';
+        else if (this.active == 'lobby-match')
             this.active = 'chat';
         else
             this.active = 'lobby-search';
