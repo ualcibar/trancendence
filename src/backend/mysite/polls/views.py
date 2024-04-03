@@ -41,7 +41,7 @@ def getOauth2Token(code):
 @authentication_classes([CustomAuthentication])
 def getInfo(request): 
     if not request.user.is_authenticated:
-        return JsonResponse({'message': 'You must login to see this page!'}, status=403)
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     return JsonResponse({'username': request.user.username}, status=200)
 
 @api_view(['POST'])
@@ -120,7 +120,7 @@ def registerWith42Token(request):
 @authentication_classes([CustomAuthentication])
 def imLoggedIn(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'message': 'you are not logged in'}, status=403)
+        return JsonResponse({'message': 'you are not logged in'}, status=401)
     return JsonResponse({'message': 'you are logged'}, status=201)
 
 
