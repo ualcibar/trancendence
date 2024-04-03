@@ -9,7 +9,7 @@ import { HttpClient } from '@angular/common/http';
 export class ProfileComponent implements OnInit{
   constructor(private http: HttpClient){}
   username = "N/A";
-  forbiddenAccess = false;
+  unauthorizedAccess = false;
   loading = true;
 
   getInfo() {
@@ -21,7 +21,7 @@ export class ProfileComponent implements OnInit{
       },
       error => {
         console.error('An error ocurred trying to contact the user authentification server: ', error.status);
-        this.forbiddenAccess = true;
+        this.unauthorizedAccess = true;
         this.loading = false;
       }
     );

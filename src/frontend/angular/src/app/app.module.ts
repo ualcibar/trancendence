@@ -15,6 +15,7 @@ import { RegisterComponent } from './pages/register/register.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ForbiddenComponent } from './components/errors/forbidden/forbidden.component';
+import { UnauthorizedComponent } from './components/errors/unauthorized/unauthorized.component';
 
 import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -39,7 +40,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     MatInputModule,
     MatFormFieldModule,
     MatAutocompleteModule,
-    ForbiddenComponent
+    ForbiddenComponent,
+    UnauthorizedComponent
   ],
   providers: [
     provideAnimationsAsync()

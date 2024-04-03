@@ -124,7 +124,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                 'matches': [MatchPreviewSerializer(match).data for match in MatchPreview.objects.filter(public=True)],
                 'tournamets': [],
             }))
-        elif operation.startswith('/join/match')
+        elif operation.startswith('/join/match'):
             bundle = operation.split(' ', 1)
             match_name = bundle[1]
             try:
@@ -146,8 +146,7 @@ class MatchMakingConsumer(WebsocketConsumer):
             except Exception as e:
                 logger.debug(f'failed to make match {e}')
                 return
-
-        elif operation.startswith('/join/tournament')
+        elif operation.startswith('/join/tournament'):
             bundle = operation.split(' ', 1)
             tournament_name = bundle[1]
 

@@ -6,8 +6,8 @@ class MatchPreview(models.Model):
     name = models.CharField(max_length=128, null=False, unique=True)
     tags = models.CharField(max_length=128, null=False)
     public = models.BooleanField(default=False, null=False)
-    host = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    players = models.ManyToManyField(to=CustomUser, blank=True)
+    host = models.ForeignKey(CustomUser, related_name='host', on_delete=models.CASCADE)
+    players = models.ManyToManyField(to=CustomUser, related_name='players', blank=True)
 
     def add_player(self,match_name, user):
         try:
