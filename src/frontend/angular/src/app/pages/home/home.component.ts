@@ -6,12 +6,13 @@ import { Router} from '@angular/router';
 import { ChatComponent } from '../../components/chat/chat.component';
 
 import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
+import { LobbyComponent } from '../../components/lobby/lobby.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ChatComponent, LobbySearchComponent, CommonModule],
+  imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -81,10 +82,12 @@ export class HomeComponent implements OnInit{
         });
     }
     toggleActive(){
-        if (this.active == 'lobby')
+        if (this.active == 'lobby-search')
+            this.active = 'lobby';
+        else if (this.active == 'lobby')
             this.active = 'chat';
         else
-            this.active = 'lobby';
+            this.active = 'lobby-search';
     }
 }
 

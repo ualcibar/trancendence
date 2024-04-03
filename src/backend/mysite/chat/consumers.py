@@ -8,6 +8,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from asgiref.sync import async_to_sync
 from chat.models import Room
+import logging
+logger = logging.getLogger('std')
 
 class ChatConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -16,7 +18,8 @@ class ChatConsumer(WebsocketConsumer):
         self.user = None
         self.auth = JWTAuthentication()
         self.user_inbox = None
-        self.room = None 
+        self.room = None
+        self.isInit = False
 
     def connect(self):
         jwt_token = self.scope['query_string'].decode().split('=')[1]
@@ -25,16 +28,18 @@ class ChatConsumer(WebsocketConsumer):
             if token is None:
                 raise DenyConnection('User is not authenticated.')
             self.user = self.auth.get_user(token)
+            if self.user is None:
+                raise DenyConnection('User is not authenticated.')
         except:
             raise DenyConnection('User is not authenticated.')
 
-        self.room_group_name = 'global'
+        self.accept()
+        
+        self.room_group_name = 'global_chat'
         self.user_inbox = f'inbox_{self.user.username}'
-        self.room = Room.objects.get_or_create(name='global')
+        self.room = Room.objects.get_or_create(name='global_chat')
         async_to_sync(self.channel_layer.group_add)( self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
-
-        self.accept()
 
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
@@ -49,18 +54,20 @@ class ChatConsumer(WebsocketConsumer):
         }))
 
         self.room[0].join(self.user)
+        self.isInit = True 
 
     def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'user_leave',
-                'user': self.user.username,
-            }
-        )
-        self.room[0].leave(self.user)
-        async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
-        async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
+        if self.isInit:
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'user_leave',
+                    'user': self.user.username,
+                }
+            )
+            self.room[0].leave(self.user)
+            async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
+            async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
 
 
     def receive(self, text_data):

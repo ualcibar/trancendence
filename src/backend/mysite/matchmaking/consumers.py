@@ -22,6 +22,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.auth = JWTAuthentication()
         self.user_inbox = None
         self.match = None
+        self.isInit = False
     def connect(self):
         jwt_token = self.scope['query_string'].decode().split('=')[1]
         try:
@@ -32,7 +33,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         except:
             raise DenyConnection('User is not authenticated.')
 
-        self.room_group_name = 'global'
+        self.room_group_name = 'global_matchmaking'
         self.user_inbox = f'inbox_{self.user.username}'
         async_to_sync(self.channel_layer.group_add)( self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
@@ -44,10 +45,12 @@ class MatchMakingConsumer(WebsocketConsumer):
             'matches': [MatchPreviewSerializer(match).data for match in MatchPreview.objects.filter(public=True)],
             'tournamets': [],
         }))
+        self.isInit = True
 
     def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
-        async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
+        if self.isInit:
+            async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
+            async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
 
 
     def receive(self, text_data):
@@ -121,6 +124,32 @@ class MatchMakingConsumer(WebsocketConsumer):
                 'matches': [MatchPreviewSerializer(match).data for match in MatchPreview.objects.filter(public=True)],
                 'tournamets': [],
             }))
+        elif operation.startswith('/join/match')
+            bundle = operation.split(' ', 1)
+            match_name = bundle[1]
+            try:
+                self.match = MatchPreview.objects.filter(
+                    name=match_name,
+                )
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        'type': 'new_match',
+                        'match': {
+                            'name': bundle['name'],
+                            'tags': bundle['tags'],
+                            'host': self.user.username
+                        },
+                    }
+                )
+                logger.debug('new match success')
+            except Exception as e:
+                logger.debug(f'failed to make match {e}')
+                return
+
+        elif operation.startswith('/join/tournament')
+            bundle = operation.split(' ', 1)
+            tournament_name = bundle[1]
 
     def match_tournament_list(self, event):
         self.send(text_data=json.dumps(event))
