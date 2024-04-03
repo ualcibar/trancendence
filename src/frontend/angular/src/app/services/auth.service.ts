@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 
-class UserInfo{
+export class UserInfo{
   username : string;
   online : boolean;
   constructor (username : string, online : boolean){
