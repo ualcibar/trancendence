@@ -49,7 +49,9 @@ export class PongComponent implements AfterViewInit {
     // INIT SCENE
     const scene = new THREE.Scene();
 
+    const defaultLightingIsOn = true;
     // INIT LIGHT
+    if (defaultLightingIsOn)
     {
   
       const color = colorPalette.white;
@@ -69,18 +71,19 @@ export class PongComponent implements AfterViewInit {
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
-    let ballSpeed = 0.01;
-    let ballAngle = Math.PI * Math.random() / 10;
+    let ballSpeed = 1;
+    // let ballAngle = Math.PI * Math.random() / 10;
+    let ballAngle = 0;
 
     // INIT BALL LIGHT
     const color = colorPalette.roseGarden;
     const intensity = 1;
-    const light = new THREE.PointLight( color, intensity );
+    const light = new THREE.PointLight( color, intensity * 5 );
     light.position.set( 0, 0, 0 );
     scene.add( light );
 
     // INIT PADDLES
-    const paddleWidth = 0.3;
+    const paddleWidth = 0.5;
     const paddleHeight = 0.02;
     const paddleDepth = 0.1;
     const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
@@ -95,16 +98,18 @@ export class PongComponent implements AfterViewInit {
     scene.add(rightPaddle);
     
     // INIT PADDLE LIGHT
-    const paddleLight1 = new THREE.PointLight( colorPalette.leadCyan, intensity );
-    paddleLight1.position.set( -1, 0, 0 );
+    const paddleLight1 = new THREE.RectAreaLight( colorPalette.leadCyan, 5, paddleWidth, paddleHeight );
+    paddleLight1.position.set( -1, -1, -1 );
+    paddleLight1.lookAt( 0, 0, 0 );
+    // paddleLight1.rotation.z = Math.PI / 2;
     scene.add( paddleLight1 );
     const paddleLight2 = new THREE.PointLight( colorPalette.leadCyan, intensity );
     paddleLight2.position.set( 1, 0, 0 );
-    scene.add( paddleLight2 );
+    // scene.add( paddleLight2 );
 
 
     // INIT WALLS
-    const wallWidth = 2;
+    const wallWidth = 2 - paddleHeight * 2;
     const wallHeight = 0.02;
     const wallDepth = 0.2;
     const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
@@ -116,7 +121,7 @@ export class PongComponent implements AfterViewInit {
     scene.add(topWall);
     scene.add(bottomWall);
 
-
+    let pastTime = 0;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
@@ -129,8 +134,10 @@ export class PongComponent implements AfterViewInit {
       }
 
       // MOVE BALL
-      ball.position.x += ballSpeed * Math.cos(ballAngle);
-      ball.position.y += ballSpeed * Math.sin(ballAngle);
+      const timeDifference = pastTime - time;
+      const diferentialDisplacement = timeDifference * ballSpeed;
+      ball.position.x += diferentialDisplacement * Math.cos(ballAngle);
+      ball.position.y += diferentialDisplacement * Math.sin(ballAngle);
 
       // MOVE PADDLES
       if (key.isPressed('w') || key.isPressed('a')) {
@@ -169,18 +176,22 @@ export class PongComponent implements AfterViewInit {
       const pseudoLimit = 1 - radius;
       if (ball.position.y < -pseudoLimit || ball.position.y > pseudoLimit) {
         ballAngle = -ballAngle;
+        if (Math.abs(Math.cos(ballAngle)) < 0.1) {
+          topWall.material = new THREE.MeshPhongMaterial({color: colorPalette.roseGarden});
+          ballAngle = Math.PI * Math.random() / 10;
+        } 
       }
-      if (ball.position.x < - pseudoLimit && ball.position.y > leftPaddle.position.y - paddleWidth / 2 && ball.position.y < leftPaddle.position.y + paddleWidth / 2) {
+      if (ball.position.x < - pseudoLimit && ball.position.y + radius / 2 > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < leftPaddle.position.y + paddleWidth / 2) {
         const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
-        ballAngle = Math.PI - ballAngle + yDifference * Math.PI / 4;
+        ballAngle = Math.asin(yDifference) * Math.PI/4 + Math.PI;
         ball.position.x = -pseudoLimit;
-        ballSpeed += 0.001;
+        ballSpeed += 0.0001;
       }
-      if (ball.position.x > pseudoLimit && ball.position.y > rightPaddle.position.y - paddleWidth / 2 && ball.position.y < rightPaddle.position.y + paddleWidth / 2) {
+      if (ball.position.x > pseudoLimit && ball.position.y + radius / 2 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < rightPaddle.position.y + paddleWidth / 2) {
         const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
-        ballAngle = Math.PI - ballAngle - yDifference * Math.PI / 4;
+        ballAngle = Math.PI - ballAngle - yDifference * Math.PI;
         ball.position.x = pseudoLimit;
-        ballSpeed += 0.001;
+        ballSpeed += 0.0001;
       }
 
       // NORMALIZE ANGLE
@@ -190,6 +201,25 @@ export class PongComponent implements AfterViewInit {
       while (ballAngle > 2 * Math.PI) {
         ballAngle -= 2 * Math.PI;
       }
+
+      // CORRECT EXTREME ANGLE
+      // const limitMax = 0.90;
+      // const limitMin = limitMax - 0.1;
+      // if (ballAngle < Math.PI / 2 && ballAngle > limitMax * Math.PI / 2) {
+      //   ballAngle = limitMax * Math.PI / 2;
+      // }
+      // if (ballAngle > Math.PI / 2 && ballAngle < Math.PI / 2 + limitMin * Math.PI / 2) {
+      //   ballAngle = Math.PI / 2 + limitMin * Math.PI / 2;
+      // }
+      // if (ballAngle < Math.PI * 3 / 2 && ballAngle > Math.PI + limitMax * Math.PI / 2) {
+      //   ballAngle = Math.PI + limitMax * Math.PI / 2;
+      // }
+      // if (ballAngle > Math.PI * 3 / 2 && ballAngle < 2 * Math.PI - limitMin * Math.PI / 2) {
+      //   ballAngle = 2 * Math.PI - limitMin * Math.PI / 2;
+      // }
+
+      // SET PAST TIME
+      pastTime = time;
 
       // CHECK WINNER
       if (ball.position.x < -1) {
