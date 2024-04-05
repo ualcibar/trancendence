@@ -125,7 +125,7 @@ export enum MatchmakingUptate{
 export class MatchmakingService {
   webSocketUrl = 'wss://localhost/ws/matchmaking/';
   webSocket : WebSocket | undefined;
-  peerConnection : RTCPeerConnection | undefined;
+  peerConnection : RTCPeerConnection;
   connected : boolean = false;
   
   private dataChangedSubject: Subject<void> = new Subject<void>();
@@ -140,6 +140,15 @@ export class MatchmakingService {
     this.entries.set(GameType.Match, []);
     this.entries.set(GameType.Tournament,[]);
     this.connectToServer();
+
+    const pc_config = {
+      iceServers: [
+        {
+            urls: "stun:stun.l.google.com:19302",
+        },
+      ],
+    };
+    this.peerConnection = new RTCPeerConnection(pc_config);
   }
   
   connectToServer() {
@@ -269,7 +278,7 @@ export class MatchmakingService {
             sdp: sdp 
           }
           this.sendMessage(JSON.stringify(messageObject));
-          console.debug('join match message sent');
+          console.debug(`join match message sent, ${sdp.sdp}`);
         })
         .catch(error => {
             console.log(error);

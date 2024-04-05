@@ -18,12 +18,13 @@ logger = logging.getLogger('std')
 class MatchMakingConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.room_group_name = None
+        self.global_room_name = 'global_matchmaking'
+        self.game_room_name = None
+        self.user_inbox = None
         self.user = None
         self.auth = JWTAuthentication()
-        self.user_inbox = None
-        self.matchHost = None
         self.isInit = False
+        self.hostedGame = None
     def connect(self):
         jwt_token = self.scope['query_string'].decode().split('=')[1]
         try:
@@ -33,10 +34,8 @@ class MatchMakingConsumer(WebsocketConsumer):
             self.user = self.auth.get_user(token)
         except:
             raise DenyConnection('User is not authenticated.')
-
-        self.room_group_name = 'global_matchmaking'
         self.user_inbox = f'inbox_{self.user.username}'
-        async_to_sync(self.channel_layer.group_add)( self.user_inbox, self.channel_name)
+        async_to_sync(self.channel_layer.group_add)(self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
 
         self.accept()
@@ -50,7 +49,7 @@ class MatchMakingConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         if self.isInit:
-            async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
+            async_to_sync(self.channel_layer.group_discard)(self.global_room_name, self.channel_name)
             async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
 
     def receive(self, text_data):
@@ -60,16 +59,22 @@ class MatchMakingConsumer(WebsocketConsumer):
         match data['type']:
             case "/new_match":
                 logger.debug('new match requested')
+                if self.hostedGame is not None:
+                    self.send(json.dumps({
+                        'type': 'new_match_result',
+                        'status': 'failure_already_host',
+                    }))
+                    return 
                 try:
                     logger.debug(f'new match name = {data['settings']['name']}')
-                    self.match = MatchPreview.objects.create(
+                    self.hostedGame = MatchPreview.objects.create(
                         name=data['settings']['name'],
                         tags=data['settings']['tags'],
                         public=data['settings']['publicGame'],
                         host=self.user,
                     )
                     async_to_sync(self.channel_layer.group_send)(
-                        self.room_group_name,
+                        self.global_room_name,
                         {
                             'type': 'new_match',
                             'match': {
@@ -83,6 +88,8 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'type': 'new_match_result',
                         'status': 'success',
                     }))
+                    self.game_room_name = data['settings']['name']
+                    async_to_sync(self.channel_layer.group_add)(self.game_room_name, self.channel_name)
                     logger.debug('new match success')
                 except IntegrityError as e:
                     if "duplicate key value violates unique constraint" in str(e):
@@ -112,20 +119,37 @@ class MatchMakingConsumer(WebsocketConsumer):
                     'new_tournament_name': data['name'],
                 }))
             case '/del_match':
-                if match_name in self.matches:
-                    self.match.remove(data['name'])
+                if isinstance(self.hostedGame, MatchPreview):
                     async_to_sync(self.channel_layer.group_send)(
-                        self.room_group_name,
+                        self.global_room_name,
                         {
                             'type': 'del_match',
                             'del_match_name': data['name'],
                         }
                     )
+                    async_to_sync(self.channel_layer.group_send)(
+                        self.game_room_name,
+                        {
+                            'type': 'match_terminated_by_host',
+                            'del_match_name': data['name'],
+                        }
+                    )
+                    async_to_sync(self.channel_layer.group_discard)(self.game_room_name, self.channel_name)
+                    try:
+                        self.hostedGame.delete()
+                    except:
+                        pass
+                else:
+                    self.send(json.dumps({
+                        'type': 'del_match_result',
+                        'status': 'failure',
+                    }))
+
             case '/del_tournament':
                 if data['name'] in self.matches:
                     self.match.remove(data['name'])
                     async_to_sync(self.channel_layer.group_send)(
-                        self.room_group_name,
+                        self.global_room_name,
                         {
                             'type': 'del_tournament',
                             'del_tournament_name': data['name'],
@@ -139,29 +163,26 @@ class MatchMakingConsumer(WebsocketConsumer):
                 }))
             case '/join/match':
                 try:
-                    self.match = MatchPreview.objects.filter(
+                    match_game = MatchPreview.objects.filter(
                         name=data['name'],
                     )
                     async_to_sync(self.channel_layer.group_send)(
-                        self.room_group_name,
+                        self.game_room_name,
                         {
-                            'type': 'new_match',
-                            'match': {
-                                'name': data['name'],
-                                'tags': data['tags'],
-                                'host': self.user.username
-                            },
+                            'type': 'player_joined_match',
+                            'name': user.username,
                         }
                     )
+                    self.send(json.dumps({
+                        'type': 'join_match_result',
+                        'status': 'failure',
+                    }))
+                    
                     logger.debug('new match success')
                 except Exception as e:
                     logger.debug(f'failed to make match {e}')
                     return
             case '/join/tournament':
-                pass
-            case '/webrtc/offer':
-                pass
-            case '/webrtc/answer':
                 pass
             case _ :
                 logger.debug(f'unexpected type {data['type']}')
@@ -182,6 +203,8 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(event))
     
     def del_match(self, event):
+        self.send(text_data=json.dumps(event))
+    def del_match_result(self, event):
         self.send(text_data=json.dumps(event))
 
     def user_join(self, event):
