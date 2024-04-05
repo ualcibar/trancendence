@@ -10,9 +10,9 @@
 			<div class="flex-1 h-full w-full flex flex-col">
 				<input #inputField class="form-control me-2 w-full max-h-12" [formControl]="myControl" type="text" autofocus placeholder="name #tag">
 				<div class="flex-1 items-start gap-2.5 p-2 min-h-80 max-h-80 overflow-y-scroll items-start gap-5">
-					<div *ngFor="let match of filtered_matches$ | async" class="flex items-center font-bold">
-						<div class="flex-1">{{ match.name }}</div>
-						<button class="btn justify-end">join</button>
+					<div *ngFor="let game of filtered_games$ | async" class="flex items-center font-bold">
+						<div class="flex-1">{{ game.name }}</div>
+						<button (click)="joinGame(game)" class="btn justify-end">join</button>
 					</div>
 				</div>
 			</div>

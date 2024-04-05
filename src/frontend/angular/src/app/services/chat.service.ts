@@ -103,9 +103,9 @@ export class ChatService {
     if (this.isConnected()) {
       let messageObject;
       if (target == '#global')
-        messageObject = { message: `/global ${message}` }; // Create a JavaScript object
+        messageObject = { type : '/global', message : message}; // Create a JavaScript object
       else
-        messageObject = { message: `/pm ${target} ${message}` }; // Create a JavaScript object
+        messageObject = { type : '/pm', message : message, target : target }; // Create a JavaScript object
       const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
       this.webSocket.send(jsonMessage); // Send the JSON string over the WebSocket connection
       return true;

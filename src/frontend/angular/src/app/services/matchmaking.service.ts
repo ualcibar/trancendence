@@ -1,9 +1,104 @@
 import { Injectable } from '@angular/core';
-import {AuthService} from './auth.service';
+import {AuthService, UserInfo} from './auth.service';
 import { Subject, Observable, interval } from 'rxjs';
+
 export enum GameType {
   Tournament = 'Tournament',
   Match = 'Match',
+}
+
+enum MatchMakingState{
+  Standby,
+  Connecting,
+  OnGame,
+}
+
+enum GameState{ 
+  Starting,
+  Running,
+  FinishedSuccess,
+  HostDisconected,
+  GameCrash,
+  FailedToJoin,
+  Error,
+}
+
+class Score{
+  state : GameState;
+  score : [number, number];
+  constructor(state : GameState, score : [number, number]){
+    this.score = score;
+    this.state = state;
+  }
+  changeState(newState : GameState){
+    this.state = newState;
+  }
+  scoreA(points : number){
+    this.score[0] += points;
+  }
+  scoreB(points : number){
+    this.score[1] += points;
+  }
+  changeScore(newScore : [number, number]){
+    this.score = newScore;
+  }
+}
+
+export class Match{
+  players : UserInfo[] = [];
+  score : [number,number] = [0,0];
+  teamSize : number;
+  name : string;
+  
+  constructor (name : string, teamSize : number){
+    this.name = name;
+    this.teamSize = teamSize;
+  }
+  addPlayer(newPlayer : UserInfo) : boolean{
+    if (this.players.length == 2 * this.teamSize){
+      return false;
+    }
+    this.players.push(newPlayer);
+    return true;
+  }
+
+  removePlayer(username : string) : boolean{
+    const index_to_remove = this.players.findIndex((player) => player.username == username);
+    if (index_to_remove === -1)
+      return false;
+    this.players.splice(index_to_remove, 1);
+    return true
+  }
+}
+
+export class Tournament{
+  players : UserInfo[] = [];
+  scores : [number,number][] = [];
+  winners : number[] = [];
+  teamSize : number;
+  name : string;
+  
+  constructor (name : string, teamSize : number){
+    this.name = name;
+    this.teamSize = teamSize;
+  }
+
+  addPlayer(newPlayer : UserInfo) : boolean{
+    if (this.players.length == 8 * this.teamSize){
+      return false;
+    }
+    this.players.push(newPlayer);
+    return true;
+  }
+
+  removePlayer(username : string) : boolean{
+    const index_to_remove = this.players.findIndex((player) => player.username === username);
+    if (index_to_remove === -1)
+      return false;
+    this.players.splice(index_to_remove, 1);
+    return true
+  }
+
 }
 
 export class GameSettings{
@@ -37,6 +132,10 @@ export class MatchmakingService {
   dataChanged$: Observable<void> = this.dataChangedSubject.asObservable();
 
   entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
+
+  state : MatchMakingState = MatchMakingState.Standby;
+  currentGame : Tournament | Match | undefined;
+
   constructor(private authService : AuthService) {
     this.entries.set(GameType.Match, []);
     this.entries.set(GameType.Tournament,[]);
@@ -124,7 +223,7 @@ export class MatchmakingService {
     if (entry_name === GameType.Match)
       type = GameType.Match;  
     else if (entry_name === GameType.Tournament)
-      type = GameType.Tournament;  
+      type = GameType.Tournament; 
     else
       return null;
     const entry = this.entries.get(type);
@@ -140,41 +239,69 @@ export class MatchmakingService {
     if (this.isConnected()){
       let messageObject;
       if (gameSettings.gameType === GameType.Tournament){
-        messageObject = { message: `/new_tournament ${JSON.stringify(gameSettings)}` };
+        messageObject = { type: '/new_tournament', settings : gameSettings} ;
       } else if (gameSettings.gameType === GameType.Match){
-        messageObject = { message: `/new_match ${JSON.stringify(gameSettings)}` };
+        messageObject = { type: '/new_match', settings : gameSettings };
       }else
         return;
-      const jsonMessage = JSON.stringify(messageObject); // Convert the object to JSON string
-      if(this.webSocket){
-        this.webSocket.send(jsonMessage);
-        console.log('new match tournament message send');
-      }
+      this.sendMessage(JSON.stringify(messageObject));
+      console.log('new match tournament message send');
     }
   }
   reloadMatchesTournamets(){
     console.log('reload called');
     if (this.isConnected()){
-      let messageObject = {message : '/match_tournament_list'}
-      this.webSocket?.send(JSON.stringify(messageObject));
+      let messageObject = {type : '/match_tournament_list'};
+      this.sendMessage(JSON.stringify(messageObject));
     }
   }
 
-  createOffer(){
-    console.log("create offer");
-    this.peerConnection
-      ?.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: false })
-      .then(sdp => {
-        this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp));
-        if (this.webSocket?.readyState === WebSocket.OPEN){
-          const message = JSON.stringify({message : `webrtc/offer ${sdp}`});
-          this.sendMessage(message);
+  joinMatch(matchName : string){
+    if (this.isConnected()){
+      this.peerConnection
+        ?.createOffer()
+        .then(sdp => {
+        console.log('service join match')
+          this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp));
+          let messageObject = {
+            type: '/match/join',
+            name: matchName,
+            sdp: sdp 
+          }
+          this.sendMessage(JSON.stringify(messageObject));
+          console.debug('join match message sent');
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+  }
+  async joinTournament(tournamentName : string){
+    if (this.isConnected()){
+      this.createOffer()
+      const offer = await this.createOffer();
+      if (offer !== undefined && offer !== null) {
+        let messageObject = {
+          type: '/tournament/join',
+          name: tournamentName,
+          sdp: offer 
         }
-        //newSocket.emit("offer", sdp);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+      }
+    }
+  }
+
+
+  createOffer(): Promise<RTCSessionDescriptionInit | null> | undefined{
+    return this.peerConnection
+        ?.createOffer()
+        .then(sdp => {
+            console.log(sdp);
+            return sdp;
+        })
+        .catch(error => {
+            console.error("Error creating offer:", error);
+            return null;
+        });
   }
   createAnswer(sdp: RTCSessionDescription){
     this.peerConnection?.setRemoteDescription(new RTCSessionDescription(sdp)).then(() => {
@@ -184,7 +311,7 @@ export class MatchmakingService {
          })
           .then(sdp1 => {
                 this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp1));
-                const message = JSON.stringify({message : `webrtc/answer ${sdp1}`});
+                const message = JSON.stringify({message : `/webrtc/answer ${sdp1}`});
                 this.sendMessage(message);
                 //this.sendMessage("answer", sdp1);
             })
@@ -195,8 +322,8 @@ export class MatchmakingService {
   }
   sendMessage(message : string): boolean {
     if (this.isConnected()) {
-      const jsonMessage = JSON.stringify(message); // Convert the object to JSON string
-      this.webSocket?.send(jsonMessage); // Send the JSON string over the WebSocket connection
+      //const jsonMessage = JSON.stringify(message); // Convert the object to JSON string
+      this.webSocket?.send(message); // Send the JSON string over the WebSocket connection
       return true;
     } else {
       console.error('WebSocket connection is not open');

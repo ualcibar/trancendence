@@ -6,7 +6,7 @@ import { AsyncPipe } from '@angular/common';
 import {Observable, Subscription} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import { TournamentMatchMenuComponent } from '../tournament-match-menu/tournament-match-menu.component';
-import { GameSettings, MatchmakingService } from '../../services/matchmaking.service';
+import { GameSettings, GameType, MatchmakingService } from '../../services/matchmaking.service';
 
 
 @Component({
@@ -25,7 +25,7 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
   //globalChatMessages : Message[] = [];
   current_entry : string= 'Match';
 //  entries : Map<string, string[]> = new Map<string, string[]>;
-  filtered_matches$ : Observable<GameSettings[]>;
+  filtered_games$ : Observable<GameSettings[]>;
 
   private dataChangedSubscription: Subscription;
   myControl = new FormControl<string>('');
@@ -36,14 +36,14 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
   @ViewChild('messageBox') messageBox!: ElementRef;
 
   constructor(private http: HttpClient, private ngZone: NgZone, private matchMakingService : MatchmakingService) {
-    this.filtered_matches$ = this.myControl.valueChanges.pipe(
+    this.filtered_games$ = this.myControl.valueChanges.pipe(
       startWith(''),
       map(value => {
         return value ? this._filter(value as string) : this.getMatches(this.current_entry).slice();
       }),
     );
     this.dataChangedSubscription = this.matchMakingService.dataChanged$.subscribe(() => {
-      this.filtered_matches$ = this.myControl.valueChanges.pipe(
+      this.filtered_games$ = this.myControl.valueChanges.pipe(
         startWith(''),
         map(value => {
           return value ? this._filter(value as string) : this.getMatches(this.current_entry).slice();
@@ -73,7 +73,7 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
 
   changeEntry(entry: string): void {
     this.current_entry = entry;
-    this.filtered_matches$ = this.myControl.valueChanges.pipe(
+    this.filtered_games$ = this.myControl.valueChanges.pipe(
       startWith(''),
       map(value => {
         return value ? this._filter(value as string) : this.getMatches(this.current_entry).slice();
@@ -109,6 +109,14 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
   new_match_tournament(newGame : any){
     console.log('new match called from component');
     this.matchMakingService.newGame(newGame);
+  }
+
+  joinGame(game : GameSettings){
+    console.debug(`joining game called ${game.name}`);
+    if (this.current_entry === GameType.Match)
+      this.matchMakingService.joinMatch(game.name);
+    else if (this.current_entry === GameType.Tournament)
+      this.matchMakingService.joinTournament(game.name);
   }
 
 	// Función para hacer autoscroll hacia abajo

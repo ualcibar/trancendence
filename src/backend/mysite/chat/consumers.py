@@ -71,44 +71,39 @@ class ChatConsumer(WebsocketConsumer):
 
 
     def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-
-        if message.startswith('/pm '):
-            bundle = message.split(' ', 2)
-            target_user = bundle[1]
-            private_message = bundle[2]
-
-            async_to_sync(self.channel_layer.group_send)(
-                f'inbox_{target_user}',  
-                {
-                    "type": "private_message",
-                    "user": self.user.username,
-                    "message": private_message
-                }
-            )
-            async_to_sync(self.channel_layer.group_send)(
-                f'inbox_{self.user}',  
-                {
-                    "type": "private_message_delivered",
-                    "user": self.user.username,
-                    "message": private_message
-                }
-            )
-        elif message == '/list':
-            self.send(json.dumps({
-            'type': 'user_list',
-            'users': [user.username for user in self.room.online.all()],
-            }))
-        else:
-            async_to_sync(self.channel_layer.group_send)(
-                self.room_group_name,
-                {
-                    "type": "chat_message",
-                    "user": self.user.username,
-                    "message": message
-                }
-            )
+        data = json.loads(text_data)
+        match data['type']:
+            case '/pm':
+                async_to_sync(self.channel_layer.group_send)(
+                    f'inbox_{data['target_user']}',  
+                    {
+                        "type": "private_message",
+                        "user": self.user.username,
+                        "message": data['message'] 
+                    }
+                )
+                async_to_sync(self.channel_layer.group_send)(
+                    f'inbox_{self.user}',  
+                    {
+                        "type": "private_message_delivered",
+                        "user": self.user.username,
+                        "message": data['message'] 
+                    }
+                )
+            case '/list':
+                self.send(json.dumps({
+                    'type': 'user_list',
+                    'users': [user.username for user in self.room.online.all()],
+                }))
+            case '/global':
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        "type": "chat_message",
+                        "user": self.user.username,
+                        "message": data['message'] 
+                    }
+                )
 
     def chat_message(self, event):
         self.send(text_data=json.dumps(event))
@@ -124,10 +119,3 @@ class ChatConsumer(WebsocketConsumer):
 
     def user_leave(self, event):
         self.send(text_data=json.dumps(event))
-
-    def get_connected_users(self, event):
-        # Send the list of connected users to the client
-        self.send(text_data=json.dumps({
-            'type': 'connected_users',
-            'users': event['users']
-        }))
