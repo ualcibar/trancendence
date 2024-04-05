@@ -36,7 +36,7 @@ class MatchMakingConsumer(WebsocketConsumer):
             raise DenyConnection('User is not authenticated.')
         self.user_inbox = f'inbox_{self.user.username}'
         async_to_sync(self.channel_layer.group_add)(self.user_inbox, self.channel_name)
-        async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
+        async_to_sync(self.channel_layer.group_add)(self.global_room_name, self.channel_name)
 
         self.accept()
 

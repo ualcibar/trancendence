@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class LobbyMatchComponent {
   team_a: UserInfo[] = [{username: "Test", online: true}, {username: "Lol", online: true}];
-  team_b: UserInfo[] = [{username: "Test2", online: true}];
+  team_b: UserInfo[] = [{username: "Test2", online: true}, {username: "Test2", online: true}];
 
   constructor(private matchmaking: MatchmakingService) {
 
