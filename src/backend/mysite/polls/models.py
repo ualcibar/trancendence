@@ -79,7 +79,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     STATUS_CHOICES = [
             ('connected', 'Connected'),
             ('disconnected', 'Disconnected'),
-            ('ingame', 'In Game'),
+            ('joiningGame', 'Joining Game'),
+            ('inGame', 'In Game'),
             ]
 
     status = models.CharField(

@@ -4,37 +4,26 @@ import { ChatComponent } from '../../components/chat/chat.component';
 import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
 import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.component';
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
-
-import { MatchmakingService } from '../../services/matchmaking.service';
-
 import { CommonModule } from '@angular/common';
-import { fadeInOut } from './animations';
-
-enum HomeState{
-    Home,
-    Multiplayer,
-    Local
-}
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-test',
   standalone: true,
   imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyMatchComponent, LobbyTournamentComponent],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
-  animations: [fadeInOut]
+  templateUrl: './test.component.html',
+  styleUrl: './test.component.css'
 })
-export class HomeComponent implements OnInit{
-    chatUnwrapped : boolean = false;
-    state : HomeState;
-    HomeState = HomeState;
-    constructor(private matchmakingService : MatchmakingService) {
-        this.state = HomeState.Home;
-    }
+export class TestComponent {
+    active : string = "lobby-match";
+    constructor() { }
     ngOnInit(): void {
     }
-    changeState(newState : HomeState){
-        this.state = newState;
+    toggleActive(){
+        if (this.active == 'lobby-search')
+            this.active = 'lobby-match';
+        else if (this.active == 'lobby-match')
+            this.active = 'chat';
+        else
+            this.active = 'lobby-search';
     }
 }
-

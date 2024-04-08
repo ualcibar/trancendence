@@ -1,0 +1,12 @@
+<div class="w-full">
+	<button (click)="toggleActive()">toggle</button>
+	<div *ngIf="active == 'lobby-search'">
+		<app-lobby-search></app-lobby-search>
+	</div>
+	<div *ngIf="active === 'chat'" class="h-1/2">
+		<app-chat></app-chat>
+	</div>
+	<div *ngIf="active === 'lobby-match'" class="h-1/2">
+		<app-lobby-match></app-lobby-match>
+	</div>
+</div>

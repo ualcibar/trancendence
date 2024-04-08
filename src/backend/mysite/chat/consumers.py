@@ -75,7 +75,7 @@ class ChatConsumer(WebsocketConsumer):
         match data['type']:
             case '/pm':
                 async_to_sync(self.channel_layer.group_send)(
-                    f'inbox_{data['target_user']}',  
+                    f'inbox_{data['target']}',  
                     {
                         "type": "private_message",
                         "user": self.user.username,
@@ -99,13 +99,13 @@ class ChatConsumer(WebsocketConsumer):
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name,
                     {
-                        "type": "chat_message",
+                        "type": "global_message",
                         "user": self.user.username,
                         "message": data['message'] 
                     }
                 )
 
-    def chat_message(self, event):
+    def global_message(self, event):
         self.send(text_data=json.dumps(event))
 
     def private_message(self, event):

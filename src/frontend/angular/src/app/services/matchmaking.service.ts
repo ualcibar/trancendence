@@ -171,59 +171,63 @@ export class MatchmakingService {
     this.webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log(`message recieved ${data}`);
-      if (data.type === 'new_match')
-        this.entries.get(GameType.Match)?.push(new GameSettings(GameType.Match, data.match.name, data.match.tags, true));
-      else if (data.type === 'new_tournament') 
-        this.entries.get(GameType.Tournament)?.push(data.new_tournament_name)
-      else if (data.type === 'del_tournament') {
-        const tournaments = this.entries.get(GameType.Tournament);
-        if (tournaments) {
-          const index = tournaments.indexOf(data.del_tournament_name);
-          if (index !== -1) {
-            tournaments.splice(index, 1);
+      switch (data.type) {
+        case 'new_match':
+          this.entries.get(GameType.Match)
+            ?.push(new GameSettings(GameType.Match, data.match.name, data.match.tags, true));
+          break;
+        case 'new_tournament':
+          this.entries.get(GameType.Tournament)
+            ?.push(data.new_tournament_name)
+          break;
+        case 'del_tournament':
+          const tournaments = this.entries.get(GameType.Tournament);
+          if (tournaments) {
+            const index = tournaments.indexOf(data.del_tournament_name);
+            if (index !== -1) {
+              tournaments.splice(index, 1);
+            }
           }
-        }
-      }
-      else if (data.type === 'del_match') {
-        const matches = this.entries.get(GameType.Match);
-        if (matches) {
-          const index = matches.indexOf(data.del_match_name);
-          if (index !== -1) {
-            matches.splice(index, 1);
+          break;
+        case 'del_match':
+          const matches = this.entries.get(GameType.Match);
+          if (matches) {
+            const index = matches.indexOf(data.del_match_name);
+            if (index !== -1) {
+              matches.splice(index, 1);
+            }
           }
-        }
-      }
-      else if (data.type === 'match_tournament_list') {
-        console.log(`list ${data.matches} ${data.tournaments}`);
-        this.entries.set(GameType.Match, data.matches);
-        this.entries.set(GameType.Tournament, data.tournaments);
-      } else if (data.type.startsWith('webrtc/')) {
-        const webrtcOper = data.type.substring(7);
-        if (webrtcOper === "all_users"){// (allUsers: Array<{ id: string; email: string }>) => {
+          break;
+        case 'match_tournament_list':
+          console.log(`list ${data.matches} ${data.tournaments}`);
+          this.entries.set(GameType.Match, data.matches);
+          this.entries.set(GameType.Tournament, data.tournaments);
+          break;
+        case 'game/all_users':
           let len = data.allUsers.length;
           if (len > 0) {
             this.createOffer();
           }
-        } else if (webrtcOper === "getOffer"){//(sdp: RTCSessionDescription) => {
-        //console.log(sdp);
-          console.log("get offer");
+          break;
+        case 'game/getOffer':
           this.createAnswer(data.sdp);
-        } else if(webrtcOper === "getAnswer"){//, (sdp: RTCSessionDescription) => {
-          console.log("get answer");
+          break;
+        case 'game/getAnswer':
           this.peerConnection?.setRemoteDescription(new RTCSessionDescription(data.sdp));
-          //console.log(sdp);
-        } else if (webrtcOper === "getCandidate"){//, (candidate: RTCIceCandidateInit) => {
+          break;
+        case 'game/getCandidate':
           this.peerConnection?.addIceCandidate(new RTCIceCandidate(data.candidate)).then(() => {
             console.log("candidate add success");
           });
-        }else
-          return;
-      }
-      else
-        return;
-      this.dataChangedSubject.next();
+          break;
+        case 'player_joined_match':
+          break;
+        default :
+          console.log(`unknown case received: ${data.type}`);
+        }
     }
   }
+
   isConnected() : boolean{
     return this.connected && this.webSocket?.readyState === WebSocket.OPEN;
   }
@@ -295,6 +299,7 @@ export class MatchmakingService {
           name: tournamentName,
           sdp: offer 
         }
+        this.sendMessage(JSON.stringify(messageObject));
       }
     }
   }
@@ -314,10 +319,7 @@ export class MatchmakingService {
   }
   createAnswer(sdp: RTCSessionDescription){
     this.peerConnection?.setRemoteDescription(new RTCSessionDescription(sdp)).then(() => {
-        this.peerConnection?.createAnswer({
-          offerToReceiveVideo: false,
-          offerToReceiveAudio: false,
-         })
+        this.peerConnection?.createAnswer()
           .then(sdp1 => {
                 this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp1));
                 const message = JSON.stringify({message : `/webrtc/answer ${sdp1}`});

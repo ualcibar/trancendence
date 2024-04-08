@@ -11,9 +11,7 @@ from chat.models import Room
 from matchmaking.models import MatchPreview
 from matchmaking.serializers import MatchPreviewSerializer
 import logging
-
 logger = logging.getLogger('std')
-
 
 class MatchMakingConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -65,6 +63,12 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'status': 'failure_already_host',
                     }))
                     return 
+                if self.status is not 'connected':
+                    self.send(json.dumps({
+                        'type': 'new_match_result',
+                        'status': 'failure_already_in_another_game',
+                    }))
+                    return 
                 try:
                     logger.debug(f'new match name = {data['settings']['name']}')
                     self.hostedGame = MatchPreview.objects.create(
@@ -91,6 +95,8 @@ class MatchMakingConsumer(WebsocketConsumer):
                     self.game_room_name = data['settings']['name']
                     async_to_sync(self.channel_layer.group_add)(self.game_room_name, self.channel_name)
                     logger.debug('new match success')
+                    self.status = 'inGame'
+                    self.save() 
                 except IntegrityError as e:
                     if "duplicate key value violates unique constraint" in str(e):
                         # Handle the specific case of duplicate key violation
@@ -118,43 +124,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                     'type': 'new_tournament',
                     'new_tournament_name': data['name'],
                 }))
-            case '/del_match':
-                if isinstance(self.hostedGame, MatchPreview):
-                    async_to_sync(self.channel_layer.group_send)(
-                        self.global_room_name,
-                        {
-                            'type': 'del_match',
-                            'del_match_name': data['name'],
-                        }
-                    )
-                    async_to_sync(self.channel_layer.group_send)(
-                        self.game_room_name,
-                        {
-                            'type': 'match_terminated_by_host',
-                            'del_match_name': data['name'],
-                        }
-                    )
-                    async_to_sync(self.channel_layer.group_discard)(self.game_room_name, self.channel_name)
-                    try:
-                        self.hostedGame.delete()
-                    except:
-                        pass
-                else:
-                    self.send(json.dumps({
-                        'type': 'del_match_result',
-                        'status': 'failure',
-                    }))
-
-            case '/del_tournament':
-                if data['name'] in self.matches:
-                    self.match.remove(data['name'])
-                    async_to_sync(self.channel_layer.group_send)(
-                        self.global_room_name,
-                        {
-                            'type': 'del_tournament',
-                            'del_tournament_name': data['name'],
-                        }
-                    )
             case '/match_tournament_list':
                 self.send(json.dumps({
                     'type': 'match_tournament_list',
@@ -162,10 +131,17 @@ class MatchMakingConsumer(WebsocketConsumer):
                     'tournamets': [],
                 }))
             case '/join/match':
+                if self.status is not 'connected':
+                    self.send(json.dumps({
+                        'type': 'join_match_result',
+                        'status': 'failure_already_in_another_game',
+                    }))
+                    return
                 try:
                     match_game = MatchPreview.objects.filter(
                         name=data['name'],
                     )
+                    self.game_room_name = match_game.name
                     async_to_sync(self.channel_layer.group_send)(
                         self.game_room_name,
                         {
@@ -173,17 +149,23 @@ class MatchMakingConsumer(WebsocketConsumer):
                             'name': user.username,
                         }
                     )
-                    self.send(json.dumps({
-                        'type': 'join_match_result',
-                        'status': 'failure',
-                    }))
-                    
+                    #self.send(json.dumps({
+                    #    'type': 'join_match_result',
+                    #    'status': 'succes',
+                    #    'players' : [player.username for player in match_game.players]
+                    #}))
+                    self.status = 'joiningGame'
+                    self.save() 
                     logger.debug('new match success')
                 except Exception as e:
                     logger.debug(f'failed to make match {e}')
                     return
             case '/join/tournament':
                 pass
+            case '/leave/game':
+                self.status = 'conected'
+                self.save()
+                async_to_sync(self.channel_layer.group_discard)(self.game_room_name, self.channel_name)
             case _ :
                 logger.debug(f'unexpected type {data['type']}')
 
@@ -192,27 +174,59 @@ class MatchMakingConsumer(WebsocketConsumer):
     
     def new_tournament(self, event):
         self.send(text_data=json.dumps(event))
-    
     def new_tournament_result(self, event):
         self.send(text_data=json.dumps(event))
  
     def new_match(self, event):
         self.send(text_data=json.dumps(event))
-   
     def new_match_result(self, event):
         self.send(text_data=json.dumps(event))
     
-    def del_match(self, event):
+    def leave_match(self, event):
         self.send(text_data=json.dumps(event))
-    def del_match_result(self, event):
+   
+    def leave_tournament(self, event):
         self.send(text_data=json.dumps(event))
 
     def user_join(self, event):
         self.send(text_data=json.dumps(event))
 
-    def del_tournament(self, event):
-        self.send(text_data=json.dumps(event))
-
-'''
-
-'''
+#
+#
+#case '/del_match':
+#    if isinstance(self.hostedGame, MatchPreview):
+#        async_to_sync(self.channel_layer.group_send)(
+#                self.global_room_name,
+#            {
+#                    'type': 'del_match',
+#                'del_match_name': data['name'],
+#            }
+#        )
+#        async_to_sync(self.channel_layer.group_send)(
+#                self.game_room_name,
+#            {
+#                    'type': 'match_terminated_by_host',
+#                'del_match_name': data['name'],
+#            }
+#        )
+#        async_to_sync(self.channel_layer.group_discard)(self.game_room_name, self.channel_name)
+#        try:
+#            self.hostedGame.delete()
+#        except:
+#            pass
+#    else:
+#        self.send(json.dumps({
+#                'type': 'del_match_result',
+#            'status': 'failure',
+#        }))
+#case '/del_tournament':
+#    if data['name'] in self.matches:
+#        self.match.remove(data['name'])
+#        async_to_sync(self.channel_layer.group_send)(
+#                self.global_room_name,
+#            {
+#                    'type': 'del_tournament',
+#                'del_tournament_name': data['name'],
+#            }
+#        )
+#

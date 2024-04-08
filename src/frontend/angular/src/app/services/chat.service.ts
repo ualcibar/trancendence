@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import {AuthService} from './auth.service';
+import { EventDispatcher } from 'three';
 
 class Message {
   message : string = '';
@@ -51,44 +52,47 @@ export class ChatService {
       this.connected = true;
     };
     this.webSocket.onmessage = (event) => {
-      const evenData = JSON.parse(event.data);
+      const data = JSON.parse(event.data);
       const actualHourDate = new Date();
       const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
       let targetChannel = this.current_chat_name;
       let message: string;
       console.log('message incoming');
-      if (evenData.type == 'private_message') {
-        console.log('message for me');
-        console.log(evenData);
-        if (!this.chatMessages.has(evenData.user)) {
-          this.chatMessages.set(evenData.user, []);
-        }
-        targetChannel = evenData.user;
-        message = evenData.message;
-      } else if (evenData.type == 'private_message_delivered') {
-        targetChannel = this.current_chat_name;
-        message = evenData.message;
-      } else if (evenData.type == 'user_list') {
-        this.users = new Set(evenData.users);
-        return;
-      } else if (evenData.type == 'user_join') {
-        this.users.add(evenData.user);
-        return;
-      } else if (evenData.type == 'user_leave') {
-        this.users.delete(evenData.user);
-        return;
-      }
-      else if (evenData.message.startsWith('/global ')) {
-        targetChannel = '#global';
-        message = evenData.message.substring('/global '.length);
-      } else {
-        console.log(evenData);
-        console.log('message no current channel');
-        return;
+      switch (data.type){
+        case 'private_message':
+          console.log('message for me');
+          console.log(data);
+          if (!this.chatMessages.has(data.user)) {
+            this.chatMessages.set(data.user, []);
+          }
+          targetChannel = data.user;
+          message = data.message;
+          break;
+        case 'private_message_delivered':
+          targetChannel = this.current_chat_name;
+          message = data.message;
+          break;
+        case 'global_message':
+          targetChannel = '#global';
+          message = data.message;
+          break;
+        case 'user_list':
+          this.users = new Set(data.users);
+          return;
+        case 'user_join':
+          this.users.add(data.user);
+          return;
+        case 'user_leave':
+          this.users.delete(data.user);
+          return;
+        default:
+          console.log(data);
+          console.log('message no current channel');
+          return;
       }
       const chatMessage = this.chatMessages.get(targetChannel);
       if (chatMessage)
-        chatMessage.push({ message: message, sender: evenData.user, date: actualHour });
+        chatMessage.push({ message: message, sender: data.user, date: actualHour });
       else
         console.log('no target channel');
     };
