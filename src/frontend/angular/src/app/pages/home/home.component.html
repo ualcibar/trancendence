@@ -1,20 +1,22 @@
-<button (click)="changeState(HomeState.Home)" class="btn text-white">reset</button>
-<div class="flex justify-center items-center h-auto">
-	<div class="w-1/2 min-w-1/2 chat p-6">
-		<app-chat></app-chat>
-	</div>
-	<div *ngIf="state === HomeState.Home" class="w-1/2 menu">
-		<button (click)="changeState(HomeState.Local)" class="card mb-16"[@fadeInOut]>
-			<h2>LOCAL</h2>
-		</button>
-		<button (click)="changeState(HomeState.Multiplayer)" class="card mb-16"[@fadeInOut]>
-			<h2>MULTIPLAYER</h2>
-		</button>
-	</div>
-	<div *ngIf="state === HomeState.Multiplayer" class="w-1/2 multiplayer" [@fadeInOut]>
-		<app-lobby-search></app-lobby-search>
-	</div>
-	<div *ngIf="state === HomeState.Local" class="w-1/2 menu">
-		<h1 class="text-white">not done</h1>
+<div class="relative bg-transparent">
+	<button (click)="changeState(HomeState.Home)" class="btn text-white">reset</button>
+	<div class="flex justify-center items-center h-auto">
+		<div class="w-1/2 min-w-1/2 chat p-6">
+			<app-chat [@fadiInOut]></app-chat>
+		</div>
+		<div *ngIf="state === HomeState.Home" class="w-1/2 menu">
+			<button (click)="changeState(HomeState.Local)" class="card mb-16" [@fadeInOut]>
+				<h2>LOCAL</h2>
+			</button>
+			<button (click)="changeState(HomeState.Multiplayer)" class="card mb-16" [@fadeInOut]>
+				<h2>MULTIPLAYER</h2>
+			</button>
+		</div>
+		<div *ngIf="state === HomeState.Multiplayer" class="w-1/2 multiplayer" [@fadeInOut]>
+			<app-lobby-search></app-lobby-search>
+		</div>
+		<div *ngIf="state === HomeState.Local" class="w-1/2 menu">
+			<h1 class="text-white">not done</h1>
+		</div>
 	</div>
 </div>

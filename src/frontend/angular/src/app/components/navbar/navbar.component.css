@@ -3,5 +3,7 @@ button {
 }
 
 nav {
-	background-color: #534295;
+	background-color: rgba(47, 50, 98, 0.5);
+	border-bottom: 1px solid rgba(73, 67, 113, 0.5);
+	backdrop-filter: blur(2px);
 }
