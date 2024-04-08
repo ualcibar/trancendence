@@ -7,10 +7,8 @@
     flex-direction: column;
 }
 
-.message-box {
-    padding: 10px;
-    flex: 1; /* Message box takes remaining space */
-    overflow-y: auto; /* Enable vertical scrolling */
+#message-box {
+    background-color: rgba(143, 183, 189, 0.278);
 }
 
 .message {
@@ -49,4 +47,17 @@
 
 .custom-textarea::placeholder {
     color: #6c757d; /* Cambia el color del placeholder según tus preferencias */
+}
+
+/* Chat container */
+#chat-bg {
+    backdrop-filter: blur(2px);
+}
+
+#bar-bg {
+    background-color: #191a3d7a;
+}
+
+#title-bg {
+    background-color: #1f214e7a;
 }

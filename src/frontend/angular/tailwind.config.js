@@ -13,6 +13,7 @@ module.exports = {
         'color-1': '#6c757d',
         'color-2': '#F4D676',
         'color-3': '#f8f9fa',
+        'card-bg-color': '#12064680',
       },
       spacing: {
         '50real': '50rem',

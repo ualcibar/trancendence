@@ -1,5 +1,6 @@
-.background-image{
+body {
     position: absolute;
     inset: 0;
     background-size: cover;
+    background-color: aqua;
 }
