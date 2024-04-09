@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 import uuid
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
         if not username or not password:
@@ -54,6 +53,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # avatar = models.ImageField(upload_to='avatars/', blank=True, null=False)
     # install pyllow to make it work
 
+    game_room_name = models.CharField(max_length=255, default=None, null=True) 
+    game = models.ForeignKey('matchmaking.MatchPreview', default=None, null=True, on_delete=models.SET_NULL) 
     is_42_user = models.BooleanField(default=False, null=False)
     id42 = models.UUIDField(None, null=True, editable=True, unique=True)
     token42 = models.CharField(max_length=255, default=None, null=True)
@@ -76,17 +77,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # Add any additional required fields
     REQUIRED_FIELDS = []
 
-    STATUS_CHOICES = [
-            ('connected', 'Connected'),
-            ('disconnected', 'Disconnected'),
-            ('joiningGame', 'Joining Game'),
-            ('inGame', 'In Game'),
-            ]
+
+    STATUS_CHOICES = (
+        ('connected', 'Connected'),
+        ('disconnected', 'Disconnected'),
+        ('joining_game', 'Joining Game'),
+        ('in_game', 'In Game'),
+    )
 
     status = models.CharField(
             max_length=20,
             choices=STATUS_CHOICES,
-            default='disconnected',
+            default='Disconnected',
             )
 
     def has_module_perms(self, app_label):

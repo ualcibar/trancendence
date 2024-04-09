@@ -5,8 +5,7 @@ import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.c
 import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.component';
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 
-import { MatchmakingService } from '../../services/matchmaking.service';
-
+import { MatchmakingService, MatchMakingState } from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
 import { fadeInOut } from './animations';
 
@@ -28,13 +27,15 @@ export class HomeComponent implements OnInit{
     chatUnwrapped : boolean = false;
     state : HomeState;
     HomeState = HomeState;
-    constructor(private matchmakingService : MatchmakingService) {
+    MatchMakingState = MatchMakingState;
+    constructor(public matchmakingService : MatchmakingService) {
         this.state = HomeState.Home;
     }
     ngOnInit(): void {
     }
     changeState(newState : HomeState){
         this.state = newState;
+        this.matchmakingService.sendMessage(JSON.stringify({type : '/reset'}));
     }
 }
 
