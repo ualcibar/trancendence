@@ -38,7 +38,7 @@
 			<div class="m-6 flex mt-auto rounded-xl border-1 border-transparent items-center">
 				<textarea [(ngModel)]="newMessage" placeholder="Type a message..."
 					(keydown.shift.enter)="handleShiftEnter($event)" (keydown.enter)="sendMessage()"
-					class="custom-textarea form-control w-full h-12 max-h-96 border-transparent outline-none bg-transparent px-3 py-2.5"
+					class="shadow-none custom-textarea form-control w-full h-12 max-h-96 border-transparent outline-none bg-transparent px-3 py-2.5"
 					style="resize: none;overflow-y: visible; color: white;"></textarea>
 				<button (click)="sendMessage()" class="btn btn-success max-h-10 flex items-center rounded-xl mr-1"><i
 						class="bi bi-send-fill mr-1"></i> Send</button>
