@@ -49,6 +49,18 @@ services:
       postgre:
         condition: service_healthy
 
+  turn:
+    container_name: turn
+    build: ./turn
+    networks:
+      - bridge
+    ports:
+      - "3478:3478"
+      - "3478:3478/udp"
+      - "5349:5349"
+      - "5349:5349/udp"
+      - "49160-49200:49160-49200/udp"
+
 #
 #  matchmaking:
 #    container_name: matchmaking

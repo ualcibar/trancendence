@@ -150,8 +150,10 @@ export class MatchmakingService {
     const pc_config = {
       iceServers: [
         {
-            urls: "stun:stun.l.google.com:19302",
-        },
+          urls : ["turn:localhost:3478",  "stun:stun.l.google.com:19302"],
+          username: "kavirajan",
+          credential: "123456",
+        }
       ],
     };
     this.peerConnection = new RTCPeerConnection(pc_config);
