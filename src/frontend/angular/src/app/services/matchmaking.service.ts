@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import {AuthService, UserInfo} from './auth.service';
-import { Subject, Observable, interval } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
 export enum GameType {
   Tournament = 'Tournament',
   Match = 'Match',
 }
 
-enum MatchMakingState{
+export enum MatchMakingState{
   Standby,
   Connecting,
   OnGame,
@@ -45,14 +45,16 @@ class Score{
 }
 
 export class Match{
+  host : UserInfo;
   players : UserInfo[] = [];
   score : [number,number] = [0,0];
   teamSize : number;
   name : string;
   
-  constructor (name : string, teamSize : number){
+  constructor (name : string, teamSize : number, host : UserInfo){
     this.name = name;
     this.teamSize = teamSize;
+    this.host = host;
   }
   addPlayer(newPlayer : UserInfo) : boolean{
     if (this.players.length == 2 * this.teamSize){
@@ -72,15 +74,17 @@ export class Match{
 }
 
 export class Tournament{
+  host : UserInfo;
   players : UserInfo[] = [];
   scores : [number,number][] = [];
   winners : number[] = [];
   teamSize : number;
   name : string;
   
-  constructor (name : string, teamSize : number){
+  constructor (name : string, teamSize : number, host : UserInfo){
     this.name = name;
     this.teamSize = teamSize;
+    this.host = host;
   }
 
   addPlayer(newPlayer : UserInfo) : boolean{
@@ -123,10 +127,10 @@ export enum MatchmakingUptate{
   providedIn: 'root'
 })
 export class MatchmakingService {
-  webSocketUrl = 'wss://localhost/ws/matchmaking/';
+  webSocketUrl = 'wss://localhost/ws/matchmaking/global/';
   webSocket : WebSocket | undefined;
   peerConnection : RTCPeerConnection;
-  connected : boolean = false;
+  dataChannel : RTCDataChannel;
   
   private dataChangedSubject: Subject<void> = new Subject<void>();
   dataChanged$: Observable<void> = this.dataChangedSubject.asObservable();
@@ -140,7 +144,9 @@ export class MatchmakingService {
     this.entries.set(GameType.Match, []);
     this.entries.set(GameType.Tournament,[]);
     this.connectToServer();
-
+    if(this.isConnected()){
+      this.sendMessage(JSON.stringify({type : '/getStatus'}));
+    }
     const pc_config = {
       iceServers: [
         {
@@ -149,6 +155,18 @@ export class MatchmakingService {
       ],
     };
     this.peerConnection = new RTCPeerConnection(pc_config);
+    this.dataChannel = this.peerConnection.createDataChannel('dataChann');
+    this.dataChannel.onmessage = event => {
+      console.log("message received:",event.data);
+    }
+    this.peerConnection.onicecandidate = event => {
+      if (event.candidate){
+        console.log("Sending ice candidate to peer", event.candidate);
+      }
+    }
+    this.peerConnection.oniceconnectionstatechange = event => {
+      console.log("ICE connection state: ", this.peerConnection.iceConnectionState);
+    }
   }
   
   connectToServer() {
@@ -160,18 +178,30 @@ export class MatchmakingService {
     this.webSocket = new WebSocket(this.webSocketUrl);
     this.webSocket.onopen = () => {
       console.log('WebSocket connection opened');
-      this.connected = true;
     };
     this.webSocket.onerror = () => {
-      this.connected = false;
     }
     this.webSocket.onclose = () => {
-      this.connected = false;
     };
     this.webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log(`message recieved ${data}`);
       switch (data.type) {
+        case 'status':
+          switch (data.status){
+            case 'Connected':
+              this.state = MatchMakingState.Standby;
+              break;
+            case 'JoiningGame':
+              this.state = MatchMakingState.Connecting;
+              break;
+            case 'InGame':
+              this.state = MatchMakingState.OnGame
+              break;
+            default:
+              console.error(`unknown status : ${data.status}`);
+            }
+          break;
         case 'new_match':
           this.entries.get(GameType.Match)
             ?.push(new GameSettings(GameType.Match, data.match.name, data.match.tags, true));
@@ -203,25 +233,73 @@ export class MatchmakingService {
           this.entries.set(GameType.Match, data.matches);
           this.entries.set(GameType.Tournament, data.tournaments);
           break;
-        case 'game/all_users':
-          let len = data.allUsers.length;
-          if (len > 0) {
-            this.createOffer();
+        case 'new_match_result':
+          switch (data.status){
+            case 'success':
+              this.state = MatchMakingState.Connecting;
+              this.currentGame = new Match(data.match.name, 1, this.authService.userinfo);
+              break;
+            case 'failure_already_host':
+              console.error('failed to create match, already in a match');
+              break;
+            case 'failure_already_in_another_game':
+              console.error('failed to create match, already in a match');
+              break;
+            case 'failure_duplicate_key':
+              console.error('match name already in use');
+              this.state = MatchMakingState.Standby;
+              break;
+            case 'failure':
+              console.error('failed to create match, try again');
+              this.state = MatchMakingState.Standby;
+              break;
+            default:
+              console.error(`unknown error status: ${data.status}`);
+              this.state = MatchMakingState.Standby;
           }
           break;
-        case 'game/getOffer':
-          this.createAnswer(data.sdp);
-          break;
-        case 'game/getAnswer':
-          this.peerConnection?.setRemoteDescription(new RTCSessionDescription(data.sdp));
-          break;
-        case 'game/getCandidate':
-          this.peerConnection?.addIceCandidate(new RTCIceCandidate(data.candidate)).then(() => {
-            console.log("candidate add success");
-          });
+        case 'join_match_result':
+          switch (data.status){
+            case 'failure_already_in_another_game':
+              console.error('failed to join lobby, already in another game');
+              this.state = MatchMakingState.Standby;
+              break;
+            case 'failure':
+              console.error('failed to join lobby');
+              this.state = MatchMakingState.Standby;
+              break;
+            case 'success':
+              this.state = MatchMakingState.Connecting;
+              this.currentGame = new Match(data.match.name, data.match.teamSize, data.match.users);
+              break;
+            default:
+              console.error(`cant find status ${data.status}`);
+              this.state = MatchMakingState.Standby;
+          }
           break;
         case 'player_joined_match':
+          if (this.currentGame !== undefined) {
+            if (this.authService.userinfo.username === this.currentGame.host.username)
+              return;
+          }else{
+            console.error('received a player joined match while not in a game');
+            return 
+          }
+          console.log(`player ${data.username} joined the match`);
           break;
+        case 'player_joined_match_to_host':
+          this.createAnswer(data.sdp, data.username);
+          break;
+        case 'webrtc_answer':
+          this.peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer))
+            .then(() => {
+              console.log("remote description set successfully");
+            })
+            .catch(error => {
+              console.error("Error setting remote description", error);
+            });
+          break;
+
         default :
           console.log(`unknown case received: ${data.type}`);
         }
@@ -229,7 +307,7 @@ export class MatchmakingService {
   }
 
   isConnected() : boolean{
-    return this.connected && this.webSocket?.readyState === WebSocket.OPEN;
+    return this.webSocket?.readyState === WebSocket.OPEN;
   }
   getEntry(entry_name : string) : GameSettings[] | null{
     let type; 
@@ -269,29 +347,21 @@ export class MatchmakingService {
     }
   }
 
-  joinMatch(matchName : string){
+  async joinMatch(matchName : string){
     if (this.isConnected()){
-      this.peerConnection
-        ?.createOffer()
-        .then(sdp => {
-        console.log('service join match')
-          this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp));
+      const sdp = await this.createOffer();
+      if (sdp !== undefined && sdp !== null) {
           let messageObject = {
-            type: '/match/join',
+            type: '/join/match',
             name: matchName,
             sdp: sdp 
           }
-          this.sendMessage(JSON.stringify(messageObject));
-          console.debug(`join match message sent, ${sdp.sdp}`);
-        })
-        .catch(error => {
-            console.log(error);
-        });
+        this.sendMessage(JSON.stringify(messageObject));
+      }
     }
   }
   async joinTournament(tournamentName : string){
     if (this.isConnected()){
-      this.createOffer()
       const offer = await this.createOffer();
       if (offer !== undefined && offer !== null) {
         let messageObject = {
@@ -305,30 +375,23 @@ export class MatchmakingService {
   }
 
 
-  createOffer(): Promise<RTCSessionDescriptionInit | null> | undefined{
-    return this.peerConnection
-        ?.createOffer()
-        .then(sdp => {
-            console.log(sdp);
-            return sdp;
-        })
-        .catch(error => {
-            console.error("Error creating offer:", error);
-            return null;
-        });
+  async createOffer() : Promise<RTCSessionDescriptionInit>{
+    const offer = await this.peerConnection.createOffer();
+    await this.peerConnection.setLocalDescription(offer);
+    return offer;
+    //let message = {type : 'offer', offer : offer};
+    //this.sendMessage(JSON.stringify(message));
   }
-  createAnswer(sdp: RTCSessionDescription){
-    this.peerConnection?.setRemoteDescription(new RTCSessionDescription(sdp)).then(() => {
-        this.peerConnection?.createAnswer()
-          .then(sdp1 => {
-                this.peerConnection?.setLocalDescription(new RTCSessionDescription(sdp1));
-                const message = JSON.stringify({message : `/webrtc/answer ${sdp1}`});
-                this.sendMessage(message);
-                //this.sendMessage("answer", sdp1);
-            })
-            .catch(error => {
-                console.log(error);
-            });
+  async createAnswer(offer: RTCSessionDescription, target : string){
+    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await this.peerConnection.createAnswer();
+    await this.peerConnection.setLocalDescription(answer);
+    const message = JSON.stringify({type : '/webrtc/answer', answer : answer, target : target});
+    this.sendMessage(message);
+  }
+  getCandidate(candidate : RTCIceCandidateInit){
+    this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).then(() => {
+        console.log("candidate add success");
     });
   }
   sendMessage(message : string): boolean {

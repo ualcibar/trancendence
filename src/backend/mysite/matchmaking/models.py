@@ -21,6 +21,11 @@ class MatchPreview(models.Model):
         except (IntegrityError, cls.DoesNotExist):
             return False
 
+    def isHost(self, host):
+        return  self.host == host
+
+    def getHostUsername(self):
+        return self.host.username
 
     def __str__(self):
         return f'match name={self.name} host={self.host}'

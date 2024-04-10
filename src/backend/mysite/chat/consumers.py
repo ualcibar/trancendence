@@ -36,8 +36,8 @@ class ChatConsumer(WebsocketConsumer):
         self.accept()
         
         self.room_group_name = 'global_chat'
-        self.user_inbox = f'inbox_{self.user.username}'
-        self.room = Room.objects.get_or_create(name='global_chat')
+        self.user_inbox = f'inbox_{self.user.username}_chat'
+        self.room = Room.objects.get_or_create(name=self.room_group_name)
         async_to_sync(self.channel_layer.group_add)( self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
 
@@ -75,7 +75,7 @@ class ChatConsumer(WebsocketConsumer):
         match data['type']:
             case '/pm':
                 async_to_sync(self.channel_layer.group_send)(
-                    f'inbox_{data['target']}',  
+                    f'inbox_{data['target']}_chat', 
                     {
                         "type": "private_message",
                         "user": self.user.username,
@@ -83,7 +83,7 @@ class ChatConsumer(WebsocketConsumer):
                     }
                 )
                 async_to_sync(self.channel_layer.group_send)(
-                    f'inbox_{self.user}',  
+                    f'inbox_{self.user}_chat',  
                     {
                         "type": "private_message_delivered",
                         "user": self.user.username,
@@ -119,3 +119,4 @@ class ChatConsumer(WebsocketConsumer):
 
     def user_leave(self, event):
         self.send(text_data=json.dumps(event))
+
