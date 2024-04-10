@@ -25,6 +25,7 @@ enum HomeState{
 })
 export class HomeComponent implements OnInit{
     chatUnwrapped : boolean = false;
+    isAnimating : boolean = false;
     state : HomeState;
     HomeState = HomeState;
     MatchMakingState = MatchMakingState;
@@ -33,9 +34,16 @@ export class HomeComponent implements OnInit{
     }
     ngOnInit(): void {
     }
-    changeState(newState : HomeState){
-        this.state = newState;
-        this.matchmakingService.sendMessage(JSON.stringify({type : '/reset'}));
+
+    changeState(newState: HomeState): void {
+        this.state = newState; // Cambia el estado
+        this.isAnimating = true;
+        console.log(this.isAnimating);
+    
+        // Espera un tiempo antes de marcar que la animación ha terminado
+        setTimeout(() => {
+          this.isAnimating = false;
+        }, 1000); // Ajusta este valor según la duración de tu animación
     }
 }
 
