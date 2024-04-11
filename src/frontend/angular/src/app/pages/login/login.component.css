@@ -1,27 +1,3 @@
-#login-div {
-	background-color: rgba(47, 50, 98, 0.806);
-	border: 1px solid rgba(73, 67, 113, 0.5);
-	backdrop-filter: blur(2px);
-	color: #cfe1e6;
-}
-
-/* Forms input and labels style */
-.form-control:valid {
-	background-color:  #3b34937d!important;
-}
-
-.form-control:focus {
-	border: 1px solid #91c5d5;
-}
-
-.form-floating > input + label:after {
-   background: rgba(58, 52, 147, 0)!important;
-}
-
 .form-floating > input + label {
 	color: #cfe1e6;
-}
-
-input {
-	color: white!important;
 }
