@@ -52,15 +52,15 @@ services:
   turn:
     container_name: turn
     build: ./turn
-    networks:
-      - bridge
+    network_mode: host
     ports:
       - "3478:3478"
       - "3478:3478/udp"
       - "5349:5349"
       - "5349:5349/udp"
       - "49160-49200:49160-49200/udp"
-
+    volumes:
+      - ./turn/ssl:/etc/openssl/ssl/
 #
 #  matchmaking:
 #    container_name: matchmaking
