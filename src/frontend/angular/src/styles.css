@@ -25,6 +25,12 @@ html {
 	border: 1px solid rgba(73, 67, 113, 0.5);
 	backdrop-filter: blur(2px);
 	color: #cfe1e6;
+
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 60rem;
 }
 
 /* Forms main style */
