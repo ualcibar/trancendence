@@ -53,12 +53,12 @@ services:
     container_name: turn
     build: ./turn
     network_mode: host
-    ports:
-      - "3478:3478"
-      - "3478:3478/udp"
-      - "5349:5349"
-      - "5349:5349/udp"
-      - "49160-49200:49160-49200/udp"
+    # ports:
+    #   - "3478:3478"
+    #   - "3478:3478/udp"
+    #   - "5349:5349"
+    #   - "5349:5349/udp"
+    #   - "49160-49200:49160-49200/udp"
     volumes:
       - ./turn/ssl:/etc/openssl/ssl/
 #

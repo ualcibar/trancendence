@@ -1,29 +1,74 @@
 <br/>
 
-<div *ngIf="unauthorizedAccess && !loading">
+<!-- <div *ngIf="unauthorizedAccess && !loading">
 	<app-unauthorized></app-unauthorized>
-</div>
+</div> -->
 
-<div *ngIf="!unauthorizedAccess && !loading" class="flex flex-col lg:flex-row justify-between mx-24 mt-12 mb-12 text-xl font-mono rounded">
-	<div class="w-3/4 bg-stone-300 shadow-md rounded">
-		<div class="md:flex bg-orange-200 rounded">
-			<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-36 h-36 ml-4 mt-4 mb-4 flex items-center justify-center bg-neutral-400">
-			<div class="ml-4 flex flex-col justify-center">
-				<div class="flex items-center">
-					<h1 class="text-5xl">{{ username }}</h1>
-					<div class="w-4 h-4 rounded-full bg-green-400 ml-2 mt-2"></div>
+<!-- <div class="w-96 bg-gray-300 rounded shadow-md">
+	<div class="text-center pt-4">
+		<h1>Friends list</h1>
+	</div>
+	<p class="text-center pt-8 text-slate-400">You don't have any friends :(</p>
+</div> -->
+
+<div id="sp-div" class="items-center p-2 max-w-xl md:max-w-4xl mx-auto h-fixed rounded-xl">
+	<div class="md:shrink-0 flex items-center">
+		<div class="w-full shadow-md rounded">
+			<div class="md:flex bg-gradient-to-r from-indigo-600 to-indigo-900 rounded">
+				<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-36 h-36 ml-4 mt-4 mb-4 flex items-center justify-center bg-neutral-400">
+				<div class="ml-4 flex flex-col justify-center">
+					<div class="flex items-center">
+						<h1 class="text-5xl font-bold">{{ username }}</h1>
+						<div class="w-4 h-4 rounded-full bg-green-400 ml-2 mt-2"></div>
+					</div>
+					<h1 class="text-gray-600" style="color: #a7bec4;">last online: 4/04/2084</h1>
 				</div>
-				<h1 class="text-gray-600">last seen: 4/04/2084</h1>
+				<button class="btn btn-active btn-neutral ml-auto m-8"><i class="bi bi-gear-fill text-2xl"></i></button>
 			</div>
 		</div>
-		<div class="mt-48">
+	</div>
+	<div class="flex">
+		<div class="stats bg-gradient-to-r from-slate-900 to-indigo-950 mt-2 p-2">
+			<div class="stat">
+				<div class="stat-figure text-secondary">
+					<i class="bi bi-controller text-2xl text-primary"></i>
+				</div>
+				<div class="stat-title">Games played</div>
+				<div class="stat-value text-primary">20</div>
+			</div>
 			
+			<div class="stat">
+				<div class="stat-figure text-secondary">
+					<i class="bi bi-trophy-fill text-2xl" style="color: #35bc9d;"></i>
+				</div>
+				<div class="stat-title">Wins</div>
+				<div class="stat-value" style="color: #35bc9d;">18</div>
+			</div>
+			
+			<div class="stat">
+				<div class="stat-figure text-secondary">
+					<i class="bi bi-x-octagon-fill text-2xl text-error"></i>
+				</div>
+				<div class="stat-title">Defeats</div>
+				<div class="stat-value text-error">2</div>
+			</div>
 		</div>
+		<button class="btn btn-active btn-neutral">Neutral</button>
+		<button class="btn btn-active btn-primary">Primary</button>
 	</div>
-	<div class="w-96 bg-gray-300 rounded shadow-md">
-		<div class="text-center pt-4">
-			<h1>Friends list</h1>
+	<!-- <div class="p-8">
+		<h1 class="text-4xl font-bold">Player stats</h1>
+		<div class="flex items-center ml-auto mt-4">
+			<i class="bi bi-controller text-2xl" style="color: #35bc9d;"></i>
+			<p class="ml-2 text-2xl">Games played: </p>
 		</div>
-		<p class="text-center pt-8 text-slate-400">You don't have any friends :(</p>
-	</div>
+		<div class="flex items-center ml-auto mt-4">
+			<i class="bi bi-trophy-fill text-2xl" style="color: #35bc9d;"></i>
+			<p class="ml-2 text-2xl">Wins: </p>
+		</div>
+		<div class="flex items-center ml-auto mt-4">
+			<i class="bi bi-x-octagon-fill text-2xl" style="color: #35bc9d;"></i>
+			<p class="ml-2 text-2xl">Defeats: </p>
+		</div>
+	</div> -->
 </div>
