@@ -105,13 +105,21 @@ export class Tournament{
 
 }
 
+export enum Maps{
+  Default = 'Default',
+  Fancy = 'Fancy'
+}
+
 export class GameSettings{
   gameType : GameType;
   name : string;
   tags : string;
+  teamSize : number = 1;
+  winScore : number = 3;
+  map : Maps = Maps.Default;
   publicGame : boolean;
   constructor (gameType : GameType, name : string, tags : string, publicGame: boolean){
-    this.gameType =gameType;
+    this.gameType = gameType;
     this.name = name;
     this.tags = tags;
     this.publicGame= publicGame;
@@ -150,12 +158,12 @@ export class MatchmakingService {
     const pc_config = {
       iceServers: [
         {
-          urls: "stun:172.217.192.127:19302",
+          urls: "stun:stun.l.google.com:19302",
         },
         {
           urls : "turn:127.0.0.1:3478", 
-          username: "kavirajan",
-          credential: "123456",
+          username: "a",
+          credential: "a",
         }
       ],
     };

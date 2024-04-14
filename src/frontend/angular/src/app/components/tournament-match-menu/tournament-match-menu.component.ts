@@ -1,7 +1,7 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, Input, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatchmakingService, GameSettings, GameType} from '../../services/matchmaking.service';
+import { MatchmakingService, GameSettings, GameType, Maps} from '../../services/matchmaking.service';
 
 @Component({
   selector: 'app-tournament-match-menu',
@@ -14,6 +14,8 @@ import { MatchmakingService, GameSettings, GameType} from '../../services/matchm
   styleUrl: './tournament-match-menu.component.css'
 })
 export class TournamentMatchMenuComponent {
+  default : boolean = true;
+  @Input() multiplayer! : boolean;
   @Output() escapeKeyPressed: EventEmitter<void> = new EventEmitter<void>();
   gameSettings : GameSettings;
   @Output() new_match_tournament: EventEmitter<GameSettings> = new EventEmitter<GameSettings>();
@@ -23,6 +25,19 @@ export class TournamentMatchMenuComponent {
   }
   togglePublicPrivate(){
     this.gameSettings.publicGame = !this.gameSettings.publicGame;
+  }
+  toggleDefault(){
+    this.default = !this.default;
+  }
+  toggleMap(){
+    switch(this.gameSettings.map){
+      case Maps.Default:
+        this.gameSettings.map = Maps.Fancy;
+        break;
+      case Maps.Fancy:
+        this.gameSettings.map = Maps.Default;
+        break;
+    }
   }
   toggleMatchTournament(){
     if (this.gameSettings.gameType == GameType.Match)
