@@ -4,12 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 
 import { SearchBarComponent } from '../search-bar/search-bar.component';
-import { ChatService } from '../../services/chat.service';
-class Message {
-  message : string = '';
-  sender: string = '';
-  date: string = '';
-}
+import { ChatService, Message } from '../../services/chat.service';
 
 function getCookie(name: string): string|null {
 	const nameLenPlus = (name.length + 1);
@@ -32,34 +27,30 @@ function getCookie(name: string): string|null {
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit{
-  newMessage: string = '';
-  current_chat_name : string= '#global';
-  showSearchBar : boolean = false;
+	newMessage: string = '';
+	current_chat_name : string= '#global';
+	showSearchBar : boolean = false;
 
-  @ViewChild('messageBox') messageBox!: ElementRef;
+	@ViewChild('messageBox') messageBox!: ElementRef;
 
-  constructor(private http: HttpClient, private ngZone: NgZone, private chatService : ChatService) {
-    
-  }
-
-  getKeys() : string[]{
-    return this.chatService.getKeys();
-  }
-
-  ngOnInit(): void {
-    this.scrollToBottom();
-  }
-
-  sendMessage() {
-	  if (this.newMessage.trim() !== '') {
-      this.chatService.sendMessage(this.newMessage, this.current_chat_name);
-      this.newMessage = '';
-    }
+	constructor(private http: HttpClient, private ngZone: NgZone, private chatService : ChatService) {
+		
 	}
-	handleShiftEnter(event: any): void {
-		if (event.shiftKey && event.key === 'Enter') {
-			event.preventDefault(); // Prevent inserting a newline character
-			this.newMessage += '\n'; // Insert a newline character in the message
+
+	getKeys() : string[]{
+		return this.chatService.getKeys();
+	}
+
+	ngOnInit(): void {
+		this.scrollToBottom();
+	}
+
+	sendMessage(event: any | undefined = undefined) {
+		event?.preventDefault();
+		
+		if (this.newMessage.trim() !== '') {
+			this.chatService.sendMessage(this.newMessage, this.current_chat_name);
+			this.newMessage = '';
 		}
 	}
 
@@ -70,27 +61,38 @@ export class ChatComponent implements OnInit{
 	togleSearchBar() {
 		this.showSearchBar = !this.showSearchBar;
 	}
+
 	scapekey() {
 		console.log('scape pressed');
 		this.showSearchBar = false;
 	}
+
 	fieldSelected(username: string) {
 		this.ngZone.run(() => {
       	this.chatService.addChat(username);
 		});
 		this.showSearchBar = false;
 	}
-	getUsers() : string[]{
-    return Array.from(this.chatService.getUsers());
-  }
-  getChatMessages(chat : string) : Message[]{
-    return this.chatService.getChatMessages(chat);
-  }
-	
-  private scrollToBottom(): void {
-		const scrollableDiv = document.querySelector('.overflow-y-scroll');
-		if (scrollableDiv != null)
-			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+
+	trackMessageById(index: number, message: any): any {
+		console.log(message.id);
+		return message.id;
 	}
+
+	getUsers() : string[]{
+		return Array.from(this.chatService.getUsers());
+	}
+	getChatMessages(chat : string) : Message[]{
+		setTimeout(() => {
+			this.scrollToBottom();
+		}, 0);
+		return this.chatService.getChatMessages(chat);
+	}
+		
+	private scrollToBottom(): void {
+			const scrollableDiv = document.querySelector('.overflow-y-auto');
+			if (scrollableDiv != null)
+				scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+		}
 
 }

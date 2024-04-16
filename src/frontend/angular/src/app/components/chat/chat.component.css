@@ -58,6 +58,20 @@
     background-color: #191a3d7a;
 }
 
-#title-bg {
-    background-color: #1f214e7a;
+#chat-btn {
+    background-color: rgba(40, 58, 57, 0.29);
+
+    border-color: #03030330;
+}
+
+#chat-btn:hover {
+    color: #6a7f84;;
+}
+
+#chat-btn-active {
+    background-color: rgba(40, 58, 57, 0.613);
+
+	color: #cfe1e6;
+	border: 1px solid #78b2c3;
+	font-weight: bold;
 }

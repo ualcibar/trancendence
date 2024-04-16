@@ -135,7 +135,7 @@ export enum MatchmakingUptate{
   providedIn: 'root'
 })
 export class MatchmakingService {
-  webSocketUrl = 'wss://localhost/ws/matchmaking/global/';
+  webSocketUrl = 'wss://10.13.7.6/ws/matchmaking/global/';
   webSocket : WebSocket | undefined;
   peerConnection : RTCPeerConnection;
   dataChannel : RTCDataChannel;
@@ -158,13 +158,13 @@ export class MatchmakingService {
     const pc_config = {
       iceServers: [
         {
-          urls: "stun:stun.l.google.com:19302",
+          urls: "stun:stun.1.google.com:19302",
         },
-        {
+       /* {
           urls : "turn:127.0.0.1:3478", 
           username: "a",
           credential: "a",
-        }
+        }*/
       ],
     };
     this.peerConnection = new RTCPeerConnection(pc_config);

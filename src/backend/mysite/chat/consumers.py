@@ -9,6 +9,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from asgiref.sync import async_to_sync
 from chat.models import Room
 import logging
+import time
+
 logger = logging.getLogger('std')
 
 class ChatConsumer(WebsocketConsumer):
@@ -72,6 +74,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
+        msg_id = self.id_generator()
         match data['type']:
             case '/pm':
                 async_to_sync(self.channel_layer.group_send)(
@@ -79,7 +82,8 @@ class ChatConsumer(WebsocketConsumer):
                     {
                         "type": "private_message",
                         "user": self.user.username,
-                        "message": data['message'] 
+                        "message": data['message'],
+                        "id": msg_id
                     }
                 )
                 async_to_sync(self.channel_layer.group_send)(
@@ -87,7 +91,8 @@ class ChatConsumer(WebsocketConsumer):
                     {
                         "type": "private_message_delivered",
                         "user": self.user.username,
-                        "message": data['message'] 
+                        "message": data['message'],
+                        "id": msg_id
                     }
                 )
             case '/list':
@@ -101,7 +106,8 @@ class ChatConsumer(WebsocketConsumer):
                     {
                         "type": "global_message",
                         "user": self.user.username,
-                        "message": data['message'] 
+                        "message": data['message'],
+                        "id": msg_id
                     }
                 )
 
@@ -119,4 +125,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def user_leave(self, event):
         self.send(text_data=json.dumps(event))
+
+    def id_generator(self):
+        return time.clock_gettime_ns(time.CLOCK_REALTIME)
 
