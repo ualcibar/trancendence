@@ -4,13 +4,21 @@ import { OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import {AuthService} from './auth.service';
 import { EventDispatcher } from 'three';
 
-class Message {
+export class Message {
   message : string = '';
+  id : number;
   sender: string = '';
   date: string = '';
 
   toString(): string{
     return `message : ${this.message}, sender ${this.sender}`;
+  }
+
+  constructor(message: string, id: number, sender: string, date: string) {
+    this.message = message;
+    this.id = id;
+    this.sender = sender;
+    this.date = date;
   }
 }
 
@@ -24,7 +32,7 @@ export class ChatService {
   users: Set<string> = new Set<string>();
   connected : boolean = false;
 
-  webSocketUrl = 'wss://localhost/ws/chat/global/';
+  webSocketUrl = 'wss://10.13.7.6/ws/chat/global/';
   //webSocketUrl = 'disabled';
 
   webSocket : WebSocket;
@@ -58,43 +66,54 @@ export class ChatService {
       let targetChannel = this.current_chat_name;
       let message: string;
       console.log('message incoming');
-      switch (data.type){
-        case 'private_message':
-          console.log('message for me');
-          console.log(data);
-          if (!this.chatMessages.has(data.user)) {
-            this.chatMessages.set(data.user, []);
-          }
-          targetChannel = data.user;
-          message = data.message;
-          break;
-        case 'private_message_delivered':
-          targetChannel = this.current_chat_name;
-          message = data.message;
-          break;
-        case 'global_message':
-          targetChannel = '#global';
-          message = data.message;
-          break;
-        case 'user_list':
-          this.users = new Set(data.users);
-          return;
-        case 'user_join':
-          this.users.add(data.user);
-          return;
-        case 'user_leave':
-          this.users.delete(data.user);
-          return;
-        default:
-          console.log(data);
-          console.log('message no current channel');
-          return;
-      }
-      const chatMessage = this.chatMessages.get(targetChannel);
-      if (chatMessage)
-        chatMessage.push({ message: message, sender: data.user, date: actualHour });
-      else
-        console.log('no target channel');
+      this.ngZone.run(() => {
+        switch (data.type){
+          case 'private_message':
+            console.log('message for me');
+            console.log(data);
+            if (!this.chatMessages.has(data.user)) {
+              this.chatMessages.set(data.user, []);
+            }
+            targetChannel = data.user;
+            message = data.message;
+            break;
+          case 'private_message_delivered':
+            targetChannel = this.current_chat_name;
+            message = data.message;
+            break;
+          case 'global_message':
+            targetChannel = '#global';
+            message = data.message;
+            break;
+          case 'user_list':
+            this.users = new Set(data.users);
+            return;
+          case 'user_join':
+            this.users.add(data.user);
+            return;
+          case 'user_leave':
+            this.users.delete(data.user);
+            return;
+          default:
+            console.log(data);
+            console.log('message no current channel');
+            return;
+        }
+
+        const chatMessage = this.chatMessages.get(targetChannel);
+        if (chatMessage)
+          chatMessage.push({ message: message, id: data.id, sender: data.user, date: actualHour });
+        else
+          console.log('no target channel');
+      });
+
+      // TEMP
+      this.addChat("lol");
+      this.addChat("lol1");
+      this.addChat("lol2");
+      this.addChat("lol3");
+      this.addChat("lol4");
+
     };
   }
   isConnected(): boolean{
@@ -128,12 +147,12 @@ export class ChatService {
   getChatMessages(chat : string): Message[]{
     const messages = this.chatMessages.get(chat);
     if (messages){
-      for (const message in messages){
-        console.log(`chat : ${chat} message: ${message}`);
-      }
+      //for (const message in messages){
+      //  console.log(`chat : ${chat} message: ${message}`);
+      //}
       return messages;
     }
-    console.log(`no chat : ${chat}`);
+   // console.log(`no chat : ${chat}`);
     return [];
   }
 }

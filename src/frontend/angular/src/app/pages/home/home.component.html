@@ -1,7 +1,8 @@
 <div class="bg-transparent">
 	<button (click)="changeState(HomeState.Home)" class="btn text-white">reset</button>
 	<div class="flex justify-center items-center h-auto">
-		<div class="w-1/2 min-w-1/2 chat p-6">
+		<!-- <div class="w-1/2 min-w-1/2 chat p-6"> -->
+		<div class="w-1/2 p-6">
 			<app-chat [@fadeInOut]></app-chat>
 		</div>
 		<div *ngIf="matchmakingService.state ===  MatchMakingState.Standby" class="w-1/2">
