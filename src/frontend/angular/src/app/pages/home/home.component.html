@@ -20,7 +20,7 @@
 				<app-lobby-search></app-lobby-search>
 			</div>
 			<div *ngIf="state === HomeState.Local" class="w-1/2 menu" [@fadeInOut]>
-				<h1 class="text-white">not done</h1>
+				<app-tournament-match-menu [multiplayer]="false"></app-tournament-match-menu>
 			</div>
 		</div>
 		<div *ngIf="matchmakingService.state === MatchMakingState.Connecting">

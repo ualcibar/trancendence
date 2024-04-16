@@ -4,6 +4,7 @@ import { ChatComponent } from '../../components/chat/chat.component';
 import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
 import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.component';
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
+import { TournamentMatchMenuComponent } from '../../components/tournament-match-menu/tournament-match-menu.component';
 
 import { MatchmakingService, MatchMakingState } from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
@@ -18,7 +19,7 @@ enum HomeState{
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyMatchComponent, LobbyTournamentComponent],
+  imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyMatchComponent, LobbyTournamentComponent, TournamentMatchMenuComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   animations: [fadeInOut]
