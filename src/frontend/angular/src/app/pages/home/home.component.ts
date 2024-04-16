@@ -43,7 +43,7 @@ export class HomeComponent implements OnInit{
         // Espera un tiempo antes de marcar que la animación ha terminado
         setTimeout(() => {
           this.isAnimating = false;
-        }, 1000); // Ajusta este valor según la duración de tu animación
+        }, 301); // Ajusta este valor según la duración de tu animación
     }
 }
 

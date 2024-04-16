@@ -5,12 +5,15 @@
 			<app-chat [@fadeInOut]></app-chat>
 		</div>
 		<div *ngIf="matchmakingService.state ===  MatchMakingState.Standby" class="w-1/2">
-			<div *ngIf="!isAnimating" class="menu">
+			<div *ngIf="!isAnimating && state === HomeState.Home" class="menu">
 				<button (click)="changeState(HomeState.Local)" class="card mb-16" [@fadeInOut]>
 					<h2>LOCAL</h2>
 				</button>
 				<button (click)="changeState(HomeState.Multiplayer)" class="card mb-16" [@fadeInOut]>
 					<h2>MULTIPLAYER</h2>
+				</button>
+				<button (click)="changeState(HomeState.Multiplayer)" class="card mb-16" [@fadeInOut]>
+					<h2>COMMUNITY</h2>
 				</button>
 			</div>
 			<div *ngIf="state === HomeState.Multiplayer" class="w-1/2 multiplayer" [@fadeInOut]="state" (@fadeInOut.done)="isAnimating = false">
