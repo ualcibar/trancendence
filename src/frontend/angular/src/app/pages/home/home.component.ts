@@ -6,7 +6,7 @@ import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.co
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 import { TournamentMatchMenuComponent } from '../../components/tournament-match-menu/tournament-match-menu.component';
 
-import { MatchmakingService, MatchMakingState } from '../../services/matchmaking.service';
+import { MatchmakingService, MatchMakingState, GameState} from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
 import { fadeInOut } from './animations';
 
@@ -29,6 +29,7 @@ export class HomeComponent implements OnInit{
     isAnimating : boolean = false;
     state : HomeState;
     HomeState = HomeState;
+    GameState = GameState;
     MatchMakingState = MatchMakingState;
     constructor(public matchmakingService : MatchmakingService) {
         this.state = HomeState.Home;

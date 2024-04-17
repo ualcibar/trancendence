@@ -9,11 +9,12 @@ export enum GameType {
 
 export enum MatchMakingState{
   Standby,
-  Connecting,
   OnGame,
 }
 
-enum GameState{ 
+export enum GameState{ 
+  Connecting,
+  WaitingForPlayers,
   Starting,
   Running,
   FinishedSuccess,
@@ -146,6 +147,7 @@ export class MatchmakingService {
   entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
 
   state : MatchMakingState = MatchMakingState.Standby;
+  gameState : GameState | undefined;
   currentGame : Tournament | Match | undefined;
 
   constructor(private authService : AuthService) {
@@ -175,10 +177,14 @@ export class MatchmakingService {
     this.peerConnection.onicecandidate = event => {
       if (event.candidate){
         console.log("Sending ice candidate to peer", event.candidate);
+        const message = {type : '/webrtc/candidate', candidate : event.candidate};
+        this.sendMessage(JSON.stringify(message));
       }
     }
     this.peerConnection.oniceconnectionstatechange = event => {
       console.log("ICE connection state: ", this.peerConnection.iceConnectionState);
+      if (this.peerConnection.iceConnectionState === 'connected')
+        this.gameState = GameState.WaitingForPlayers;
     }
   }
   
@@ -206,7 +212,7 @@ export class MatchmakingService {
               this.state = MatchMakingState.Standby;
               break;
             case 'JoiningGame':
-              this.state = MatchMakingState.Connecting;
+              this.state = MatchMakingState.OnGame;
               break;
             case 'InGame':
               this.state = MatchMakingState.OnGame
@@ -249,7 +255,8 @@ export class MatchmakingService {
         case 'new_match_result':
           switch (data.status){
             case 'success':
-              this.state = MatchMakingState.Connecting;
+              this.state = MatchMakingState.OnGame;
+              this.gameState = GameState.WaitingForPlayers;
               this.currentGame = new Match(data.match.name, 1, this.authService.userinfo);
               break;
             case 'failure_already_host':
@@ -282,7 +289,8 @@ export class MatchmakingService {
               this.state = MatchMakingState.Standby;
               break;
             case 'success':
-              this.state = MatchMakingState.Connecting;
+              this.state = MatchMakingState.OnGame;
+              this.gameState = GameState.WaitingForPlayers;
               this.currentGame = new Match(data.match.name, data.match.teamSize, data.match.users);
               break;
             default:
@@ -312,7 +320,10 @@ export class MatchmakingService {
               console.error("Error setting remote description", error);
             });
           break;
-
+        case 'webrtc_candidate':
+          if (data.sender != this.authService.userinfo.username)
+            this.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+          break;
         default :
           console.log(`unknown case received: ${data.type}`);
         }

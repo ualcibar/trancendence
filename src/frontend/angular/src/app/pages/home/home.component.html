@@ -24,11 +24,10 @@
 				<app-tournament-match-menu [multiplayer]="false"></app-tournament-match-menu>
 			</div>
 		</div>
-		<div *ngIf="matchmakingService.state === MatchMakingState.Connecting">
-			<app-lobby-match></app-lobby-match>	
-		</div>
-		<div *ngIf="matchmakingService.state === MatchMakingState.OnGame" class="text-white">
-			Game should be playing
+		<div *ngIf="matchmakingService.state === MatchMakingState.OnGame">
+			<div *ngIf="matchmakingService.gameState === GameState.WaitingForPlayers">
+				<app-lobby-match></app-lobby-match>	
+			</div>
 		</div>
 	</div>
 </div>
