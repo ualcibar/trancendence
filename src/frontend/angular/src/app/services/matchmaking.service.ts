@@ -135,7 +135,7 @@ export enum MatchmakingUptate{
   providedIn: 'root'
 })
 export class MatchmakingService {
-  webSocketUrl = 'wss://10.13.7.6/ws/matchmaking/global/';
+  webSocketUrl = 'wss://localhost/ws/matchmaking/global/';
   webSocket : WebSocket | undefined;
   peerConnection : RTCPeerConnection;
   dataChannel : RTCDataChannel;

@@ -32,7 +32,7 @@ export class ChatService {
   users: Set<string> = new Set<string>();
   connected : boolean = false;
 
-  webSocketUrl = 'wss://10.13.7.6/ws/chat/global/';
+  webSocketUrl = 'wss://localhost/ws/chat/global/';
   //webSocketUrl = 'disabled';
 
   webSocket : WebSocket;

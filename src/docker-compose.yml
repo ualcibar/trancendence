@@ -49,13 +49,6 @@ services:
       postgre:
         condition: service_healthy
 
-  turn:
-    container_name: turn
-    build: ./turn
-    network_mode: host
-    volumes:
-      - ./turn/ssl:/etc/openssl/ssl/
-
 
 networks:
   bridge:
