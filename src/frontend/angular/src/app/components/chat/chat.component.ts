@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, NgZone, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { ChatService, Message } from '../../services/chat.service';
@@ -30,25 +30,33 @@ export class ChatComponent implements OnInit{
 	newMessage: string = '';
 	current_chat_name : string= '#global';
 	showSearchBar : boolean = false;
+	chatMessages: Message[] = [];
 
 	@ViewChild('messageBox') messageBox!: ElementRef;
 
-	constructor(private http: HttpClient, private ngZone: NgZone, private chatService : ChatService) {
-		
-	}
+	constructor(private http: HttpClient, private ngZone: NgZone, private chatService : ChatService, private cdr: ChangeDetectorRef) { }
 
 	getKeys() : string[]{
 		return this.chatService.getKeys();
 	}
 
 	ngOnInit(): void {
+		this.fetchChatMessages();
 		this.scrollToBottom();
+	}
+
+	fetchChatMessages(): void {
+		const chat = this.current_chat_name;
+		this.chatMessages = this.chatService.getChatMessages(chat);
+
+		this.cdr.detectChanges();
 	}
 
 	sendMessage(event: any | undefined = undefined) {
 		event?.preventDefault();
 		
 		if (this.newMessage.trim() !== '') {
+			console.log("1111111111111111111111");
 			this.chatService.sendMessage(this.newMessage, this.current_chat_name);
 			this.newMessage = '';
 		}
@@ -56,6 +64,8 @@ export class ChatComponent implements OnInit{
 
 	changeChannel(channel: string): void {
 		this.current_chat_name = channel;
+		console.log(this.current_chat_name);
+		this.fetchChatMessages();
 	}
 
 	togleSearchBar() {
@@ -63,7 +73,6 @@ export class ChatComponent implements OnInit{
 	}
 
 	scapekey() {
-		console.log('scape pressed');
 		this.showSearchBar = false;
 	}
 
@@ -74,25 +83,21 @@ export class ChatComponent implements OnInit{
 		this.showSearchBar = false;
 	}
 
-	trackMessageById(index: number, message: any): any {
-		console.log(message.id);
-		return message.id;
-	}
-
 	getUsers() : string[]{
 		return Array.from(this.chatService.getUsers());
 	}
+
 	getChatMessages(chat : string) : Message[]{
 		setTimeout(() => {
 			this.scrollToBottom();
 		}, 0);
+		console.log("holaaaa");
 		return this.chatService.getChatMessages(chat);
 	}
 		
 	private scrollToBottom(): void {
-			const scrollableDiv = document.querySelector('.overflow-y-auto');
-			if (scrollableDiv != null)
-				scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-		}
-
+		const scrollableDiv = document.querySelector('.overflow-y-auto');
+		if (scrollableDiv != null)
+			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+	}
 }

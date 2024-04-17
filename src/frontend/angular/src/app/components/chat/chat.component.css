@@ -75,3 +75,22 @@
 	border: 1px solid #78b2c3;
 	font-weight: bold;
 }
+
+::placeholder {
+    color: rgba(172, 163, 163, 0.534);
+    opacity: 1; /* Firefox */
+  }
+
+.form-control {
+    border: 1px solid transparent;
+    outline: none;
+}
+
+.form-control:focus {
+    border-bottom-color: white;
+    outline: none;
+}
+
+.form-control:valid {
+	background-color: #191a3d00!important;
+}

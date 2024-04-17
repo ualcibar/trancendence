@@ -32,7 +32,7 @@ export class ChatService {
   users: Set<string> = new Set<string>();
   connected : boolean = false;
 
-  webSocketUrl = 'wss://10.13.7.6/ws/chat/global/';
+  webSocketUrl = 'wss://localhost/ws/chat/global/';
   //webSocketUrl = 'disabled';
 
   webSocket : WebSocket;
@@ -84,6 +84,7 @@ export class ChatService {
           case 'global_message':
             targetChannel = '#global';
             message = data.message;
+            console.log("lo he mandado al global tambien");
             break;
           case 'user_list':
             this.users = new Set(data.users);
@@ -106,23 +107,18 @@ export class ChatService {
         else
           console.log('no target channel');
       });
-
-      // TEMP
-      this.addChat("lol");
-      this.addChat("lol1");
-      this.addChat("lol2");
-      this.addChat("lol3");
-      this.addChat("lol4");
-
     };
   }
   isConnected(): boolean{
     return this.connected && this.webSocket.readyState === WebSocket.OPEN;
   }
+
   getKeys() : string[]{
     return Array.from(this.chatMessages.keys());
   }
+
   sendMessage(message : string, target : string) : boolean{
+    console.log(target);
     if (this.isConnected()) {
       let messageObject;
       if (target == '#global')
@@ -138,21 +134,20 @@ export class ChatService {
     }
     return false;
   }
+
   getUsers(): Set<string>{
     return this.users;
   }
+  
   addChat(username : string){
     this.chatMessages.set(username, []);
   }
+
   getChatMessages(chat : string): Message[]{
     const messages = this.chatMessages.get(chat);
     if (messages){
-      //for (const message in messages){
-      //  console.log(`chat : ${chat} message: ${message}`);
-      //}
       return messages;
     }
-   // console.log(`no chat : ${chat}`);
     return [];
   }
 }
