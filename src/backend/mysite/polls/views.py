@@ -253,4 +253,15 @@ class FriendsListView(APIView):
         user.friends.add(*friends)
         user.save()
 
-        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)   
+        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)
+
+# File uploading management
+def upload_file(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(request.FILES["file"])
+            return HttpResponseRedirect("/success/url/")
+    else:
+        form = UploadFileForm()
+    return render(request, "upload.html", {"form": form})
