@@ -14,7 +14,6 @@ import { GameSettings, GameType, MatchmakingService } from '../../services/match
   standalone: true,
   imports: [CommonModule,
     FormsModule,
-    FormsModule,
     ReactiveFormsModule,
     AsyncPipe,
     TournamentMatchMenuComponent],

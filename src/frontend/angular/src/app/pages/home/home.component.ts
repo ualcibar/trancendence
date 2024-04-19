@@ -8,7 +8,8 @@ import { TournamentMatchMenuComponent } from '../../components/tournament-match-
 
 import { MatchmakingService, MatchMakingState, GameState} from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
-import { fadeInOut } from './animations';
+
+import { fadeInOut } from '../../../assets/animations/fadeInOut';
 
 enum HomeState{
     Home,

@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      brightness: {
+        25: '.25',
+      },
       colors: {
         '42': '#292D39',
         '42-selected': '#3e4559',

@@ -65,12 +65,12 @@ export class ChatService {
       const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
       let targetChannel = this.current_chat_name;
       let message: string;
-      console.log('message incoming');
+
       this.ngZone.run(() => {
-        switch (data.type){
+        console.log("Channel type: " + data.type);
+        switch (data.type){ /// GLOBAL IGNORA SWITCH, LUEGO ENTRA DOS VECES; es posble que #global no entre en data.type
           case 'private_message':
             console.log('message for me');
-            console.log(data);
             if (!this.chatMessages.has(data.user)) {
               this.chatMessages.set(data.user, []);
             }
@@ -78,12 +78,14 @@ export class ChatService {
             message = data.message;
             break;
           case 'private_message_delivered':
-            targetChannel = this.current_chat_name;
+            console.log("!!!! Has recibido de " + data.user + " el siguiente mensaje: " + data.message);
+            targetChannel = data.user;
             message = data.message;
             break;
           case 'global_message':
             targetChannel = '#global';
             message = data.message;
+            console.log("lo he mandado al global tambien");
             break;
           case 'user_list':
             this.users = new Set(data.users);
@@ -106,23 +108,18 @@ export class ChatService {
         else
           console.log('no target channel');
       });
-
-      // TEMP
-      this.addChat("lol");
-      this.addChat("lol1");
-      this.addChat("lol2");
-      this.addChat("lol3");
-      this.addChat("lol4");
-
     };
   }
   isConnected(): boolean{
     return this.connected && this.webSocket.readyState === WebSocket.OPEN;
   }
+
   getKeys() : string[]{
     return Array.from(this.chatMessages.keys());
   }
+
   sendMessage(message : string, target : string) : boolean{
+    console.log(target);
     if (this.isConnected()) {
       let messageObject;
       if (target == '#global')
@@ -136,23 +133,21 @@ export class ChatService {
       console.error('WebSocket connection is not open');
       return false;
     }
-    return false;
   }
+
   getUsers(): Set<string>{
     return this.users;
   }
+  
   addChat(username : string){
     this.chatMessages.set(username, []);
   }
+
   getChatMessages(chat : string): Message[]{
     const messages = this.chatMessages.get(chat);
     if (messages){
-      //for (const message in messages){
-      //  console.log(`chat : ${chat} message: ${message}`);
-      //}
       return messages;
     }
-   // console.log(`no chat : ${chat}`);
     return [];
   }
 }

@@ -1,25 +1,22 @@
-<div class="alert alert-secondary alert-dismissible" (keydown)="onKeyPress($event)">
-	<h1 class="text-xl"><i class="bi bi-person-lines-fill"></i> Select a user to chat with</h1>
-	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" (click)="onBlur()"><i class="bi bi-x-lg"></i></button>
-	<form autofocus (keydown)="onKeyPress($event)" (submit)="onFormSubmit()" class="mt-2">
-		<div class="flex place-items-baseline min-w-80 space-y-0">
-			<form class="flex">
-				<input #inputField class="form-control me-2 w-80 max-h-12" [formControl]="myControl" type="text" autofocus placeholder="username">
-				<button type="submit" (click)="onFormSubmit()" class="btn max-h-10 w-20 space-y-0 btn-success bg-green-700"><i class="bi bi-plus-circle"></i>
-					Add</button>
-			</form>
+<div id="sp-div" class="alert alert-dark alert-dismissible flex flex-col justify-start items-start" (keydown)="onKeyPress($event)">
+	<h1 class="text-xl"><i class="bi bi-person-raised-hand"></i> Who do you want to chat with?</h1>
+	<button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close" (click)="onBlur()"></button>
+	<form autofocus class="w-full" (keydown)="onKeyPress($event)" (submit)="onFormSubmit()">
+		<div class="flex">
+			<input #inputField autofocus class="form-control shadow-none" [formControl]="myControl" type="text" placeholder="Write a username here...">
+			<button type="button" (click)="onFormSubmit()" class="btn btn-success rounded-full ml-2"><i class="bi bi-plus-lg"></i></button>
 		</div>
-		<div class="mt-1 space-y-0">
-			<div *ngFor="let option of filteredOptions$ | async">
-				<div *ngIf="option != myControl.value" (click)="autocomplete(option)" class="btn card space-y-0 bg-cyan-900 hover:bg-cyan-800 max-w-80 rounded-none max-h-10">
-					<div class="flex justify-content-between text-white">
-						{{option}} <i class="bi bi-plus-circle-fill ml-2 inset-y-0 right-0"></i>
-					</div>
+		<div *ngFor="let option of filteredOptions$ | async" class="mt-1 flex flex-col md:flex-row md:flex-wrap">
+			<button id="filter-btn" *ngIf="option != myControl.value" (click)="autocomplete(option)" class="btn max-w-full md:max-w-80 rounded-none max-h-10 mb-2 md:mr-2 md:mb-0">
+				<div class="flex justify-content-between text-white">
+					{{option}} <i class="bi bi-plus-circle-fill ml-2 inset-y-0 right-0"></i>
 				</div>
-			</div>
+			</button>
 		</div>
 	</form>
-	<div *ngIf="errorMessage" class="alert alert-warning" style="margin-bottom: -10px;" role="alert">
+	<div *ngIf="errorMessage" class="alert alert-warning alert-dismissible fade show" style="margin-bottom: -10px;" role="alert">
 		<i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
+		<button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close" [@fadeInOut]></button>
 	</div>
 </div>
+

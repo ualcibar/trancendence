@@ -1,0 +1,14 @@
+::placeholder {
+	color: rgba(172, 163, 163, 0.534);
+	opacity: 1;
+}
+
+#filter-btn {
+    background-color: rgba(40, 58, 57, 0.29);
+
+    border-color: #03030330;
+}
+
+#filter-btn:hover {
+    color: #6a7f84;;
+}
