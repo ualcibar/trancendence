@@ -19,6 +19,8 @@ export class AuthService implements OnInit{
   private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   userinfo : UserInfo = new UserInfo('guest', true);
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  username: any;
+  user_id: any;
 
   constructor(private http: HttpClient) {
     this.amILoggedIn().subscribe(value => {
@@ -45,6 +47,20 @@ export class AuthService implements OnInit{
         this.userinfo =  new UserInfo('guest', true);
       }
     );
+  }
+
+  getUserId(): Promise<number> {
+    const backendURL = 'api/polls/getInfo';
+    return new Promise((resolve, reject) => {
+      this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
+        response => {
+          console.log(response['userid']);
+        },
+        error => {
+          reject(error.status);
+        }
+      );
+    })
   }
 
   ngOnInit() {

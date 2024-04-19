@@ -1,5 +1,5 @@
 import { Component , OnInit} from '@angular/core';
-import {AuthService} from '../../services/auth.service';
+import {AuthService, UserInfo} from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,10 +8,17 @@ import {AuthService} from '../../services/auth.service';
 })
 export class NavbarComponent implements OnInit{
   loggedIn : boolean = false;
-  constructor(private authService: AuthService) { }
+  userId: number = -1;
+
+  constructor(private authService: AuthService) {}
+
   ngOnInit() {
     this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       this.loggedIn = isLoggedIn;
+    });
+
+    this.authService.getUserId().then(userId => {
+      this.userId = userId;
     });
   }
   logout(){

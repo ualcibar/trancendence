@@ -16,6 +16,7 @@ urlpatterns = [
     path("logout/", views.logout, name='logout'),
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
     path("getInfo/", views.getInfo, name="get_info"),
+    path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('user/<int:user_id>/', CustomUserView.as_view(), name='user_info'),
     path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),

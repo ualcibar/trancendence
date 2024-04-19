@@ -39,10 +39,37 @@ def getOauth2Token(code):
 
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
-def getInfo(request): 
+def getInfo(request, user_id=None):
+    '''
+    Esta función acepta también el valor de ID.
+    Por que?
+     - Nos permite gestionar los perfiles para mostrar su contenido en el frontend
+    Funciona con usuarios solamente?
+     - Para hacer llamadas para obtener solamente el usuario, también funciona.
+    '''
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
-    return JsonResponse({'username': request.user.username}, status=200)
+
+    if user_id is not None:
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
+    else:
+        try:
+            user = CustomUser.objects.get(username=request.user.username)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
+    return JsonResponse({
+        'username': user.username,
+        'userid': user.id,
+        'status': user.status,
+        'total': user.total,
+        'wins': user.wins,
+        'defeats': user.loses
+        }, status=200)
 
 @api_view(['POST'])
 def loginWith42Token(request):
