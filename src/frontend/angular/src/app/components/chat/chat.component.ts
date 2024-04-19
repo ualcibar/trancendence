@@ -48,12 +48,9 @@ export class ChatComponent implements OnInit{
 		this.scrollToBottom();
 	}
 
-
-
 	fetchChatMessages(): void {
 		const chat = this.current_chat_name;
 		this.chatMessages = this.chatService.getChatMessages(chat);
-		console.log(chat);
 
 		this.cdr.detectChanges();
 	}
@@ -61,8 +58,8 @@ export class ChatComponent implements OnInit{
 	sendMessage(event: any | undefined = undefined) {
 		event?.preventDefault();
 		
+		console.log(this.newMessage + " : " + this.current_chat_name);
 		if (this.newMessage.trim() !== '') {
-			console.log(this.current_chat_name);
 			this.chatService.sendMessage(this.newMessage, this.current_chat_name);
 			this.newMessage = '';
 		}
@@ -70,7 +67,6 @@ export class ChatComponent implements OnInit{
 
 	changeChannel(channel: string): void {
 		this.current_chat_name = channel;
-		console.log(this.current_chat_name);
 		this.fetchChatMessages();
 	}
 
@@ -97,7 +93,6 @@ export class ChatComponent implements OnInit{
 		setTimeout(() => {
 			this.scrollToBottom();
 		}, 0);
-		console.log("holaaaa");
 		return this.chatService.getChatMessages(chat);
 	}
 		
