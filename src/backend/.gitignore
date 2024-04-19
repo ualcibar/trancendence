@@ -1,2 +1,3 @@
 mysite/myenv
 mysite/django.log
+mysite/chat/__pycache__/*

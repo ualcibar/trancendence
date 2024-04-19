@@ -4,3 +4,7 @@
 # Archivos de configuración del sistema: 
 .vscode/
 src/backend/mysite/myenv/
+src/backend/mysite/chat/__pycache__/
+
+
+*.pyc

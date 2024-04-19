@@ -1,0 +1,11 @@
+#time {
+    text-align: right;
+    color: black;
+    background-color: gray;
+}
+
+#welcome {
+    color: lime;
+    background-color: magenta;
+    font-family: 'Jokerhand', cursive;
+}

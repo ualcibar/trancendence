@@ -203,6 +203,15 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'answer': data['answer'],
                     }
                 ) 
+            case '/webrtc/candidate':
+                async_to_sync(self.channel_layer.group_send)(
+                    f'{self.user.game_room_name}',
+                    {
+                        'type': 'webrtc_candidate',
+                        'candidate': data['candidate'],
+                        'sender': self.user.username
+                    }
+                ) 
             case '/leave/game':
                 self.user.status = 'Connected'
                 self.user.save()
@@ -232,6 +241,8 @@ class MatchMakingConsumer(WebsocketConsumer):
     def user_join(self, event):
         self.send(text_data=json.dumps(event))
     def webrtc_answer(self, event):
+        self.send(text_data=json.dumps(event))
+    def webrtc_candidate(self, event):
         self.send(text_data=json.dumps(event))
     def player_joined_match(self, event):
         self.send(text_data=json.dumps(event))
