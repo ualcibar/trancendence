@@ -25,43 +25,12 @@ export class LoginComponent {
     window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2Flocalhost%3A4200&response_type=code&state=login';
   }
 
-
-  imLoggedIn() {
-    const backendURL = '/api/polls/imLoggedIn';
-    this.http.get<any>(backendURL, {withCredentials: true}).subscribe(
-      response => {
-        console.log('Sent data: ', response);
-      },
-      error => {
-        console.error('An error ocurred trying to contact the registration server:', error.status);
-      }
-    );
-  }
-
-  loginAcc() {
-    const backendURL = '/api/polls/login/';
-    const jsonToSend = {
-      username: this.user.username,
-      password: this.user.password
-    };
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type' : 'application/json'
-      }),
-      withCredentials: true
-    };
-
-    this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
-      response => {
-        this.successMessage = response.message;
-        this.auth.login();
-        this.router.navigate(['/']);
-      },
-      error => {
-        console.error('An error ocurred trying to contact the registration server:', error.status);
-        this.errorMessage = error.error.message;
-      }
-    );
+  async loginAcc() {
+    if (await this.auth.login(this.user.username, this.user.password)){
+      this.successMessage = 'login successful';
+      this.router.navigate(['/']); 
+    }else {
+      this.successMessage = 'failed to login';
+    }
   }
 }

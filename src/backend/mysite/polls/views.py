@@ -24,7 +24,7 @@ import requests
 import json
 import logging
 
-logger = logging.getLogger('polls')
+logger = logging.getLogger('std')
 
 def getOauth2Token(code):
     sendJson = {'code': code}
@@ -38,7 +38,6 @@ def getOauth2Token(code):
 
 
 @api_view(['GET'])
-@authentication_classes([CustomAuthentication])
 def getInfo(request): 
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
@@ -117,10 +116,8 @@ def registerWith42Token(request):
 
 
 @api_view(['GET'])
-@authentication_classes([CustomAuthentication])
+#@permission_classes([IsAuthenticated])
 def imLoggedIn(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'message': 'you are not logged in'}, status=401)
     return JsonResponse({'message': 'you are logged'}, status=201)
 
 
@@ -130,8 +127,8 @@ def logout(request):
     response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
     return response
 
-
 @api_view(['POST'])
+@authentication_classes([])
 def register(request):
     data = json.loads(request.body)
     username = data.get('username', '')
@@ -177,8 +174,10 @@ def get_tokens_for_user(user):
     }
 
 
-class LoginView(APIView):
-    def post(self, request, format=None):
+@api_view(['POST'])
+@authentication_classes([])
+def login(request):
+        logger.debug('login request received')
         data = request.data
         response = Response()
         username = data.get('username', None)
@@ -187,17 +186,27 @@ class LoginView(APIView):
 
         if user is not None:
             if user.is_active:
-                data = get_tokens_for_user(user)
+                refresh = RefreshToken.for_user(user)
                 response.set_cookie(
                     key=settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value=data["access"],
+                    value=refresh.access_token,
                     expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                     secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                )
+                response.set_cookie(
+                    key='refresh_token',
+                    value=refresh,
+                    expires=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
+                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
                 # csrf.get_token(request)
+                logger.debug('loggin successful')
                 response.data = {"Success": "Login successfully", "data": data}
+                response.status = 200
                 return response
             else:
                 return Response({"message": "This account is not active!!"}, status=500)

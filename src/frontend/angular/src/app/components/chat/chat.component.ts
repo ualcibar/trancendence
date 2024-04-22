@@ -63,7 +63,6 @@ export class ChatComponent implements OnInit{
 	}
 
 	scapekey() {
-		console.log('scape pressed');
 		this.showSearchBar = false;
 	}
 
@@ -75,7 +74,6 @@ export class ChatComponent implements OnInit{
 	}
 
 	trackMessageById(index: number, message: any): any {
-		console.log(message.id);
 		return message.id;
 	}
 

@@ -18,7 +18,6 @@ export class RegisterComponent implements OnInit {
     constructor(private http: HttpClient) {}
 
     ngOnInit(): void {
-        console.log("unai sucks");//so true
     }
 
     register42Api() {
@@ -35,7 +34,7 @@ export class RegisterComponent implements OnInit {
         const httpOptions = {
             headers: new HttpHeaders({
                 'Content-Type' : 'application/json'
-            })
+            }),
         };
 
         this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(

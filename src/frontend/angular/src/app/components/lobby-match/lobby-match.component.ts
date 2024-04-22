@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 
 enum LobbyMatchState {
   Error,
+  Waiting,
   Ok
 }
 
@@ -22,11 +23,7 @@ export class LobbyMatchComponent {
   LobbyMatchState = LobbyMatchState;
   MatchMakingState = MatchMakingState;
   constructor(private matchmaking: MatchmakingService) {
-    if (matchmaking.state !== MatchMakingState.Connecting){
-      this.state = LobbyMatchState.Error;
-      console.error('matchmaking state is not connecting')
-    }
-    else{
+  {
       this.state = LobbyMatchState.Ok
       if (this.matchmaking.currentGame){
         this.team_a = new Array(this.matchmaking.currentGame.teamSize).fill(undefined);
@@ -42,8 +39,8 @@ export class LobbyMatchComponent {
           player_index++;
         }
       }else{
-        this.state = LobbyMatchState.Error;
-        console.error('current game not initialized in matchmaking service')
+        this.state = LobbyMatchState.Waiting;
+        //console.error('current game not initialized in matchmaking service')
       }
     }
   }

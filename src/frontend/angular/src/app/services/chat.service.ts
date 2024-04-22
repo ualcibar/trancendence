@@ -65,12 +65,9 @@ export class ChatService {
       const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
       let targetChannel = this.current_chat_name;
       let message: string;
-      console.log('message incoming');
       this.ngZone.run(() => {
         switch (data.type){
           case 'private_message':
-            console.log('message for me');
-            console.log(data);
             if (!this.chatMessages.has(data.user)) {
               this.chatMessages.set(data.user, []);
             }

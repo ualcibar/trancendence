@@ -183,8 +183,10 @@ export class MatchmakingService {
     }
     this.peerConnection.oniceconnectionstatechange = event => {
       console.log("ICE connection state: ", this.peerConnection.iceConnectionState);
-      if (this.peerConnection.iceConnectionState === 'connected')
+      if (this.peerConnection.iceConnectionState === 'connected'){
+        this.state = MatchMakingState.OnGame;
         this.gameState = GameState.WaitingForPlayers;
+      }
     }
   }
   
@@ -204,7 +206,6 @@ export class MatchmakingService {
     };
     this.webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log(`message recieved ${data}`);
       switch (data.type) {
         case 'status':
           switch (data.status){
@@ -248,7 +249,6 @@ export class MatchmakingService {
           }
           break;
         case 'match_tournament_list':
-          console.log(`list ${data.matches} ${data.tournaments}`);
           this.entries.set(GameType.Match, data.matches);
           this.entries.set(GameType.Tournament, data.tournaments);
           break;
@@ -258,6 +258,7 @@ export class MatchmakingService {
               this.state = MatchMakingState.OnGame;
               this.gameState = GameState.WaitingForPlayers;
               this.currentGame = new Match(data.match.name, 1, this.authService.userinfo);
+              console.log("successfully created match");
               break;
             case 'failure_already_host':
               console.error('failed to create match, already in a match');
@@ -290,8 +291,9 @@ export class MatchmakingService {
               break;
             case 'success':
               this.state = MatchMakingState.OnGame;
-              this.gameState = GameState.WaitingForPlayers;
+              this.gameState = GameState.Connecting;
               this.currentGame = new Match(data.match.name, data.match.teamSize, data.match.users);
+              console.log('successfully joined game group, waiting for webrtc');
               break;
             default:
               console.error(`cant find status ${data.status}`);
@@ -350,7 +352,6 @@ export class MatchmakingService {
     return Array.from(this.entries.keys());
   }
   newGame(gameSettings : GameSettings){
-    console.log('new game called');
     if (this.isConnected()){
       let messageObject;
       if (gameSettings.gameType === GameType.Tournament){
@@ -360,11 +361,10 @@ export class MatchmakingService {
       }else
         return;
       this.sendMessage(JSON.stringify(messageObject));
-      console.log('new match tournament message send');
+      console.log('new game called');
     }
   }
   reloadMatchesTournamets(){
-    console.log('reload called');
     if (this.isConnected()){
       let messageObject = {type : '/match_tournament_list'};
       this.sendMessage(JSON.stringify(messageObject));
@@ -372,6 +372,7 @@ export class MatchmakingService {
   }
 
   async joinMatch(matchName : string){
+    console.log('join match called');
     if (this.isConnected()){
       const sdp = await this.createOffer();
       if (sdp !== undefined && sdp !== null) {
@@ -382,7 +383,8 @@ export class MatchmakingService {
           }
         this.sendMessage(JSON.stringify(messageObject));
       }
-    }
+    }else
+      console.error('failled to join match called');
   }
   async joinTournament(tournamentName : string){
     if (this.isConnected()){
@@ -403,8 +405,6 @@ export class MatchmakingService {
     const offer = await this.peerConnection.createOffer();
     await this.peerConnection.setLocalDescription(offer);
     return offer;
-    //let message = {type : 'offer', offer : offer};
-    //this.sendMessage(JSON.stringify(message));
   }
   async createAnswer(offer: RTCSessionDescription, target : string){
     await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
@@ -412,11 +412,6 @@ export class MatchmakingService {
     await this.peerConnection.setLocalDescription(answer);
     const message = JSON.stringify({type : '/webrtc/answer', answer : answer, target : target});
     this.sendMessage(message);
-  }
-  getCandidate(candidate : RTCIceCandidateInit){
-    this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).then(() => {
-        console.log("candidate add success");
-    });
   }
   sendMessage(message : string): boolean {
     if (this.isConnected()) {

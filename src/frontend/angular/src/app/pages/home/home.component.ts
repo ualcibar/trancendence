@@ -6,6 +6,7 @@ import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.co
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 import { TournamentMatchMenuComponent } from '../../components/tournament-match-menu/tournament-match-menu.component';
 
+import { AuthService } from '../../services/auth.service';
 import { MatchmakingService, MatchMakingState, GameState} from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
 import { fadeInOut } from './animations';
@@ -31,7 +32,7 @@ export class HomeComponent implements OnInit{
     HomeState = HomeState;
     GameState = GameState;
     MatchMakingState = MatchMakingState;
-    constructor(public matchmakingService : MatchmakingService) {
+    constructor(public matchmakingService : MatchmakingService, private authService :AuthService) {
         this.state = HomeState.Home;
     }
     ngOnInit(): void {
@@ -40,12 +41,14 @@ export class HomeComponent implements OnInit{
     changeState(newState: HomeState): void {
         this.state = newState; // Cambia el estado
         this.isAnimating = true;
-        console.log(this.isAnimating);
-    
+        console.log(this.isAnimating); 
         // Espera un tiempo antes de marcar que la animación ha terminado
         setTimeout(() => {
           this.isAnimating = false;
         }, 301); // Ajusta este valor según la duración de tu animación
+    }
+    refresh(){
+      this.authService.refreshToken();
     }
 }
 
