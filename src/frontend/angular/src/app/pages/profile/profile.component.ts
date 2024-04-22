@@ -5,5 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
-
 }

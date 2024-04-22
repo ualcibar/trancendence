@@ -1,10 +1,13 @@
 import { Component} from '@angular/core';
-import { Router} from '@angular/router';
+import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
+import { fadeInOut } from '../../../assets/animations/fadeInOut';
+
 @Component({
   selector: 'app-login',
+  animations: [fadeInOut],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -56,7 +59,7 @@ export class LoginComponent {
       response => {
         this.successMessage = response.message;
         this.auth.login();
-        this.router.navigate(['/']);
+        window.location.href="/";
       },
       error => {
         console.error('An error ocurred trying to contact the registration server:', error.status);

@@ -6,13 +6,17 @@
 			<input #inputField autofocus class="form-control shadow-none" [formControl]="myControl" type="text" placeholder="Write a username here...">
 			<button type="button" (click)="onFormSubmit()" class="btn btn-success rounded-full ml-2"><i class="bi bi-plus-lg"></i></button>
 		</div>
-		<div *ngFor="let option of filteredOptions$ | async" class="mt-1 flex flex-col md:flex-row md:flex-wrap">
-			<button id="filter-btn" *ngIf="option != myControl.value" (click)="autocomplete(option)" class="btn max-w-full md:max-w-80 rounded-none max-h-10 mb-2 md:mr-2 md:mb-0">
-				<div class="flex justify-content-between text-white">
-					{{option}} <i class="bi bi-plus-circle-fill ml-2 inset-y-0 right-0"></i>
-				</div>
-			</button>
-		</div>
+		<ng-container *ngFor="let option of filteredOptions$ | async">
+			<ng-container *ngIf="option != myControl.value">
+				<ng-template [ngIf]="true">
+					<button id="filter-btn" (click)="autocomplete(option)" class="btn max-w-full md:max-w-80 rounded-none max-h-10 mb-2 md:mr-2 md:mb-0">
+						<div class="flex justify-content-between text-white">
+							{{option}} <i class="bi bi-plus-circle-fill ml-2 inset-y-0 right-0"></i>
+						</div>
+					</button>
+				</ng-template>
+			</ng-container>
+		</ng-container>
 	</form>
 	<div *ngIf="errorMessage" class="alert alert-warning alert-dismissible fade show" style="margin-bottom: -10px;" role="alert">
 		<i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}

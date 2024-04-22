@@ -30,6 +30,7 @@ export class AuthService implements OnInit{
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
       response => {
         this.userinfo = new UserInfo(response['username'], true);
+        this.user_id = response['userid'];
       },
       error => {
         this.userinfo =  new UserInfo('guest', true);
@@ -47,20 +48,6 @@ export class AuthService implements OnInit{
         this.userinfo =  new UserInfo('guest', true);
       }
     );
-  }
-
-  getUserId(): Promise<number> {
-    const backendURL = 'api/polls/getInfo';
-    return new Promise((resolve, reject) => {
-      this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
-        response => {
-          console.log(response['userid']);
-        },
-        error => {
-          reject(error.status);
-        }
-      );
-    })
   }
 
   ngOnInit() {

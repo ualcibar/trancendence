@@ -1,4 +1,3 @@
-<br>
 <div id="sp-div" class="max-w-xl mx-auto shadow-md rounded-xl overflow-hidden md:max-w-2xl items-center">
 	<div class="p-8 w-full">
 		<p class="text-center text-3xl font-semibold">Register to SpacePong!</p>
@@ -33,14 +32,23 @@
 	</div>
 </div>
 
-<div  *ngIf="errorMessage" class="pt-6 flex items-center justify-center">
-	<div class="alert alert-danger max-auto max-w-xl">
-		<i class="bi bi-x-circle"></i> {{ errorMessage }}
+<div *ngIf="errorMessage" class="pt-6 flex items-center justify-center" [@fadeInOut]>
+	<div class="alert max-auto max-w-xl" style="background-color: #db4d4d;">
+		<i class="bi bi-x-circle text-black"></i>
+		<div>
+			<h4 class="font-bold text-black">Oops!</h4>
+			<p class="text-black">{{ errorMessage }}</p>
+		</div>
 	</div>
 </div>
 
 <div *ngIf="successMessage" class="pt-6 flex items-center justify-center">
 	<div class="alert alert-success max-auto max-w-xl">
-		<i class="bi bi-check-circle"></i> {{ successMessage }}
+		<i class="bi bi-check-circle"></i>
+		<div>
+			<h4 class="font-bold">Success!</h4>
+			{{ successMessage }}
+			<i>Redirecting...</i>
+		</div>
 	</div>
 </div>

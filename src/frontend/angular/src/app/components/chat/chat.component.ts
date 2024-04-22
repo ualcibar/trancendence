@@ -80,7 +80,7 @@ export class ChatComponent implements OnInit{
 
 	fieldSelected(username: string) {
 		this.ngZone.run(() => {
-      	this.chatService.addChat(username);
+			this.chatService.addChat(username);
 		});
 		this.showSearchBar = false;
 	}
