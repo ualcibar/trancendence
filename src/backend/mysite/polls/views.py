@@ -148,8 +148,6 @@ def registerWith42Token(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def imLoggedIn(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'message': 'you are not logged in'}, status=401)
     return JsonResponse({'message': 'you are logged'}, status=201)
 
 
