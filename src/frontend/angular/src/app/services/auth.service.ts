@@ -25,26 +25,24 @@ export class AuthService implements OnInit{
   constructor(private http: HttpClient) {
     this.amILoggedIn(); 
     const backendURL = 'api/polls/getInfo';
-    this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
-      (response) => {
+    this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
+      next: (response) => {
         this.userinfo = new UserInfo(response['username'], true);
-        this.user_id = response['userid'];
       },
-      (error) => {
+      error: () => {
         this.userinfo =  new UserInfo('guest', true);
       }
-    );
+    })
   }
 
-  updateUserInfo(){
+  updateUserInfo(): Observable<UserInfo>{
     const backendURL = 'api/polls/getInfo';
-    this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
-      response => {
-        this.userinfo = new UserInfo(response['username'], true);
-      },
-      error => {
-        this.userinfo =  new UserInfo('guest', true);
-      }
+    return this.http.get<any>(backendURL, { withCredentials: true }).pipe(
+      map(Response => ({
+        username: Response.username,
+        userid: Response.userid,
+        online: Response.status
+      }))
     );
   }
 
@@ -54,20 +52,19 @@ export class AuthService implements OnInit{
 
   async amILoggedIn(): Promise<boolean>{
     let backendURL = 'api/polls/imLoggedIn';
-    this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
-      (response) => {
-        console.log('im logged in');
+    this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
+      next: () => {
+        console.log("|!| You are logged in!")
         this.isLoggedInSubject.next(true);
         return true;
       },
-      (error) => {
+      error: () => {
         this.refreshToken().then(value => {
           this.isLoggedInSubject.next(value);
           return value;
-        }
-      );
+        })
       }
-    )
+    });
     return false;
   }
 
@@ -85,15 +82,15 @@ export class AuthService implements OnInit{
           })
         };
 
-        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
-          (response) => {
+        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
+          next: () => {
             this.isLoggedInSubject.next(true);
             value(true);
           },
-          (error) => {
+          error: () => {
             value(false);
           }
-        );
+        });
       } catch (error) {
         console.error('An error occurred while contacting the registration server:');
         value(false);
@@ -130,14 +127,14 @@ export class AuthService implements OnInit{
 
   logout() {
     const backendURL = 'api/polls/logout/';
-    this.http.post<any>(backendURL, {},{withCredentials: true}).subscribe(
-      response => {
+    this.http.post<any>(backendURL, {},{withCredentials: true}).subscribe({
+      next: (response) => {
         console.log('Sent data: ', response);
       },
-      error => {
+      error: (error) => {
         console.error('An error ocurred trying to contact the registration server: ', error);
       }
-    );
+    });
     var accessToken = localStorage.getItem('access_token');
     // Logic to perform logout
     if (accessToken) {
@@ -154,15 +151,15 @@ export class AuthService implements OnInit{
       return new Promise<boolean>(()=>false);
     }
     const backendURL = 'api/polls/token/refresh/';
-    this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe(
-      response => {
+    this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
+      next: (response) => {
         console.log('success refresh?', response);
         return this.amILoggedIn();
       },
-      error => {
+      error: () => {
         return false;
       }
-    );
+    });
     return new Promise<boolean>(() => false);
   }
 

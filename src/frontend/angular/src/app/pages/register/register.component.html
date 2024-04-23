@@ -42,13 +42,13 @@
 	</div>
 </div>
 
-<div *ngIf="successMessage" class="pt-6 flex items-center justify-center">
+<div *ngIf="successMessage" class="pt-6 flex items-center justify-center" [@fadeInOut]>
 	<div class="alert alert-success max-auto max-w-xl">
 		<i class="bi bi-check-circle"></i>
 		<div>
 			<h4 class="font-bold">Success!</h4>
 			{{ successMessage }}
-			<i>Redirecting...</i>
+			<i>Redirecting to the login page...</i>
 		</div>
 	</div>
 </div>

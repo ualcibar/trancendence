@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AuthService } from '../../../services/auth.service';
+import { AuthService, UserInfo } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -19,36 +19,40 @@ export class UserProfileComponent {
   unauthorizedAccess = false;
   loading = true;
   editProfile = false;
+  logged_username: any;
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const userId = params['userId'];
-      this.getUserInfo(userId);
-      console.log(this.authService.user_id);
-      console.log(userId);
-      if (this.authService.user_id === userId) { // Esto hay que revisarlo
-        console.log("lol");
-        this.editProfile = true;
+    this.authService.updateUserInfo().subscribe({
+      next: (userInfo: any) => {
+        this.logged_username = userInfo.username;
+        this.route.params.subscribe(params => { // Esto hay que mirarlo, porquqe si lo del getUserInfo() falla por no estar con la sesión
+          // iniciada, entonces se queda "cargando" infinitamente
+          const userId = params['userId'];
+          this.getUserInfo(userId);
+        });
       }
     });
   }
 
   getUserInfo(userId: number): void {
     const backendURL = 'api/polls/getInfo/' + userId;
-    this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
-      response => {
+    this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
+      next: (response) => {
         this.username = response['username'];
         this.user_id = response['userid'];
         this.total = response['total'];
         this.wins = response['wins'];
         this.defeats = response['defeats'];
+
+        if (this.logged_username === this.username) {
+          this.editProfile = true;
+        }
         this.loading = false;
         this.user_not_found = false;
-        console.log('id is ', this.user_id);
       },
-      error => {
+      error: (error) => {
         console.error('An error ocurred fetching this user: ', error.status);
         this.loading = false;
         if (error.status === 404) {
@@ -57,6 +61,6 @@ export class UserProfileComponent {
           this.unauthorizedAccess = true;
         }
       }
-    );
+    })
   }
 }
