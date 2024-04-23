@@ -1,4 +1,3 @@
-<br/>
 <div id="sp-div" class="max-w-xl mx-auto shadow-md rounded-xl overflow-hidden md:max-w-2xl items-center">
 	<div class="p-8 w-full">
 		<p class="text-center text-3xl font-semibold">Glad to see you again!</p>
@@ -31,20 +30,12 @@
 	</div>
 </div>
 
-<!-- <div class="mt-80">
-	<div class="max-w-2xl m-auto bg-stone-300">
-		<button class="btn">lol</button>
-	</div>
-</div> -->
-
-<div *ngIf="errorMessage" class="pt-6 flex items-center justify-center">
-	<div class="alert alert-danger max-auto max-w-xl">
-		<i class="bi bi-x-circle"></i> {{ errorMessage }}
-	</div>
-</div>
-
-<div *ngIf="successMessage" class="pt-6 flex items-center justify-center">
-	<div class="alert alert-success max-auto max-w-xl">
-		<i class="bi bi-check-circle"></i> {{ successMessage }}
+<div *ngIf="errorMessage" class="pt-6 flex items-center justify-center" [@fadeInOut]>
+	<div class="alert max-auto max-w-xl" style="background-color: #db4d4d;">
+		<i class="bi bi-x-circle text-black"></i>
+		<div>
+			<h4 class="font-bold text-black">Oops!</h4>
+			<p class="text-black">{{ errorMessage }}</p>
+		</div>
 	</div>
 </div>

@@ -1,17 +1,19 @@
 import { Component, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
+import { fadeInOut } from '../../../assets/animations/fadeInOut';
+
 @Component({
     selector: 'app-register',
+    animations: [fadeInOut],
     templateUrl: './register.component.html',
     styleUrl: './register.component.css'
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent {
     user = {
         username: '',
         password: ''
     };
-
     errorMessage: string = '';
     successMessage: string = '';
 

@@ -1,10 +1,13 @@
 import { Component} from '@angular/core';
-import { Router} from '@angular/router';
+import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
+import { fadeInOut } from '../../../assets/animations/fadeInOut';
+
 @Component({
   selector: 'app-login',
+  animations: [fadeInOut],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -28,9 +31,10 @@ export class LoginComponent {
   async loginAcc() {
     if (await this.auth.login(this.user.username, this.user.password)){
       this.successMessage = 'login successful';
-      this.router.navigate(['/']); 
+      this.router.navigate(['/']);
+      window.location.href="/";
     }else {
-      this.successMessage = 'failed to login';
+      this.errorMessage = 'failed to login';
     }
   }
 }

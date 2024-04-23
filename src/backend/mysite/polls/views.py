@@ -101,7 +101,7 @@ def loginWith42Token(request):
         if user.is_active:
             data = get_tokens_for_user(user)
             if data is None:
-                return Response({"message": "couldn't  get token for user"}, status=500)
+                return Response({"message": "couldn't get token for user"}, status=500)
             response.set_cookie(
                 key=settings.SIMPLE_JWT['AUTH_COOKIE'],
                 value=data["access"],
@@ -114,9 +114,9 @@ def loginWith42Token(request):
             response.data = {"Success": "Login successfully", "data": data}
             return response
         else:
-            return Response({"No active": "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"No active": "This account is not active!"}, status=status.HTTP_404_NOT_FOUND)
     else:
-        return Response({"Invalid": "Invalid username!!"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"Invalid": "Invalid username!"}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
@@ -166,9 +166,9 @@ def register(request):
     if username and password:
         user = CustomUser.objects.create_user(
             username=username, password=password)
-        return JsonResponse({'message': 'User registered successfully'}, status=201)
+        return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
-        return JsonResponse({'reason': 'Username and password are required'}, status=400)
+        return JsonResponse({'reason': 'Username and password are required!'}, status=400)
 
 
 # @csrf_exempt
@@ -234,14 +234,12 @@ def login(request):
                     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
                 # csrf.get_token(request)
-                logger.debug('loggin successful')
                 response.data = {"Success": "Login successfully", "data": data}
-                response.status = 200
                 return response
             else:
-                return Response({"message": "This account is not active!!"}, status=500)
+                return Response({"message": "This account is not active!"}, status=500)
         else:
-            return Response({"message": "Invalid username or password!!"}, status=500)
+            return Response({"message": "Invalid username or password!"}, status=500)
 
 class CustomUserView(APIView):
     def get(self, request, user_id):
@@ -252,7 +250,6 @@ class CustomUserView(APIView):
         serializer = CustomUserSerializer(usuario)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-   
 class GameHistoryView(APIView):
     def get(self, request, user_id):
         player1_games = Game.objects.filter(player1_id=user_id)

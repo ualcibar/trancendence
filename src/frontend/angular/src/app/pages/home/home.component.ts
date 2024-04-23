@@ -33,9 +33,11 @@ export class HomeComponent implements OnInit{
     HomeState = HomeState;
     GameState = GameState;
     MatchMakingState = MatchMakingState;
+
     constructor(public matchmakingService : MatchmakingService, private authService :AuthService) {
         this.state = HomeState.Home;
     }
+
     ngOnInit(): void {
     }
 
