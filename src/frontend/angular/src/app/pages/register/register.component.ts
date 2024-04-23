@@ -1,4 +1,5 @@
-import { Component, OnInit} from '@angular/core';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { fadeInOut } from '../../../assets/animations/fadeInOut';
@@ -17,7 +18,7 @@ export class RegisterComponent {
     errorMessage: string = '';
     successMessage: string = '';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private router: Router) {}
 
     ngOnInit(): void {
     }
@@ -39,14 +40,17 @@ export class RegisterComponent {
             }),
         };
 
-        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
-            response => {
+        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
+            next: (response) => {
                 this.successMessage = response.message;
+                setTimeout(() => {
+                    this.router.navigate(['/login']);
+                }, 3000);
             },
-            error => {
-                console.error('An error ocurred trying to contact the registration server:', error.status);
+            error: (error) => {
+                console.error('An error ocurred registering this account:', error.status);
                 this.errorMessage = error.error.reason;
             }
-        );
+        })
     }
 }
