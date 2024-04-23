@@ -11,7 +11,7 @@ import { AuthService } from '../../../services/auth.service';
 })
 export class UserProfileComponent {
   username = 'Loading...';
-  user_id = 0;
+  user_id: any;
   total: any;
   wins: any;
   defeats: any;
@@ -29,6 +29,7 @@ export class UserProfileComponent {
       console.log(this.authService.user_id);
       console.log(userId);
       if (this.authService.user_id === userId) { // Esto hay que revisarlo
+        console.log("lol");
         this.editProfile = true;
       }
     });
