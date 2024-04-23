@@ -76,7 +76,7 @@ export class ChatService {
             message = data.message;
             break;
           case 'private_message_delivered':
-            console.log("!!!! Has recibido de " + data.user + " el siguiente mensaje: " + data.message);
+            console.log("message was delivered");
             targetChannel = data.user;
             message = data.message;
             break;

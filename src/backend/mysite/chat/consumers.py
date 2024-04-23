@@ -87,10 +87,10 @@ class ChatConsumer(WebsocketConsumer):
                     }
                 )
                 async_to_sync(self.channel_layer.group_send)(
-                    f'inbox_{self.user}_chat',  
+                    f'inbox_{self.user.username}_chat',  
                     {
                         "type": "private_message_delivered",
-                        "user": self.user.username,
+                        "user": data['target'],
                         "message": data['message'],
                         "id": msg_id
                     }
