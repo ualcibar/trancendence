@@ -1,43 +1,42 @@
-<!-- <div *ngIf="isConnected()"> -->
-<app-search-bar [fields]="getUsers()" (selectedField)="fieldSelected($event)" (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center " *ngIf="showSearchBar">
-</app-search-bar>
-<div [class]="showSearchBar ? 'blur-sm' : ''" id="chat-bg" class="w-full flex h-50real rounded-xl shadow-md">
-	<div class="h-50real rounded-l-lg flex flex-col" id="bar-bg">
-		<div class="w-full text-2xl font-bold text-center rounded-tl-lg">
-			<button (click)="togleSearchBar()" class="btn btn-dark w-full text-2xl text-center text-white" style="min-width: 220px; min-height: 80px;"><i class="bi bi-plus-circle-fill"></i> New Chat</button>
-		</div>
-		<div class="flex flex-col flex-1">
-			<div *ngFor="let userChat of getKeys()">
-			<button id="chat-btn-active" *ngIf="userChat == current_chat_name" (click)="changeChannel(userChat)"
-				class="btn w-full rounded-none text-2xl text-start">{{
-				userChat }}</button>
-			<button id="chat-btn" *ngIf="userChat != current_chat_name" (click)="changeChannel(userChat)"
-				class="btn w-full text-slate-400 rounded-none text-2xl text-start">{{ userChat }}</button>
+<div class="relative">
+	<div [class]="showSearchBar ? 'transition duration-150 brightness-50' : 'transition duration-150'" id="sp-div" class="w-full flex h-50real rounded-xl shadow-md">
+		<div class="h-50real rounded-l-lg flex flex-col" id="bar-bg">
+			<div class="w-full text-2xl font-bold text-center rounded-tl-lg">
+				<button (click)="togleSearchBar()" class="btn btn-dark w-full text-2xl text-center text-white" style="min-width: 220px; min-height: 80px;"><i class="bi bi-plus-circle-fill"></i> New Chat</button>
 			</div>
-		</div>
-	</div>
-	<div class="flex-1 flex h-full flex-col">
-		<div class="overflow-y-auto" style="overflow: auto;">
-			<div class="flex-1 w-1/2 items-start gap-2.5 p-2">
-				<div class="items-start gap-5">
-					<div *ngFor="let message of getChatMessages(current_chat_name); trackBy: trackMessageById" class="mb-3 rounded" id="message-box">
-						<div class="flex items-center font-bold">
-							<div class="rounded-full w-6 h-6 m-2 bg-black flex-shrink-0"></div>
-							<div class="flex-1">{{ message.sender}}</div>
-							<div class="flex-2 m-2">{{ message.date}}</div>
-						</div>
-						<div class="ml-2">{{ message.message }}</div>
-					</div>
+			<div class="flex flex-col flex-1">
+				<div *ngFor="let userChat of getKeys()">
+				<button id="chat-btn-active" *ngIf="userChat == current_chat_name" (click)="changeChannel(userChat)"
+					class="btn w-full rounded-none text-2xl text-start">{{
+					userChat }}</button>
+				<button id="chat-btn" *ngIf="userChat != current_chat_name" (click)="changeChannel(userChat)"
+					class="btn w-full text-slate-400 rounded-none text-2xl text-start">{{ userChat }}</button>
 				</div>
 			</div>
 		</div>
-		<div class="m-6 flex mt-auto rounded-xl border-1 border-transparent items-center">
-			<textarea [(ngModel)]="newMessage" placeholder="Type a message..." (keydown.enter)="sendMessage($event)"
-				class="shadow-none custom-textarea form-control w-full h-12 max-h-96 border-transparent outline-none bg-transparent px-3 py-2.5"
-				style="resize: none;overflow-y: visible; color: white;"></textarea>
-			<button (click)="sendMessage()" class="btn btn-success max-h-10 flex items-center rounded-xl mr-1"><i
-					class="bi bi-send-fill mr-1"></i> Send</button>
+		<div class="flex-1 flex h-full flex-col">
+			<div class="overflow-y-auto" style="overflow: auto;">
+				<div class="flex-1 w-1/2 items-start gap-2.5 p-2">
+					<div *ngFor="let message of chatMessages;" class="chat chat-start">
+						<div class="chat-image avatar">
+							<div class="w-10 rounded-full">
+								<img alt="Profile image" src="" class="bg-white" />
+							</div>
+						</div>
+						<div class="chat-header">
+							<b class="mr-2">{{ message.sender }}</b>
+							<time class="text-xs opacity-50">{{ message.date }}</time>
+						</div>
+						<div class="chat-bubble">{{ message.message }}</div>
+					</div>
+				</div>
+			</div>
+			<div class="flex mt-auto h-24 justify-between items-center" style="background-color: #191a3d7a;">
+				<input [(ngModel)]="newMessage" (keydown.enter)="sendMessage($event)" class="form-control shadow-none rounded-none fw-semibold mr-4" placeholder="Type a message..." style="resize: none; color: #cfe1e6; height: calc(100% - 2rem);">
+				<button (click)="sendMessage()" class="btn btn-success rounded-full mr-4"><i class="bi bi-send-fill"></i></button>
+			</div>
 		</div>
 	</div>
+	<app-search-bar [fields]="getUsers()" (selectedField)="fieldSelected($event)" (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center" style="width: 50%; margin: 0 auto;" *ngIf="showSearchBar">
+	</app-search-bar>
 </div>
-<!-- </div> -->

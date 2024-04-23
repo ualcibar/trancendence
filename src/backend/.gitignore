@@ -1,3 +1,9 @@
 mysite/myenv
 mysite/django.log
+mysite/chat/migrations/*
 mysite/chat/__pycache__/*
+mysite/matchmaking/migrations/*
+mysite/matchmaking/__pycache__/*
+mysite/mysite/__pycache__/*
+mysite/polls/migrations/*
+mysite/polls/__pycache__/*

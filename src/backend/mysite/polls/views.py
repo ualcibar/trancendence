@@ -38,10 +38,40 @@ def getOauth2Token(code):
 
 
 @api_view(['GET'])
-def getInfo(request): 
+@authentication_classes([CustomAuthentication])
+def getInfo(request, user_id=None):
+    '''
+    Esta función acepta también el valor de ID.
+    Por que?
+     - Nos permite gestionar los perfiles para mostrar su contenido en el frontend
+    Funciona con usuarios solamente?
+     - Para hacer llamadas para obtener solamente el usuario, también funciona.
+    unai aprende ha comentar codigo:
+    get endpoint for user information, user id passed on the url, codes : 200, 401,404,
+    '''
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
-    return JsonResponse({'username': request.user.username}, status=200)
+
+    if user_id is not None:
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
+    else:
+        try:
+            user = CustomUser.objects.get(username=request.user.username)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
+    return JsonResponse({
+        'username': user.username,
+        'userid': user.id,
+        'status': user.status,
+        'total': user.total,
+        'wins': user.wins,
+        'defeats': user.loses
+        }, status=200)
 
 @api_view(['POST'])
 def loginWith42Token(request):
@@ -116,7 +146,7 @@ def registerWith42Token(request):
 
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def imLoggedIn(request):
     return JsonResponse({'message': 'you are logged'}, status=201)
 
@@ -261,5 +291,15 @@ class FriendsListView(APIView):
         friends = CustomUser.objects.filter(id__in=friend_ids)
         user.friends.add(*friends)
         user.save()
+        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)
 
-        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)   
+# File uploading management
+def upload_file(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(request.FILES["file"])
+            return HttpResponseRedirect("/success/url/")
+    else:
+        form = UploadFileForm()
+    return render(request, "upload.html", {"form": form})

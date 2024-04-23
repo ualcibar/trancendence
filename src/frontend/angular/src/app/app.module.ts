@@ -17,8 +17,11 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { ForbiddenComponent } from './components/errors/forbidden/forbidden.component';
 import { UnauthorizedComponent } from './components/errors/unauthorized/unauthorized.component';
 
+import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
+
 import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { NotFoundComponent } from './components/errors/not-found/not-found.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +31,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     RegisterComponent,
     LoginComponent,
     ProfileComponent,
+    UserProfileComponent
   ],
   imports: [
     BrowserModule,
@@ -41,7 +45,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     MatFormFieldModule,
     MatAutocompleteModule,
     ForbiddenComponent,
-    UnauthorizedComponent
+    UnauthorizedComponent,
+    NotFoundComponent
   ],
   providers: [
     provideAnimationsAsync()

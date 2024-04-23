@@ -12,7 +12,7 @@ class CustomTokenRefreshView(TokenRefreshView):
         # Add custom logic before refreshing the token (if needed)
         response = super().post(request, *args, **kwargs)
         if 'access' in response.data:
-            logger.debug('settings cookies')
+            logger.debug('ACCESS EXISTS')
             access_token = response.data['access']
             response.set_cookie(
                 key=settings.SIMPLE_JWT['AUTH_COOKIE'],
@@ -22,32 +22,10 @@ class CustomTokenRefreshView(TokenRefreshView):
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
             )
+            return response
         else:
-            logger.debug('error cant find access')
-#        if 'access' in response.data and 'refresh' in response.data:
-#            logger.debug('settings cookies')
-#            access_token = response.data['access']
-#            refresh_token = response.data['refresh']
-#            response.set_cookie(
-#                key=settings.SIMPLE_JWT['AUTH_COOKIE'],
-#                value=access_token,
-#                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-#                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-#                httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-#                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-#            )
-#            response.set_cookie(
-#                key='refresh_token',
-#                value=refresh_token,
-#                expires=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
-#                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-#                httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-#                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-#            )
-#        else:
-#           logger.debug('cant find access or refresh')
-        # Add custom logic after refreshing the token (if needed)
-        return response
+            logger.debug('ACCESS doesn\'t exist')
+            return Response({message: "access doesn't exist"}, status=400)
 
 from .views import CustomUserView, GameHistoryView, FriendsListView
 
@@ -59,11 +37,12 @@ urlpatterns = [
     path("logout/", views.logout, name='logout'),
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
     path("getInfo/", views.getInfo, name="get_info"),
+    path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),
+    #path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('user/<int:user_id>/', CustomUserView.as_view(), name='user_info'),
     path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),
     path('player_games/', GameHistoryView.as_view(), name='game_history'), 
     path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'),
-    #path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh') 
 ]
 

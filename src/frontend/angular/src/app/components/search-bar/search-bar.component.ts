@@ -15,6 +15,7 @@ import { AfterViewInit, Renderer2 } from '@angular/core';
     ReactiveFormsModule,
     AsyncPipe,],
   templateUrl: './search-bar.component.html',
+  styleUrl: './search-bar.component.css'
 
 })
 export class SearchBarComponent implements OnInit, AfterViewInit{
@@ -78,10 +79,12 @@ export class SearchBarComponent implements OnInit, AfterViewInit{
       this.errorMessage = 'You must type a username!';
     }
   }
+
   autocomplete(username : string){
     this.myControl.setValue(username);
     this.inputField.nativeElement.focus();
   }
+  
   private _filter(name: string): string[] {
     const filterValue = name.toLowerCase();
     return this.fields.filter(field => field.toLowerCase().includes(filterValue));
