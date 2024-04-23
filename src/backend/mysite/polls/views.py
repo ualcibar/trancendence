@@ -24,7 +24,7 @@ import requests
 import json
 import logging
 
-logger = logging.getLogger('polls')
+logger = logging.getLogger('std')
 
 def getOauth2Token(code):
     sendJson = {'code': code}
@@ -46,6 +46,8 @@ def getInfo(request, user_id=None):
      - Nos permite gestionar los perfiles para mostrar su contenido en el frontend
     Funciona con usuarios solamente?
      - Para hacer llamadas para obtener solamente el usuario, también funciona.
+    unai aprende ha comentar codigo:
+    get endpoint for user information, user id passed on the url, codes : 200, 401,404,
     '''
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
@@ -144,11 +146,11 @@ def registerWith42Token(request):
 
 
 @api_view(['GET'])
-@authentication_classes([CustomAuthentication])
+@permission_classes([IsAuthenticated])
 def imLoggedIn(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'message': 'You are not logged in! Register today!'}, status=401)
-    return JsonResponse({'message': 'You are logged in! Welcome!'}, status=201)
+        return JsonResponse({'message': 'you are not logged in'}, status=401)
+    return JsonResponse({'message': 'you are logged'}, status=201)
 
 
 @api_view(['POST'])
@@ -158,6 +160,7 @@ def logout(request):
     return response
 
 @api_view(['POST'])
+@authentication_classes([])
 def register(request):
     data = json.loads(request.body)
     username = data.get('username', '')
@@ -203,8 +206,10 @@ def get_tokens_for_user(user):
     }
 
 
-class LoginView(APIView):
-    def post(self, request, format=None):
+@api_view(['POST'])
+@authentication_classes([])
+def login(request):
+        logger.debug('login request received')
         data = request.data
         response = Response()
         username = data.get('username', None)
@@ -213,17 +218,25 @@ class LoginView(APIView):
 
         if user is not None:
             if user.is_active:
-                data = get_tokens_for_user(user)
+                refresh = RefreshToken.for_user(user)
                 response.set_cookie(
                     key=settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value=data["access"],
+                    value=refresh.access_token,
                     expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                     secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                )
+                response.set_cookie(
+                    key='refresh_token',
+                    value=refresh,
+                    expires=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
+                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
                 # csrf.get_token(request)
-                response.data = {"Success": "Successfully logged in", "data": data}
+                response.data = {"Success": "Login successfully", "data": data}
                 return response
             else:
                 return Response({"message": "This account is not active!"}, status=500)
@@ -277,7 +290,6 @@ class FriendsListView(APIView):
         friends = CustomUser.objects.filter(id__in=friend_ids)
         user.friends.add(*friends)
         user.save()
-
         return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)
 
 # File uploading management

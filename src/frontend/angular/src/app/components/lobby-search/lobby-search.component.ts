@@ -79,7 +79,6 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
       }),
     );
     this.inputField.nativeElement.focus();
-    console.log(`entry : ${this.current_entry}`);
   }
 
 	toggleMatchTournamentMenu() {
@@ -87,7 +86,6 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
 	}
 
 	scapekey() {
-		console.log('scape pressed');
 		this.showMatchTournamentMenu = false;
 	}
 	fieldSelected(username: string) {
@@ -106,7 +104,6 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
   }
   
   new_match_tournament(newGame : any){
-    console.log('new match called from component');
     this.matchMakingService.newGame(newGame);
   }
 

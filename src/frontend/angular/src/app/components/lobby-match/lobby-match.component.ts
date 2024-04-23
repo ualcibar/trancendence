@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 
 enum LobbyMatchState {
   Error,
+  Waiting,
   Ok
 }
 
@@ -42,8 +43,8 @@ export class LobbyMatchComponent {
           player_index++;
         }
       }else{
-        this.state = LobbyMatchState.Error;
-        console.error('current game not initialized in matchmaking service')
+        this.state = LobbyMatchState.Waiting;
+        //console.error('current game not initialized in matchmaking service')
       }
     }
   }

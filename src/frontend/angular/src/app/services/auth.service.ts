@@ -23,16 +23,14 @@ export class AuthService implements OnInit{
   user_id: any;
 
   constructor(private http: HttpClient) {
-    this.amILoggedIn().subscribe(value => {
-      this.isLoggedInSubject.next(value);
-    });
+    this.amILoggedIn(); 
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
-      response => {
+      (response) => {
         this.userinfo = new UserInfo(response['username'], true);
         this.user_id = response['userid'];
       },
-      error => {
+      (error) => {
         this.userinfo =  new UserInfo('guest', true);
       }
     );
@@ -50,23 +48,84 @@ export class AuthService implements OnInit{
     );
   }
 
-  ngOnInit() {
-    this.amILoggedIn().subscribe(value => {
-      this.isLoggedInSubject.next(value);
-    });
+  async ngOnInit() {
+    this.isLoggedInSubject.next(await this.amILoggedIn());
   }
 
-  amILoggedIn(): Observable<boolean>{
-    const backendURL = 'api/polls/imLoggedIn';
-    return this.http.get<any>(backendURL, { withCredentials: true })
-      .pipe(
-        map(response => true), // Map successful response to true
-        catchError(error => of(false)) // Catch errors and map to false
+  async amILoggedIn(): Promise<boolean>{
+    let backendURL = 'api/polls/imLoggedIn';
+    this.http.get<any>(backendURL, { withCredentials: true }).subscribe(
+      (response) => {
+        console.log('im logged in');
+        this.isLoggedInSubject.next(true);
+        return true;
+      },
+      (error) => {
+        this.refreshToken().then(value => {
+          this.isLoggedInSubject.next(value);
+          return value;
+        }
       );
+      }
+    )
+    return false;
   }
 
-  login(){
-    this.isLoggedInSubject.next(true);
+  login(username : string, password : string) : Promise<boolean>{
+    return new Promise<boolean>((value) => {
+      try { 
+        const backendURL = 'api/polls/login/';
+        const jsonToSend = {
+          username: username,
+          password: password
+        };
+        const httpOptions = {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json'
+          })
+        };
+
+        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
+          (response) => {
+            this.isLoggedInSubject.next(true);
+            value(true);
+          },
+          (error) => {
+            value(false);
+          }
+        );
+      } catch (error) {
+        console.error('An error occurred while contacting the registration server:');
+        value(false);
+      }
+    });
+    /* 
+    const backendURL = '/api/polls/login/';
+    const jsonToSend = {
+      username: username,
+      password: password
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type' : 'application/json'
+      }),
+      withCredentials: false 
+    };
+
+    this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
+      response => {
+        return true;
+        this.successMessage = response.message;
+        this.router.navigate(['/']);
+        this.isLoggedInSubject.next(true);
+      },
+      error => {
+        return false;
+        console.error('An error ocurred trying to contact the registration server:', error.status);
+        this.errorMessage = error.error.message;
+      }
+    );*/
   }
 
   logout() {
@@ -85,6 +144,26 @@ export class AuthService implements OnInit{
       localStorage.removeItem('access_token');
     }
     this.isLoggedInSubject.next(false);
+  }
+
+  refreshToken() : Promise<boolean>{
+    console.log('refresh token has been called in auth');
+    const refresh = this.getCookie('refresh_token');
+    if (refresh === null){
+      console.error('cant find refresh token')
+      return new Promise<boolean>(()=>false);
+    }
+    const backendURL = 'api/polls/token/refresh/';
+    this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe(
+      response => {
+        console.log('success refresh?', response);
+        return this.amILoggedIn();
+      },
+      error => {
+        return false;
+      }
+    );
+    return new Promise<boolean>(() => false);
   }
 
   getCookie(name: string): string | null {

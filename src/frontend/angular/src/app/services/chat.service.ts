@@ -65,12 +65,10 @@ export class ChatService {
       const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
       let targetChannel = this.current_chat_name;
       let message: string;
-
       this.ngZone.run(() => {
         console.log("Channel type: " + data.type);
         switch (data.type){ /// GLOBAL IGNORA SWITCH, LUEGO ENTRA DOS VECES; es posble que #global no entre en data.type
           case 'private_message':
-            console.log('message for me');
             if (!this.chatMessages.has(data.user)) {
               this.chatMessages.set(data.user, []);
             }
@@ -78,7 +76,7 @@ export class ChatService {
             message = data.message;
             break;
           case 'private_message_delivered':
-            console.log("!!!! Has recibido de " + data.user + " el siguiente mensaje: " + data.message);
+            console.log("message was delivered");
             targetChannel = data.user;
             message = data.message;
             break;

@@ -19,6 +19,9 @@ export class RegisterComponent {
 
     constructor(private http: HttpClient) {}
 
+    ngOnInit(): void {
+    }
+
     register42Api() {
         window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2Flocalhost%3A4200&response_type=code&state=register';
     }
@@ -33,7 +36,7 @@ export class RegisterComponent {
         const httpOptions = {
             headers: new HttpHeaders({
                 'Content-Type' : 'application/json'
-            })
+            }),
         };
 
         this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(

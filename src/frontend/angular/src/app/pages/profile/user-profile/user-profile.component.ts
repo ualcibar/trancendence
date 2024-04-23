@@ -46,6 +46,7 @@ export class UserProfileComponent {
         this.defeats = response['defeats'];
         this.loading = false;
         this.user_not_found = false;
+        console.log('id is ', this.user_id);
       },
       error => {
         console.error('An error ocurred fetching this user: ', error.status);
