@@ -2,7 +2,6 @@ import { Component, EventEmitter, Output, Input, OnInit, ViewChild, ElementRef, 
 import { CommonModule } from '@angular/common';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { AfterViewInit, Renderer2 } from '@angular/core';
@@ -11,7 +10,6 @@ import { AfterViewInit, Renderer2 } from '@angular/core';
   standalone: true,
   imports: [CommonModule,
     FormsModule,
-    MatFormFieldModule,
     ReactiveFormsModule,
     AsyncPipe,],
   templateUrl: './search-bar.component.html',

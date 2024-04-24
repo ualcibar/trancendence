@@ -4,9 +4,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import {MatAutocompleteModule} from '@angular/material/autocomplete'
 
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -18,6 +15,7 @@ import { ForbiddenComponent } from './components/errors/forbidden/forbidden.comp
 import { UnauthorizedComponent } from './components/errors/unauthorized/unauthorized.component';
 
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
+import { UserEditComponent } from './pages/profile/user-edit/user-edit.component';
 
 import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -41,12 +39,10 @@ import { NotFoundComponent } from './components/errors/not-found/not-found.compo
     ReactiveFormsModule,
     HttpClientModule,
     CommonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatAutocompleteModule,
     ForbiddenComponent,
     UnauthorizedComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    UserEditComponent
   ],
   providers: [
     provideAnimationsAsync()
