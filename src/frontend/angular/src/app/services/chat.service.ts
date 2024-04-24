@@ -77,7 +77,7 @@ export class ChatService {
             break;
           case 'private_message_delivered':
             console.log("message was delivered");
-            targetChannel = data.user;
+            targetChannel = data.target;
             message = data.message;
             break;
           case 'global_message':
@@ -102,7 +102,7 @@ export class ChatService {
 
         const chatMessage = this.chatMessages.get(targetChannel);
         if (chatMessage)
-          chatMessage.push({ message: message, id: data.id, sender: data.user, date: actualHour });
+          chatMessage.push({ message: message, id: data.id, sender: data.sender, date: actualHour });
         else
           console.log('no target channel');
       });
