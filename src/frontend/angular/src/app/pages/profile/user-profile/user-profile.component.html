@@ -11,61 +11,55 @@
 </div>
 
 <ng-template #content>
-	<div class="grid">
-		<div *ngIf="!user_not_found && !unauthorizedAccess" id="sp-div" class="items-center p-2 max-w-xl md:max-w-4xl mx-auto h-fixed rounded-xl">
-			<div class="md:shrink-0 flex items-center">
-				<div class="w-full shadow-md rounded">
-					<div class="md:flex bg-gradient-to-r from-indigo-600 to-indigo-900 rounded">
-						<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-36 h-36 ml-4 mt-4 mb-4 flex items-center justify-center bg-neutral-400">
-						<div class="ml-4 flex flex-col justify-center">
-							<div class="flex items-center">
-								<h1 class="text-5xl font-bold">{{ username }}</h1>
-								<div class="w-4 h-4 rounded-full bg-green-400 ml-2 mt-2"></div>
-							</div>
-							<h1 class="text-gray-600" style="color: #a7bec4;">last online: 4/04/2084</h1>
+	<div *ngIf="!user_not_found && !unauthorizedAccess" id="sp-div" class="items-center p-2 max-w-xl md:max-w-4xl md:flex-row mx-auto h-fixed rounded-xl">
+		<div class="md:shrink-0 flex items-center">
+			<div class="w-full shadow-md rounded">
+				<div class="md:flex bg-gradient-to-r from-indigo-600 to-indigo-900 rounded">
+					<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-36 h-36 ml-4 mt-4 mb-4 flex items-center justify-center bg-neutral-400">
+					<div class="ml-4 flex flex-col justify-center">
+						<div class="flex items-center">
+							<h1 class="text-5xl font-bold">{{ username }}</h1>
+							<div class="w-4 h-4 rounded-full bg-green-400 ml-2 mt-2"></div>
 						</div>
-						<div *ngIf="editProfile" class="ml-auto m-8">
-							<div class="lg:tooltip" data-tip="Edit your profile">
-								<button class="btn btn-active btn-neutral"><i class="bi bi-pencil-fill text-2xl"></i></button>
-							</div>
-							<div class="lg:tooltip" data-tip="User Settings">
-								<button class="btn btn-active btn-neutral ml-2"><i class="bi bi-gear-fill text-2xl"></i></button>
-							</div>
+						<h1 class="text-gray-600" style="color: #a7bec4;">last online: 4/04/2084</h1>
+					</div>
+					<div *ngIf="editProfile" class="ml-auto m-8">
+						<div class="lg:tooltip" data-tip="User Settings">
+							<button class="btn btn-active btn-neutral ml-2"><i class="bi bi-gear-fill text-2xl"></i></button>
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="flex">
-				<div class="stats bg-gradient-to-r from-slate-900 to-indigo-950 mt-2 p-2">
-					<div class="stat">
-						<div class="stat-figure text-secondary">
-							<i class="bi bi-controller text-2xl text-primary"></i>
-						</div>
-						<div class="stat-title">Games played</div>
-						<div class="stat-value text-primary">{{ total }}</div>
-					</div>
-					
-					<div class="stat">
-						<div class="stat-figure text-secondary">
-							<i class="bi bi-trophy-fill text-2xl" style="color: #35bc9d;"></i>
-						</div>
-						<div class="stat-title">Wins</div>
-						<div class="stat-value" style="color: #35bc9d;">{{ wins }}</div>
-					</div>
-					
-					<div class="stat">
-						<div class="stat-figure text-secondary">
-							<i class="bi bi-x-octagon-fill text-2xl text-error"></i>
-						</div>
-						<div class="stat-title">Defeats</div>
-						<div class="stat-value text-error">{{ defeats }}</div>
-					</div>
-				</div>
-				<button class="btn btn-active btn-neutral">Neutral</button>
-				<button class="btn btn-active btn-primary">Primary</button>
 			</div>
 		</div>
-		<app-user-edit></app-user-edit>
+		<div class="flex">
+			<div class="stats bg-gradient-to-r from-slate-900 to-indigo-950 mt-2 p-2">
+				<div class="stat">
+					<div class="stat-figure text-secondary">
+						<i class="bi bi-controller text-2xl text-primary"></i>
+					</div>
+					<div class="stat-title">Games played</div>
+					<div class="stat-value text-primary">{{ total }}</div>
+				</div>
+				
+				<div class="stat">
+					<div class="stat-figure text-secondary">
+						<i class="bi bi-trophy-fill text-2xl" style="color: #35bc9d;"></i>
+					</div>
+					<div class="stat-title">Wins</div>
+					<div class="stat-value" style="color: #35bc9d;">{{ wins }}</div>
+				</div>
+				
+				<div class="stat">
+					<div class="stat-figure text-secondary">
+						<i class="bi bi-x-octagon-fill text-2xl text-error"></i>
+					</div>
+					<div class="stat-title">Defeats</div>
+					<div class="stat-value text-error">{{ defeats }}</div>
+				</div>
+			</div>
+			<button class="btn btn-active btn-neutral">Neutral</button>
+			<button class="btn btn-active btn-primary">Primary</button>
+		</div>
 	</div>
 	<app-not-found *ngIf="user_not_found"></app-not-found>
 	<app-unauthorized *ngIf="unauthorizedAccess"></app-unauthorized>

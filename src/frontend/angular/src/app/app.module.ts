@@ -15,7 +15,6 @@ import { ForbiddenComponent } from './components/errors/forbidden/forbidden.comp
 import { UnauthorizedComponent } from './components/errors/unauthorized/unauthorized.component';
 
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
-import { UserEditComponent } from './pages/profile/user-edit/user-edit.component';
 
 import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -41,8 +40,7 @@ import { NotFoundComponent } from './components/errors/not-found/not-found.compo
     CommonModule,
     ForbiddenComponent,
     UnauthorizedComponent,
-    NotFoundComponent,
-    UserEditComponent
+    NotFoundComponent
   ],
   providers: [
     provideAnimationsAsync()
