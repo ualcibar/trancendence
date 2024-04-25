@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {AuthService, UserInfo} from './auth.service';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, lastValueFrom } from 'rxjs';
 
 export enum GameType {
   Tournament = 'Tournament',
@@ -205,6 +205,8 @@ export class MatchmakingService {
     this.webSocket.onclose = () => {
     };
     this.webSocket.onmessage = (event) => {
+      if (this.authService.user_info === undefined)
+        return;
       const data = JSON.parse(event.data);
       switch (data.type) {
         case 'status':
@@ -257,7 +259,7 @@ export class MatchmakingService {
             case 'success':
               this.state = MatchMakingState.OnGame;
               this.gameState = GameState.WaitingForPlayers;
-              this.currentGame = new Match(data.match.name, 1, this.authService.userinfo);
+              this.currentGame = new Match(data.match.name, 1, this.authService.user_info);
               console.log("successfully created match");
               break;
             case 'failure_already_host':
@@ -302,8 +304,10 @@ export class MatchmakingService {
           break;
         case 'player_joined_match':
           if (this.currentGame !== undefined) {
-            if (this.authService.userinfo.username === this.currentGame.host.username)
-              return;
+            //if (this.u this.authService.user_info.username === this.currentGame?.host.username)
+                return;
+            //}
+            
           }else{
             console.error('received a player joined match while not in a game');
             return 
@@ -323,7 +327,7 @@ export class MatchmakingService {
             });
           break;
         case 'webrtc_candidate':
-          if (data.sender != this.authService.userinfo.username)
+          if (data.sender != this.authService.user_info.username)
             this.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
           break;
         default :

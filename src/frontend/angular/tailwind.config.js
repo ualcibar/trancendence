@@ -17,6 +17,7 @@ module.exports = {
         'color-2': '#F4D676',
         'color-3': '#f8f9fa',
         'card-bg-color': '#12064680',
+        'sp-text': '#cfe1e6',
       },
       spacing: {
         '50real': '50rem',
