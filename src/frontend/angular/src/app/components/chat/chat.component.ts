@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit, NgZone, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 
-import { SearchBarComponent } from '../search-bar/search-bar.component';
+import { SearchBarComponent } from './search-bar/search-bar.component';
 import { ChatService, Message } from '../../services/chat.service';
 
 import { fadeInOut } from '../../../assets/animations/fadeInOut';

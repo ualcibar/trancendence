@@ -70,7 +70,8 @@ def getInfo(request, user_id=None):
         'status': user.status,
         'total': user.total,
         'wins': user.wins,
-        'defeats': user.loses
+        'defeats': user.loses,
+        'status': user.status
         }, status=200)
 
 @api_view(['POST'])
@@ -150,6 +151,12 @@ def registerWith42Token(request):
 def imLoggedIn(request):
     return JsonResponse({'message': 'you are logged'}, status=201)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def setUserConfig(request):
+    requst.user.username = request['username']
+    request.save()
+    return JsonResponse({'message': 'you changed the username'}, status=201)
 
 @api_view(['POST'])
 def logout(request):

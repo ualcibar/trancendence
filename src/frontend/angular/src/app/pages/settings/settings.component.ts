@@ -1,12 +1,17 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
 export class SettingsComponent {
-
+  profileColorEdit: boolean = true;
+  
+  ngOnInit(): void {
+    console.log(this.profileColorEdit);
+  }
 }

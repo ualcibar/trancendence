@@ -1,13 +1,15 @@
 import { Injectable, OnInit } from '@angular/core';
-import { BehaviorSubject, Observable, of} from 'rxjs';
+import { BehaviorSubject, Observable, UnaryFunction, of} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 
 export class UserInfo{
+  user_id : number;
   username : string;
   online : boolean;
-  constructor (username : string, online : boolean){
+  constructor (username : string, user_id : number, online : boolean){
     this.username = username;
+    this.user_id = user_id;
     this.online = online;
   }
 }
@@ -15,57 +17,40 @@ export class UserInfo{
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService implements OnInit{
+export class AuthService {
   private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  userinfo : UserInfo = new UserInfo('guest', true);
+  user_info? : UserInfo;
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
-  username: any;
-  user_id: any;
+
 
   constructor(private http: HttpClient) {
-    this.amILoggedIn(); 
+    this.amILoggedIn();
+  }
+
+  updateUserInfo() {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
-        this.userinfo = new UserInfo(response['username'], true);
+        this.user_info = new UserInfo(response['username'], response['userid'], true);
+        this.isLoggedInSubject.next(true);
       },
       error: () => {
-        this.userinfo =  new UserInfo('guest', true);
+        this.user_info = undefined;
       }
-    })
+    });
   }
 
-  updateUserInfo(): Observable<UserInfo>{
-    const backendURL = 'api/polls/getInfo';
-    return this.http.get<any>(backendURL, { withCredentials: true }).pipe(
-      map(Response => ({
-        username: Response.username,
-        userid: Response.userid,
-        online: Response.status
-      }))
-    );
-  }
-
-  async ngOnInit() {
-    this.isLoggedInSubject.next(await this.amILoggedIn());
-  }
-
-  async amILoggedIn(): Promise<boolean>{
+  amILoggedIn(){
     let backendURL = 'api/polls/imLoggedIn';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: () => {
         console.log("|!| You are logged in!")
-        this.isLoggedInSubject.next(true);
-        return true;
+        this.updateUserInfo();
       },
       error: () => {
-        this.refreshToken().then(value => {
-          this.isLoggedInSubject.next(value);
-          return value;
-        })
+        this.refreshToken();
       }
-    });
-    return false;
+    })
   }
 
   login(username : string, password : string) : Promise<boolean>{
@@ -96,33 +81,6 @@ export class AuthService implements OnInit{
         value(false);
       }
     });
-    /* 
-    const backendURL = '/api/polls/login/';
-    const jsonToSend = {
-      username: username,
-      password: password
-    };
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type' : 'application/json'
-      }),
-      withCredentials: false 
-    };
-
-    this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
-      response => {
-        return true;
-        this.successMessage = response.message;
-        this.router.navigate(['/']);
-        this.isLoggedInSubject.next(true);
-      },
-      error => {
-        return false;
-        console.error('An error ocurred trying to contact the registration server:', error.status);
-        this.errorMessage = error.error.message;
-      }
-    );*/
   }
 
   logout() {
@@ -139,28 +97,34 @@ export class AuthService implements OnInit{
     // Logic to perform logout
     if (accessToken) {
       localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
     }
     this.isLoggedInSubject.next(false);
   }
 
-  refreshToken() : Promise<boolean>{
+  refreshToken(){
     console.log('refresh token has been called in auth');
     const refresh = this.getCookie('refresh_token');
     if (refresh === null){
       console.error('cant find refresh token')
-      return new Promise<boolean>(()=>false);
+      this.isLoggedInSubject.next(false);
+      //return new Promise<boolean>(()=>false);
     }
     const backendURL = 'api/polls/token/refresh/';
     this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
       next: (response) => {
         console.log('success refresh?', response);
-        return this.amILoggedIn();
+        this.updateUserInfo();
+        
+        //this.amILoggedIn();
       },
       error: () => {
-        return false;
+       // return false;
+       console.error('failed refresh token')
+       this.isLoggedInSubject.next(false);
       }
     });
-    return new Promise<boolean>(() => false);
+    //return new Promise<boolean>(() => false);
   }
 
   getCookie(name: string): string | null {
