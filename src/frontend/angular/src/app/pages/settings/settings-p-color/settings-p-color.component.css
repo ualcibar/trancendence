@@ -1,3 +1,5 @@
+/* Estas variables hay que moverlas al styles main o acortarlo para que no sea demasiado; por IDs o algo con el mismo prefijo
+de '.gradient-id-' por ejemplo */
 .gradient-id-default {
 	background-image: linear-gradient(to right, rgb(138 151 168), rgb(71 85 105));
 }
