@@ -1,17 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+import { AuthService } from '../../services/auth.service';
+
+import { SettingsPColorComponent } from './settings-p-color/settings-p-color.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SettingsPColorComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
 export class SettingsComponent {
-  profileColorEdit: boolean = true;
-  
-  ngOnInit(): void {
-    console.log(this.profileColorEdit);
-  }
+  profileColorEdit: boolean = false;
 }

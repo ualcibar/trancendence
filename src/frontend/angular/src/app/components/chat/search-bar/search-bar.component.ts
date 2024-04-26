@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Output, Input, OnInit, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/operators';
-import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { AfterViewInit, Renderer2 } from '@angular/core';
+
 @Component({
   selector: 'app-search-bar',
   standalone: true,
