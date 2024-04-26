@@ -4,3 +4,11 @@
 	left: 50%;
 	transform: translateX(-50%);
 }
+
+.selected {
+	background-color: rgba(30, 41, 59, 0.491);
+}
+
+li {
+	user-select: none;
+}
