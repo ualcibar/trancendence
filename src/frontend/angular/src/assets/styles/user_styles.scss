@@ -1,0 +1,16 @@
+/* Estilos principales para la config de estilos de usuario */
+$gradients: (
+	default: (#8a97a8, #475569),
+	rojo: (#ec4747, #7f1d1d),
+	naranja: (#ea580c, #6a250e),
+	ambar: (#f59e0b, #78350f),
+	lima: (#65a30d, #365314),
+	pino: (#16a34a, #166534),
+	purpura: (#6366f1, #312e81)
+);
+
+@each $name, $colors in $gradients {
+	.gradient-id-#{$name} {
+		background-image: linear-gradient(to right, #{$colors});
+	}
+}
