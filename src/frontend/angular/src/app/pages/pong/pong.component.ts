@@ -2,6 +2,7 @@ import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import * as THREE from 'three';
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 
+import { GameSettings, MatchmakingService} from '../../services/matchmaking.service';
 
 
 export const colorPalette = {
@@ -23,9 +24,17 @@ export const colorPalette = {
 export class PongComponent implements AfterViewInit {
 
   @ViewChild('pongCanvas', { static: true }) pongCanvas!: ElementRef<HTMLCanvasElement>;
+  // @Input gameSettings!: GameSettings;//affectan el juego a todos los jugadores
+  // @Input clientSettings!; 
+    // affectan el juego solo al cliente
+    // colores
+    // imagen de fondo
+   
 
+  private mm: MatchmakingService;
 
-  constructor() {
+  constructor(private matchmakingService: MatchmakingService) {
+    this.mm = matchmakingService;
   }
 
   ngAfterViewInit(): void {
@@ -53,13 +62,12 @@ export class PongComponent implements AfterViewInit {
     // INIT LIGHT
     if (defaultLightingIsOn)
     {
-  
       const color = colorPalette.white;
       const intensity = 3;
       const light = new THREE.DirectionalLight( color, intensity );
       light.position.set( - 1, 2, 4 );
       scene.add( light );
-  
+
     }
 
     // INIT BALL
@@ -67,7 +75,8 @@ export class PongComponent implements AfterViewInit {
     const widthSegments = 32;
     const heightSegments = 16;
     const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-    const ballMaterial = new THREE.MeshPhongMaterial({color: colorPalette.roseGarden});
+    const ballColor = colorPalette.roseGarden;
+    const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
@@ -87,7 +96,8 @@ export class PongComponent implements AfterViewInit {
     const paddleHeight = 0.02;
     const paddleDepth = 0.1;
     const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
-    const paddleMaterial = new THREE.MeshPhongMaterial({color: colorPalette.leadCyan});
+    const paddleColor = colorPalette.leadCyan;
+    const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     const leftPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
     leftPaddle.position.x = -1;
     leftPaddle.rotation.z = Math.PI / 2;
@@ -96,14 +106,14 @@ export class PongComponent implements AfterViewInit {
     rightPaddle.rotation.z = Math.PI / 2;
     scene.add(leftPaddle);
     scene.add(rightPaddle);
-    
+
     // INIT PADDLE LIGHT
-    const paddleLight1 = new THREE.RectAreaLight( colorPalette.leadCyan, 5, paddleWidth, paddleHeight );
+    const paddleLight1 = new THREE.RectAreaLight( paddleColor, 5, paddleWidth, paddleHeight );
     paddleLight1.position.set( -1, -1, -1 );
     paddleLight1.lookAt( 0, 0, 0 );
     // paddleLight1.rotation.z = Math.PI / 2;
     scene.add( paddleLight1 );
-    const paddleLight2 = new THREE.PointLight( colorPalette.leadCyan, intensity );
+    const paddleLight2 = new THREE.PointLight( paddleColor, intensity );
     paddleLight2.position.set( 1, 0, 0 );
     // scene.add( paddleLight2 );
 
@@ -113,7 +123,8 @@ export class PongComponent implements AfterViewInit {
     const wallHeight = 0.02;
     const wallDepth = 0.2;
     const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
-    const wallMaterial = new THREE.MeshPhongMaterial({color: colorPalette.darkestPurple});
+    const wallColor = colorPalette.swingPurple;
+    const wallMaterial = new THREE.MeshPhongMaterial({color: wallColor});
     const topWall = new THREE.Mesh(wallGeometry, wallMaterial);
     topWall.position.y = 1;
     const bottomWall = new THREE.Mesh(wallGeometry, wallMaterial);
