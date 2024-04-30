@@ -27,6 +27,8 @@ export class AuthService {
     this.amILoggedIn();
   }
 
+  // Función para obtener los datos del usuario en el momento en el que sea llamada
+  // - Debajo, el Getter para poder ser utilizado por el servicio de 'Settings'
   updateUserInfo() {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
@@ -38,6 +40,10 @@ export class AuthService {
         this.user_info = undefined;
       }
     });
+  }
+
+  getUpdateUserInfo(): UserInfo | undefined {
+    return this.user_info;
   }
 
   amILoggedIn(){

@@ -71,7 +71,8 @@ def getInfo(request, user_id=None):
         'total': user.total,
         'wins': user.wins,
         'defeats': user.loses,
-        'status': user.status
+        'status': user.status,
+        'color': user.user_color,
         }, status=200)
 
 @api_view(['POST'])
@@ -153,10 +154,20 @@ def imLoggedIn(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def setUserConfig(request):
-    requst.user.username = request['username']
-    request.save()
-    return JsonResponse({'message': 'you changed the username'}, status=201)
+def setUserConfig(request, user_id=None): # Hay que mirar esto para que se pueda usar para distintas request (como el usuario, la password... etc)
+    data = json.loads(request.body)
+    color = data.get('color')
+    if color is None:
+        return JsonResponse({'message': 'Failed to set custom user setting'}, status=500)
+    if user_id is not None:
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
+    user.user_color = color
+    user.save()
+    return JsonResponse({'message': 'Change color success!'}, status=201)
 
 @api_view(['POST'])
 def logout(request):
