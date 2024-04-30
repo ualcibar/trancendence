@@ -90,6 +90,22 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             choices=STATUS_CHOICES,
             default='Disconnected',
             )
+    
+    USER_COLOR_CHOICES = (
+        ('default','default'),
+        ('rojo', 'rojo'),
+        ('naranja', 'naranja'),
+        ('ambar', 'ambar'),
+        ('lima', 'lima'),
+        ('pino', 'pino'),
+        ('purpura', 'purpura'),
+    )
+
+    user_color = models.CharField(
+        max_length=10,
+        choices=USER_COLOR_CHOICES,
+        default='default',
+    )
 
     def has_module_perms(self, app_label):
         # This method should return True if the user has permissions to view the app `app_label`
