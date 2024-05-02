@@ -185,12 +185,17 @@ export class PongComponent implements AfterViewInit {
 
       // COLLISION BALL
       const pseudoLimit = 1 - radius;
-      if (ball.position.y < -pseudoLimit || ball.position.y > pseudoLimit) {
+      if (ball.position.y < -pseudoLimit)
+      {
+        bottomWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
         ballAngle = -ballAngle;
-        if (Math.abs(Math.cos(ballAngle)) < 0.1) {
-          topWall.material = new THREE.MeshPhongMaterial({color: colorPalette.roseGarden});
-          ballAngle = Math.PI * Math.random() / 10;
-        } 
+        ball.position.y = -pseudoLimit;
+      }
+      if (ball.position.y > pseudoLimit)
+      {
+        topWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+        ballAngle = -ballAngle;
+        ball.position.y = pseudoLimit;
       }
       if (ball.position.x < - pseudoLimit && ball.position.y + radius / 2 > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < leftPaddle.position.y + paddleWidth / 2) {
         const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
