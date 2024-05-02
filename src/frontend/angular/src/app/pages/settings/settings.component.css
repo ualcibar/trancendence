@@ -5,10 +5,27 @@
 	transform: translateX(-50%);
 }
 
+.loading-tab {
+	position: absolute;
+	top: 30%;
+	left: 48.5%;
+	transform: translateX(-50%);
+}
+
 .selected {
 	background-color: rgba(30, 41, 59, 0.491);
 }
 
 li {
 	user-select: none;
+	cursor: pointer;
 }
+
+.prueba{
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	font-size: 40px;
+	color: gray;
+	background-color: black;
+} 

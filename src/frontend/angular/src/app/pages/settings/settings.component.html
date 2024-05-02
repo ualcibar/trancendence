@@ -1,15 +1,31 @@
-<div class="settings-tab flex flex-col mx-auto w-1/2 md:flex-row">
-	<div id="sp-div" class="pb-4 md:flex-row h-fit rounded">
-		<ul class="pl-4 mr-4 mt-4 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
-			<h2 class="text-2xl text-sp-text font-bold">Profile</h2>
-			<li (click)="profileColorEdit = true" [ngClass]="{'selected': profileColorEdit}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-palette-fill"></i> Your color</a></li>
-			<li class="pl-4 py-2 text-zinc-300"><a><i class="bi bi-translate"></i> Language</a></li>
-		</ul>
-		<ul class="pl-4 mr-4 mt-2 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
-			<h2 class="text-2xl text-sp-text font-bold">Account</h2>
-			<li class="pl-4 py-2 text-zinc-300"><a><i class="bi bi-person-square"></i> Public profile</a></li>
-			<li class="pl-4 py-2 text-zinc-300"><a><i class="bi bi-person-fill-lock"></i> Account security</a></li>
-		</ul>
-	</div>
-	<app-settings-p-color *ngIf="profileColorEdit" class="w-full"></app-settings-p-color>
+<style>
+	.prueba{
+		display:flex;
+	}
+</style>
+<div id="sp-div" *ngIf="loading; else content" class="loading-tab flex flex-col items-center justify-center rounded" style="width: 20rem;">
+	<h1 class="m-4">Loading data... </h1>
+	<div class="spinner-border text-warning mb-4" role="status"></div>
 </div>
+
+<ng-template class="prueba" #content>
+	<h2 class="text-2xl text-sp-text font-bold prueba">Settings</h2>
+	<div class="settings-tab flex flex-col mx-auto w-1/2 md:flex-row">
+		
+		<div id="sp-div" class="pb-4 md:flex-row h-fit rounded">
+			<ul class="pl-4 mr-4 mt-4 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
+				<h2 class="text-2xl text-sp-text font-bold">Profile</h2>
+				<li (click)="profileColorEdit = true" [ngClass]="{'selected': profileColorEdit}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-palette-fill"></i> Your color</a></li>
+				<li  class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-translate"></i> Language</a></li>
+			</ul>
+			<ul class="pl-4 mr-4 mt-2 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
+				<h2 class="text-2xl text-sp-text font-bold">Account</h2>
+				<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> Public profile</a></li>
+				<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> Account security</a></li>
+			</ul>
+		</div>
+	
+		<app-settings-p-color [loaded]="loading" *ngIf="profileColorEdit" class="w-full"></app-settings-p-color>
+	</div>
+
+</ng-template>
