@@ -106,6 +106,7 @@ export class PongComponent implements AfterViewInit {
     rightPaddle.rotation.z = Math.PI / 2;
     scene.add(leftPaddle);
     scene.add(rightPaddle);
+    
 
     // INIT PADDLE LIGHT
     const paddleLight1 = new THREE.RectAreaLight( paddleColor, 5, paddleWidth, paddleHeight );
@@ -133,6 +134,9 @@ export class PongComponent implements AfterViewInit {
     scene.add(bottomWall);
 
     let pastTime = 0;
+    let pastIATime = 0;
+    let rightPaddleMovingRight = false;
+    let rightPaddleMovingLeft = false;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
@@ -150,6 +154,7 @@ export class PongComponent implements AfterViewInit {
       ball.position.x += diferentialDisplacement * Math.cos(ballAngle);
       ball.position.y += diferentialDisplacement * Math.sin(ballAngle);
 
+
       // MOVE PADDLES
       if (key.isPressed('w') || key.isPressed('a')) {
         leftPaddle.position.y += 0.01;
@@ -157,12 +162,26 @@ export class PongComponent implements AfterViewInit {
       if (key.isPressed('s') || key.isPressed('d')) {
         leftPaddle.position.y -= 0.01;
       }
-      if (key.isPressed('up') || key.isPressed('right')) {
+      // console.log(pastIATime - time);
+      if (time - pastIATime > 1) {
+        console.log('IA');
+        pastIATime = time;
+        rightPaddleMovingRight = false;
+        rightPaddleMovingLeft = false;
+        if (rightPaddle.position.y > ball.position.y) {
+          rightPaddleMovingLeft = true;
+        }
+        if (rightPaddle.position.y < ball.position.y) {
+          rightPaddleMovingRight = true;
+        }
+      }
+      if (rightPaddleMovingRight) {
         rightPaddle.position.y += 0.01;
       }
-      if (key.isPressed('down') || key.isPressed('left')) {
+      if (rightPaddleMovingLeft) {
         rightPaddle.position.y -= 0.01;
       }
+
       if (leftPaddle.position.y > 1) {
         leftPaddle.position.y = 1;
       }
