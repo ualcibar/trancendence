@@ -180,6 +180,7 @@ export class PongComponent implements AfterViewInit {
         while (predictedBallY < -1) {
           predictedBallY = -1 - (predictedBallY + 1);
         }
+        predictedBallY  += Math.random() * paddleWidth / 2 - Math.random() * paddleWidth / 2;
         console.log(predictedBallY);
       }
       if (rightPaddle.position.y < predictedBallY) {
@@ -223,13 +224,13 @@ export class PongComponent implements AfterViewInit {
         const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
         ballAngle = Math.asin(yDifference) * Math.PI/4 + Math.PI;
         ball.position.x = -pseudoLimit;
-        ballSpeed += 0.0001;
+        ballSpeed += 0.01 * ballSpeed;
       }
       if (ball.position.x > pseudoLimit && ball.position.y + radius / 2 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < rightPaddle.position.y + paddleWidth / 2) {
         const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
         ballAngle = Math.PI - ballAngle - yDifference * Math.PI;
         ball.position.x = pseudoLimit;
-        ballSpeed += 0.0001;
+        ballSpeed += 0.01 * ballSpeed;
       }
 
       // NORMALIZE ANGLE
