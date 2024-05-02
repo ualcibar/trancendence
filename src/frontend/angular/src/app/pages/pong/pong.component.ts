@@ -156,6 +156,8 @@ export class PongComponent implements AfterViewInit {
 
 
       // MOVE PADDLES
+      const pseudoLimit = 1 - radius;
+
       if (key.isPressed('w') || key.isPressed('a')) {
         leftPaddle.position.y += 0.01;
       }
@@ -173,6 +175,10 @@ export class PongComponent implements AfterViewInit {
         }
         if (rightPaddle.position.y < ball.position.y) {
           rightPaddleMovingRight = true;
+        }
+        if (ball.position.y + radius / 2 > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < leftPaddle.position.y + paddleWidth / 2) {
+          rightPaddleMovingRight = false;
+          rightPaddleMovingLeft = false;
         }
       }
       if (rightPaddleMovingRight) {
@@ -203,7 +209,7 @@ export class PongComponent implements AfterViewInit {
 
 
       // COLLISION BALL
-      const pseudoLimit = 1 - radius;
+      // const pseudoLimit = 1 - radius;
       if (ball.position.y < -pseudoLimit || ball.position.y > pseudoLimit) {
         ballAngle = -ballAngle;
         if (Math.abs(Math.cos(ballAngle)) < 0.1) {
