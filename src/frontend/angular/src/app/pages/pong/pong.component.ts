@@ -80,8 +80,9 @@ export class PongComponent implements AfterViewInit {
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
-    let ballSpeed = 0.8;
+    let ballSpeed = 1;
     // let ballAngle = Math.PI * Math.random() / 10;
+    // let ballAngle = Math.PI * 9 / 8;
     let ballAngle = 0;
 
     // INIT BALL LIGHT
@@ -171,13 +172,15 @@ export class PongComponent implements AfterViewInit {
         pastIATime = time;
 
         // IA
-        predictedBallY = ball.position.y + Math.sin(ballAngle) * (rightPaddle.position.x - ball.position.x);
+        predictedBallY = ball.position.y +(Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
+        console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));
         while (predictedBallY > 1) {
-          predictedBallY -= 1;
+          predictedBallY = 1 - (predictedBallY - 1);
         }
         while (predictedBallY < -1) {
-          predictedBallY += 1;
+          predictedBallY = -1 - (predictedBallY + 1);
         }
+        console.log(predictedBallY);
       }
       if (rightPaddle.position.y < predictedBallY) {
         rightPaddle.position.y += 0.01;
