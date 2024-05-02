@@ -80,7 +80,7 @@ export class PongComponent implements AfterViewInit {
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
-    let ballSpeed = 1;
+    let ballSpeed = 0.8;
     // let ballAngle = Math.PI * Math.random() / 10;
     let ballAngle = 0;
 
@@ -137,6 +137,7 @@ export class PongComponent implements AfterViewInit {
     let pastIATime = 0;
     let rightPaddleMovingRight = false;
     let rightPaddleMovingLeft = false;
+    let predictedBallY = 0;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
@@ -168,26 +169,24 @@ export class PongComponent implements AfterViewInit {
       if (time - pastIATime > 1) {
         console.log('IA');
         pastIATime = time;
-        rightPaddleMovingRight = false;
-        rightPaddleMovingLeft = false;
-        if (rightPaddle.position.y > ball.position.y) {
-          rightPaddleMovingLeft = true;
+
+        // IA
+        predictedBallY = ball.position.y + Math.sin(ballAngle) * (rightPaddle.position.x - ball.position.x);
+        while (predictedBallY > 1) {
+          predictedBallY -= 1;
         }
-        if (rightPaddle.position.y < ball.position.y) {
-          rightPaddleMovingRight = true;
-        }
-        if (ball.position.y + radius / 2 > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < leftPaddle.position.y + paddleWidth / 2) {
-          rightPaddleMovingRight = false;
-          rightPaddleMovingLeft = false;
+        while (predictedBallY < -1) {
+          predictedBallY += 1;
         }
       }
-      if (rightPaddleMovingRight) {
+      if (rightPaddle.position.y < predictedBallY) {
         rightPaddle.position.y += 0.01;
       }
-      if (rightPaddleMovingLeft) {
+      if (rightPaddle.position.y > predictedBallY) {
         rightPaddle.position.y -= 0.01;
       }
 
+      // LIMIT PADDLES
       if (leftPaddle.position.y > 1) {
         leftPaddle.position.y = 1;
       }
