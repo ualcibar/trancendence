@@ -71,7 +71,7 @@ export class PongComponent implements AfterViewInit {
     }
 
     // INIT BALL
-    const radius = 0.1;
+    const radius = 0.05;
     const widthSegments = 32;
     const heightSegments = 16;
     const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
@@ -100,9 +100,11 @@ export class PongComponent implements AfterViewInit {
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     const leftPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
     leftPaddle.position.x = -1;
+    leftPaddle.position.y = paddleWidth / 2+ radius * 3 / 4;
     leftPaddle.rotation.z = Math.PI / 2;
     const rightPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
     rightPaddle.position.x = 1;
+    rightPaddle.position.y = paddleWidth / 2;
     rightPaddle.rotation.z = Math.PI / 2;
     scene.add(leftPaddle);
     scene.add(rightPaddle);
@@ -197,15 +199,19 @@ export class PongComponent implements AfterViewInit {
         ballAngle = -ballAngle;
         ball.position.y = pseudoLimit;
       }
-      if (ball.position.x < - pseudoLimit && ball.position.y + radius / 2 > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < leftPaddle.position.y + paddleWidth / 2) {
+      if (ball.position.x < - pseudoLimit && ball.position.y + radius * 3/4  > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < leftPaddle.position.y + paddleWidth / 2) {
         const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
-        ballAngle = Math.asin(yDifference) * Math.PI/4 + Math.PI;
+        ballAngle = Math.asin(yDifference) + Math.PI;
+        console.log(yDifference);
+        ballAngle = Math.PI * yDifference + Math.PI;
         ball.position.x = -pseudoLimit;
         ballSpeed += 0.0001;
       }
-      if (ball.position.x > pseudoLimit && ball.position.y + radius / 2 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < rightPaddle.position.y + paddleWidth / 2) {
+      if (ball.position.x > pseudoLimit && ball.position.y + radius * 3/4 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < rightPaddle.position.y + paddleWidth / 2) {
         const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
         ballAngle = Math.PI - ballAngle - yDifference * Math.PI;
+        ballAngle = - Math.PI * yDifference;
+
         ball.position.x = pseudoLimit;
         ballSpeed += 0.0001;
       }
