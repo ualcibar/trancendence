@@ -80,7 +80,7 @@ export class PongComponent implements AfterViewInit {
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
-    let ballSpeed = 1;
+    let ballSpeed = 0.77;
     // let ballAngle = Math.PI * Math.random() / 10;
     // let ballAngle = Math.PI * 9 / 8;
     let ballAngle = 0;
@@ -101,11 +101,11 @@ export class PongComponent implements AfterViewInit {
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     const leftPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
     leftPaddle.position.x = -1;
-    leftPaddle.position.y = paddleWidth / 2+ radius * 3 / 4;
+    leftPaddle.position.y = 0;
     leftPaddle.rotation.z = Math.PI / 2;
     const rightPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
     rightPaddle.position.x = 1;
-    rightPaddle.position.y = paddleWidth / 2;
+    rightPaddle.position.y = 0;
     rightPaddle.rotation.z = Math.PI / 2;
     scene.add(leftPaddle);
     scene.add(rightPaddle);
@@ -136,10 +136,9 @@ export class PongComponent implements AfterViewInit {
     scene.add(topWall);
     scene.add(bottomWall);
 
+    const IA = true;
     let pastTime = 0;
     let pastIATime = 0;
-    let rightPaddleMovingRight = false;
-    let rightPaddleMovingLeft = false;
     let predictedBallY = 0;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
@@ -162,34 +161,50 @@ export class PongComponent implements AfterViewInit {
       // MOVE PADDLES
       const pseudoLimit = 1 - radius;
 
-      if (key.isPressed('w') || key.isPressed('a')) {
-        leftPaddle.position.y += 0.01;
-      }
-      if (key.isPressed('s') || key.isPressed('d')) {
-        leftPaddle.position.y -= 0.01;
-      }
-      // console.log(pastIATime - time);
-      if (time - pastIATime > 1) {
-        console.log('IA');
-        pastIATime = time;
+      if (IA) {
+        if (key.isPressed('w') || key.isPressed('a')) {
+          leftPaddle.position.y += 0.01;
+        }
+        if (key.isPressed('s') || key.isPressed('d')) {
+          leftPaddle.position.y -= 0.01;
+        }
+        if (time - pastIATime > 1) {
+          console.log('IA');
+          pastIATime = time;
 
-        // IA
-        predictedBallY = ball.position.y +(Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
-        console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));
-        while (predictedBallY > 1) {
-          predictedBallY = 1 - (predictedBallY - 1);
+          // IA
+
+          predictedBallY = ball.position.y +(Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
+          console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));
+          while (predictedBallY > 1) {
+            predictedBallY = 1 - (predictedBallY - 1);
+          }
+          while (predictedBallY < -1) {
+            predictedBallY = -1 - (predictedBallY + 1);
+          }
+          predictedBallY  += Math.random() * paddleWidth / 2 - Math.random() * paddleWidth / 2;
+          console.log(predictedBallY);
         }
-        while (predictedBallY < -1) {
-          predictedBallY = -1 - (predictedBallY + 1);
+        if (rightPaddle.position.y < predictedBallY) {
+          rightPaddle.position.y += 0.01;
         }
-        predictedBallY  += Math.random() * paddleWidth / 2 - Math.random() * paddleWidth / 2;
-        console.log(predictedBallY);
+        if (rightPaddle.position.y > predictedBallY) {
+          rightPaddle.position.y -= 0.01;
+        }
       }
-      if (rightPaddle.position.y < predictedBallY) {
-        rightPaddle.position.y += 0.01;
-      }
-      if (rightPaddle.position.y > predictedBallY) {
-        rightPaddle.position.y -= 0.01;
+      else {
+        if (key.isPressed('w') || key.isPressed('a')) {
+          leftPaddle.position.y += 0.01;
+        }
+        if (key.isPressed('s') || key.isPressed('d')) {
+          leftPaddle.position.y -= 0.01;
+        }
+        if (key.isPressed('up') || key.isPressed('right')) {
+          rightPaddle.position.y += 0.01;
+        }
+        if (key.isPressed('down') || key.isPressed('left')) {
+          rightPaddle.position.y -= 0.01;
+        }
       }
 
       // LIMIT PADDLES
