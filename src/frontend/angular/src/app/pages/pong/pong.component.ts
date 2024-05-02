@@ -224,22 +224,6 @@ export class PongComponent implements AfterViewInit {
         ballAngle -= 2 * Math.PI;
       }
 
-      // CORRECT EXTREME ANGLE
-      // const limitMax = 0.90;
-      // const limitMin = limitMax - 0.1;
-      // if (ballAngle < Math.PI / 2 && ballAngle > limitMax * Math.PI / 2) {
-      //   ballAngle = limitMax * Math.PI / 2;
-      // }
-      // if (ballAngle > Math.PI / 2 && ballAngle < Math.PI / 2 + limitMin * Math.PI / 2) {
-      //   ballAngle = Math.PI / 2 + limitMin * Math.PI / 2;
-      // }
-      // if (ballAngle < Math.PI * 3 / 2 && ballAngle > Math.PI + limitMax * Math.PI / 2) {
-      //   ballAngle = Math.PI + limitMax * Math.PI / 2;
-      // }
-      // if (ballAngle > Math.PI * 3 / 2 && ballAngle < 2 * Math.PI - limitMin * Math.PI / 2) {
-      //   ballAngle = 2 * Math.PI - limitMin * Math.PI / 2;
-      // }
-
       // SET PAST TIME
       pastTime = time;
 
