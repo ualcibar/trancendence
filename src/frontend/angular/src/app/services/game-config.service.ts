@@ -52,8 +52,10 @@ export class GameConfigService {
     public readonly ballColor = this.colorPalette.white;
 
     // Quinetity settings
-    public readonly ballSpeed = 0.77;
+    public readonly ballSpeed = 1;
     public readonly ballAngle = 0;
+    // public readonly ballSpeed = 0.5;
+    // public readonly ballAngle = Math.PI * 9 / 8;
 
       // Ball light settings
       public readonly ballLightColor = this.ballColor;
@@ -77,7 +79,7 @@ export class GameConfigService {
       public readonly rightPaddleRotation = Math.PI / 2; // 90 degrees, don't change this
 
     // Paddle movement settings
-    public readonly paddleSpeed = 0.02;
+    public readonly paddleSpeed = 0.77;
 
   // Wall settings
     // Constructor settings
@@ -104,6 +106,8 @@ export class GameConfigService {
     public readonly collisionChangeBallColor = true;
     public readonly collisionChangeWallColor = true;
     public readonly collisionChangePaddleColor = true;
+
+    public readonly aceleration = 0.025;
 
   constructor() { }
 }

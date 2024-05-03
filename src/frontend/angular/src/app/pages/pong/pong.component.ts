@@ -133,9 +133,12 @@ export class PongComponent implements AfterViewInit {
     let pastTime = 0;
     let pastIATime = 0;
     let predictedBallY = 0;
+    let rightPaddleMovement = 0;
+    let leftPaddleMovement = 0;
     const collisionChangeBallColor = this.configService.collisionChangeBallColor;
     const collisionChangeWallColor = this.configService.collisionChangeWallColor;
     const collisionChangePaddleColor = this.configService.collisionChangePaddleColor;
+    const aceleration = this.configService.aceleration;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
@@ -150,59 +153,70 @@ export class PongComponent implements AfterViewInit {
 
       // MOVE BALL
       const timeDifference = pastTime - time;
-      const diferentialDisplacement = timeDifference * ballSpeed;
-      ball.position.x += diferentialDisplacement * Math.cos(ballAngle);
-      ball.position.y += diferentialDisplacement * Math.sin(ballAngle);
+      const ballDiferentialDisplacement = timeDifference * ballSpeed;
+      ball.position.x += ballDiferentialDisplacement * Math.cos(ballAngle);
+      ball.position.y += ballDiferentialDisplacement * Math.sin(ballAngle);
 
 
-      // MOVE PADDLES
+      // HANDLE PADDLE MOVEMENT
       const pseudoLimit = 1 - radius;
+      const paddleDiferentialDisplacement = - timeDifference * paddleSpeed;
 
+      // LEFT PADDLE MOVEMENT
+      if (key.isPressed('w') || key.isPressed('a')) {
+        leftPaddleMovement = paddleDiferentialDisplacement;
+      }
+      else if (key.isPressed('s') || key.isPressed('d')) {
+        leftPaddleMovement = - paddleDiferentialDisplacement;
+      }
+      else {
+        leftPaddleMovement = 0;
+      }
+
+      // RIGHT PADDLE MOVEMENT
       if (IA) {
-        if (key.isPressed('w') || key.isPressed('a')) {
-          leftPaddle.position.y += paddleSpeed;
-        }
-        if (key.isPressed('s') || key.isPressed('d')) {
-          leftPaddle.position.y -= paddleSpeed;
-        }
         if (time - pastIATime > 1) { // IA only sees the ball every second
           console.log('IA');
           pastIATime = time;
 
-          // IA
-
+          // IA PREDICTION
           predictedBallY = ball.position.y +(Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
           console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));
-          while (predictedBallY > 1) {
-            predictedBallY = 1 - (predictedBallY - 1);
+          while (predictedBallY > topWall.position.y) {
+            predictedBallY = topWall.position.y - (predictedBallY - 1);
           }
-          while (predictedBallY < -1) {
-            predictedBallY = -1 - (predictedBallY + 1);
+          while (predictedBallY < bottomWall.position.y) {
+            predictedBallY = bottomWall.position.y - (predictedBallY + 1);
           }
           predictedBallY  += Math.random() * paddleWidth / 2 - Math.random() * paddleWidth / 2;
           console.log(predictedBallY);
         }
-        if (rightPaddle.position.y < predictedBallY) {
-          rightPaddle.position.y += paddleSpeed;
+
+        if (rightPaddle.position.y < predictedBallY - paddleWidth / 5) {
+          rightPaddleMovement = paddleDiferentialDisplacement;
         }
-        if (rightPaddle.position.y > predictedBallY) {
-          rightPaddle.position.y -= paddleSpeed;
+        else if (rightPaddle.position.y > predictedBallY + paddleWidth / 5) {
+          rightPaddleMovement = - paddleDiferentialDisplacement;
+        }
+        else {
+          rightPaddleMovement = 0;
         }
       }
       else {
-        if (key.isPressed('w') || key.isPressed('a')) {
-          leftPaddle.position.y += paddleSpeed;
+        if (key.isPressed('up') || key.isPressed('left')) {
+          rightPaddleMovement = paddleDiferentialDisplacement;
         }
-        if (key.isPressed('s') || key.isPressed('d')) {
-          leftPaddle.position.y -= paddleSpeed;
+        else if (key.isPressed('down') || key.isPressed('right')) {
+          rightPaddleMovement = - paddleDiferentialDisplacement;
         }
-        if (key.isPressed('up') || key.isPressed('right')) {
-          rightPaddle.position.y += paddleSpeed;
-        }
-        if (key.isPressed('down') || key.isPressed('left')) {
-          rightPaddle.position.y -= paddleSpeed;
+        else {
+          rightPaddleMovement = 0;
         }
       }
+      
+      // MOVE PADDLES
+      leftPaddle.position.y += leftPaddleMovement;
+      rightPaddle.position.y += rightPaddleMovement;
 
       // LIMIT PADDLES
       if (leftPaddle.position.y > topWall.position.y) {
@@ -265,7 +279,7 @@ export class PongComponent implements AfterViewInit {
         console.log(yDifference);
         ballAngle = Math.PI * yDifference + Math.PI;
         ball.position.x = -pseudoLimit;
-        ballSpeed += 0.01 * ballSpeed;
+        ballSpeed += aceleration * ballSpeed;
       }
       if (ball.position.x > pseudoLimit && ball.position.y + radius * 3/4 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < rightPaddle.position.y + paddleWidth / 2) {
         if (collisionChangeBallColor) {
@@ -282,7 +296,7 @@ export class PongComponent implements AfterViewInit {
         ballAngle = - Math.PI * yDifference;
 
         ball.position.x = pseudoLimit;
-        ballSpeed += 0.01 * ballSpeed;
+        ballSpeed += aceleration * ballSpeed;
       }
 
       // NORMALIZE ANGLE
