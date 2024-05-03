@@ -107,6 +107,7 @@ export class PongComponent implements AfterViewInit {
     rightPaddle.rotation.z = this.configService.rightPaddleRotation;
     scene.add(leftPaddle);
     scene.add(rightPaddle);
+    const paddleSpeed = this.configService.paddleSpeed;
 
     // INIT WALLS
     const wallWidth = this.configService.wallWidth;
@@ -159,10 +160,10 @@ export class PongComponent implements AfterViewInit {
 
       if (IA) {
         if (key.isPressed('w') || key.isPressed('a')) {
-          leftPaddle.position.y += 0.01;
+          leftPaddle.position.y += paddleSpeed;
         }
         if (key.isPressed('s') || key.isPressed('d')) {
-          leftPaddle.position.y -= 0.01;
+          leftPaddle.position.y -= paddleSpeed;
         }
         if (time - pastIATime > 1) {
           console.log('IA');
@@ -182,24 +183,24 @@ export class PongComponent implements AfterViewInit {
           console.log(predictedBallY);
         }
         if (rightPaddle.position.y < predictedBallY) {
-          rightPaddle.position.y += 0.01;
+          rightPaddle.position.y += paddleSpeed;
         }
         if (rightPaddle.position.y > predictedBallY) {
-          rightPaddle.position.y -= 0.01;
+          rightPaddle.position.y -= paddleSpeed;
         }
       }
       else {
         if (key.isPressed('w') || key.isPressed('a')) {
-          leftPaddle.position.y += 0.01;
+          leftPaddle.position.y += paddleSpeed;
         }
         if (key.isPressed('s') || key.isPressed('d')) {
-          leftPaddle.position.y -= 0.01;
+          leftPaddle.position.y -= paddleSpeed;
         }
         if (key.isPressed('up') || key.isPressed('right')) {
-          rightPaddle.position.y += 0.01;
+          rightPaddle.position.y += paddleSpeed;
         }
         if (key.isPressed('down') || key.isPressed('left')) {
-          rightPaddle.position.y -= 0.01;
+          rightPaddle.position.y -= paddleSpeed;
         }
       }
 

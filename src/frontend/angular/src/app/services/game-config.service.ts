@@ -18,6 +18,10 @@ export class GameConfigService {
   // General game settings
     gameHeight = 2;
     gameWidth = 2;
+    leftLimit = - this.gameWidth / 2;
+    rightLimit = this.gameWidth / 2;
+    topLimit = this.gameHeight / 2;
+    bottomLimit = - this.gameHeight / 2;
 
   // Camera settings
     // Constructor settings
@@ -64,13 +68,16 @@ export class GameConfigService {
 
     // Paddle position
       // Left paddle
-      public readonly leftPaddleX = - this.gameWidth / 2;
+      public readonly leftPaddleX = this.leftLimit;
       public readonly leftPaddleY = 0;
       public readonly leftPaddleRotation = Math.PI / 2; // 90 degrees, don't change this
       // Right paddle
-      public readonly rightPaddleX = this.gameWidth / 2;
+      public readonly rightPaddleX = this.rightLimit;
       public readonly rightPaddleY = 0;
       public readonly rightPaddleRotation = Math.PI / 2; // 90 degrees, don't change this
+
+    // Paddle movement settings
+    public readonly paddleSpeed = 0.02;
 
   // Wall settings
     // Constructor settings
@@ -82,11 +89,11 @@ export class GameConfigService {
     // Wall position
       // Top wall
       public readonly topWallX = 0;
-      public readonly topWallY = this.gameHeight / 2;
+      public readonly topWallY = this.topLimit;
       public readonly topWallZ = 0;
       // Bottom wall
       public readonly bottomWallX = 0;
-      public readonly bottomWallY = - this.gameHeight / 2;
+      public readonly bottomWallY = this.bottomLimit;
       public readonly bottomWallZ = 0;
 
   // IA settings
