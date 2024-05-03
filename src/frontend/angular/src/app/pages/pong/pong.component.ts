@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 
 import { GameSettings, MatchmakingService} from '../../services/matchmaking.service';
+import { GameConfigService } from '../../services/game-config.service';
+
 
 
 export const colorPalette = {
@@ -31,10 +33,7 @@ export class PongComponent implements AfterViewInit {
     // imagen de fondo
    
 
-  private mm: MatchmakingService;
-
-  constructor(private matchmakingService: MatchmakingService) {
-    this.mm = matchmakingService;
+  constructor(private matchmakingService: MatchmakingService, private configService: GameConfigService) {
   }
 
   ngAfterViewInit(): void {
@@ -48,101 +47,95 @@ export class PongComponent implements AfterViewInit {
     const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
   
     // INIT CAMERA
-    const fov = 75;
-    const aspect = 2; // the canvas default
-    const near = 0.1;
-    const far = 5;
+    const fov = this.configService.fov;
+    const aspect = this.configService.aspect;
+    const near = this.configService.near;
+    const far = this.configService.far;
     const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
-    camera.position.z = 2;
+    camera.position.z = this.configService.cameraZ;
 
     // INIT SCENE
     const scene = new THREE.Scene();
 
-    const defaultLightingIsOn = true;
+    const defaultLightingIsOn = this.configService.defaultLightingIsOn;
     // INIT LIGHT
     if (defaultLightingIsOn)
     {
-      const color = colorPalette.white;
-      const intensity = 3;
+      const color = this.configService.defaultlightColor;
+      const intensity = this.configService.defaultLightIntensity;
       const light = new THREE.DirectionalLight( color, intensity );
-      light.position.set( - 1, 2, 4 );
+      const X = this.configService.defaultLightPositionX;
+      const Y = this.configService.defaultLightPositionY;
+      const Z = this.configService.defaultLightPositionZ;
+      light.position.set( X, Y, Z);
       scene.add( light );
-
     }
 
     // INIT BALL
-    const radius = 0.05;
-    const widthSegments = 32;
-    const heightSegments = 16;
+    const radius = this.configService.radius;
+    const widthSegments = this.configService.widthSegments;
+    const heightSegments = this.configService.heightSegments;
     const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-    const ballColor = colorPalette.roseGarden;
+    const ballColor = this.configService.ballColor;
     const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
-    let ballSpeed = 0.77;
-    // let ballAngle = Math.PI * Math.random() / 10;
-    // let ballAngle = Math.PI * 9 / 8;
-    let ballAngle = 0;
+    let ballSpeed = this.configService.ballSpeed;
+    let ballAngle = this.configService.ballAngle;
 
     // INIT BALL LIGHT
-    const color = colorPalette.roseGarden;
-    const intensity = 1;
-    const light = new THREE.PointLight( color, intensity * 5 );
-    light.position.set( 0, 0, 0 );
+    const color = this.configService.ballLightColor;
+    const intensity = this.configService.ballLightIntensity;
+    const light = new THREE.PointLight( color, intensity );
     scene.add( light );
 
     // INIT PADDLES
-    const paddleWidth = 0.5;
-    const paddleHeight = 0.02;
-    const paddleDepth = 0.1;
+    const paddleWidth = this.configService.paddleWidth;
+    const paddleHeight = this.configService.paddleHeight;
+    const paddleDepth = this.configService.paddleDepth;
     const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
-    const paddleColor = colorPalette.leadCyan;
+    const paddleColor = this.configService.paddleColor;
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     const leftPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-    leftPaddle.position.x = -1;
-    leftPaddle.position.y = 0;
-    leftPaddle.rotation.z = Math.PI / 2;
+    leftPaddle.position.x = this.configService.leftPaddleX;
+    leftPaddle.position.y = this.configService.leftPaddleY;
+    leftPaddle.rotation.z = this.configService.leftPaddleRotation;
     const rightPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-    rightPaddle.position.x = 1;
-    rightPaddle.position.y = 0;
-    rightPaddle.rotation.z = Math.PI / 2;
+    rightPaddle.position.x = this.configService.rightPaddleX;
+    rightPaddle.position.y = this.configService.rightPaddleY;
+    rightPaddle.rotation.z = this.configService.rightPaddleRotation;
     scene.add(leftPaddle);
     scene.add(rightPaddle);
-    
-
-    // INIT PADDLE LIGHT
-    const paddleLight1 = new THREE.RectAreaLight( paddleColor, 5, paddleWidth, paddleHeight );
-    paddleLight1.position.set( -1, -1, -1 );
-    paddleLight1.lookAt( 0, 0, 0 );
-    // paddleLight1.rotation.z = Math.PI / 2;
-    scene.add( paddleLight1 );
-    const paddleLight2 = new THREE.PointLight( paddleColor, intensity );
-    paddleLight2.position.set( 1, 0, 0 );
-    // scene.add( paddleLight2 );
-
 
     // INIT WALLS
-    const wallWidth = 2 - paddleHeight * 2;
-    const wallHeight = 0.02;
-    const wallDepth = 0.2;
+    const wallWidth = this.configService.wallWidth;
+    const wallHeight = this.configService.wallHeight;
+    const wallDepth = this.configService.wallDepth;
     const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
-    const wallColor = colorPalette.swingPurple;
+    const wallColor = this.configService.wallColor;
     const wallMaterial = new THREE.MeshPhongMaterial({color: wallColor});
     const topWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    topWall.position.y = 1;
+    topWall.position.x = this.configService.topWallX;
+    topWall.position.y = this.configService.topWallY;
+    topWall.position.z = this.configService.topWallZ;
     const bottomWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    bottomWall.position.y = -1;
+    bottomWall.position.x = this.configService.bottomWallX;
+    bottomWall.position.y = this.configService.bottomWallY;
+    bottomWall.position.z = this.configService.bottomWallZ;
     scene.add(topWall);
     scene.add(bottomWall);
 
-    const IA = true;
+    const IA = this.configService.IAisOn;
+
+    // Init loop variables
     let pastTime = 0;
     let pastIATime = 0;
     let predictedBallY = 0;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
+      // DISPLAY TIME
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
   
@@ -224,8 +217,6 @@ export class PongComponent implements AfterViewInit {
       // MOVE LIGHT
       light.position.x = ball.position.x;
       light.position.y = ball.position.y;
-      paddleLight1.position.y = leftPaddle.position.y;
-      paddleLight2.position.y = rightPaddle.position.y;
 
 
       // COLLISION BALL
