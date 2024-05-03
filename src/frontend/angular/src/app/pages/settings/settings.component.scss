@@ -1,9 +1,4 @@
-.settings-tab {
-	position: absolute;
-	top: 30%;
-	left: 50%;
-	transform: translateX(-50%);
-}
+
 
 .loading-tab {
 	position: absolute;
@@ -25,7 +20,23 @@ li {
 	position: absolute;
 	top: 25%;
 	left: 25%;
-	font-size: 40px;
-	color: gray;
-	background-color: black;
-} 
+}
+
+/* Media queries */
+.settings-tab {
+	margin-top: 19vh;
+}
+
+.settings-tab-margin {
+	margin-right: 16px;
+}
+
+@media (max-width: 575.98px) {
+	.settings-tab {
+		margin-top: 3vh;
+	}
+
+	.settings-tab-margin {
+		margin-right: 0px;
+	}
+}

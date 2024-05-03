@@ -19,6 +19,7 @@ import { UserProfileComponent } from './pages/profile/user-profile/user-profile.
 import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { NotFoundComponent } from './components/errors/not-found/not-found.compo
     CommonModule,
     ForbiddenComponent,
     UnauthorizedComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    SettingsComponent
   ],
   providers: [
     provideAnimationsAsync()
