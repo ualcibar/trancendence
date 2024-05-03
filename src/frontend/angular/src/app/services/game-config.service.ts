@@ -45,7 +45,7 @@ export class GameConfigService {
     public readonly radius = 0.05;
     public readonly widthSegments = 32;
     public readonly heightSegments = 16;
-    public readonly ballColor = this.colorPalette.josefYellow;
+    public readonly ballColor = this.colorPalette.white;
 
     // Quinetity settings
     public readonly ballSpeed = 0.77;
@@ -89,8 +89,14 @@ export class GameConfigService {
       public readonly bottomWallY = - this.gameHeight / 2;
       public readonly bottomWallZ = 0;
 
-    // IA settings
-      public readonly IAisOn = true;
+  // IA settings
+    public readonly IAisOn = true;
+
+  // Collision settings
+    // Colistion change color
+    public readonly collisionChangeBallColor = true;
+    public readonly collisionChangeWallColor = true;
+    public readonly collisionChangePaddleColor = true;
 
   constructor() { }
 }
