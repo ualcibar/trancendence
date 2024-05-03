@@ -165,7 +165,7 @@ export class PongComponent implements AfterViewInit {
         if (key.isPressed('s') || key.isPressed('d')) {
           leftPaddle.position.y -= paddleSpeed;
         }
-        if (time - pastIATime > 1) {
+        if (time - pastIATime > 1) { // IA only sees the ball every second
           console.log('IA');
           pastIATime = time;
 
@@ -205,17 +205,17 @@ export class PongComponent implements AfterViewInit {
       }
 
       // LIMIT PADDLES
-      if (leftPaddle.position.y > 1) {
-        leftPaddle.position.y = 1;
+      if (leftPaddle.position.y > topWall.position.y) {
+        leftPaddle.position.y = topWall.position.y;
       }
-      if (leftPaddle.position.y < -1) {
-        leftPaddle.position.y = -1;
+      if (leftPaddle.position.y < bottomWall.position.y) {
+        leftPaddle.position.y = bottomWall.position.y;
       }
-      if (rightPaddle.position.y > 1) {
-        rightPaddle.position.y = 1;
+      if (rightPaddle.position.y > topWall.position.y) {
+        rightPaddle.position.y = topWall.position.y;
       }
-      if (rightPaddle.position.y < -1) {
-        rightPaddle.position.y = -1;
+      if (rightPaddle.position.y < bottomWall.position.y) {
+        rightPaddle.position.y = bottomWall.position.y;
       }
 
       // MOVE LIGHT
@@ -297,11 +297,11 @@ export class PongComponent implements AfterViewInit {
       pastTime = time;
 
       // CHECK WINNER
-      if (ball.position.x < -1) {
+      if (ball.position.x < leftPaddle.position.x - paddleHeight) {
         alert('Right player wins!');
         window.location.reload();
       }
-      if (ball.position.x > 1) {
+      if (ball.position.x > rightPaddle.position.x + paddleHeight) {
         alert('Left player wins!');
         window.location.reload();
       }
