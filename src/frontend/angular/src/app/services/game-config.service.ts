@@ -54,12 +54,12 @@ export class GameConfigService {
     // Quinetity settings
     public readonly ballSpeed = 1;
     public readonly ballAngle = 0;
-    // public readonly ballSpeed = 0.5;
-    // public readonly ballAngle = Math.PI * 9 / 8;
+    // public readonly ballSpeed = 0.01;
+    // public readonly ballAngle = Math.PI * -1.4 / 2;
 
       // Ball light settings
       public readonly ballLightColor = this.ballColor;
-      public readonly ballLightIntensity = 0.5;
+      public readonly ballLightIntensity = 1;
 
   // Paddle settings
     // Constructor settings
@@ -99,7 +99,7 @@ export class GameConfigService {
       public readonly bottomWallZ = 0;
 
   // IA settings
-    public readonly IAisOn = true;
+    public readonly IAisOn = false;
 
   // Collision settings
     // Colistion change color
@@ -108,6 +108,10 @@ export class GameConfigService {
     public readonly collisionChangePaddleColor = true;
 
     public readonly aceleration = 0.025;
+
+    public readonly friction = Math.PI / 6;
+
+    public readonly deltaFactor = Math.PI / 2;
 
   constructor() { }
 }

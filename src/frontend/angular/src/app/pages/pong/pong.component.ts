@@ -139,6 +139,8 @@ export class PongComponent implements AfterViewInit {
     const collisionChangeWallColor = this.configService.collisionChangeWallColor;
     const collisionChangePaddleColor = this.configService.collisionChangePaddleColor;
     const aceleration = this.configService.aceleration;
+    const friction = this.configService.friction;
+    const deltaFactor = this.configService.deltaFactor;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
@@ -181,21 +183,23 @@ export class PongComponent implements AfterViewInit {
 
           // IA PREDICTION
           predictedBallY = ball.position.y +(Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
-          console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));
+          console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));///grrrr
+          console.log('before ', predictedBallY);
           while (predictedBallY > topWall.position.y) {
             predictedBallY = topWall.position.y - (predictedBallY - 1);
           }
           while (predictedBallY < bottomWall.position.y) {
             predictedBallY = bottomWall.position.y - (predictedBallY + 1);
           }
-          predictedBallY  += Math.random() * paddleWidth / 2 - Math.random() * paddleWidth / 2;
-          console.log(predictedBallY);
+          console.log('after ', predictedBallY);
+          predictedBallY  += (Math.random() - Math.random()) * paddleWidth / 2 * 0;
+          console.log(rightPaddle.position.y);
         }
 
-        if (rightPaddle.position.y < predictedBallY - paddleWidth / 5) {
+        if (rightPaddle.position.y < predictedBallY - paddleWidth / 42) {
           rightPaddleMovement = paddleDiferentialDisplacement;
         }
-        else if (rightPaddle.position.y > predictedBallY + paddleWidth / 5) {
+        else if (rightPaddle.position.y > predictedBallY + paddleWidth / 42) {
           rightPaddleMovement = - paddleDiferentialDisplacement;
         }
         else {
@@ -238,6 +242,7 @@ export class PongComponent implements AfterViewInit {
 
 
       // COLLISION BALL
+      // COLLISION BOTTOM WALL
       if (ball.position.y < -pseudoLimit)
       {
         if (collisionChangeBallColor) {
@@ -250,7 +255,9 @@ export class PongComponent implements AfterViewInit {
         }
         ballAngle = -ballAngle;
         ball.position.y = -pseudoLimit;
+        ballSpeed += aceleration * ballSpeed;
       }
+      // COLLISION TOP WALL
       if (ball.position.y > pseudoLimit)
       {
         if (collisionChangeBallColor) {
@@ -263,7 +270,9 @@ export class PongComponent implements AfterViewInit {
         }
         ballAngle = -ballAngle;
         ball.position.y = pseudoLimit;
+        ballSpeed += aceleration * ballSpeed;
       }
+      // COLLISION LEFT PADDLE
       if (ball.position.x < - pseudoLimit && ball.position.y + radius * 3/4  > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < leftPaddle.position.y + paddleWidth / 2) {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
@@ -275,12 +284,15 @@ export class PongComponent implements AfterViewInit {
         }
         
         const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
-        ballAngle = Math.asin(yDifference) + Math.PI;
-        console.log(yDifference);
-        ballAngle = Math.PI * yDifference + Math.PI;
+        ballAngle = deltaFactor * yDifference + Math.PI;
+        if (leftPaddleMovement > 0)
+          ballAngle += friction ;
+        if (leftPaddleMovement < 0)
+          ballAngle -= friction;
         ball.position.x = -pseudoLimit;
         ballSpeed += aceleration * ballSpeed;
       }
+      // COLLISION RIGHT PADDLE
       if (ball.position.x > pseudoLimit && ball.position.y + radius * 3/4 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < rightPaddle.position.y + paddleWidth / 2) {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
@@ -292,9 +304,11 @@ export class PongComponent implements AfterViewInit {
         }
         
         const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
-        ballAngle = Math.PI - ballAngle - yDifference * Math.PI;
-        ballAngle = - Math.PI * yDifference;
-
+        ballAngle = - deltaFactor * yDifference;
+        if (rightPaddleMovement > 0)
+          ballAngle += friction;
+        if (rightPaddleMovement < 0)
+          ballAngle -= friction;
         ball.position.x = pseudoLimit;
         ballSpeed += aceleration * ballSpeed;
       }
