@@ -20,6 +20,7 @@ export class UserProfileComponent {
   loading = true;
   editProfile = false;
   logged_username: any;
+  user_color: string = "default";
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
 
@@ -46,12 +47,16 @@ export class UserProfileComponent {
         this.total = response['total'];
         this.wins = response['wins'];
         this.defeats = response['defeats'];
+        this.user_color = response['color'];
 
+        this.loading = false;
         if (this.authService.user_info?.username === this.username) {
           this.editProfile = true;
+        } else if (this.username === "admin") {
+          this.user_not_found = true;
+        } else {
+          this.user_not_found = false;
         }
-        this.loading = false;
-        this.user_not_found = false;
       },
       error: (error) => {
         console.error('An error ocurred fetching this user: ', error.status);
