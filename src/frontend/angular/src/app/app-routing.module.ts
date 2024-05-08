@@ -9,12 +9,14 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
 import { TestComponent } from './pages/test/test.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'play', component: PongComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'settings', component: SettingsComponent },
   { path: 'profile', component: ProfileComponent, children: [
     { path: ':userId', component: UserProfileComponent }
   ]},

@@ -1,0 +1,32 @@
+.gradient-id-default {
+	background-image: linear-gradient(to right, rgb(138 151 168), rgb(71 85 105));
+}
+
+.gradient-id-rojo {
+	background-image: linear-gradient(to right, rgb(236 71 71), #7f1d1d);
+}
+
+.gradient-id-naranja {
+	background-image: linear-gradient(to right, rgb(234 88 12), rgb(106 37 14));
+}
+
+.gradient-id-ambar {
+	background-image: linear-gradient(to right, rgb(245 158 11), rgb(120 53 15));
+}
+
+.gradient-id-lima {
+	background-image: linear-gradient(to right, rgb(101 163 13), rgb(54 83 20));
+}
+
+.gradient-id-pino {
+	background-image: linear-gradient(to right, rgb(22 163 74), rgb(22 101 52));
+}
+
+.gradient-id-purpura {
+	background-image: linear-gradient(to right, rgb(99 102 241), rgb(49, 46, 129));
+}
+
+.selected {
+	border: 4px solid white;
+	filter: brightness(.9);
+}

@@ -1,0 +1,15 @@
+<div class="settings-tab flex flex-col mx-auto w-1/2 md:flex-row">
+	<div id="sp-div" class="pb-4 md:flex-row h-fit rounded">
+		<ul class="pl-4 mr-4 mt-4 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
+			<h2 class="text-2xl text-sp-text font-bold">Profile</h2>
+			<li (click)="profileColorEdit = true" [ngClass]="{'selected': profileColorEdit}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-palette-fill"></i> Your color</a></li>
+			<li class="pl-4 py-2 text-zinc-300"><a><i class="bi bi-translate"></i> Language</a></li>
+		</ul>
+		<ul class="pl-4 mr-4 mt-2 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
+			<h2 class="text-2xl text-sp-text font-bold">Account</h2>
+			<li class="pl-4 py-2 text-zinc-300"><a><i class="bi bi-person-square"></i> Public profile</a></li>
+			<li class="pl-4 py-2 text-zinc-300"><a><i class="bi bi-person-fill-lock"></i> Account security</a></li>
+		</ul>
+	</div>
+	<app-settings-p-color *ngIf="profileColorEdit" class="w-full"></app-settings-p-color>
+</div>

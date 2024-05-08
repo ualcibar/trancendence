@@ -5,6 +5,8 @@ from channels.layers import get_channel_layer
 from rest_framework_simplejwt.tokens import TokenError, AccessToken
 from channels.exceptions import DenyConnection
 
+from polls.serializers import UserSerializer
+
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from asgiref.sync import async_to_sync
@@ -105,7 +107,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'status': 'success',
                         'match' : data['settings']
                     }))
-                    self.user.game_room_name = data['settings']['name']
+                    self.user.game_room_name = f'{data['settings']['name']}_match'
                     self.user.status = 'Joining Game'
                     self.user.save()
                     async_to_sync(self.channel_layer.group_add)(self.user.game_room_name, self.channel_name)
@@ -158,14 +160,23 @@ class MatchMakingConsumer(WebsocketConsumer):
                         name=data['name'],
                     )
                     self.user.game = match_game
-                    self.user.game_room_name = match_game.name
+                    self.user.game_room_name = f'{match_game.name}_match'
                     self.user.status = 'joiningGame'
-                    self.user.save() 
+                    self.user.save()
+                    user_info =  UserSerializer(self.user).data
+                    self.user.game.add_player(match_game.name, self.user)
+                    serialized_match = MatchPreviewSerializer(self.user.game).data
+                    async_to_sync(self.channel_layer.group_add)(self.user.game_room_name, self.channel_name)
+                    self.send(json.dumps({
+                        'type': 'join_match_result',
+                        'status': 'success',
+                        'match' : serialized_match
+                    }))
                     async_to_sync(self.channel_layer.group_send)(
                         self.user.game_room_name,
                         {
                             'type': 'player_joined_match',
-                            'username': self.user.username,
+                            'userInfo': user_info,
                         }
                     )
                     async_to_sync(self.channel_layer.group_send)(
@@ -173,14 +184,11 @@ class MatchMakingConsumer(WebsocketConsumer):
                         {
                             'type': 'player_joined_match_to_host',
                             'username': self.user.username,
+                            'senderId' : self.user.id,
+                            'userInfo': user_info,
                             'sdp' : data['sdp']
                         }
                     )
-                    #self.send(json.dumps({
-                    #    'type': 'join_match_result',
-                    #    'status': 'succes',
-                    #    'players' : [player.username for player in match_game.players]
-                    #}))
                     logger.debug('new match success')
                 except Exception as e:
                     self.user.game = None 
@@ -193,6 +201,16 @@ class MatchMakingConsumer(WebsocketConsumer):
                     }))
                     logger.debug(f'failed to join match {e}')
                     return
+            case '/confirm_join/match':
+                async_to_sync(self.channel_layer.group_send)(
+                    self.user.game_room_name,
+                    {
+                        'type': 'confirm_join_match_result',
+                        'status' : 'success',
+                        'playerId' : data['playerId'],
+                        'player' :  data['player']
+                    }
+                ) 
             case '/join/tournament':
                 pass
             case '/webrtc/answer':
@@ -201,17 +219,27 @@ class MatchMakingConsumer(WebsocketConsumer):
                     {
                         'type': 'webrtc_answer',
                         'answer': data['answer'],
+                        'targetId' : self.user.id
                     }
                 ) 
             case '/webrtc/candidate':
                 async_to_sync(self.channel_layer.group_send)(
-                    f'{self.user.game_room_name}',
+                    self.user.game_room_name,
                     {
                         'type': 'webrtc_candidate',
                         'candidate': data['candidate'],
-                        'sender': self.user.username
+                        'sender': self.user.username,
+                        'senderId' :self.user.id
                     }
-                ) 
+                )
+            case '/match/all_players_connected':
+                async_to_sync(self.channel_layer.group_send)(
+                    self.user.game_room_name,
+                    {
+                        'type': 'match_all_players_connected',
+                    }
+                )
+
             case '/leave/game':
                 self.user.status = 'Connected'
                 self.user.save()
@@ -248,7 +276,10 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(event))
     def player_joined_match_to_host(self, event):
         self.send(text_data=json.dumps(event))
-        
+    def confirm_join_match_result(self, event):
+        self.send(text_data=json.dumps(event))
+    def match_all_players_connected(self, event):
+        self.send(text_data=json.dumps(event))
 #
 #
 #case '/del_match':

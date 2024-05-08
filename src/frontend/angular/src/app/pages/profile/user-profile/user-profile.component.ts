@@ -11,10 +11,10 @@ import { AuthService, UserInfo } from '../../../services/auth.service';
 })
 export class UserProfileComponent {
   username = 'Loading...';
-  user_id: any;
-  total: any;
-  wins: any;
-  defeats: any;
+  user_id: number = 0;
+  total: number = 0;
+  wins: number = 0;
+  defeats: number = 0;
   user_not_found = false;
   unauthorizedAccess = false;
   loading = true;
@@ -24,16 +24,17 @@ export class UserProfileComponent {
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.authService.updateUserInfo().subscribe({
-      next: (userInfo: any) => {
-        this.logged_username = userInfo.username;
-        this.route.params.subscribe(params => { // Esto hay que mirarlo, porquqe si lo del getUserInfo() falla por no estar con la sesión
-          // iniciada, entonces se queda "cargando" infinitamente
-          const userId = params['userId'];
-          this.getUserInfo(userId);
-        });
+    this.authService.isLoggedIn$.subscribe({
+      next: (value) => {
+        if (value) {
+          this.route.params.subscribe(params => { // Esto hay que mirarlo, porquqe si lo del getUserInfo() falla por no estar con la sesión
+            // iniciada, entonces se queda "cargando" infinitamente
+            const userId = params['userId'];
+            this.getUserInfo(userId);
+          });
+        }
       }
-    });
+    })
   }
 
   getUserInfo(userId: number): void {
@@ -46,7 +47,7 @@ export class UserProfileComponent {
         this.wins = response['wins'];
         this.defeats = response['defeats'];
 
-        if (this.logged_username === this.username) {
+        if (this.authService.user_info?.username === this.username) {
           this.editProfile = true;
         }
         this.loading = false;
