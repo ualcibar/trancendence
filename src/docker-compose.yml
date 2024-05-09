@@ -6,8 +6,8 @@ services:
     volumes:
       - ./frontend/angular:/usr/src/app/
     ports:
-      - "80:80"
-      - "443:443"
+      - "1500:80"
+      - "1501:443"
     networks:
       - bridge
     depends_on:
