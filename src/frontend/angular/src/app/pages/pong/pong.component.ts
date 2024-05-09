@@ -2,6 +2,9 @@ import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import * as THREE from 'three';
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 
+import { GameSettings, MatchmakingService} from '../../services/matchmaking.service';
+import { GameConfigService } from '../../services/game-config.service';
+
 
 
 export const colorPalette = {
@@ -23,9 +26,14 @@ export const colorPalette = {
 export class PongComponent implements AfterViewInit {
 
   @ViewChild('pongCanvas', { static: true }) pongCanvas!: ElementRef<HTMLCanvasElement>;
+  // @Input gameSettings!: GameSettings;//affectan el juego a todos los jugadores
+  // @Input clientSettings!; 
+    // affectan el juego solo al cliente
+    // colores
+    // imagen de fondo
+   
 
-
-  constructor() {
+  constructor(private matchmakingService: MatchmakingService, private configService: GameConfigService) {
   }
 
   ngAfterViewInit(): void {
@@ -39,92 +47,104 @@ export class PongComponent implements AfterViewInit {
     const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
   
     // INIT CAMERA
-    const fov = 75;
-    const aspect = 2; // the canvas default
-    const near = 0.1;
-    const far = 5;
+    const fov = this.configService.fov;
+    const aspect = this.configService.aspect;
+    const near = this.configService.near;
+    const far = this.configService.far;
     const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
-    camera.position.z = 2;
+    camera.position.z = this.configService.cameraZ;
 
     // INIT SCENE
     const scene = new THREE.Scene();
 
-    const defaultLightingIsOn = true;
+    const defaultLightingIsOn = this.configService.defaultLightingIsOn;
     // INIT LIGHT
     if (defaultLightingIsOn)
     {
-  
-      const color = colorPalette.white;
-      const intensity = 3;
+      const color = this.configService.defaultlightColor;
+      const intensity = this.configService.defaultLightIntensity;
       const light = new THREE.DirectionalLight( color, intensity );
-      light.position.set( - 1, 2, 4 );
+      const X = this.configService.defaultLightPositionX;
+      const Y = this.configService.defaultLightPositionY;
+      const Z = this.configService.defaultLightPositionZ;
+      light.position.set( X, Y, Z);
       scene.add( light );
-  
     }
 
     // INIT BALL
-    const radius = 0.1;
-    const widthSegments = 32;
-    const heightSegments = 16;
+    const radius = this.configService.radius;
+    const widthSegments = this.configService.widthSegments;
+    const heightSegments = this.configService.heightSegments;
     const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-    const ballMaterial = new THREE.MeshPhongMaterial({color: colorPalette.roseGarden});
+    const ballColor = this.configService.ballColor;
+    const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     scene.add(ball);
 
-    let ballSpeed = 1;
-    // let ballAngle = Math.PI * Math.random() / 10;
-    let ballAngle = 0;
+    let ballSpeed = this.configService.ballSpeed;
+    let ballAngle = this.configService.ballAngle;
 
     // INIT BALL LIGHT
-    const color = colorPalette.roseGarden;
-    const intensity = 1;
-    const light = new THREE.PointLight( color, intensity * 5 );
-    light.position.set( 0, 0, 0 );
+    const color = this.configService.ballLightColor;
+    const intensity = this.configService.ballLightIntensity;
+    const light = new THREE.PointLight( color, intensity );
     scene.add( light );
 
     // INIT PADDLES
-    const paddleWidth = 0.5;
-    const paddleHeight = 0.02;
-    const paddleDepth = 0.1;
+    const paddleWidth = this.configService.paddleWidth;
+    const paddleHeight = this.configService.paddleHeight;
+    const paddleDepth = this.configService.paddleDepth;
     const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
-    const paddleMaterial = new THREE.MeshPhongMaterial({color: colorPalette.leadCyan});
+    const paddleColor = this.configService.paddleColor;
+    const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     const leftPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-    leftPaddle.position.x = -1;
-    leftPaddle.rotation.z = Math.PI / 2;
+    leftPaddle.position.x = this.configService.leftPaddleX;
+    leftPaddle.position.y = this.configService.leftPaddleY;
+    leftPaddle.rotation.z = this.configService.leftPaddleRotation;
     const rightPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-    rightPaddle.position.x = 1;
-    rightPaddle.rotation.z = Math.PI / 2;
+    rightPaddle.position.x = this.configService.rightPaddleX;
+    rightPaddle.position.y = this.configService.rightPaddleY;
+    rightPaddle.rotation.z = this.configService.rightPaddleRotation;
     scene.add(leftPaddle);
     scene.add(rightPaddle);
-    
-    // INIT PADDLE LIGHT
-    const paddleLight1 = new THREE.RectAreaLight( colorPalette.leadCyan, 5, paddleWidth, paddleHeight );
-    paddleLight1.position.set( -1, -1, -1 );
-    paddleLight1.lookAt( 0, 0, 0 );
-    // paddleLight1.rotation.z = Math.PI / 2;
-    scene.add( paddleLight1 );
-    const paddleLight2 = new THREE.PointLight( colorPalette.leadCyan, intensity );
-    paddleLight2.position.set( 1, 0, 0 );
-    // scene.add( paddleLight2 );
-
+    const paddleSpeed = this.configService.paddleSpeed;
 
     // INIT WALLS
-    const wallWidth = 2 - paddleHeight * 2;
-    const wallHeight = 0.02;
-    const wallDepth = 0.2;
+    const wallWidth = this.configService.wallWidth;
+    const wallHeight = this.configService.wallHeight;
+    const wallDepth = this.configService.wallDepth;
     const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
-    const wallMaterial = new THREE.MeshPhongMaterial({color: colorPalette.darkestPurple});
+    const wallColor = this.configService.wallColor;
+    const wallMaterial = new THREE.MeshPhongMaterial({color: wallColor});
     const topWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    topWall.position.y = 1;
+    topWall.position.x = this.configService.topWallX;
+    topWall.position.y = this.configService.topWallY;
+    topWall.position.z = this.configService.topWallZ;
     const bottomWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    bottomWall.position.y = -1;
+    bottomWall.position.x = this.configService.bottomWallX;
+    bottomWall.position.y = this.configService.bottomWallY;
+    bottomWall.position.z = this.configService.bottomWallZ;
     scene.add(topWall);
     scene.add(bottomWall);
 
+    const IA = this.configService.IAisOn;
+
+    // Init loop variables
     let pastTime = 0;
+    let pastIATime = 0;
+    let predictedBallY = 0;
+    let rightPaddleMovement = 0;
+    let leftPaddleMovement = 0;
+    const collisionChangeBallColor = this.configService.collisionChangeBallColor;
+    const collisionChangeWallColor = this.configService.collisionChangeWallColor;
+    const collisionChangePaddleColor = this.configService.collisionChangePaddleColor;
+    const aceleration = this.configService.aceleration;
+    const friction = this.configService.friction;
+    const deltaFactor = this.configService.deltaFactor;
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
+      // DISPLAY TIME
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
   
@@ -135,63 +155,162 @@ export class PongComponent implements AfterViewInit {
 
       // MOVE BALL
       const timeDifference = pastTime - time;
-      const diferentialDisplacement = timeDifference * ballSpeed;
-      ball.position.x += diferentialDisplacement * Math.cos(ballAngle);
-      ball.position.y += diferentialDisplacement * Math.sin(ballAngle);
+      const ballDiferentialDisplacement = timeDifference * ballSpeed;
+      ball.position.x += ballDiferentialDisplacement * Math.cos(ballAngle);
+      ball.position.y += ballDiferentialDisplacement * Math.sin(ballAngle);
 
-      // MOVE PADDLES
+
+      // HANDLE PADDLE MOVEMENT
+      const pseudoLimit = 1 - radius;
+      const paddleDiferentialDisplacement = - timeDifference * paddleSpeed;
+
+      // LEFT PADDLE MOVEMENT
       if (key.isPressed('w') || key.isPressed('a')) {
-        leftPaddle.position.y += 0.01;
+        leftPaddleMovement = paddleDiferentialDisplacement;
       }
-      if (key.isPressed('s') || key.isPressed('d')) {
-        leftPaddle.position.y -= 0.01;
+      else if (key.isPressed('s') || key.isPressed('d')) {
+        leftPaddleMovement = - paddleDiferentialDisplacement;
       }
-      if (key.isPressed('up') || key.isPressed('right')) {
-        rightPaddle.position.y += 0.01;
+      else {
+        leftPaddleMovement = 0;
       }
-      if (key.isPressed('down') || key.isPressed('left')) {
-        rightPaddle.position.y -= 0.01;
+
+      // RIGHT PADDLE MOVEMENT
+      if (IA) {
+        if (time - pastIATime > 1) { // IA only sees the ball every second
+          console.log('IA');
+          pastIATime = time;
+
+          // IA PREDICTION
+          predictedBallY = ball.position.y +(Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
+          console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));///grrrr
+          console.log('before ', predictedBallY);
+          while (predictedBallY > topWall.position.y) {
+            predictedBallY = topWall.position.y - (predictedBallY - 1);
+          }
+          while (predictedBallY < bottomWall.position.y) {
+            predictedBallY = bottomWall.position.y - (predictedBallY + 1);
+          }
+          console.log('after ', predictedBallY);
+          predictedBallY  += (Math.random() - Math.random()) * paddleWidth / 2 * 0;
+          console.log(rightPaddle.position.y);
+        }
+
+        if (rightPaddle.position.y < predictedBallY - paddleWidth / 42) {
+          rightPaddleMovement = paddleDiferentialDisplacement;
+        }
+        else if (rightPaddle.position.y > predictedBallY + paddleWidth / 42) {
+          rightPaddleMovement = - paddleDiferentialDisplacement;
+        }
+        else {
+          rightPaddleMovement = 0;
+        }
       }
-      if (leftPaddle.position.y > 1) {
-        leftPaddle.position.y = 1;
+      else {
+        if (key.isPressed('up') || key.isPressed('left')) {
+          rightPaddleMovement = paddleDiferentialDisplacement;
+        }
+        else if (key.isPressed('down') || key.isPressed('right')) {
+          rightPaddleMovement = - paddleDiferentialDisplacement;
+        }
+        else {
+          rightPaddleMovement = 0;
+        }
       }
-      if (leftPaddle.position.y < -1) {
-        leftPaddle.position.y = -1;
+      
+      // MOVE PADDLES
+      leftPaddle.position.y += leftPaddleMovement;
+      rightPaddle.position.y += rightPaddleMovement;
+
+      // LIMIT PADDLES
+      if (leftPaddle.position.y > topWall.position.y) {
+        leftPaddle.position.y = topWall.position.y;
       }
-      if (rightPaddle.position.y > 1) {
-        rightPaddle.position.y = 1;
+      if (leftPaddle.position.y < bottomWall.position.y) {
+        leftPaddle.position.y = bottomWall.position.y;
       }
-      if (rightPaddle.position.y < -1) {
-        rightPaddle.position.y = -1;
+      if (rightPaddle.position.y > topWall.position.y) {
+        rightPaddle.position.y = topWall.position.y;
+      }
+      if (rightPaddle.position.y < bottomWall.position.y) {
+        rightPaddle.position.y = bottomWall.position.y;
       }
 
       // MOVE LIGHT
       light.position.x = ball.position.x;
       light.position.y = ball.position.y;
-      paddleLight1.position.y = leftPaddle.position.y;
-      paddleLight2.position.y = rightPaddle.position.y;
 
 
       // COLLISION BALL
-      const pseudoLimit = 1 - radius;
-      if (ball.position.y < -pseudoLimit || ball.position.y > pseudoLimit) {
+      // COLLISION BOTTOM WALL
+      if (ball.position.y < -pseudoLimit)
+      {
+        if (collisionChangeBallColor) {
+          const color = Math.random() * 0xFFFFFF;
+          ball.material = new THREE.MeshPhongMaterial({color: color});
+          light.color = new THREE.Color(color);
+        }
+        if (collisionChangeWallColor) {
+          bottomWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+        }
         ballAngle = -ballAngle;
-        if (Math.abs(Math.cos(ballAngle)) < 0.1) {
-          topWall.material = new THREE.MeshPhongMaterial({color: colorPalette.roseGarden});
-          ballAngle = Math.PI * Math.random() / 10;
-        } 
+        ball.position.y = -pseudoLimit;
+        ballSpeed += aceleration * ballSpeed;
       }
-      if (ball.position.x < - pseudoLimit && ball.position.y + radius / 2 > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < leftPaddle.position.y + paddleWidth / 2) {
+      // COLLISION TOP WALL
+      if (ball.position.y > pseudoLimit)
+      {
+        if (collisionChangeBallColor) {
+          const color = Math.random() * 0xFFFFFF;
+          ball.material = new THREE.MeshPhongMaterial({color: color});
+          light.color = new THREE.Color(color);
+        }
+        if (collisionChangeWallColor) {
+          topWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+        }
+        ballAngle = -ballAngle;
+        ball.position.y = pseudoLimit;
+        ballSpeed += aceleration * ballSpeed;
+      }
+      // COLLISION LEFT PADDLE
+      if (ball.position.x < - pseudoLimit && ball.position.y + radius * 3/4  > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < leftPaddle.position.y + paddleWidth / 2) {
+        if (collisionChangeBallColor) {
+          const color = Math.random() * 0xFFFFFF;
+          ball.material = new THREE.MeshPhongMaterial({color: color});
+          light.color = new THREE.Color(color);
+        }
+        if (collisionChangePaddleColor) {
+          leftPaddle.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+        }
+        
         const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
-        ballAngle = Math.asin(yDifference) * Math.PI/4 + Math.PI;
+        ballAngle = deltaFactor * yDifference + Math.PI;
+        if (leftPaddleMovement > 0)
+          ballAngle += friction ;
+        if (leftPaddleMovement < 0)
+          ballAngle -= friction;
         ball.position.x = -pseudoLimit;
-        ballSpeed += 0.0001;
+        ballSpeed += aceleration * ballSpeed;
       }
-      if (ball.position.x > pseudoLimit && ball.position.y + radius / 2 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius / 2 < rightPaddle.position.y + paddleWidth / 2) {
+      // COLLISION RIGHT PADDLE
+      if (ball.position.x > pseudoLimit && ball.position.y + radius * 3/4 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < rightPaddle.position.y + paddleWidth / 2) {
+        if (collisionChangeBallColor) {
+          const color = Math.random() * 0xFFFFFF;
+          ball.material = new THREE.MeshPhongMaterial({color: color});
+          light.color = new THREE.Color(color);
+        }
+        if (collisionChangePaddleColor) {
+          rightPaddle.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+        }
+        
         const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
-        ballAngle = Math.PI - ballAngle - yDifference * Math.PI;
+        ballAngle = - deltaFactor * yDifference;
+        if (rightPaddleMovement > 0)
+          ballAngle += friction;
+        if (rightPaddleMovement < 0)
+          ballAngle -= friction;
         ball.position.x = pseudoLimit;
-        ballSpeed += 0.0001;
+        ballSpeed += aceleration * ballSpeed;
       }
 
       // NORMALIZE ANGLE
@@ -202,31 +321,15 @@ export class PongComponent implements AfterViewInit {
         ballAngle -= 2 * Math.PI;
       }
 
-      // CORRECT EXTREME ANGLE
-      // const limitMax = 0.90;
-      // const limitMin = limitMax - 0.1;
-      // if (ballAngle < Math.PI / 2 && ballAngle > limitMax * Math.PI / 2) {
-      //   ballAngle = limitMax * Math.PI / 2;
-      // }
-      // if (ballAngle > Math.PI / 2 && ballAngle < Math.PI / 2 + limitMin * Math.PI / 2) {
-      //   ballAngle = Math.PI / 2 + limitMin * Math.PI / 2;
-      // }
-      // if (ballAngle < Math.PI * 3 / 2 && ballAngle > Math.PI + limitMax * Math.PI / 2) {
-      //   ballAngle = Math.PI + limitMax * Math.PI / 2;
-      // }
-      // if (ballAngle > Math.PI * 3 / 2 && ballAngle < 2 * Math.PI - limitMin * Math.PI / 2) {
-      //   ballAngle = 2 * Math.PI - limitMin * Math.PI / 2;
-      // }
-
       // SET PAST TIME
       pastTime = time;
 
       // CHECK WINNER
-      if (ball.position.x < -1) {
+      if (ball.position.x < leftPaddle.position.x - paddleHeight) {
         alert('Right player wins!');
         window.location.reload();
       }
-      if (ball.position.x > 1) {
+      if (ball.position.x > rightPaddle.position.x + paddleHeight) {
         alert('Left player wins!');
         window.location.reload();
       }

@@ -90,7 +90,8 @@ class ChatConsumer(WebsocketConsumer):
                     f'inbox_{self.user.username}_chat',  
                     {
                         "type": "private_message_delivered",
-                        "user": data['target'],
+                        "target": data['target'],
+                        "sender": self.user.username,
                         "message": data['message'],
                         "id": msg_id
                     }

@@ -15,7 +15,7 @@ services:
         condition: service_healthy
  
   postgre:
-    container_name: db
+    container_name: postgre
     image: postgres:latest
     networks:
       - bridge

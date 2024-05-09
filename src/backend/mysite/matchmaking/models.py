@@ -9,16 +9,16 @@ class MatchPreview(models.Model):
     host = models.ForeignKey(CustomUser, related_name='host', on_delete=models.CASCADE)
     players = models.ManyToManyField(to=CustomUser, related_name='players', blank=True)
 
-    def add_player(self,match_name, user):
+    def add_player(self,name, user):
         try:
             with transaction.atomic():
-                match = self.objects.select_for_update().get(name=match_name)
+                match = self.objects.select_for_update().get(name=name)
                 if match.players.count() < self.max_players:
                     match.players.add(user)
                     return True
                 else:
                     return False
-        except (IntegrityError, cls.DoesNotExist):
+        except Exception as e:
             return False
 
     def isHost(self, host):
