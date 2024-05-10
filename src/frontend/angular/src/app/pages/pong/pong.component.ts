@@ -306,9 +306,9 @@ export class PongComponent implements AfterViewInit {
         const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
         ballAngle = - deltaFactor * yDifference;
         if (rightPaddleMovement > 0)
-          ballAngle += friction;
-        if (rightPaddleMovement < 0)
           ballAngle -= friction;
+        if (rightPaddleMovement < 0)
+          ballAngle += friction;
         ball.position.x = pseudoLimit;
         ballSpeed += aceleration * ballSpeed;
       }
