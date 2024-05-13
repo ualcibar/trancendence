@@ -59,6 +59,10 @@ export class AuthService {
     })
   }
 
+  isLoggedIn() : boolean{
+   return this.isLoggedInSubject.value; 
+  }
+
   login(username : string, password : string) : Promise<boolean>{
     return new Promise<boolean>((value) => {
       try { 

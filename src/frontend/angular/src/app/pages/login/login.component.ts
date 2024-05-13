@@ -32,7 +32,7 @@ export class LoginComponent {
     if (await this.auth.login(this.user.username, this.user.password)){
       this.successMessage = 'login successful';
       this.router.navigate(['/']);
-      window.location.href="/";
+      //window.location.href="/";
     }else {
       this.errorMessage = 'failed to login';
     }

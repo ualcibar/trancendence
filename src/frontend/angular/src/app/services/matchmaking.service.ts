@@ -181,7 +181,6 @@ export class MatchmakingService {
   entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
 
   state : MatchMakingState = MatchMakingState.Standby;
-  //gameState : GameState | undefined;
   currentGame : Match | undefined;
   private currentGameStateSubject : BehaviorSubject<GameState | undefined>;
   currentGameState$  : Observable<GameState | undefined>;
@@ -195,79 +194,17 @@ export class MatchmakingService {
     if(this.isConnected()){
       this.sendMessage(JSON.stringify({type : '/getStatus'}));
     }
-    /*const pc_config = {
-      iceServers: [
-        {
-          urls: "stun:stun.1.google.com:19302",
-        },
-        {
-          urls : "turn:127.0.0.1:3478", 
-          username: "a",
-          credential: "a",
-        }
-      ],
-    };
-    this.peerConnection = new RTCPeerConnection(pc_config);
-    this.dataChannel = this.peerConnection.createDataChannel('dataChann');
-    this.dataChannel.onmessage = event => {
-      console.log("message received:",event.data);
-    }
-    this.peerConnection.onicecandidate = event => {
-      if (event.candidate){
-        console.log("Sending ice candidate to peer", event.candidate);
-        const message = {type : '/webrtc/candidate', candidate : event.candidate};
-        this.sendMessage(JSON.stringify(message));
-      }
-    }
-    this.peerConnection.oniceconnectionstatechange = event => {
-      console.log("ICE connection state: ", this.peerConnection.iceConnectionState);
-      if (this.peerConnection.iceConnectionState === 'connected'){
-        this.state = MatchMakingState.OnGame;
-        this.gameState = GameState.WaitingForPlayers;
-      }
-    }*/
   }
   
-  /*webrtcAnswer(data : any) {
-    if (!this.amIHost){
-      console.error('only host should answer');
-      return; 
-    }
-    if (!(this.peerConnections instanceof Map)){
-      console.error('im host jet instance of peer connection is not map')
-      return;
-    }
-    const peerConnection = this.peerConnections.get(data.senderId);
-    if (!peerConnection){
-      console.error("not recognised id from answer")
-      return;
-    }
-    peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer))
-      .then(() => {
-        console.log("remote description set successfully");
-      })
-      .catch(error => {
-        console.error("Error setting remote description", error);
-      }); 
-  }*/
   webrtcCreatePeerConnection(playerId: number | undefined = undefined) : RTCPeerConnection{
     const pc_config = {
       iceServers: [
         {
           urls: "stun:stun.1.google.com:19302",
         },
-       /* {
-          urls : "turn:127.0.0.1:3478", 
-          username: "a",
-          credential: "a",
-        }*/
       ],
     };
     const peerConnection = new RTCPeerConnection(pc_config);
-    /*this.dataChannel = peerConnection.createDataChannel('dataChann');
-    this.dataChannel.onmessage = event => {
-      console.log("message received:",event.data);
-    }*/
     peerConnection.onicecandidate = event => {
       if (event.candidate){
         this.currentGameState$?.subscribe(state => {
