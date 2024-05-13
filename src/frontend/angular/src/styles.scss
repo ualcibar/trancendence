@@ -15,6 +15,13 @@ html {
     z-index: -1;
 }
 
+@media (max-width: 575.98px) {
+	#myVideo {
+		display: none;
+		background: linear-gradient(to right, #3e2665, #2d2637);
+	}
+}
+
 .card {
 	background-color: #12064680;
 }

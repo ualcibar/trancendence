@@ -62,5 +62,5 @@
 		</div>
 	</div>
 	<app-not-found *ngIf="user_not_found"></app-not-found>
-	<app-unauthorized *ngIf="unauthorizedAccess"></app-unauthorized>
+	<app-unauthorized *ngIf="unauthorizedAccess && !loading"></app-unauthorized>
 </ng-template>

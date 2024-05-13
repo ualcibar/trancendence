@@ -14,3 +14,17 @@ $gradients: (
 		background-image: linear-gradient(to right, #{$colors});
 	}
 }
+
+/* Selector de Idiomas */
+$idiomas: (
+	en: ('../img/bandera_espana.png'),
+	es: ('../img/bandera_espana.png'),
+	eus: ('../img/bandera_espana.png')
+);
+
+@each $lang, $url in $idiomas {
+	.idioma-id-#{$lang} {
+		background-size: contain;
+		background-image: url(#{$url});
+	}
+}

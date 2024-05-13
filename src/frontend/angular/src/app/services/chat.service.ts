@@ -33,7 +33,7 @@ export class ChatService {
   connected : boolean = false;
   connectionInterval : Subscription | undefined;
 
-  webSocketUrl = 'wss://localhost/ws/chat/global/';
+  webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
   //webSocketUrl = 'disabled';
 
   webSocket : WebSocket | undefined;

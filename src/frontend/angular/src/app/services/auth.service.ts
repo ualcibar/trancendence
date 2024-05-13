@@ -22,7 +22,6 @@ export class AuthService {
   user_info? : UserInfo;
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 
-
   constructor(private http: HttpClient) {
     this.amILoggedIn();
   }
@@ -105,10 +104,10 @@ export class AuthService {
     });
     var accessToken = localStorage.getItem('access_token');
     // Logic to perform logout
-    if (accessToken) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-    }
+    //if (accessToken) {
+    //  localStorage.removeItem('access_token');
+    //  localStorage.removeItem('refresh_token');
+    //}
     this.isLoggedInSubject.next(false);
   }
 

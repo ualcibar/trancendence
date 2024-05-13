@@ -173,6 +173,7 @@ def setUserConfig(request, user_id=None): # Hay que mirar esto para que se pueda
 def logout(request):
     response = JsonResponse({'message': 'test'}, status=201)
     response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
+    response.delete_cookie('refresh_token')
     return response
 
 @api_view(['POST'])

@@ -29,7 +29,15 @@ export class SettingsService {
   updateUserConfig() {
     const currentUserInfo = this.authService.getUpdateUserInfo();
     if (currentUserInfo) {
-      this.user_settingsInfo = new UserSettingsInfo(currentUserInfo, 'default', 'es');
+      const backendURL = 'api/polls/getInfo';
+      this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
+        next: (response) => {
+          this.user_settingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], 'es');
+        },
+        error: () => {
+          this.user_settingsInfo = undefined;
+        }
+      });
     }
   }
 
@@ -45,6 +53,9 @@ export class SettingsService {
 
     this.http.post<any>(backendURL, httpReqBody, httpHeader).subscribe({
       next: (response) => {
+        if (this.user_settingsInfo) {
+          this.user_settingsInfo.user_color = color;
+        }
         console.log('|?| Respuesta del backend:', response);
       },
       error: (error) => {

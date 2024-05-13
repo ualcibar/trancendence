@@ -1,27 +1,34 @@
-<div id="sp-div" class="rounded ml-4 h-full p-4">
-	<h1 class="font-bold text-2xl"><i class="bi bi-palette-fill"></i> Choose your color</h1>
-	<p class="text-zinc-300">This will be shown to other players ingame and in your profile</p>
-	<div class="flex mt-2 mb-4">
-		<div (click)="selectColor('default')" [ngClass]="{'selected': selectColorBool('default')}" class="transition mt-2 mr-2 w-12 h-12 bg-slate-400 rounded-full hover:bg-slate-500"></div>
-		<div (click)="selectColor('rojo')" [ngClass]="{'selected': selectColorBool('rojo')}" class="transition mt-2 mr-2 w-12 h-12 bg-red-500 rounded-full hover:bg-red-600"></div>
-		<div (click)="selectColor('naranja')" [ngClass]="{'selected': selectColorBool('naranja')}" class="transition mt-2 mr-2 w-12 h-12 bg-orange-500 rounded-full hover:bg-orange-600"></div>
-		<div (click)="selectColor('ambar')" [ngClass]="{'selected': selectColorBool('ambar')}" class="transition mt-2 mr-2 w-12 h-12 bg-amber-500 rounded-full hover:bg-amber-600"></div>
-		<div (click)="selectColor('lima')" [ngClass]="{'selected': selectColorBool('lima')}" class="transition mt-2 mr-2 w-12 h-12 bg-lime-500 rounded-full hover:bg-lime-600"></div>
-		<div (click)="selectColor('pino')" [ngClass]="{'selected': selectColorBool('pino')}" class="transition mt-2 mr-2 w-12 h-12 bg-green-600 rounded-full hover:bg-green-700"></div>
-		<div (click)="selectColor('purpura')" [ngClass]="{'selected': selectColorBool('purpura')}" class="transition mt-2 w-12 h-12 bg-indigo-500 rounded-full hover:bg-indigo-600"></div>
+<div id="sp-div" class="rounded  h-full p-4">
+	<div *ngIf="loading; else content" class="loading-tab flex flex-col items-center justify-center rounded mx-auto" style="width: 20rem;">
+		<h1 class="m-4">Loading data... </h1>
+		<div class="spinner-border text-warning mb-4" role="status"></div>
 	</div>
-	<h1 class="font-bold text-2xl"><i class="bi bi-eye-fill"></i> Preview</h1>
-	<div [ngClass]="'gradient-id-' + colorId" class="md:flex rounded p-2 mt-2 max-w-lg">
-		<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-12 h-12 ml-4 mt-4 mb-4 flex items-center justify-center bg-neutral-400">
-		<div class="flex items-center">
-			<div class="ml-4 flex flex-col justify-center">
-				<div class="flex items-center">
-					<h1 class="text-lg font-bold">{{authService.user_info?.username}}</h1>
-					<div class="w-4 h-4 rounded-full bg-green-400 ml-2"></div>
+
+	<ng-template #content>
+		<h1 class="font-bold text-2xl"><i class="bi bi-palette-fill"></i> Choose your color</h1>
+		<p class="text-zinc-300">This will be shown to other players ingame and in your profile</p>
+		<div class="flex mt-2 mb-4">
+			<div (click)="selectColor('default')" [ngClass]="{'selected': selectColorBool('default')}" class="transition mt-2 mr-2 w-12 h-12 bg-slate-400 rounded-full hover:bg-slate-500"></div>
+			<div (click)="selectColor('rojo')" [ngClass]="{'selected': selectColorBool('rojo')}" class="transition mt-2 mr-2 w-12 h-12 bg-red-500 rounded-full hover:bg-red-600"></div>
+			<div (click)="selectColor('naranja')" [ngClass]="{'selected': selectColorBool('naranja')}" class="transition mt-2 mr-2 w-12 h-12 bg-orange-500 rounded-full hover:bg-orange-600"></div>
+			<div (click)="selectColor('ambar')" [ngClass]="{'selected': selectColorBool('ambar')}" class="transition mt-2 mr-2 w-12 h-12 bg-amber-500 rounded-full hover:bg-amber-600"></div>
+			<div (click)="selectColor('lima')" [ngClass]="{'selected': selectColorBool('lima')}" class="transition mt-2 mr-2 w-12 h-12 bg-lime-500 rounded-full hover:bg-lime-600"></div>
+			<div (click)="selectColor('pino')" [ngClass]="{'selected': selectColorBool('pino')}" class="transition mt-2 mr-2 w-12 h-12 bg-green-600 rounded-full hover:bg-green-700"></div>
+			<div (click)="selectColor('purpura')" [ngClass]="{'selected': selectColorBool('purpura')}" class="transition mt-2 w-12 h-12 bg-indigo-500 rounded-full hover:bg-indigo-600"></div>
+		</div>
+		<h1 class="font-bold text-2xl"><i class="bi bi-eye-fill"></i> Preview</h1>
+		<div [ngClass]="'gradient-id-' + colorId" class="md:flex rounded p-2 mt-2 max-w-lg">
+			<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-12 h-12 ml-4 mt-4 mb-4 flex items-center justify-center bg-neutral-400">
+			<div class="flex items-center">
+				<div class="ml-4 flex flex-col justify-center">
+					<div class="flex items-center">
+						<h1 class="text-lg font-bold">{{authService.user_info?.username}}</h1>
+						<div class="w-4 h-4 rounded-full bg-green-400 ml-2"></div>
+					</div>
+					<h1 class="text-gray-600" style="color: #a7bec4;">last online: 4/04/2084</h1>
 				</div>
-				<h1 class="text-gray-600" style="color: #a7bec4;">last online: 4/04/2084</h1>
 			</div>
 		</div>
-	</div>
-	<button (click)="saveColor()" type="button" class="mt-4 btn btn-warning"><i class="bi bi-floppy-fill"></i> Save changes</button>
+		<button (click)="saveColor()" type="button" class="mt-4 btn btn-warning"><i class="bi bi-floppy-fill"></i> Save changes</button>
+	</ng-template>
 </div>
