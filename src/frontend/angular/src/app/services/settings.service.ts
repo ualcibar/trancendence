@@ -34,9 +34,8 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], 'es');
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], 'eus');
           this.userSettingsInfoSubject.next(userSettingsInfo);
-          console.log("lol");
         },
         error: () => {
           this.userSettingsInfoSubject.next(null);

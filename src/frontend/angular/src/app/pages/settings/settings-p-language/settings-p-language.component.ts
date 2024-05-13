@@ -18,9 +18,7 @@ export class SettingsPLanguageComponent {
 
   @Input() loaded: boolean = false;
 
-  constructor(public authService: AuthService, private renderer: Renderer2, public settingsService: SettingsService) {
-
-  }
+  constructor(public authService: AuthService, private renderer: Renderer2, public settingsService: SettingsService) {}
 
   ngOnInit() {
     this.settingsService.userSettingsInfo$.subscribe(userSettingsInfo => {
@@ -28,12 +26,6 @@ export class SettingsPLanguageComponent {
         this.selected_lang = userSettingsInfo.user_language;
       }
     });
-
-    //setTimeout(() => {
-    //  console.log("hola");
-    //  this.selected_lang = this.settingsService.user_settingsInfo?.user_language ?? 'en';
-    //},100);
-    //this.loading = false;
   }
 
   selectLanguage(lang: string): void {
