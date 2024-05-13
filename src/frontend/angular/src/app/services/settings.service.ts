@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService, UserInfo } from './auth.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 // Esta clase nos permite guardar/obtener la config custom del usuario
 // - Para obtener todos los valores, implementamos la clase 'UserInfo' del servicio de 'Auth'
@@ -19,7 +20,8 @@ export class UserSettingsInfo extends UserInfo {
   providedIn: 'root'
 })
 export class SettingsService {
-  user_settingsInfo? : UserSettingsInfo;
+  private userSettingsInfoSubject: BehaviorSubject<UserSettingsInfo | null> = new BehaviorSubject<UserSettingsInfo | null>(null);
+  userSettingsInfo$: Observable<UserSettingsInfo | null> = this.userSettingsInfoSubject.asObservable();
 
   constructor(private http: HttpClient, private authService: AuthService) {
     this.updateUserConfig();
@@ -32,10 +34,12 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          this.user_settingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], 'es');
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], 'es');
+          this.userSettingsInfoSubject.next(userSettingsInfo);
+          console.log("lol");
         },
         error: () => {
-          this.user_settingsInfo = undefined;
+          this.userSettingsInfoSubject.next(null);
         }
       });
     }
@@ -43,24 +47,28 @@ export class SettingsService {
 
   // Esta función nos permite actualizar datos de usuario utilizanddo la view del backend
   setUserConfig(color: string) {
-    const backendURL = '/api/polls/setConfig/' + this.user_settingsInfo?.user_id;
-    const httpReqBody = { color: color };
-    const httpHeader = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
+    const userSettingsInfoVal = this.userSettingsInfoSubject.getValue();
+    if (userSettingsInfoVal) {
+      const backendURL = '/api/polls/setConfig/' + userSettingsInfoVal.user_id;
+      const httpReqBody = { color: color };
+      const httpHeader = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json'
+        })
+      };
 
-    this.http.post<any>(backendURL, httpReqBody, httpHeader).subscribe({
-      next: (response) => {
-        if (this.user_settingsInfo) {
-          this.user_settingsInfo.user_color = color;
+      this.http.post<any>(backendURL, httpReqBody, httpHeader).subscribe({
+        next: (response) => {
+          userSettingsInfoVal.user_color = color;
+          console.log('|?| Respuesta del backend:', response);
+        },
+        error: (error) => {
+          console.log('|x| Algo no ha ido bien en el backend:', error);
         }
-        console.log('|?| Respuesta del backend:', response);
-      },
-      error: (error) => {
-        console.log('|x| Algo no ha ido bien en el backend:', error);
-      }
-    });
+      });
+    } else {
+      console.log('|x| Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
+      return;
+    }
   }
 }

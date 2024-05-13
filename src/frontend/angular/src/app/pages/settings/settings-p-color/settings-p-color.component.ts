@@ -21,13 +21,13 @@ export class SettingsPColorComponent {
   constructor(public authService: AuthService, private renderer: Renderer2, public settingsService: SettingsService) {}
 
   ngOnInit() {
-    setTimeout(() => {
-      console.log("hola");
-      this.selected_colorId = this.settingsService.user_settingsInfo?.user_color ?? 'default';
-      this.colorId = this.settingsService.user_settingsInfo?.user_color ?? 'default';
-      console.log(this.settingsService.user_settingsInfo?.user_color);
-      this.loading = false;
-    },100);
+    //setTimeout(() => {
+    //  console.log("hola");
+    //  this.selected_colorId = this.settingsService.user_settingsInfo?.user_color ?? 'default';
+    //  this.colorId = this.settingsService.user_settingsInfo?.user_color ?? 'default';
+    //  console.log(this.settingsService.user_settingsInfo?.user_color);
+    //  this.loading = false;
+    //},100);
   }
 
   selectColor(color: string): void {
