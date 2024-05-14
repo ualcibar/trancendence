@@ -34,22 +34,25 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], 'eus');
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language']);
           this.userSettingsInfoSubject.next(userSettingsInfo);
         },
         error: () => {
           this.userSettingsInfoSubject.next(null);
         }
       });
+    } else {
+      console.log('|x| Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
+      return;
     }
   }
 
   // Esta función nos permite actualizar datos de usuario utilizanddo la view del backend
-  setUserConfig(color: string) {
+  setUserConfig(type: string, value: string) {
     const userSettingsInfoVal = this.userSettingsInfoSubject.getValue();
     if (userSettingsInfoVal) {
       const backendURL = '/api/polls/setConfig/' + userSettingsInfoVal.user_id;
-      const httpReqBody = { color: color };
+      const httpReqBody = { [type]: value };
       const httpHeader = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json'
@@ -58,15 +61,21 @@ export class SettingsService {
 
       this.http.post<any>(backendURL, httpReqBody, httpHeader).subscribe({
         next: (response) => {
-          userSettingsInfoVal.user_color = color;
-          console.log('|?| Respuesta del backend:', response);
+          if (type === 'user_language') {
+            userSettingsInfoVal.user_language = value;
+          } else if (type === 'user_color') {
+            userSettingsInfoVal.user_color = value;
+          } else if (type === 'username') {
+            userSettingsInfoVal.username = value;
+          }
+          console.log('✔️ ', response);
         },
         error: (error) => {
-          console.log('|x| Algo no ha ido bien en el backend:', error);
+          console.error('❌ An error ocurred:', error);
         }
       });
     } else {
-      console.log('|x| Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
+      console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
     }
   }

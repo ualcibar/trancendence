@@ -1,17 +1,10 @@
 <div id="sp-div" class="rounded  h-full p-4">
-	<div *ngIf="!loading; else content" class="loading-tab flex flex-col items-center justify-center rounded mx-auto" style="width: 20rem;">
-		<h1 class="m-4">Loading data... </h1>
-		<div class="spinner-border text-warning mb-4" role="status"></div>
-	</div>
-
-	<ng-template #content>
-		<h1 class="font-bold text-2xl"><i class="bi bi-translate"></i> Select your language</h1>
-		<p class="text-zinc-300">Note: The page may not be translated at 100%</p>
-		<div class="flex mt-2 mb-4">
-			<div (click)="selectLanguage('en')" [ngClass]="{'selected': selectLanguageBool('en')}" class="transition mt-2 mr-2 w-14 h-14 rounded hover:brightness-50" style="content: url('../../../../assets/img/bandera_eeuu.png');"></div>
-			<div (click)="selectLanguage('es')" [ngClass]="{'selected': selectLanguageBool('es')}" class="transition mt-2 mr-2 w-14 h-14 rounded hover:brightness-50" style="content: url('../../../../assets/img/bandera_espana.png');"></div>
-			<div (click)="selectLanguage('eus')" [ngClass]="{'selected': selectLanguageBool('eus')}" class="transition mt-2 mr-2 w-14 h-14 rounded hover:brightness-50" style="content: url('../../../../assets/img/bandera_euskadi.png');"></div>
-		</div>
-		<button (click)="saveLanguage()" type="button" class="mt-4 btn btn-warning"><i class="bi bi-floppy-fill"></i> Save changes</button>
-	</ng-template>
+    <h1 class="font-bold text-2xl"><i class="bi bi-translate"></i> Select your language</h1>
+    <p class="text-zinc-300">Note: The page may not be translated at 100%</p>
+    <div class="flex mt-2 mb-4">
+        <div (click)="selectLanguage('en')" [ngClass]="{'selected': selectLanguageBool('en')}" class="transition mt-2 mr-2 w-14 h-14 rounded hover:brightness-50" style="content: url('../../../../assets/img/bandera_eeuu.png');"></div>
+        <div (click)="selectLanguage('es')" [ngClass]="{'selected': selectLanguageBool('es')}" class="transition mt-2 mr-2 w-14 h-14 rounded hover:brightness-50" style="content: url('../../../../assets/img/bandera_espana.png');"></div>
+        <div (click)="selectLanguage('eus')" [ngClass]="{'selected': selectLanguageBool('eus')}" class="transition mt-2 mr-2 w-14 h-14 rounded hover:brightness-50" style="content: url('../../../../assets/img/bandera_euskadi.png');"></div>
+    </div>
+    <button [ngClass]="{'': selected_lang !== user_lang, 'grayscale disabled opacity-50': selected_lang === user_lang}" (click)="saveLanguage()" type="button" class="mt-4 btn btn-warning"><i class="bi bi-floppy-fill"></i> Save changes</button>
 </div>

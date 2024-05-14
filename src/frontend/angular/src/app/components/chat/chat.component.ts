@@ -60,7 +60,7 @@ export class ChatComponent implements OnInit{
 		
 		console.log(this.newMessage + " : " + this.current_chat_name);
 		if (this.newMessage.trim() !== '') {
-			this.chatService.sendMessage(this.newMessage, this.current_chat_name);
+			//this.chatService.sendMessage(this.newMessage, this.current_chat_name);
 			this.newMessage = '';
 		}
 	}

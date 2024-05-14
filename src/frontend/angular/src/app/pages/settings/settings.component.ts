@@ -16,11 +16,9 @@ import { UnauthorizedComponent } from '../../components/errors/unauthorized/unau
   styleUrl: './settings.component.scss'
 })
 export class SettingsComponent {
-  profileColorEdit: boolean = true;
-  profileLanguageEdit: boolean = false;
   loading: boolean = true;
 
-  activeTab: string | null =  'language';
+  activeTab: string | null =  'color';
 
   constructor (public authService: AuthService) { }
 
