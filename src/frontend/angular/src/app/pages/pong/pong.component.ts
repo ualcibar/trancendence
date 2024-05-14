@@ -183,21 +183,13 @@ export class PongComponent implements AfterViewInit {
 
           // IA PREDICTION
           predictedBallY = ball.position.y +(Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
-          // console.log('predictedBallY', ball.position.y, ' + ', Math.tan(ballAngle - Math.PI) , '*' , (rightPaddle.position.x - ball.position.x));///grrrr
-          // console.log('predictedBallY', ball.position.y, ' + ', Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
-          // console.log('predictedBallY', ball.position.y  +  Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
-          // console.log('before ', predictedBallY);
           while (predictedBallY > pseudoLimit) {
             predictedBallY = pseudoLimit - (predictedBallY - pseudoLimit);
           }
           while (predictedBallY < -pseudoLimit) {
             predictedBallY = -pseudoLimit - (predictedBallY + pseudoLimit);
           }
-          // console.log('after ', predictedBallY);
           predictedBallY  += (Math.random() - Math.random()) * (paddleWidth - radius)/2 ;
-          // console.log(rightPaddle.position.y);
-          // console.log(ballAngle);
-          // console.log(ballAngle, '<', Math.PI / 2, '&&', ballAngle, '>', 3 * Math.PI / 2)
           if (ballAngle < Math.PI / 2 || ballAngle > 3 * Math.PI / 2) {
             predictedBallY = (predictedBallY + leftPaddle.position.y) / 2;
           }
