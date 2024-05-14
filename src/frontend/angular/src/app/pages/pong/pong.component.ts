@@ -183,19 +183,19 @@ export class PongComponent implements AfterViewInit {
 
           // IA PREDICTION
           predictedBallY = ball.position.y +(Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
-          console.log('predictedBallY', ball.position.y, ' + ', Math.tan(ballAngle - Math.PI) , '*' , (rightPaddle.position.x - ball.position.x));///grrrr
-          console.log('predictedBallY', ball.position.y, ' + ', Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
-          console.log('predictedBallY', ball.position.y  +  Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
-          console.log('before ', predictedBallY);
+          // console.log('predictedBallY', ball.position.y, ' + ', Math.tan(ballAngle - Math.PI) , '*' , (rightPaddle.position.x - ball.position.x));///grrrr
+          // console.log('predictedBallY', ball.position.y, ' + ', Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
+          // console.log('predictedBallY', ball.position.y  +  Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
+          // console.log('before ', predictedBallY);
           while (predictedBallY > pseudoLimit) {
-            predictedBallY = pseudoLimit - (predictedBallY - 1);
+            predictedBallY = pseudoLimit - (predictedBallY - pseudoLimit);
           }
           while (predictedBallY < -pseudoLimit) {
-            predictedBallY = -pseudoLimit - (predictedBallY + 1);
+            predictedBallY = -pseudoLimit - (predictedBallY + pseudoLimit);
           }
-          console.log('after ', predictedBallY);
-          predictedBallY  += (Math.random() - Math.random()) * paddleWidth / 2 * 0;
-          console.log(rightPaddle.position.y);
+          // console.log('after ', predictedBallY);
+          predictedBallY  += (Math.random() - Math.random()) * (paddleWidth - radius)/2 ;
+          // console.log(rightPaddle.position.y);
         }
 
         if (rightPaddle.position.y < predictedBallY - paddleWidth / 42) {
