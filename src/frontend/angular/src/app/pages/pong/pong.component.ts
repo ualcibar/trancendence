@@ -187,11 +187,11 @@ export class PongComponent implements AfterViewInit {
           console.log('predictedBallY', ball.position.y, ' + ', Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
           console.log('predictedBallY', ball.position.y  +  Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));///grrrr
           console.log('before ', predictedBallY);
-          while (predictedBallY > topWall.position.y) {
-            predictedBallY = topWall.position.y - (predictedBallY - 1);
+          while (predictedBallY > pseudoLimit) {
+            predictedBallY = pseudoLimit - (predictedBallY - 1);
           }
-          while (predictedBallY < bottomWall.position.y) {
-            predictedBallY = bottomWall.position.y - (predictedBallY + 1);
+          while (predictedBallY < -pseudoLimit) {
+            predictedBallY = -pseudoLimit - (predictedBallY + 1);
           }
           console.log('after ', predictedBallY);
           predictedBallY  += (Math.random() - Math.random()) * paddleWidth / 2 * 0;
