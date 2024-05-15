@@ -107,6 +107,43 @@ class Ball {
   }
 }
 
+class Camera {
+  camera : THREE.PerspectiveCamera;
+
+  constructor(private configService: GameConfigService) {
+    const fov = this.configService.fov;
+    const aspect = this.configService.aspect;
+    const near = this.configService.near;
+    const far = this.configService.far;
+    this.camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+    this.camera.position.z = this.configService.cameraZ;
+  }
+}
+
+class GeneralLights {
+  mainLight : THREE.DirectionalLight | undefined;
+
+  constructor(private configService: GameConfigService) {
+    const defaultLightingIsOn = this.configService.defaultLightingIsOn;
+
+    if (defaultLightingIsOn)
+    {
+      const color = this.configService.defaultlightColor;
+      const intensity = this.configService.defaultLightIntensity;
+      this.mainLight = new THREE.DirectionalLight( color, intensity );
+      const X = this.configService.defaultLightPositionX;
+      const Y = this.configService.defaultLightPositionY;
+      const Z = this.configService.defaultLightPositionZ;
+      this.mainLight.position.set( X, Y, Z);
+    }
+  }
+
+  adToScene(scene: THREE.Scene) {
+    if (this.mainLight)
+      scene.add(this.mainLight);
+  }
+}
+
 @Component({
   selector: 'app-pong',
   templateUrl: './pong.component.html',
@@ -115,11 +152,6 @@ class Ball {
 export class PongComponent implements AfterViewInit {
 
   @ViewChild('pongCanvas', { static: true }) pongCanvas!: ElementRef<HTMLCanvasElement>;
-  // @Input gameSettings!: GameSettings;//affectan el juego a todos los jugadores
-  // @Input clientSettings!; 
-    // affectan el juego solo al cliente
-    // colores
-    // imagen de fondo
   
   constructor(private matchmakingService: MatchmakingService, private configService: GameConfigService) {
   }
@@ -135,35 +167,19 @@ export class PongComponent implements AfterViewInit {
     const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
   
     // INIT CAMERA
-    const fov = this.configService.fov;
-    const aspect = this.configService.aspect;
-    const near = this.configService.near;
-    const far = this.configService.far;
-    const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
-    camera.position.z = this.configService.cameraZ;
+    const camera = new Camera(this.configService);
 
     // INIT SCENE
     const scene = new THREE.Scene();
 
     const defaultLightingIsOn = this.configService.defaultLightingIsOn;
-    // INIT LIGHT
-    if (defaultLightingIsOn)
-    {
-      const color = this.configService.defaultlightColor;
-      const intensity = this.configService.defaultLightIntensity;
-      const light = new THREE.DirectionalLight( color, intensity );
-      const X = this.configService.defaultLightPositionX;
-      const Y = this.configService.defaultLightPositionY;
-      const Z = this.configService.defaultLightPositionZ;
-      light.position.set( X, Y, Z);
-      scene.add( light );
-    }
+    // INIT LIGHTS
+    const generalLights = new GeneralLights(this.configService);
+    generalLights.adToScene(scene);
 
     // // INIT BALL
     const ball = new Ball(this.configService);
     ball.adToScene(scene);
-
-
 
     // INIT PADDLES
     const paddleWidth = this.configService.paddleWidth;
@@ -384,7 +400,7 @@ export class PongComponent implements AfterViewInit {
         window.location.reload();
       }
 
-      renderer.render(scene, camera);
+      renderer.render(scene, camera.camera);
       requestAnimationFrame(render);
     }
 
