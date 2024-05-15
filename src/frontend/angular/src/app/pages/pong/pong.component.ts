@@ -51,8 +51,8 @@ class Ball {
 
   update(timeDelta : number) {
     const ballDiferentialDisplacement = timeDelta * this.speed;
-    this.mesh.position.x += ballDiferentialDisplacement * Math.cos(this.angle);
-    this.mesh.position.y += ballDiferentialDisplacement * Math.sin(this.angle);
+    this.mesh.position.x -= ballDiferentialDisplacement * Math.cos(this.angle);
+    this.mesh.position.y -= ballDiferentialDisplacement * Math.sin(this.angle);
     this.light.position.x = this.mesh.position.x;
     this.light.position.y = this.mesh.position.y;
   }
@@ -113,6 +113,13 @@ class Paddle {
   speed : number;
   height : number;
   width : number;
+  upKey : string;
+  downKey : string;
+  goinUp : boolean;
+  goinDown : boolean;
+  localPlayer : boolean;
+  AIplayer : boolean;
+  AIprediction : number = 0;
 
   constructor(private configService: GameConfigService) {
     this.width = this.configService.paddleWidth;
@@ -123,14 +130,76 @@ class Paddle {
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
     this.speed = this.configService.paddleSpeed;
+    this.upKey = this.configService.defaultUpKey;
+    this.downKey = this.configService.defaultDownKey;
+    this.goinUp = false;
+    this.goinDown = false;
+    this.localPlayer = false;
+    this.AIplayer = false;
   }
 
   addToScene(scene: THREE.Scene) {
     scene.add(this.mesh);
   }
 
+  handleKey() {
+    if (key.isPressed(this.upKey)) {
+      this.goinUp = true;
+    }
+    else {
+      this.goinUp = false;
+    }
+    if (key.isPressed(this.downKey)) {
+      this.goinDown = true;
+    }
+    else {
+      this.goinDown = false;
+    }
+  }
+
+  handleIA() {
+    if (this.getPosition().y < this.AIprediction - this.getWidth() / 42) {
+      this.goinUp = true;
+      this.goinDown = false;
+    }
+    else if (this.getPosition().y > this.AIprediction + this.getWidth() / 42) {
+      this.goinUp = false;
+      this.goinDown = true;
+    }
+    else {
+      this.goinUp = false;
+      this.goinDown = false;
+    }
+  }
+
+  update(timeDelta : number) {
+    if (this.localPlayer) {
+      this.handleKey();
+    }
+    if (this.AIplayer) {
+      this.handleIA();
+    }
+    const paddleDiferentialDisplacement = timeDelta * this.speed;
+    if (this.goinUp) {
+      this.getPosition().y += paddleDiferentialDisplacement;
+    }
+    if (this.goinDown) {
+      this.getPosition().y -= paddleDiferentialDisplacement;
+    }
+  }
+
   changeColor(color: number) {
     this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+  }
+
+  madeLocalPlayer() {
+    this.localPlayer = true;
+    this.AIplayer = false;
+  }
+
+  madeAIPlayer() {
+    this.localPlayer = false;
+    this.AIplayer = true;
   }
 
   //GETTERS
@@ -146,6 +215,14 @@ class Paddle {
   getHeight() {
     return this.height;
   }
+  isAI() {
+    return this.AIplayer;
+  }
+
+  //SETTERS
+  setAIprediction(prediction: number) {
+    this.AIprediction = prediction;
+  }
   
 }
 
@@ -155,6 +232,9 @@ class LeftPaddle extends Paddle {
     this.getPosition().x = this._configService.leftPaddleX;
     this.getPosition().y = this._configService.leftPaddleY;
     this.getRotation().z = this._configService.leftPaddleRotation;
+    this.upKey = this._configService.leftUpKey;
+    this.downKey = this._configService.leftDownKey;
+    this.madeLocalPlayer();
   }
 }
 
@@ -164,6 +244,14 @@ class RightPaddle extends Paddle {
     this.getPosition().x = this._configService.rightPaddleX;
     this.getPosition().y = this._configService.rightPaddleY;
     this.getRotation().z = this._configService.rightPaddleRotation;
+    this.upKey = this._configService.rightUpKey;
+    this.downKey = this._configService.rightDownKey;
+    if (this._configService.IAisOn) {
+      this.madeAIPlayer();
+    }
+    else {
+      this.madeLocalPlayer();
+    }
   }
 }
 
@@ -213,7 +301,6 @@ class BottomWall extends Wall {
     this.mesh.position.z = this._configService.bottomWallZ;
   }
 }
-
 
 class Camera {
   camera : THREE.PerspectiveCamera;
@@ -307,14 +394,13 @@ export class PongComponent implements AfterViewInit {
     let pastTime = 0;
     let pastIATime = 0;
     let predictedBallY = 0;
-    let rightPaddleMovement = 0;
-    let leftPaddleMovement = 0;
     const collisionChangeBallColor = this.configService.collisionChangeBallColor;
     const collisionChangeWallColor = this.configService.collisionChangeWallColor;
     const collisionChangePaddleColor = this.configService.collisionChangePaddleColor;
     const aceleration = this.configService.aceleration;
     const friction = this.configService.friction;
     const deltaFactor = this.configService.deltaFactor;
+
     function render(time: number) {
       time *= 0.001; // convert time to seconds
 
@@ -327,27 +413,14 @@ export class PongComponent implements AfterViewInit {
           timeElement.innerText = `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s `;
       }
 
+      const timeDifference = time - pastTime;
+
       // MOVE BALL
-      const timeDifference = pastTime - time;
       ball.update(timeDifference);
 
       // HANDLE PADDLE MOVEMENT
       const pseudoLimit = 1 - ball.radius;
-      const paddleDiferentialDisplacement = - timeDifference * leftPaddle.speed;
-
-      // LEFT PADDLE MOVEMENT
-      if (key.isPressed('w') || key.isPressed('a')) {
-        leftPaddleMovement = paddleDiferentialDisplacement;
-      }
-      else if (key.isPressed('s') || key.isPressed('d')) {
-        leftPaddleMovement = - paddleDiferentialDisplacement;
-      }
-      else {
-        leftPaddleMovement = 0;
-      }
-
-      // RIGHT PADDLE MOVEMENT
-      if (IA) {
+      if (rightPaddle.isAI()) {
         if (time - pastIATime > 1) { // IA only sees the ball every second
           console.log('IA');
           pastIATime = time;
@@ -364,47 +437,27 @@ export class PongComponent implements AfterViewInit {
           if (ball.getAngle() < Math.PI / 2 || ball.getAngle() > 3 * Math.PI / 2) {
             predictedBallY = (predictedBallY + leftPaddle.getPosition().y) / 2;
           }
+          rightPaddle.setAIprediction(predictedBallY);
         }
+      }
+      // UPDATE PADDLES
+      leftPaddle.update(timeDifference);
+      rightPaddle.update(timeDifference);
 
-        if (rightPaddle.getPosition().y < predictedBallY - rightPaddle.getWidth() / 42) {
-          rightPaddleMovement = paddleDiferentialDisplacement;
-        }
-        else if (rightPaddle.getPosition().y > predictedBallY + rightPaddle.getWidth() / 42) {
-          rightPaddleMovement = - paddleDiferentialDisplacement;
-        }
-        else {
-          rightPaddleMovement = 0;
-        }
-      }
-      else {
-        if (key.isPressed('up') || key.isPressed('left')) {
-          rightPaddleMovement = paddleDiferentialDisplacement;
-        }
-        else if (key.isPressed('down') || key.isPressed('right')) {
-          rightPaddleMovement = - paddleDiferentialDisplacement;
-        }
-        else {
-          rightPaddleMovement = 0;
-        }
-      }
-      
-      // MOVE PADDLES
-      leftPaddle.getPosition().y += leftPaddleMovement;
-      rightPaddle.getPosition().y += rightPaddleMovement;
 
-      // LIMIT PADDLES
-      if (leftPaddle.getPosition().y > topWall.getPosition().y) {
-        leftPaddle.getPosition().y = topWall.getPosition().y;
-      }
-      if (leftPaddle.getPosition().y < bottomWall.getPosition().y) {
-        leftPaddle.getPosition().y = bottomWall.getPosition().y;
-      }
-      if (rightPaddle.getPosition().y > topWall.getPosition().y) {
-        rightPaddle.getPosition().y = topWall.getPosition().y;
-      }
-      if (rightPaddle.getPosition().y < bottomWall.getPosition().y) {
-        rightPaddle.getPosition().y = bottomWall.getPosition().y;
-      }
+      // // LIMIT PADDLES
+      // if (leftPaddle.getPosition().y > topWall.getPosition().y) {
+      //   leftPaddle.getPosition().y = topWall.getPosition().y;
+      // }
+      // if (leftPaddle.getPosition().y < bottomWall.getPosition().y) {
+      //   leftPaddle.getPosition().y = bottomWall.getPosition().y;
+      // }
+      // if (rightPaddle.getPosition().y > topWall.getPosition().y) {
+      //   rightPaddle.getPosition().y = topWall.getPosition().y;
+      // }
+      // if (rightPaddle.getPosition().y < bottomWall.getPosition().y) {
+      //   rightPaddle.getPosition().y = bottomWall.getPosition().y;
+      // }
 
       // COLLISION BALL
       // COLLISION BOTTOM WALL
@@ -443,10 +496,10 @@ export class PongComponent implements AfterViewInit {
         
         const yDifference = (ball.getPosition().y - leftPaddle.getPosition().y) / leftPaddle.getWidth() / 2;
         let newAngle = deltaFactor * yDifference + Math.PI;
-        if (leftPaddleMovement > 0)
-          newAngle += friction ;
-        if (leftPaddleMovement < 0)
-          newAngle -= friction;
+        // if (leftPaddleMovement > 0)
+        //   newAngle += friction ;
+        // if (leftPaddleMovement < 0)
+        //   newAngle -= friction;
         ball.xCollision(-pseudoLimit);
         ball.setAngle(newAngle);
       }
@@ -462,10 +515,10 @@ export class PongComponent implements AfterViewInit {
         
         const yDifference = (ball.getPosition().y - rightPaddle.getPosition().y) / rightPaddle.getWidth() / 2;
         let newAngle = - deltaFactor * yDifference;
-        if (rightPaddleMovement > 0)
-          newAngle -= friction;
-        if (rightPaddleMovement < 0)
-          newAngle += friction;
+        // if (rightPaddleMovement > 0)
+        //   newAngle -= friction;
+        // if (rightPaddleMovement < 0)
+        //   newAngle += friction;
         ball.xCollision(pseudoLimit);
         ball.setAngle(newAngle);
       }
