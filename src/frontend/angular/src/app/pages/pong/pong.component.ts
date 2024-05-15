@@ -5,6 +5,7 @@ import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { GameSettings, MatchmakingService} from '../../services/matchmaking.service';
 import { GameConfigService } from '../../services/game-config.service';
 import { normalize } from 'three/src/math/MathUtils';
+import { left } from '@popperjs/core';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -43,7 +44,7 @@ class Ball {
     this.light = new THREE.PointLight( color, intensity );
   }
 
-  adToScene(scene: THREE.Scene) {
+  addToScene(scene: THREE.Scene) {
     scene.add(this.mesh);
     scene.add(this.light);
   }
@@ -107,6 +108,46 @@ class Ball {
   }
 }
 
+class Paddle {
+  mesh : THREE.Mesh;
+  speed : number;
+  height : number;
+  width : number;
+
+  constructor(private configService: GameConfigService) {
+    this.width = this.configService.paddleWidth;
+    this.height = this.configService.paddleHeight;
+    const paddleDepth = this.configService.paddleDepth;
+    const paddleGeometry = new THREE.BoxGeometry(this.width, this.height, paddleDepth);
+    const paddleColor = this.configService.paddleColor;
+    const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
+    this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
+    this.speed = this.configService.paddleSpeed;
+  }
+
+  addToScene(scene: THREE.Scene) {
+    scene.add(this.mesh);
+  }
+
+  changeColor(color: number) {
+    this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+  }
+
+  //GETTERS
+  getPosition() {
+    return this.mesh.position;
+  }
+  getRotation() {
+    return this.mesh.rotation;
+  }
+  getWidth() {
+    return this.width;
+  }
+  getHeight() {
+    return this.height;
+  }
+}
+
 class Camera {
   camera : THREE.PerspectiveCamera;
 
@@ -138,7 +179,7 @@ class GeneralLights {
     }
   }
 
-  adToScene(scene: THREE.Scene) {
+  addToScene(scene: THREE.Scene) {
     if (this.mainLight)
       scene.add(this.mainLight);
   }
@@ -175,29 +216,23 @@ export class PongComponent implements AfterViewInit {
     const defaultLightingIsOn = this.configService.defaultLightingIsOn;
     // INIT LIGHTS
     const generalLights = new GeneralLights(this.configService);
-    generalLights.adToScene(scene);
+    generalLights.addToScene(scene);
 
     // // INIT BALL
     const ball = new Ball(this.configService);
-    ball.adToScene(scene);
+    ball.addToScene(scene);
 
     // INIT PADDLES
-    const paddleWidth = this.configService.paddleWidth;
-    const paddleHeight = this.configService.paddleHeight;
-    const paddleDepth = this.configService.paddleDepth;
-    const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
-    const paddleColor = this.configService.paddleColor;
-    const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
-    const leftPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-    leftPaddle.position.x = this.configService.leftPaddleX;
-    leftPaddle.position.y = this.configService.leftPaddleY;
-    leftPaddle.rotation.z = this.configService.leftPaddleRotation;
-    const rightPaddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-    rightPaddle.position.x = this.configService.rightPaddleX;
-    rightPaddle.position.y = this.configService.rightPaddleY;
-    rightPaddle.rotation.z = this.configService.rightPaddleRotation;
-    scene.add(leftPaddle);
-    scene.add(rightPaddle);
+    const leftPaddle = new Paddle(this.configService);
+    leftPaddle.getPosition().x = this.configService.leftPaddleX;
+    leftPaddle.getPosition().y = this.configService.leftPaddleY;
+    leftPaddle.getRotation().z = this.configService.leftPaddleRotation;
+    const rightPaddle = new Paddle(this.configService);
+    rightPaddle.getPosition().x = this.configService.rightPaddleX;
+    rightPaddle.getPosition().y = this.configService.rightPaddleY;
+    rightPaddle.getRotation().z = this.configService.rightPaddleRotation;
+    leftPaddle.addToScene(scene);
+    rightPaddle.addToScene(scene);
     const paddleSpeed = this.configService.paddleSpeed;
 
     // INIT WALLS
@@ -270,23 +305,23 @@ export class PongComponent implements AfterViewInit {
           pastIATime = time;
 
           // IA PREDICTION
-          predictedBallY = ball.getPosition().y +(Math.tan(ball.getAngle() - Math.PI) * (rightPaddle.position.x - ball.getPosition().x));
+          predictedBallY = ball.getPosition().y +(Math.tan(ball.getAngle() - Math.PI) * (rightPaddle.getPosition().x - ball.getPosition().x));
           while (predictedBallY > pseudoLimit) {
             predictedBallY = pseudoLimit - (predictedBallY - pseudoLimit);
           }
           while (predictedBallY < -pseudoLimit) {
             predictedBallY = -pseudoLimit - (predictedBallY + pseudoLimit);
           }
-          predictedBallY  += (Math.random() - Math.random()) * (paddleWidth - ball.getRadius())/2 ;
+          predictedBallY  += (Math.random() - Math.random()) * (rightPaddle.getWidth() - ball.getRadius())/2 ;
           if (ball.getAngle() < Math.PI / 2 || ball.getAngle() > 3 * Math.PI / 2) {
-            predictedBallY = (predictedBallY + leftPaddle.position.y) / 2;
+            predictedBallY = (predictedBallY + leftPaddle.getPosition().y) / 2;
           }
         }
 
-        if (rightPaddle.position.y < predictedBallY - paddleWidth / 42) {
+        if (rightPaddle.getPosition().y < predictedBallY - rightPaddle.getWidth() / 42) {
           rightPaddleMovement = paddleDiferentialDisplacement;
         }
-        else if (rightPaddle.position.y > predictedBallY + paddleWidth / 42) {
+        else if (rightPaddle.getPosition().y > predictedBallY + rightPaddle.getWidth() / 42) {
           rightPaddleMovement = - paddleDiferentialDisplacement;
         }
         else {
@@ -306,21 +341,21 @@ export class PongComponent implements AfterViewInit {
       }
       
       // MOVE PADDLES
-      leftPaddle.position.y += leftPaddleMovement;
-      rightPaddle.position.y += rightPaddleMovement;
+      leftPaddle.getPosition().y += leftPaddleMovement;
+      rightPaddle.getPosition().y += rightPaddleMovement;
 
       // LIMIT PADDLES
-      if (leftPaddle.position.y > topWall.position.y) {
-        leftPaddle.position.y = topWall.position.y;
+      if (leftPaddle.getPosition().y > topWall.position.y) {
+        leftPaddle.getPosition().y = topWall.position.y;
       }
-      if (leftPaddle.position.y < bottomWall.position.y) {
-        leftPaddle.position.y = bottomWall.position.y;
+      if (leftPaddle.getPosition().y < bottomWall.position.y) {
+        leftPaddle.getPosition().y = bottomWall.position.y;
       }
-      if (rightPaddle.position.y > topWall.position.y) {
-        rightPaddle.position.y = topWall.position.y;
+      if (rightPaddle.getPosition().y > topWall.position.y) {
+        rightPaddle.getPosition().y = topWall.position.y;
       }
-      if (rightPaddle.position.y < bottomWall.position.y) {
-        rightPaddle.position.y = bottomWall.position.y;
+      if (rightPaddle.getPosition().y < bottomWall.position.y) {
+        rightPaddle.getPosition().y = bottomWall.position.y;
       }
 
       // COLLISION BALL
@@ -349,16 +384,16 @@ export class PongComponent implements AfterViewInit {
         ball.yCollision(pseudoLimit);
       }
       // COLLISION LEFT PADDLE
-      if (ball.getPosition().x < - pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4  > leftPaddle.position.y - paddleWidth / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < leftPaddle.position.y + paddleWidth / 2) {
+      if (ball.getPosition().x < - pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4  > leftPaddle.getPosition().y - leftPaddle.getWidth() / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < leftPaddle.getPosition().y + leftPaddle.getWidth() / 2) {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
           ball.changeColor(color);
         }
         if (collisionChangePaddleColor) {
-          leftPaddle.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+          leftPaddle.changeColor(Math.random() * 0xFFFFFF);
         }
         
-        const yDifference = (ball.getPosition().y - leftPaddle.position.y) / paddleWidth / 2;
+        const yDifference = (ball.getPosition().y - leftPaddle.getPosition().y) / leftPaddle.getWidth() / 2;
         let newAngle = deltaFactor * yDifference + Math.PI;
         if (leftPaddleMovement > 0)
           newAngle += friction ;
@@ -368,16 +403,16 @@ export class PongComponent implements AfterViewInit {
         ball.setAngle(newAngle);
       }
       // COLLISION RIGHT PADDLE
-      if (ball.getPosition().x > pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4 > rightPaddle.position.y - paddleWidth / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < rightPaddle.position.y + paddleWidth / 2) {
+      if (ball.getPosition().x > pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4 > rightPaddle.getPosition().y - rightPaddle.getWidth() / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < rightPaddle.getPosition().y + rightPaddle.getWidth() / 2) {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
           ball.changeColor(color);
         }
         if (collisionChangePaddleColor) {
-          rightPaddle.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+          rightPaddle.changeColor(Math.random() * 0xFFFFFF);
         }
         
-        const yDifference = (ball.getPosition().y - rightPaddle.position.y) / paddleWidth / 2;
+        const yDifference = (ball.getPosition().y - rightPaddle.getPosition().y) / rightPaddle.getWidth() / 2;
         let newAngle = - deltaFactor * yDifference;
         if (rightPaddleMovement > 0)
           newAngle -= friction;
@@ -391,14 +426,14 @@ export class PongComponent implements AfterViewInit {
       pastTime = time;
 
       // CHECK WINNER
-      if (ball.getPosition().x < leftPaddle.position.x - paddleHeight) {
-        alert('Right player wins!');
-        window.location.reload();
-      }
-      if (ball.getPosition().x > rightPaddle.position.x + paddleHeight) {
-        alert('Left player wins!');
-        window.location.reload();
-      }
+      // if (ball.getPosition().x < leftPaddle.getPosition().x - leftPaddle.getHeight()) {
+      //   alert('Right player wins!');
+      //   window.location.reload();
+      // }
+      // if (ball.getPosition().x > rightPaddle.getPosition().x + rightPaddle.getHeight()) {
+      //   alert('Left player wins!');
+      //   window.location.reload();
+      // }
 
       renderer.render(scene, camera.camera);
       requestAnimationFrame(render);
