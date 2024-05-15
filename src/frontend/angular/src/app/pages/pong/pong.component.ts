@@ -146,7 +146,74 @@ class Paddle {
   getHeight() {
     return this.height;
   }
+  
 }
+
+class LeftPaddle extends Paddle {
+  constructor(private _configService: GameConfigService) {// lo de _configService es para que no se confunda con el configService de la clase Paddle(apaño)
+    super(_configService);
+    this.getPosition().x = this._configService.leftPaddleX;
+    this.getPosition().y = this._configService.leftPaddleY;
+    this.getRotation().z = this._configService.leftPaddleRotation;
+  }
+}
+
+class RightPaddle extends Paddle {
+  constructor(private _configService: GameConfigService) {
+    super(_configService);
+    this.getPosition().x = this._configService.rightPaddleX;
+    this.getPosition().y = this._configService.rightPaddleY;
+    this.getRotation().z = this._configService.rightPaddleRotation;
+  }
+}
+
+class Wall {
+  mesh : THREE.Mesh;
+
+  constructor(private configService: GameConfigService) {
+    const wallWidth = this.configService.wallWidth;
+    const wallHeight = this.configService.wallHeight;
+    const wallDepth = this.configService.wallDepth;
+    const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
+    const wallColor = this.configService.wallColor;
+    const wallMaterial = new THREE.MeshPhongMaterial({color: wallColor});
+    this.mesh = new THREE.Mesh(wallGeometry, wallMaterial);
+  }
+
+  addToScene(scene: THREE.Scene) {
+    scene.add(this.mesh);
+  }
+
+  changeColor(color: number) {
+    this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+  }
+
+  //GETTERS
+  getPosition() {
+    return this.mesh.position;
+  }
+
+
+}
+
+class TopWall extends Wall {
+  constructor(private _configService: GameConfigService) {
+    super(_configService);
+    this.mesh.position.x = this._configService.topWallX;
+    this.mesh.position.y = this._configService.topWallY;
+    this.mesh.position.z = this._configService.topWallZ;
+  }
+}
+
+class BottomWall extends Wall {
+  constructor(private _configService: GameConfigService) {
+    super(_configService);
+    this.mesh.position.x = this._configService.bottomWallX;
+    this.mesh.position.y = this._configService.bottomWallY;
+    this.mesh.position.z = this._configService.bottomWallZ;
+  }
+}
+
 
 class Camera {
   camera : THREE.PerspectiveCamera;
@@ -223,35 +290,16 @@ export class PongComponent implements AfterViewInit {
     ball.addToScene(scene);
 
     // INIT PADDLES
-    const leftPaddle = new Paddle(this.configService);
-    leftPaddle.getPosition().x = this.configService.leftPaddleX;
-    leftPaddle.getPosition().y = this.configService.leftPaddleY;
-    leftPaddle.getRotation().z = this.configService.leftPaddleRotation;
-    const rightPaddle = new Paddle(this.configService);
-    rightPaddle.getPosition().x = this.configService.rightPaddleX;
-    rightPaddle.getPosition().y = this.configService.rightPaddleY;
-    rightPaddle.getRotation().z = this.configService.rightPaddleRotation;
+    const leftPaddle = new LeftPaddle(this.configService);
+    const rightPaddle = new RightPaddle(this.configService);
     leftPaddle.addToScene(scene);
     rightPaddle.addToScene(scene);
-    const paddleSpeed = this.configService.paddleSpeed;
 
     // INIT WALLS
-    const wallWidth = this.configService.wallWidth;
-    const wallHeight = this.configService.wallHeight;
-    const wallDepth = this.configService.wallDepth;
-    const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
-    const wallColor = this.configService.wallColor;
-    const wallMaterial = new THREE.MeshPhongMaterial({color: wallColor});
-    const topWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    topWall.position.x = this.configService.topWallX;
-    topWall.position.y = this.configService.topWallY;
-    topWall.position.z = this.configService.topWallZ;
-    const bottomWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    bottomWall.position.x = this.configService.bottomWallX;
-    bottomWall.position.y = this.configService.bottomWallY;
-    bottomWall.position.z = this.configService.bottomWallZ;
-    scene.add(topWall);
-    scene.add(bottomWall);
+    const topWall = new TopWall(this.configService);
+    const bottomWall = new BottomWall(this.configService);
+    topWall.addToScene(scene);
+    bottomWall.addToScene(scene);
 
     const IA = this.configService.IAisOn;
 
@@ -285,7 +333,7 @@ export class PongComponent implements AfterViewInit {
 
       // HANDLE PADDLE MOVEMENT
       const pseudoLimit = 1 - ball.radius;
-      const paddleDiferentialDisplacement = - timeDifference * paddleSpeed;
+      const paddleDiferentialDisplacement = - timeDifference * leftPaddle.speed;
 
       // LEFT PADDLE MOVEMENT
       if (key.isPressed('w') || key.isPressed('a')) {
@@ -345,17 +393,17 @@ export class PongComponent implements AfterViewInit {
       rightPaddle.getPosition().y += rightPaddleMovement;
 
       // LIMIT PADDLES
-      if (leftPaddle.getPosition().y > topWall.position.y) {
-        leftPaddle.getPosition().y = topWall.position.y;
+      if (leftPaddle.getPosition().y > topWall.getPosition().y) {
+        leftPaddle.getPosition().y = topWall.getPosition().y;
       }
-      if (leftPaddle.getPosition().y < bottomWall.position.y) {
-        leftPaddle.getPosition().y = bottomWall.position.y;
+      if (leftPaddle.getPosition().y < bottomWall.getPosition().y) {
+        leftPaddle.getPosition().y = bottomWall.getPosition().y;
       }
-      if (rightPaddle.getPosition().y > topWall.position.y) {
-        rightPaddle.getPosition().y = topWall.position.y;
+      if (rightPaddle.getPosition().y > topWall.getPosition().y) {
+        rightPaddle.getPosition().y = topWall.getPosition().y;
       }
-      if (rightPaddle.getPosition().y < bottomWall.position.y) {
-        rightPaddle.getPosition().y = bottomWall.position.y;
+      if (rightPaddle.getPosition().y < bottomWall.getPosition().y) {
+        rightPaddle.getPosition().y = bottomWall.getPosition().y;
       }
 
       // COLLISION BALL
@@ -367,7 +415,7 @@ export class PongComponent implements AfterViewInit {
           ball.changeColor(color);
         }
         if (collisionChangeWallColor) {
-          bottomWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+          bottomWall.changeColor(Math.random() * 0xFFFFFF);
         }
         ball.yCollision(-pseudoLimit);
       }
@@ -379,7 +427,7 @@ export class PongComponent implements AfterViewInit {
           ball.changeColor(color);
         }
         if (collisionChangeWallColor) {
-          topWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
+          topWall.changeColor(Math.random() * 0xFFFFFF);
         }
         ball.yCollision(pseudoLimit);
       }
