@@ -363,20 +363,19 @@ export class PongComponent implements AfterViewInit, OnDestroy{
         console.log('IA');
         pastIATime = time;
 
-        // IA PREDICTION
-        predictedBallY = ball.position.y +(Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
-        console.log(ball.position.y, ' + ', (Math.sin(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x)));///grrrr
-        console.log('before ', predictedBallY);
-        while (predictedBallY > topWall.position.y) {
-          predictedBallY = topWall.position.y - (predictedBallY - 1);
+          // IA PREDICTION
+          predictedBallY = ball.position.y +(Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
+          while (predictedBallY > pseudoLimit) {
+            predictedBallY = pseudoLimit - (predictedBallY - pseudoLimit);
+          }
+          while (predictedBallY < -pseudoLimit) {
+            predictedBallY = -pseudoLimit - (predictedBallY + pseudoLimit);
+          }
+          predictedBallY  += (Math.random() - Math.random()) * (paddleWidth - radius)/2 ;
+          if (ballAngle < Math.PI / 2 || ballAngle > 3 * Math.PI / 2) {
+            predictedBallY = (predictedBallY + leftPaddle.position.y) / 2;
+          }
         }
-        while (predictedBallY < bottomWall.position.y) {
-          predictedBallY = bottomWall.position.y - (predictedBallY + 1);
-        }
-        console.log('after ', predictedBallY);
-        predictedBallY  += (Math.random() - Math.random()) * paddleWidth / 2 * 0;
-        console.log(rightPaddle.position.y);
-      }
 
       if (rightPaddle.position.y < predictedBallY - paddleWidth / 42) {
         rightPaddleMovement = paddleDiferentialDisplacement;
