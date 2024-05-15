@@ -1,14 +1,16 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy} from '@angular/core';
 import * as THREE from 'three';
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Vector2 } from 'three';
+import { Subscription } from 'rxjs';
 
 import { Input } from '@angular/core';
 
 import { GameSettings, MatchGame, MatchUpdate, MatchmakingService} from '../../services/matchmaking.service';
-import { GameConfigService } from '../../services/game-config.service';
+import { GameConfigService, GameConfigState } from '../../services/game-config.service';
 import { Rect } from '@popperjs/core';
 import { normalize } from 'three/src/math/MathUtils';
+import { Router } from '@angular/router';
 
 
 
@@ -62,7 +64,7 @@ class Ball {
   templateUrl: './pong.component.html',
   styleUrls: ['./pong.component.css']
 })
-export class PongComponent implements AfterViewInit {
+export class PongComponent implements AfterViewInit, OnDestroy{
 
   @ViewChild('pongCanvas', { static: true }) pongCanvas!: ElementRef<HTMLCanvasElement>;
   // @Input gameSettings!: GameSettings;//affectan el juego a todos los jugadores
@@ -82,18 +84,43 @@ export class PongComponent implements AfterViewInit {
   paddles : RenderRectangle[] = [];
   pastTime : number = 0;
   currentMatchStateId = 0;
-  currentGame! : MatchGame;
-  constructor(private matchmakingService: MatchmakingService, private configService: GameConfigService) {
+  currentGame! : MatchGame;//it should always exist when a game starts, even if not at construction
+
+  configStateSubscription! : Subscription;
+
+  constructor(private matchmakingService: MatchmakingService, private configService: GameConfigService,
+              private router : Router) {
   }
 
-  ngAfterViewInit(): void {
-    if (this.configService.gameSettings === undefined){
-      console.error('game Settings must be initialized');
+  ngOnDestroy(): void {
+    if (this.renderer)
+      this.renderer.setAnimationLoop(null);
+  }
+
+  manageState(state : GameConfigState) : boolean{
+      switch (state){
+        case GameConfigState.Standby:
+          console.error('no current game should not render'); 
+          if (this.configStateSubscription)
+            this.configStateSubscription.unsubscribe();
+          this.router.navigate(['/'])
+          //do we redirect or what?
+          return true;
+        case GameConfigState.StartingGame:
+          this.initValues();
+          return false;
+        case GameConfigState.Ingame:
+          this.renderer.setAnimationLoop(this.render.bind(this));
+          return false;
+      }
+  }
+
+  ngAfterViewInit(): void { 
+    if (this.manageState(this.configService.state.getCurrentValue()))
       return;
-    }
-    this.initValues();
-    console.log(this.balls[0].mesh.position);
-    this.renderer.setAnimationLoop(this.render.bind(this));
+    this.configStateSubscription = this.configService.state.observable.subscribe(state => {
+      this.manageState(state);
+    });
   }
   initValues(){
     if (this.configService.gameSettings === undefined){
@@ -225,6 +252,14 @@ export class PongComponent implements AfterViewInit {
   }
 
   render(time : number) {
+    if (this.configService.gameSettings === undefined){
+      console.error('game Settings must be initialized');
+      return; 
+    }
+    if (this.configService.matchState === undefined && this.configService.online){
+      console.error('match state must be initialized if online is true');
+      return; 
+    }
     time += 0.001;
     //console.log(time);
     //console.log('position', this.balls[0].mesh.position);

@@ -23,7 +23,7 @@ export class LobbyMatchComponent {
   LobbyMatchState = LobbyMatchState;
   MatchMakingState = MatchMakingState;
   constructor(private matchmaking: MatchmakingService) {
-    if (matchmaking.state !== MatchMakingState.OnGame){
+    if (matchmaking.state.getCurrentValue() !== MatchMakingState.OnGame){
       this.state = LobbyMatchState.Error;
       console.error('matchmaking state is not connecting')
     }

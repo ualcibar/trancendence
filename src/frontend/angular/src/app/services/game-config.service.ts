@@ -3,6 +3,13 @@ import { GameState, GameType, MatchmakingService, MatchMakingState, MatchGame} f
 import { GameSettings } from './matchmaking.service';
 
 import { Vector2, Vector3} from 'three';
+import { State } from '../utils/state';
+
+export enum GameConfigState{
+  Standby = 'standby',
+  StartingGame = 'starting game',
+  Ingame = 'in game'
+}
 
 export class Key{
   up : string;
@@ -24,6 +31,7 @@ export class GameConfigService {
   host : boolean;
   gameSettings? : GameSettings = undefined;
   matchState? : MatchGame = undefined;
+  state : State<GameConfigState> = new State<GameConfigState>(GameConfigState.Standby);
   public readonly colorPalette = {
     darkestPurple: 0x1C0658,
     swingPurple: 0x5C2686,
@@ -119,10 +127,9 @@ export class GameConfigService {
 
     public readonly deltaFactor = Math.PI / 2;
 
-  constructor(matchmaking : MatchmakingService) {
-    console.log('stop fucking around???', matchmaking.state);
-    if (matchmaking.state === MatchMakingState.OnGame){
-      if (matchmaking.currentMatchInfo === undefined){
+  constructor(private matchmaking : MatchmakingService) {
+    if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
+      if (this.matchmaking.currentMatchInfo === undefined){
         //!todo
         console.error('todo!');
         this.inGame = false;
@@ -131,8 +138,9 @@ export class GameConfigService {
       }else{
         this.inGame = true;
         this.online = true;
-        this.host = matchmaking.amIHost;
-        this.gameSettings = new GameSettings(GameType.Match, matchmaking.currentMatchInfo.name,'', false, matchmaking.currentMatchInfo.teamSize);
+        this.host = this.matchmaking.amIHost;
+        this.gameSettings = new GameSettings(GameType.Match, this.matchmaking.currentMatchInfo.name,'', false, this.matchmaking.currentMatchInfo.teamSize);
+        this.matchState = matchmaking.getMatchGame();
       }
     }else{
       console.log('hello');
@@ -142,5 +150,40 @@ export class GameConfigService {
       this.gameSettings = new GameSettings(GameType.Match, 'patata', '', false, 1);
       //this.matchState = new MatchState()
     }
+    //why not call the function? typescript doesn't realize for some reason and throws error
+    //!todo fix thi shit
+    matchmaking.state.observable.subscribe(value => {
+      if (value === MatchMakingState.OnGame)
+        this.initValues();
+    });
+  }
+
+  initValues(){
+    if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
+      if (this.matchmaking.currentMatchInfo === undefined){
+        //!todo
+        console.error('todo!');
+        this.inGame = false;
+        this.online = false;
+        this.host = false;
+      }else{
+        this.inGame = true;
+        this.online = true;
+        this.host = this.matchmaking.amIHost;
+        this.gameSettings = new GameSettings(GameType.Match, this.matchmaking.currentMatchInfo.name,'', false, this.matchmaking.currentMatchInfo.teamSize);
+        this.state.setValue(GameConfigState.StartingGame);
+        setTimeout(()=> this.state.setValue(GameConfigState.Ingame),200);
+      }
+    }else{
+      console.log('hello');
+      this.online = false;
+      this.host = false; 
+      this.inGame = true;
+      this.gameSettings = new GameSettings(GameType.Match, 'patata', '', false, 1);
+      this.state.setValue(GameConfigState.StartingGame);
+      setTimeout(()=> this.state.setValue(GameConfigState.Ingame),200);
+      //this.matchState = new MatchState()
+    }
+
   }
 }
