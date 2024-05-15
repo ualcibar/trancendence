@@ -56,7 +56,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                     logger.debug('deleting game')
                     self.user.game.delete()
                     self.user.game = None
-            logger.debug(f'status: {self.user.status}') 
+            logger.debug(f'status: {self.user.status}')
             self.user.status = 'Disconnected'
             self.user.save()
             async_to_sync(self.channel_layer.group_discard)(self.global_room_name, self.channel_name)

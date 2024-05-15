@@ -73,6 +73,7 @@ def getInfo(request, user_id=None):
         'defeats': user.loses,
         'status': user.status,
         'color': user.user_color,
+        'language': user.user_language,
         }, status=200)
 
 @api_view(['POST'])
@@ -150,28 +151,37 @@ def registerWith42Token(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def imLoggedIn(request):
-    return JsonResponse({'message': 'you are logged'}, status=201)
+    return JsonResponse({'message': 'You are logged in'}, status=201)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def setUserConfig(request, user_id=None): # Hay que mirar esto para que se pueda usar para distintas request (como el usuario, la password... etc)
+def setUserConfig(request, user_id=None):
     data = json.loads(request.body)
-    color = data.get('color')
-    if color is None:
-        return JsonResponse({'message': 'Failed to set custom user setting'}, status=500)
+
     if user_id is not None:
         try:
             user = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
-    user.user_color = color
+    updated_fields = []
+    valid_keys = ['user_color', 'user_language']
+
+    for key, value in data.items():
+        if key in valid_keys:
+            setattr(user, key, value)
+            updated_fields.append(key)
+            logger.debug(f"Actualizada la key {key} a {value}")
+
+    if not valid_keys:
+        return JsonResponse({'message': 'No valid user settings provided'}, status=400)
+
     user.save()
-    return JsonResponse({'message': 'Change color success!'}, status=201)
+    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields}, status=201)
 
 @api_view(['POST'])
 def logout(request):
-    response = JsonResponse({'message': 'test'}, status=201)
+    response = JsonResponse({'message': 'See you later!'}, status=201)
     response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
     response.delete_cookie('refresh_token')
     return response
@@ -252,7 +262,6 @@ def login(request):
                     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
-                # csrf.get_token(request)
                 response.data = {"Success": "Login successfully", "data": data}
                 return response
             else:
