@@ -1,6 +1,5 @@
 import { Component , OnInit} from '@angular/core';
-import { AuthService, UserInfo } from '../../services/auth.service';
-import { TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,25 +11,14 @@ export class NavbarComponent implements OnInit {
 
   lang:string ='';
 
-  constructor(public authService: AuthService, private translateService:TranslateService) {}
-
-
+  constructor(public authService: AuthService) {}
 
   ngOnInit() {
     this.authService.isLoggedIn$.subscribe(() => {
       this.loading = false;
     });
-    this.lang = localStorage.getItem('lang') || 'eus';
   }
 
-  ChangeLang(lang:any){
-    const selectedLanguage = lang.target.value;
-
-    localStorage.setItem('lang',selectedLanguage);
-
-    this.translateService.use(selectedLanguage);
-
-  }
   logout(){
     this.authService.logout();
   }

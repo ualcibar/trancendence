@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { SettingsService } from '../../../services/settings.service';
 
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-settings-p-language',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './settings-p-language.component.html',
   styleUrl: './settings-p-language.component.scss'
 })
@@ -16,7 +18,7 @@ export class SettingsPLanguageComponent {
 
   @Input() loaded: boolean = false;
 
-  constructor(public authService: AuthService, public settingsService: SettingsService) {}
+  constructor(public authService: AuthService, public settingsService: SettingsService, private translateService: TranslateService) {}
 
   ngOnInit() {
     this.settingsService.userSettingsInfo$.subscribe(userSettingsInfo => {
@@ -37,6 +39,8 @@ export class SettingsPLanguageComponent {
 
   saveLanguage() {
     this.settingsService.setUserConfig('user_language', this.selected_lang);
+    localStorage.setItem('lang', this.selected_lang);
+    this.translateService.use(this.selected_lang);
     this.user_lang = this.selected_lang;
   }
 }

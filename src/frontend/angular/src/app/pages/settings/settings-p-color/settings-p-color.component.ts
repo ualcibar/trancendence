@@ -2,11 +2,12 @@ import { Component, Renderer2, Input, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { SettingsService } from '../../../services/settings.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-settings-p-color',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './settings-p-color.component.html',
   styleUrl: './settings-p-color.component.css'
 })

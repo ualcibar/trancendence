@@ -108,7 +108,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     )
 
     USER_LANGUAGE_CHOICES = (
-        ('eus', 'Euskera'),
+        ('eu', 'Euskera'),
         ('en', 'English'),
         ('es', 'Spanish'),
     )

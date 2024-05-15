@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService, UserInfo } from './auth.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+import { TranslateService } from '@ngx-translate/core';
+
 // Esta clase nos permite guardar/obtener la config custom del usuario
 // - Para obtener todos los valores, implementamos la clase 'UserInfo' del servicio de 'Auth'
 export class UserSettingsInfo extends UserInfo {
@@ -23,7 +25,7 @@ export class SettingsService {
   private userSettingsInfoSubject: BehaviorSubject<UserSettingsInfo | null> = new BehaviorSubject<UserSettingsInfo | null>(null);
   userSettingsInfo$: Observable<UserSettingsInfo | null> = this.userSettingsInfoSubject.asObservable();
 
-  constructor(private http: HttpClient, private authService: AuthService) {
+  constructor(private http: HttpClient, private authService: AuthService, private translateService: TranslateService) {
     this.updateUserConfig();
   }
 
