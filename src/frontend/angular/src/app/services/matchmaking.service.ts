@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import {AuthService, UserInfo} from './auth.service';
-import { Subject, Observable, BehaviorSubject } from 'rxjs';
-import { isInNotificationPhase } from '@angular/core/primitives/signals';
-import { data } from 'jquery';
+import { Subject, Observable} from 'rxjs';
 import { Router } from '@angular/router';
 import { State } from '../utils/state';
+
+import { Vector2 } from 'three';
+
 export enum GameType {
   Tournament = 'Tournament',
   Match = 'Match',
@@ -31,31 +32,58 @@ export enum GameState{
 export class MatchUpdate{
   paddlesPosition : number[];
   paddlesDirection : number[];
-  ballsPosition : number[];
-  ballsDirection : number[];
-  constructor(paddlesPosition : number[], paddlesDirection : number[],
-              ballsPosition : number[], ballsDirection : number[]){
-    this.paddlesDirection = paddlesDirection;
-    this.paddlesPosition = paddlesPosition;
-    this.ballsPosition = ballsPosition;
-    this.ballsDirection = ballsDirection;
+  ballsPosition : Vector2[];
+  ballsDirection : Vector2[];
+  ballsSpeed : number[];
+  id : number;
+  constructor(paddlesPosition : number[] | undefined, paddlesDirection : number[] | undefined,
+              ballsPosition : Vector2[] | undefined, ballsDirection : Vector2[] | undefined,
+              ballsSpeed : number[] | undefined, id : number| undefined,
+              config : MatchInfo){
+    if (paddlesPosition)
+      this.paddlesPosition = paddlesPosition;
+    else
+      this.paddlesPosition = new Array<number>(config.teamSize * 2).fill(0);
+    
+    if (paddlesDirection)
+      this.paddlesDirection = paddlesDirection;
+    else
+      this.paddlesDirection = new Array<number>(config.teamSize * 2).fill(0);
+
+    if (ballsPosition)
+      this.ballsPosition = ballsPosition;
+    else
+      this.ballsPosition = new Array<Vector2>(1).fill(new Vector2(0,0));
+    
+    if (ballsDirection)
+      this.ballsDirection = ballsDirection;
+    else
+      this.ballsDirection = new Array<Vector2>(1).fill(new Vector2(0,0));
+
+    if (ballsSpeed)
+      this.ballsSpeed = ballsSpeed;
+    else
+      this.ballsSpeed = new Array<number>(1).fill(0);
+
+    if (id)
+      this.id = id;
+    else
+      this.id = 0;
   }
 }
 
 export class MatchGame{
-  id : number;
   state : State<GameState>;
   score : Score;
   update : MatchUpdate;
-  constructor (state : GameState, score : Score, update : MatchUpdate | undefined, id : number){
+  constructor (state : GameState, score : Score, update : MatchUpdate | undefined, id : number, config : MatchInfo){
     this.state = new State(state);
     this.score = score;
     if (update)
       this.update = update;
     else{
-      this.update = new MatchUpdate([],[],[],[]);
+      this.update = new MatchUpdate(undefined,undefined,undefined,undefined,undefined, undefined,config);
     }
-    this.id = id;
   } 
 }
 
@@ -290,7 +318,13 @@ export class MatchmakingService {
       console.log('Data channel opened');
     };
     dataChannel.onmessage = (event => {
-      console.log('DATACHANNEL message: ',event.data);
+      if (this.currentMatch === undefined)
+        return;
+      const message = JSON.parse(event.data);
+      if (message.type === 'update')
+        //console.log('update', message.data)
+        this.currentMatch.update = message.data; 
+      //console.log('DATACHANNEL message: ',event.data);
     });
     dataChannel.onclose = () => {
       console.log('Data channel closed');
@@ -399,7 +433,7 @@ export class MatchmakingService {
           switch (data.status){
             case 'success':
               this.currentMatchInfo = new MatchInfo(data.match.name, 1, this.authService.user_info);//info needs to be somewhere else
-              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), new MatchUpdate([],[],[],[]),0);
+              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), undefined, 0,this.currentMatchInfo);
               //this.setCurrentMatchState(GameState.WaitingForPlayers)
               this.maxCurrentPeerConnections = 2;//info needs to be somewhere else
               this.dataChannels = new Map();
@@ -443,7 +477,7 @@ export class MatchmakingService {
               this.currentMatchInfo = new MatchInfo(data.match.name, data.match.max_players / 2, new UserInfo(data.match.host.username, data.match.host.id, true));
               //this.setCurrentMatchState(GameState.Connecting);
               //!todo
-              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), new MatchUpdate([],[],[],[]),0);
+              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), undefined,0, this.currentMatchInfo);
               this.maxCurrentPeerConnections = data.match.max_players - 1;
               console.log('successfully joined game group, waiting for webrtc');
               this.amIHost = false;
@@ -567,8 +601,12 @@ export class MatchmakingService {
       console.error('send match update: data channels must be intance of map')
       return;
     }
+    const message = JSON.stringify({
+      type : 'update',
+      data : update,
+    });
     for (const chann of this.dataChannels.values()){
-      chann.send(JSON.stringify(update));
+      chann.send(message);
     }
   }
 

@@ -79,8 +79,8 @@ export class GameConfigService {
     public readonly ballColor = this.colorPalette.white;
 
     // Quinetity settings
-    public readonly ballSpeed = 0.5;
-    public readonly ballDir : Vector2 = new Vector2(-0.5,1).normalize();
+    public readonly ballSpeed = 1;
+    public readonly ballDir : Vector2 = new Vector2(0,1).normalize();
     // public readonly ballSpeed = 0.01;
     // public readonly ballAngle = Math.PI * -1.4 / 2;
 
@@ -128,7 +128,7 @@ export class GameConfigService {
     public readonly deltaFactor = Math.PI / 2;
 
   constructor(private matchmaking : MatchmakingService) {
-    if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
+    /*if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
       if (this.matchmaking.currentMatchInfo === undefined){
         //!todo
         console.error('todo!');
@@ -140,6 +140,7 @@ export class GameConfigService {
         this.online = true;
         this.host = this.matchmaking.amIHost;
         this.gameSettings = new GameSettings(GameType.Match, this.matchmaking.currentMatchInfo.name,'', false, this.matchmaking.currentMatchInfo.teamSize);
+//        this.state.setValue(GameConfigState.StartingGame);
         this.matchState = matchmaking.getMatchGame();
       }
     }else{
@@ -148,10 +149,16 @@ export class GameConfigService {
       this.host = false; 
       this.inGame = true;
       this.gameSettings = new GameSettings(GameType.Match, 'patata', '', false, 1);
+ //     this.state.setValue(GameConfigState.StartingGame);
       //this.matchState = new MatchState()
-    }
+    }*/
     //why not call the function? typescript doesn't realize for some reason and throws error
     //!todo fix thi shit
+    this.inGame = false;
+    this.online = false;
+    this.host = false;
+    if (matchmaking.state.getCurrentValue() === MatchMakingState.OnGame)
+      this.initValues();
     matchmaking.state.observable.subscribe(value => {
       if (value === MatchMakingState.OnGame)
         this.initValues();
@@ -172,7 +179,7 @@ export class GameConfigService {
         this.host = this.matchmaking.amIHost;
         this.gameSettings = new GameSettings(GameType.Match, this.matchmaking.currentMatchInfo.name,'', false, this.matchmaking.currentMatchInfo.teamSize);
         this.state.setValue(GameConfigState.StartingGame);
-        setTimeout(()=> this.state.setValue(GameConfigState.Ingame),200);
+        setTimeout(()=> this.state.setValue(GameConfigState.Ingame),1000);
       }
     }else{
       console.log('hello');
@@ -181,7 +188,7 @@ export class GameConfigService {
       this.inGame = true;
       this.gameSettings = new GameSettings(GameType.Match, 'patata', '', false, 1);
       this.state.setValue(GameConfigState.StartingGame);
-      setTimeout(()=> this.state.setValue(GameConfigState.Ingame),200);
+      setTimeout(()=> this.state.setValue(GameConfigState.Ingame),1000);
       //this.matchState = new MatchState()
     }
 
