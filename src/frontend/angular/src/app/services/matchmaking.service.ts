@@ -191,7 +191,7 @@ export class MatchmakingService {
     this.entries.set(GameType.Tournament,[]);
     this.currentGameStateSubject = new BehaviorSubject<GameState | undefined>(undefined);
     this.currentGameState$ = this.currentGameStateSubject.asObservable();
-    //this.connectToServer();
+    this.connectToServer();
     if(this.isConnected()){
       this.sendMessage(JSON.stringify({type : '/getStatus'}));
     }
