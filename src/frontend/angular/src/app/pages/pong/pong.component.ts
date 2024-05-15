@@ -425,7 +425,7 @@ export class PongComponent implements AfterViewInit {
       // SET PAST TIME
       pastTime = time;
 
-      CHECK WINNER
+      // CHECK WINNER
       if (ball.getPosition().x < leftPaddle.getPosition().x - leftPaddle.getHeight()) {
         alert('Right player wins!');
         window.location.reload();
