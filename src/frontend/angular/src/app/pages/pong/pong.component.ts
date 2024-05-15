@@ -425,15 +425,15 @@ export class PongComponent implements AfterViewInit {
       // SET PAST TIME
       pastTime = time;
 
-      // CHECK WINNER
-      // if (ball.getPosition().x < leftPaddle.getPosition().x - leftPaddle.getHeight()) {
-      //   alert('Right player wins!');
-      //   window.location.reload();
-      // }
-      // if (ball.getPosition().x > rightPaddle.getPosition().x + rightPaddle.getHeight()) {
-      //   alert('Left player wins!');
-      //   window.location.reload();
-      // }
+      CHECK WINNER
+      if (ball.getPosition().x < leftPaddle.getPosition().x - leftPaddle.getHeight()) {
+        alert('Right player wins!');
+        window.location.reload();
+      }
+      if (ball.getPosition().x > rightPaddle.getPosition().x + rightPaddle.getHeight()) {
+        alert('Left player wins!');
+        window.location.reload();
+      }
 
       renderer.render(scene, camera.camera);
       requestAnimationFrame(render);
