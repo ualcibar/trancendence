@@ -4,8 +4,7 @@ import * as key from 'keymaster'; // Si estás utilizando TypeScript
 
 import { GameSettings, MatchmakingService} from '../../services/matchmaking.service';
 import { GameConfigService } from '../../services/game-config.service';
-
-
+import { normalize } from 'three/src/math/MathUtils';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -17,12 +16,102 @@ export const colorPalette = {
   black: 0x000000,
 };
 
+
+
+class Ball {
+  mesh : THREE.Mesh;
+  light : THREE.PointLight;
+
+  radius : number;
+  speed : number;
+  aceleration : number;//after a collision
+  angle : number;
+
+  constructor(private configService: GameConfigService) {
+    this.radius = this.configService.radius;
+    const widthSegments = this.configService.widthSegments;
+    const heightSegments = this.configService.heightSegments;
+    const ballGeometry = new THREE.SphereGeometry(this.radius, widthSegments, heightSegments);
+    const ballColor = this.configService.ballColor;
+    const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
+    this.mesh = new THREE.Mesh(ballGeometry, ballMaterial);
+    this.speed = this.configService.ballSpeed;
+    this.aceleration = this.configService.aceleration;
+    this.angle = this.configService.ballAngle;
+    const color = ballColor;
+    const intensity = this.configService.ballLightIntensity;
+    this.light = new THREE.PointLight( color, intensity );
+  }
+
+  adToScene(scene: THREE.Scene) {
+    scene.add(this.mesh);
+    scene.add(this.light);
+  }
+
+  update(timeDelta : number) {
+    const ballDiferentialDisplacement = timeDelta * this.speed;
+    this.mesh.position.x += ballDiferentialDisplacement * Math.cos(this.angle);
+    this.mesh.position.y += ballDiferentialDisplacement * Math.sin(this.angle);
+    this.light.position.x = this.mesh.position.x;
+    this.light.position.y = this.mesh.position.y;
+  }
+
+  changeColor(color: number) {
+    this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+    this.light.color = new THREE.Color(color);
+  }
+
+  yCollision(y: number) {// y is the ideal position of the ball when it collides
+    this.angle = -this.getAngle();
+    this.getPosition().y = y;
+    this.speed += this.getAceleration() * this.getSpeed();
+  }
+
+  xCollision(x: number) {// x is the ideal position of the ball when it collides
+    this.angle = Math.PI - this.getAngle();
+    this.getPosition().x = x;
+    this.speed += this.getAceleration() * this.getSpeed();
+  }
+
+  //GETTERS
+  getPosition() {
+    return this.mesh.position;
+  }
+
+  getAngle() {
+    return this.angle;
+  }
+
+  getSpeed() {
+    return this.speed;
+  }
+
+  getAceleration() {
+    return this.aceleration;
+  }
+
+  getRadius() {
+    return this.radius;
+  }
+
+  //SETTERS
+  setAngle(angle: number) {
+    this.angle = angle;
+    //normalize angle
+    while (this.angle < 0) {
+      this.angle += 2 * Math.PI;
+    }
+    while (this.angle > 2 * Math.PI) {
+      this.angle -= 2 * Math.PI;
+    }
+  }
+}
+
 @Component({
   selector: 'app-pong',
   templateUrl: './pong.component.html',
   styleUrls: ['./pong.component.css']
 })
-
 export class PongComponent implements AfterViewInit {
 
   @ViewChild('pongCanvas', { static: true }) pongCanvas!: ElementRef<HTMLCanvasElement>;
@@ -31,8 +120,7 @@ export class PongComponent implements AfterViewInit {
     // affectan el juego solo al cliente
     // colores
     // imagen de fondo
-   
-
+  
   constructor(private matchmakingService: MatchmakingService, private configService: GameConfigService) {
   }
 
@@ -71,24 +159,11 @@ export class PongComponent implements AfterViewInit {
       scene.add( light );
     }
 
-    // INIT BALL
-    const radius = this.configService.radius;
-    const widthSegments = this.configService.widthSegments;
-    const heightSegments = this.configService.heightSegments;
-    const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-    const ballColor = this.configService.ballColor;
-    const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
-    const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-    scene.add(ball);
+    // // INIT BALL
+    const ball = new Ball(this.configService);
+    ball.adToScene(scene);
 
-    let ballSpeed = this.configService.ballSpeed;
-    let ballAngle = this.configService.ballAngle;
 
-    // INIT BALL LIGHT
-    const color = this.configService.ballLightColor;
-    const intensity = this.configService.ballLightIntensity;
-    const light = new THREE.PointLight( color, intensity );
-    scene.add( light );
 
     // INIT PADDLES
     const paddleWidth = this.configService.paddleWidth;
@@ -155,13 +230,10 @@ export class PongComponent implements AfterViewInit {
 
       // MOVE BALL
       const timeDifference = pastTime - time;
-      const ballDiferentialDisplacement = timeDifference * ballSpeed;
-      ball.position.x += ballDiferentialDisplacement * Math.cos(ballAngle);
-      ball.position.y += ballDiferentialDisplacement * Math.sin(ballAngle);
-
+      ball.update(timeDifference);
 
       // HANDLE PADDLE MOVEMENT
-      const pseudoLimit = 1 - radius;
+      const pseudoLimit = 1 - ball.radius;
       const paddleDiferentialDisplacement = - timeDifference * paddleSpeed;
 
       // LEFT PADDLE MOVEMENT
@@ -182,15 +254,15 @@ export class PongComponent implements AfterViewInit {
           pastIATime = time;
 
           // IA PREDICTION
-          predictedBallY = ball.position.y +(Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
+          predictedBallY = ball.getPosition().y +(Math.tan(ball.getAngle() - Math.PI) * (rightPaddle.position.x - ball.getPosition().x));
           while (predictedBallY > pseudoLimit) {
             predictedBallY = pseudoLimit - (predictedBallY - pseudoLimit);
           }
           while (predictedBallY < -pseudoLimit) {
             predictedBallY = -pseudoLimit - (predictedBallY + pseudoLimit);
           }
-          predictedBallY  += (Math.random() - Math.random()) * (paddleWidth - radius)/2 ;
-          if (ballAngle < Math.PI / 2 || ballAngle > 3 * Math.PI / 2) {
+          predictedBallY  += (Math.random() - Math.random()) * (paddleWidth - ball.getRadius())/2 ;
+          if (ball.getAngle() < Math.PI / 2 || ball.getAngle() > 3 * Math.PI / 2) {
             predictedBallY = (predictedBallY + leftPaddle.position.y) / 2;
           }
         }
@@ -235,100 +307,79 @@ export class PongComponent implements AfterViewInit {
         rightPaddle.position.y = bottomWall.position.y;
       }
 
-      // MOVE LIGHT
-      light.position.x = ball.position.x;
-      light.position.y = ball.position.y;
-
-
       // COLLISION BALL
       // COLLISION BOTTOM WALL
-      if (ball.position.y < -pseudoLimit)
+      if (ball.getPosition().y < -pseudoLimit)
       {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({color: color});
-          light.color = new THREE.Color(color);
+          ball.changeColor(color);
         }
         if (collisionChangeWallColor) {
           bottomWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
         }
-        ballAngle = -ballAngle;
-        ball.position.y = -pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
+        ball.yCollision(-pseudoLimit);
       }
       // COLLISION TOP WALL
-      if (ball.position.y > pseudoLimit)
+      if (ball.getPosition().y > pseudoLimit)
       {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({color: color});
-          light.color = new THREE.Color(color);
+          ball.changeColor(color);
         }
         if (collisionChangeWallColor) {
           topWall.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
         }
-        ballAngle = -ballAngle;
-        ball.position.y = pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
+        ball.yCollision(pseudoLimit);
       }
       // COLLISION LEFT PADDLE
-      if (ball.position.x < - pseudoLimit && ball.position.y + radius * 3/4  > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < leftPaddle.position.y + paddleWidth / 2) {
+      if (ball.getPosition().x < - pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4  > leftPaddle.position.y - paddleWidth / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < leftPaddle.position.y + paddleWidth / 2) {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({color: color});
-          light.color = new THREE.Color(color);
+          ball.changeColor(color);
         }
         if (collisionChangePaddleColor) {
           leftPaddle.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
         }
         
-        const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
-        ballAngle = deltaFactor * yDifference + Math.PI;
+        const yDifference = (ball.getPosition().y - leftPaddle.position.y) / paddleWidth / 2;
+        let newAngle = deltaFactor * yDifference + Math.PI;
         if (leftPaddleMovement > 0)
-          ballAngle += friction ;
+          newAngle += friction ;
         if (leftPaddleMovement < 0)
-          ballAngle -= friction;
-        ball.position.x = -pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
+          newAngle -= friction;
+        ball.xCollision(-pseudoLimit);
+        ball.setAngle(newAngle);
       }
       // COLLISION RIGHT PADDLE
-      if (ball.position.x > pseudoLimit && ball.position.y + radius * 3/4 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3/4 < rightPaddle.position.y + paddleWidth / 2) {
+      if (ball.getPosition().x > pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4 > rightPaddle.position.y - paddleWidth / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < rightPaddle.position.y + paddleWidth / 2) {
         if (collisionChangeBallColor) {
           const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({color: color});
-          light.color = new THREE.Color(color);
+          ball.changeColor(color);
         }
         if (collisionChangePaddleColor) {
           rightPaddle.material = new THREE.MeshPhongMaterial({color: Math.random() * 0xFFFFFF});
         }
         
-        const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
-        ballAngle = - deltaFactor * yDifference;
+        const yDifference = (ball.getPosition().y - rightPaddle.position.y) / paddleWidth / 2;
+        let newAngle = - deltaFactor * yDifference;
         if (rightPaddleMovement > 0)
-          ballAngle -= friction;
+          newAngle -= friction;
         if (rightPaddleMovement < 0)
-          ballAngle += friction;
-        ball.position.x = pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
-      }
-
-      // NORMALIZE ANGLE
-      while (ballAngle < 0) {
-        ballAngle += 2 * Math.PI;
-      }
-      while (ballAngle > 2 * Math.PI) {
-        ballAngle -= 2 * Math.PI;
+          newAngle += friction;
+        ball.xCollision(pseudoLimit);
+        ball.setAngle(newAngle);
       }
 
       // SET PAST TIME
       pastTime = time;
 
       // CHECK WINNER
-      if (ball.position.x < leftPaddle.position.x - paddleHeight) {
+      if (ball.getPosition().x < leftPaddle.position.x - paddleHeight) {
         alert('Right player wins!');
         window.location.reload();
       }
-      if (ball.position.x > rightPaddle.position.x + paddleHeight) {
+      if (ball.getPosition().x > rightPaddle.position.x + paddleHeight) {
         alert('Left player wins!');
         window.location.reload();
       }
