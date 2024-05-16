@@ -23,6 +23,7 @@ from .models import CustomUser, Game, Tournament, CustomUserManager
 import requests
 import json
 import logging
+from . import mail
 
 logger = logging.getLogger('std')
 
@@ -182,9 +183,13 @@ def register(request):
     data = json.loads(request.body)
     username = data.get('username', '')
     password = data.get('password', '')
-    if username and password:
+    email = data.get('email', '')
+    if username and password and email:
         user = CustomUser.objects.create_user(
-            username=username, password=password)
+            username=username, email=email, password=password)
+        fernet_obj = mail.generateFernetObj()
+        token_url = mail.generate_token()
+        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(email, fernet_obj)), email)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
@@ -253,7 +258,16 @@ def login(request):
                     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
                 # csrf.get_token(request)
+
+                try:
+                    customUser = CustomUser.objects.get(username=username)
+                except CustomUser.DoesNotExist:
+                    return JsonResponse({'message': 'This user does not exist!'}, status=404)
+                
                 response.data = {"Success": "Login successfully", "data": data}
+                token_TwoFA = mail.generate_random_verification_code(6)
+                logger.debug(f"QUE ES ESTOOOoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO {customUser.email}")
+                mail.send_TwoFA_mail(token_TwoFA, customUser.email)
                 return response
             else:
                 return Response({"message": "This account is not active!"}, status=500)
