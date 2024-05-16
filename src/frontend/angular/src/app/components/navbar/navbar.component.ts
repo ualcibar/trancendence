@@ -1,5 +1,5 @@
 import { Component , OnInit} from '@angular/core';
-import { AuthService, UserInfo } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,6 +8,8 @@ import { AuthService, UserInfo } from '../../services/auth.service';
 })
 export class NavbarComponent implements OnInit {
   loading: boolean = true;
+
+  lang:string ='';
 
   constructor(public authService: AuthService) {}
 

@@ -1,0 +1,42 @@
+{
+    "play":"Jokatu",
+    "preview":"Aurrebista",
+    "return":"Itzuli",
+    "exit":"Irten",
+    "save_changes":"Aldaketak gorde",
+
+    "about":"About Us",
+    "share":"Share",
+    "info":"Channel Information",
+    "name":"Names",
+    "email":"Email",
+    "Mobile":"Mobile",
+    "subscribe":"Subscribe Now",
+
+    "profile_lastonline":"azken konexioa",
+    "profile_stats_gamespl":"Jokaldiak",
+    "profile_stats_gameswin":"Garaipenak",
+    "profile_stats_gamesdefeats":"Galduerak",
+    "profile_addasfriend":"Gehitu lagun gisa",
+    "profile_sendamessage":"Mezu bat bidali",
+
+    "profile_logout":"Saioa itxi",
+    "profile_login":"Saioa hasi",
+    "profile_register":"Erregistratu",
+
+    "settings_title":"Profilaren doikuntzak",
+    "settings_tab_title_pro":"Profila",
+
+    "settings_tab_content_color":"Zure kolorea",
+    "settings_tab_color_title":"Zure kolorea aukeratu",
+    "settings_tab_color_text":"Kolorea beste jokalariek ikusiko dute jokoan eta zure profilean",
+
+    "settings_tab_content_lang":"Hizkuntza",
+    "settings_tab_lang_title":"Zure hizkuntza aukeratu",
+    "settings_tab_lang_text":"Oharra: Baliteke web orria %100ean itzulita ez egotea",
+
+    "settings_tab_title_acc":"Kontua",
+    "settings_tab_content_public":"Profil publikoa",
+    "settings_tab_content_security":"Kontuaren segurtasuna"
+
+}

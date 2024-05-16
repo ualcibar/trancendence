@@ -1,0 +1,51 @@
+{
+    "play":"Play",
+    "preview":"Preview",
+    "return":"Return",
+    "exit":"Exit",
+    "success":"Success!",
+    "error":"Oops!",
+    "save_changes":"Save changes",
+    "42_account":"42 Account",
+
+    "username":"Username",
+    "password":"Password",
+    "register_title":"Register to SpacePong!",
+    "register_subtitle":"Already a user?",
+    "register_subtitle_link":"Login here",
+    "register_username_tip":"Choose a nice looking username that will be shown to other players",
+    "register_password_tip":"Choose a long password with different characters",
+    "register_finish_tip":"or register using",
+    "register_redirect":"Redirecting to the login page...",
+
+    "login_title":"Glad to see you again!",
+    "login_subtitle":"New to SpacePong?",
+    "login_subtitle_link":"Register here",
+    "login_finish_tip":"or login using",
+
+    "profile_logout":"Logout",
+    "profile_login":"Login",
+    "profile_register":"Register",
+
+    "profile_lastonline":"last online",
+    "profile_stats_gamespl":"Games played",
+    "profile_stats_gameswin":"Wins",
+    "profile_stats_gamesdefeats":"Defeats",
+    "profile_addasfriend":"Add as friend",
+    "profile_sendamessage":"Send a message",
+
+    "settings_title":"User settings",
+    "settings_tab_title_pro":"Profile",
+
+    "settings_tab_content_color":"Your color",
+    "settings_tab_color_title":"Choose your color",
+    "settings_tab_color_text":"This will be shown to other players ingame and in your profile",
+
+    "settings_tab_content_lang":"Language",
+    "settings_tab_lang_title":"Select your language",
+    "settings_tab_lang_text":"Note: The page may not be translated at 100%",
+
+    "settings_tab_title_acc":"Account",
+    "settings_tab_content_public":"Public profile",
+    "settings_tab_content_security":"Account security"
+}
