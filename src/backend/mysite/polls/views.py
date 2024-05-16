@@ -199,7 +199,7 @@ def register(request):
             username=username, email=email, password=password)
         fernet_obj = mail.generateFernetObj()
         token_url = mail.generate_token()
-        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(email, fernet_obj)), email)
+        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
