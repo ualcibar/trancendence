@@ -446,6 +446,7 @@ export class PongComponent implements AfterViewInit {
 
 
       // // LIMIT PADDLES
+      leftPaddle.getPosition().y = Math.min(pseudoLimit, Math.max(-pseudoLimit, leftPaddle.getPosition().y));
       // if (leftPaddle.getPosition().y > topWall.getPosition().y) {
       //   leftPaddle.getPosition().y = topWall.getPosition().y;
       // }

@@ -78,6 +78,16 @@ export class GameConfigService {
       public readonly rightPaddleY = 0;
       public readonly rightPaddleRotation = Math.PI / 2; // 90 degrees, don't change this
 
+    // Control settings
+      public readonly defaultUpKey = 'a';
+      public readonly defaultDownKey = 'd';
+        // Left paddle
+        public readonly leftUpKey = this.defaultUpKey;
+        public readonly leftDownKey = this.defaultDownKey;
+        // Right paddle
+        public readonly rightUpKey = 'left';
+        public readonly rightDownKey = 'right';
+
     // Paddle movement settings
     public readonly paddleSpeed = 0.77;
 
@@ -99,7 +109,7 @@ export class GameConfigService {
       public readonly bottomWallZ = 0;
 
   // IA settings
-    public readonly IAisOn = false;
+    public readonly IAisOn = true;
 
   // Collision settings
     // Colistion change color
