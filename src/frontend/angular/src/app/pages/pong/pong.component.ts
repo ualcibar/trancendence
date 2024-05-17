@@ -27,6 +27,7 @@ class Ball {
   speed : number;
   aceleration : number;//after a collision
   angle : number;
+  colorChange : boolean;
 
   constructor(private configService: GameConfigService) {
     this.radius = this.configService.radius;
@@ -42,6 +43,7 @@ class Ball {
     const color = ballColor;
     const intensity = this.configService.ballLightIntensity;
     this.light = new THREE.PointLight( color, intensity );
+    this.colorChange = this.configService.collisionChangeBallColor;
   }
 
   addToScene(scene: THREE.Scene) {
@@ -66,12 +68,16 @@ class Ball {
     this.angle = -this.getAngle();
     this.getPosition().y = y;
     this.speed += this.getAceleration() * this.getSpeed();
+    if (this.colorChange)
+      this.changeColor(Math.random() * 0xFFFFFF);
   }
 
   xCollision(x: number) {// x is the ideal position of the ball when it collides
     this.angle = Math.PI - this.getAngle();
     this.getPosition().x = x;
     this.speed += this.getAceleration() * this.getSpeed();
+    if (this.colorChange)
+      this.changeColor(Math.random() * 0xFFFFFF);
   }
 
   //GETTERS
@@ -111,14 +117,16 @@ class Ball {
 class Paddle {
   mesh : THREE.Mesh;
   speed : number;
+  friction : number;
+  deltaFactor : number;
   height : number;
   width : number;
   upKey : string;
   downKey : string;
-  goinUp : boolean;
-  goinDown : boolean;
-  localPlayer : boolean;
-  AIplayer : boolean;
+  goinUp : boolean = false;
+  goinDown : boolean = false;
+  localPlayer : boolean = false;
+  AIplayer : boolean = false;
   AIprediction : number = 0;
 
   constructor(private configService: GameConfigService) {
@@ -132,10 +140,8 @@ class Paddle {
     this.speed = this.configService.paddleSpeed;
     this.upKey = this.configService.defaultUpKey;
     this.downKey = this.configService.defaultDownKey;
-    this.goinUp = false;
-    this.goinDown = false;
-    this.localPlayer = false;
-    this.AIplayer = false;
+    this.friction = this.configService.friction;
+    this.deltaFactor = this.configService.deltaFactor;
   }
 
   addToScene(scene: THREE.Scene) {
@@ -192,6 +198,18 @@ class Paddle {
     this.mesh.material = new THREE.MeshPhongMaterial({color: color});
   }
 
+  limitYmax(maxY: number) {
+    if (this.getPosition().y > maxY) {
+      this.getPosition().y = maxY;
+    }
+  }
+
+  limitYmin(minY: number) {
+    if (this.getPosition().y < minY) {
+      this.getPosition().y = minY;
+    }
+  }
+
   madeLocalPlayer() {
     this.localPlayer = true;
     this.AIplayer = false;
@@ -236,6 +254,25 @@ class LeftPaddle extends Paddle {
     this.downKey = this._configService.leftDownKey;
     this.madeLocalPlayer();
   }
+
+  handleCollision(ball: Ball) {
+    const pseudoLimitx = this.getPosition().x + ball.getRadius() + this.height / 2;
+    const pseudoLimitymax = this.getPosition().y + ball.getRadius() + this.width / 2;
+    const pseudoLimitymin = this.getPosition().y - ball.getRadius() - this.width / 2;
+    if (ball.getPosition().x < pseudoLimitx && ball.getPosition().y < pseudoLimitymax && ball.getPosition().y > pseudoLimitymin) {
+      ball.xCollision(pseudoLimitx);
+      const yDifference = (ball.getPosition().y - this.getPosition().y) / this.getWidth() / 2;
+      ball.setAngle(this.deltaFactor * yDifference + Math.PI);
+      ball.setAngle
+      if (this.goinUp)
+        ball.setAngle(ball.getAngle() + this.friction);
+      if (this.goinDown)
+        ball.setAngle(ball.getAngle() - this.friction);
+      if (this._configService.collisionChangeWallColor) {
+        this.changeColor(Math.random() * 0xFFFFFF);
+      }
+    }
+  }
 }
 
 class RightPaddle extends Paddle {
@@ -253,16 +290,35 @@ class RightPaddle extends Paddle {
       this.madeLocalPlayer();
     }
   }
+  handleCollision(ball: Ball) {
+    const pseudoLimitx = this.getPosition().x - ball.getRadius() - this.height / 2;
+    const pseudoLimitymax = this.getPosition().y + ball.getRadius() + this.width / 2;
+    const pseudoLimitymin = this.getPosition().y - ball.getRadius() - this.width / 2;
+    if (ball.getPosition().x > pseudoLimitx && ball.getPosition().y < pseudoLimitymax && ball.getPosition().y > pseudoLimitymin) {
+      ball.xCollision(pseudoLimitx);
+      const yDifference = (ball.getPosition().y - this.getPosition().y) / this.getWidth() / 2;
+      ball.setAngle(- this.deltaFactor * yDifference);
+      if (this.goinUp)
+        ball.setAngle(ball.getAngle() - this.friction);
+      if (this.goinDown)
+        ball.setAngle(ball.getAngle() + this.friction);
+      if (this._configService.collisionChangeWallColor) {
+        this.changeColor(Math.random() * 0xFFFFFF);
+      }
+    }
+  }
 }
 
 class Wall {
   mesh : THREE.Mesh;
+  width : number;
+  height : number;
 
   constructor(private configService: GameConfigService) {
-    const wallWidth = this.configService.wallWidth;
-    const wallHeight = this.configService.wallHeight;
+    this.width = this.configService.wallWidth;
+    this.height = this.configService.wallHeight;
     const wallDepth = this.configService.wallDepth;
-    const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
+    const wallGeometry = new THREE.BoxGeometry(this.width, this.height, wallDepth);
     const wallColor = this.configService.wallColor;
     const wallMaterial = new THREE.MeshPhongMaterial({color: wallColor});
     this.mesh = new THREE.Mesh(wallGeometry, wallMaterial);
@@ -291,6 +347,16 @@ class TopWall extends Wall {
     this.mesh.position.y = this._configService.topWallY;
     this.mesh.position.z = this._configService.topWallZ;
   }
+
+  handleCollision(ball: Ball) {
+    const pseudoLimit =  this.getPosition().y - ball.getRadius() - this.height / 2;
+    if (ball.getPosition().y > pseudoLimit) {
+      ball.yCollision(pseudoLimit);
+      if (this._configService.collisionChangeWallColor) {
+        this.changeColor(Math.random() * 0xFFFFFF);
+      }
+    }
+  }
 }
 
 class BottomWall extends Wall {
@@ -299,6 +365,16 @@ class BottomWall extends Wall {
     this.mesh.position.x = this._configService.bottomWallX;
     this.mesh.position.y = this._configService.bottomWallY;
     this.mesh.position.z = this._configService.bottomWallZ;
+  }
+
+  handleCollision(ball: Ball) {
+    const pseudoLimit =  this.getPosition().y + ball.getRadius() + this.height / 2;
+    if (ball.getPosition().y < pseudoLimit) {
+      ball.yCollision(pseudoLimit);
+      if (this._configService.collisionChangeWallColor) {
+        this.changeColor(Math.random() * 0xFFFFFF);
+      }
+    }
   }
 }
 
@@ -388,20 +464,12 @@ export class PongComponent implements AfterViewInit {
     topWall.addToScene(scene);
     bottomWall.addToScene(scene);
 
-    const IA = this.configService.IAisOn;
-
     // Init loop variables
     let pastTime = 0;
     let pastIATime = 0;
-    let predictedBallY = 0;
-    const collisionChangeBallColor = this.configService.collisionChangeBallColor;
-    const collisionChangeWallColor = this.configService.collisionChangeWallColor;
-    const collisionChangePaddleColor = this.configService.collisionChangePaddleColor;
-    const aceleration = this.configService.aceleration;
-    const friction = this.configService.friction;
-    const deltaFactor = this.configService.deltaFactor;
 
     function render(time: number) {
+
       time *= 0.001; // convert time to seconds
 
       // DISPLAY TIME
@@ -419,19 +487,23 @@ export class PongComponent implements AfterViewInit {
       ball.update(timeDifference);
 
       // HANDLE PADDLE MOVEMENT
-      const pseudoLimit = 1 - ball.radius;
       if (rightPaddle.isAI()) {
         if (time - pastIATime > 1) { // IA only sees the ball every second
           console.log('IA');
           pastIATime = time;
+          let predictedBallY = 0;
 
           // IA PREDICTION
-          predictedBallY = ball.getPosition().y +(Math.tan(ball.getAngle() - Math.PI) * (rightPaddle.getPosition().x - ball.getPosition().x));
-          while (predictedBallY > pseudoLimit) {
-            predictedBallY = pseudoLimit - (predictedBallY - pseudoLimit);
-          }
-          while (predictedBallY < -pseudoLimit) {
-            predictedBallY = -pseudoLimit - (predictedBallY + pseudoLimit);
+          predictedBallY = ball.getPosition().y +(Math.tan(ball.getAngle() - Math.PI) * (rightPaddle.getPosition().x - ball.getPosition().x)); //trigonometria
+          const pseudoLimitMax = topWall.getPosition().y - topWall.height / 2 - ball.getRadius();
+          const pseudoLimitMin = bottomWall.getPosition().y + bottomWall.height / 2 + ball.getRadius();
+          while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
+            if (predictedBallY > pseudoLimitMax) {
+              predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
+            }
+            if (predictedBallY < pseudoLimitMin) {
+              predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
+            }
           }
           predictedBallY  += (Math.random() - Math.random()) * (rightPaddle.getWidth() - ball.getRadius())/2 ;
           if (ball.getAngle() < Math.PI / 2 || ball.getAngle() > 3 * Math.PI / 2) {
@@ -446,83 +518,16 @@ export class PongComponent implements AfterViewInit {
 
 
       // // LIMIT PADDLES
-      leftPaddle.getPosition().y = Math.min(pseudoLimit, Math.max(-pseudoLimit, leftPaddle.getPosition().y));
-      // if (leftPaddle.getPosition().y > topWall.getPosition().y) {
-      //   leftPaddle.getPosition().y = topWall.getPosition().y;
-      // }
-      // if (leftPaddle.getPosition().y < bottomWall.getPosition().y) {
-      //   leftPaddle.getPosition().y = bottomWall.getPosition().y;
-      // }
-      // if (rightPaddle.getPosition().y > topWall.getPosition().y) {
-      //   rightPaddle.getPosition().y = topWall.getPosition().y;
-      // }
-      // if (rightPaddle.getPosition().y < bottomWall.getPosition().y) {
-      //   rightPaddle.getPosition().y = bottomWall.getPosition().y;
-      // }
+      leftPaddle.limitYmax(topWall.getPosition().y - topWall.height / 2);
+      leftPaddle.limitYmin(bottomWall.getPosition().y + bottomWall.height / 2);
+      rightPaddle.limitYmax(topWall.getPosition().y - topWall.height / 2);
+      rightPaddle.limitYmin(bottomWall.getPosition().y + bottomWall.height / 2);
 
-      // COLLISION BALL
-      // COLLISION BOTTOM WALL
-      if (ball.getPosition().y < -pseudoLimit)
-      {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.changeColor(color);
-        }
-        if (collisionChangeWallColor) {
-          bottomWall.changeColor(Math.random() * 0xFFFFFF);
-        }
-        ball.yCollision(-pseudoLimit);
-      }
-      // COLLISION TOP WALL
-      if (ball.getPosition().y > pseudoLimit)
-      {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.changeColor(color);
-        }
-        if (collisionChangeWallColor) {
-          topWall.changeColor(Math.random() * 0xFFFFFF);
-        }
-        ball.yCollision(pseudoLimit);
-      }
-      // COLLISION LEFT PADDLE
-      if (ball.getPosition().x < - pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4  > leftPaddle.getPosition().y - leftPaddle.getWidth() / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < leftPaddle.getPosition().y + leftPaddle.getWidth() / 2) {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.changeColor(color);
-        }
-        if (collisionChangePaddleColor) {
-          leftPaddle.changeColor(Math.random() * 0xFFFFFF);
-        }
-        
-        const yDifference = (ball.getPosition().y - leftPaddle.getPosition().y) / leftPaddle.getWidth() / 2;
-        let newAngle = deltaFactor * yDifference + Math.PI;
-        // if (leftPaddleMovement > 0)
-        //   newAngle += friction ;
-        // if (leftPaddleMovement < 0)
-        //   newAngle -= friction;
-        ball.xCollision(-pseudoLimit);
-        ball.setAngle(newAngle);
-      }
-      // COLLISION RIGHT PADDLE
-      if (ball.getPosition().x > pseudoLimit && ball.getPosition().y + ball.getRadius() * 3/4 > rightPaddle.getPosition().y - rightPaddle.getWidth() / 2 && ball.getPosition().y - ball.getRadius() * 3/4 < rightPaddle.getPosition().y + rightPaddle.getWidth() / 2) {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.changeColor(color);
-        }
-        if (collisionChangePaddleColor) {
-          rightPaddle.changeColor(Math.random() * 0xFFFFFF);
-        }
-        
-        const yDifference = (ball.getPosition().y - rightPaddle.getPosition().y) / rightPaddle.getWidth() / 2;
-        let newAngle = - deltaFactor * yDifference;
-        // if (rightPaddleMovement > 0)
-        //   newAngle -= friction;
-        // if (rightPaddleMovement < 0)
-        //   newAngle += friction;
-        ball.xCollision(pseudoLimit);
-        ball.setAngle(newAngle);
-      }
+      // HANDLE COLLISIONS
+      topWall.handleCollision(ball);
+      bottomWall.handleCollision(ball);
+      leftPaddle.handleCollision(ball);
+      rightPaddle.handleCollision(ball);
 
       // SET PAST TIME
       pastTime = time;
