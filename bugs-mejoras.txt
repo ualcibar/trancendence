@@ -1,0 +1,8 @@
+BUGS MENORES:
+
+1.- Aviso que ya esta login pillado
+2.- last online del perfil no funciona
+
+OBLIGATORIO:
+
+1.- Pausar el juego (online / local)
