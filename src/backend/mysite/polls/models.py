@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+
 import uuid
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password, **extra_fields):
         if not username or not password:
@@ -53,7 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # avatar = models.ImageField(upload_to='avatars/', blank=True, null=False)
     # install pyllow to make it work
 
-    email = models.CharField(max_length=320, unique=True, blank=False, null=False)
+    email = models.CharField(max_length=320, unique=True, blank=False, null=True)
 
     game_room_name = models.CharField(max_length=255, default=None, null=True) 
     game = models.ForeignKey('matchmaking.MatchPreview', default=None, null=True, on_delete=models.SET_NULL) 

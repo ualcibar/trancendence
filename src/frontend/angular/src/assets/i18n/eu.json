@@ -5,13 +5,25 @@
     "exit":"Irten",
     "save_changes":"Aldaketak gorde",
 
-    "about":"About Us",
-    "share":"Share",
-    "info":"Channel Information",
-    "name":"Names",
-    "email":"Email",
-    "Mobile":"Mobile",
-    "subscribe":"Subscribe Now",
+    "username":"Usuario",
+    "password":"Contraseña",
+    "email":"Correo",
+    "register_title":"Regístrate a SpacePong!",
+    "register_subtitle":"¿Ya eres usuario?",
+    "register_subtitle_link":"Inicia sesión aquí",
+    "register_username_tip":"Elige un nombre de usuario atractivo que se mostrará al resto de jugadores",
+    "register_password_tip":"Elige una contraseña larga y con distintos carácteres",
+    "register_finish_tip":"o regístrate con",
+    "register_redirect":"Redireccionándote al inicio de sesión...",
+
+    "login_title":"Encantados de volver a verte!",
+    "login_subtitle":"¿Nuevo a SpacePong?",
+    "login_subtitle_link":"Regístrate aquí",
+    "login_finish_tip":"o inicia sesión con",
+
+    "profile_logout":"Saioa itxi",
+    "profile_login":"Saioa hasi",
+    "profile_register":"Erregistratu",
 
     "profile_lastonline":"azken konexioa",
     "profile_stats_gamespl":"Jokaldiak",
@@ -19,10 +31,6 @@
     "profile_stats_gamesdefeats":"Galduerak",
     "profile_addasfriend":"Gehitu lagun gisa",
     "profile_sendamessage":"Mezu bat bidali",
-
-    "profile_logout":"Saioa itxi",
-    "profile_login":"Saioa hasi",
-    "profile_register":"Erregistratu",
 
     "settings_title":"Profilaren doikuntzak",
     "settings_tab_title_pro":"Profila",
