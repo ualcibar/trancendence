@@ -48,6 +48,7 @@ export function HttpLoaderFactory(http:HttpClient){
     ForbiddenComponent,
     UnauthorizedComponent,
     NotFoundComponent,
+    SettingsComponent,
     TranslateModule.forRoot(
       {
       loader:{
@@ -56,7 +57,6 @@ export function HttpLoaderFactory(http:HttpClient){
         deps:[HttpClient]
       }
     }),
-    SettingsComponent
   ]
 ,
   providers: [

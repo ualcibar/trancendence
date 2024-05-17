@@ -88,23 +88,35 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     status = models.CharField(
             max_length=20,
             choices=STATUS_CHOICES,
-            default='Disconnected',
+            default='disconnected',
             )
     
     USER_COLOR_CHOICES = (
-        ('default','default'),
-        ('rojo', 'rojo'),
-        ('naranja', 'naranja'),
-        ('ambar', 'ambar'),
-        ('lima', 'lima'),
-        ('pino', 'pino'),
-        ('purpura', 'purpura'),
+        ('default','Default'),
+        ('rojo', 'Rojo'),
+        ('naranja', 'Naranja'),
+        ('ambar', 'Ambar'),
+        ('lima', 'Lima'),
+        ('pino', 'Pino'),
+        ('purpura', 'Purpura'),
     )
 
     user_color = models.CharField(
         max_length=10,
         choices=USER_COLOR_CHOICES,
         default='default',
+    )
+
+    USER_LANGUAGE_CHOICES = (
+        ('eu', 'Euskera'),
+        ('en', 'English'),
+        ('es', 'Spanish'),
+    )
+
+    user_language = models.CharField(
+        max_length=8,
+        choices=USER_LANGUAGE_CHOICES,
+        default='en',
     )
 
     def has_module_perms(self, app_label):

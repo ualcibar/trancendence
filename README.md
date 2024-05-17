@@ -5,11 +5,11 @@
 - [Django](#Django)
 - [Angular](#Angular)
 - [Postgre](#Postgre)
-- [User MAnagement](#UserManagerment)
-- [AI oponent](#AIoponent)
+- [User Management](#User_Management)
+- [AI oponent](#AI_oponent)
 - [GDPR](#GDPR)
 - [2FA JWT](#2FA_JWT)
-- [Game Options](#GameOptions)
+- [Game Options](#Game_Options)
   
 <a id="Django"></a>
 ### Django
@@ -29,7 +29,7 @@
    Use a database for the backend.
    Database: PostgreSQL
   
-### User Management
+### User_Management
   <a id="UserManagement"></a>
   Major module:
    Standard user management, authentication, users across tournaments.
@@ -42,7 +42,7 @@
    * User profiles display stats, such as wins and losses.
    * Each user has a Match History including 1v1 games, dates, and relevant details, accessible to logged-in users.
 
-### AI oponent
+### AI_oponent
 <a id="AIoponent"></a>
 Major module:
 Introduce an AI Opponent.<br>
@@ -77,7 +77,7 @@ If you are not familiar with the General Data Protection Regulation (GDPR), it i
 This website provides comprehensive information about the GDPR, including its principles, objectives, and user rights. It also offers additional resources to delve deeper into the topic and ensure compliance with the regulation. If you are unfamiliar with the GDPR, please take the time to visit the provided link and familiarize yourself with the regulations before proceeding with this project.
 </blockquote>
 
-### 2FA JWT
+### 2FA_JWT
 <a id="2FA_JWT"></a>
 Major module:
 Implement Two-Factor Authentication (2FA) and JWT.
@@ -91,7 +91,7 @@ This major module aims to strengthen user account security by offering Two-Facto
 Authentication (2FA) and enhancing authentication and authorization through the
 use of JSON Web Tokens (JWT).
 
-### Game Options
+### Game_Options
 <a id="GameOptions"></a>
 Minor module:
 Game Customization Options.
