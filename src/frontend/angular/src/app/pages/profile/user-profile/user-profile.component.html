@@ -58,7 +58,12 @@
 				</div>
 
 				<div class="stat">
-					<button [ngClass]="{'': !editProfile,'grayscale disabled opacity-25': editProfile}" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
+					<button [ngClass]="{'': !editProfile, 'grayscale disabled opacity-25': editProfile}"
+        class="btn mb-2 btn-warning btn-sm"
+        (click)="toggleAddFrined()">
+  <i class="bi bi-person-heart"></i>
+</button>
+					<!-- <button [ngClass]="{'': !editProfile,'grayscale disabled opacity-25': editProfile}" class="btn mb-2 btn-warning btn-sm" (click)="toggleEditProfile()"></button>><i class="bi bi-person-heart"></i></button>-->
 					<button class="btn btn-primary btn-sm"><i class="bi bi-chat-dots-fill"></i></button>
 				</div>
 			</div>

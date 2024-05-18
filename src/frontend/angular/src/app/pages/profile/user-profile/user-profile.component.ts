@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
+import { FriendsService } from '../../../services/friends.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -20,9 +21,10 @@ export class UserProfileComponent {
   loading = true;
   editProfile = false;
   logged_username: any;
+  logged_user_id: number = 0;
   user_color: string = "default";
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
+  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService, private friendService: FriendsService) {}
 
   ngOnInit(): void {
     this.authService.isLoggedIn$.subscribe({
@@ -32,12 +34,39 @@ export class UserProfileComponent {
             // iniciada, entonces se queda "cargando" infinitamente
             const userId = params['userId'];
             this.getUserInfo(userId);
+            this.getLoggedUserInfo();
           });
         }
       }
     })
   }
 
+  toggleAddFrined() {
+    console.log('Im in profile:', this.user_id);
+    console.log('Im the user', this.logged_user_id);
+
+
+  }
+
+  getLoggedUserInfo(): void {
+    const backendURL = 'api/polls/getInfo/';
+    this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
+      next: (response) => {
+      this.logged_user_id = response['userid'];
+      } 
+    })
+  }
+/*
+  addFriend(userId: number, friendId: number): void {
+    const backendURL = 'api/polls/friends/' + userId + '/' + friendId;
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    const body = {};
+    return this.http.post(backendURL, headers, body);
+    
+  }
+*/
   getUserInfo(userId: number): void {
     const backendURL = 'api/polls/getInfo/' + userId;
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({

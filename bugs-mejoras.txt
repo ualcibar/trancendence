@@ -2,7 +2,11 @@ BUGS MENORES:
 
 1.- Aviso que ya esta login pillado
 2.- last online del perfil no funciona
+3.- El punto del perfil que te marca si estas conectado no Chuta
+4.- En el caso de cambiar las dimensiones en el codigo la IA se emborracha con los rebotes
 
 OBLIGATORIO:
 
 1.- Pausar el juego (online / local)
+2.- Bandera republicana
+3.- Que el id este en la ruta es una vulnerabilidad bastante tocha (no se si se menciona esto en la correccion)

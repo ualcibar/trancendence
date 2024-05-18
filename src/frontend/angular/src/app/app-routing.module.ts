@@ -17,9 +17,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'settings', component: SettingsComponent },
-  { path: 'profile', component: ProfileComponent, children: [
-    { path: ':userId', component: UserProfileComponent }
-  ]},
+  { path: 'profile', component: ProfileComponent, children: [{ path: ':userId', component: UserProfileComponent }]},
   { path: 'test', component: TestComponent},
   { path: '**', component: NotFoundComponent },
 ];
