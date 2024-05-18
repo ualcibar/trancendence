@@ -10,6 +10,7 @@ import { UserProfileComponent } from './pages/profile/user-profile/user-profile.
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
 import { TestComponent } from './pages/test/test.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { VerifyComponent } from './pages/verify/verify.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -21,6 +22,7 @@ const routes: Routes = [
     { path: ':userId', component: UserProfileComponent }
   ]},
   { path: 'test', component: TestComponent},
+  { path: 'verify', component: VerifyComponent},
   { path: '**', component: NotFoundComponent },
 ];
 

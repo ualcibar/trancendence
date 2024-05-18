@@ -2,10 +2,10 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 import uuid
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, email, password, **extra_fields):
+    def create_user(self, username, email, password, token_verification, **extra_fields):
         if not username or not password:
             raise ValueError('Password and username are required')
-        user = self.model(username=username, email=email, **extra_fields)
+        user = self.model(username=username, email=email, token_verification=token_verification, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -29,7 +29,7 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password, **extra_fields):
+    def create_superuser(self, username, email, password, token_verification, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -38,7 +38,7 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self.create_user(username, email, password, **extra_fields)
+        return self.create_user(username, email, password, token_verification, **extra_fields)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -54,6 +54,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # install pyllow to make it work
 
     email = models.CharField(max_length=320, unique=True, blank=False, null=False)
+
+    #token_2FA = models.CharField(max_length=6, unique=True, blank=False, null=False)
+    token_verification = models.CharField(max_length=64, unique=True, blank=False, null=False)
+    token_fernet = models.CharField(max_length=49, unique=True, blank=False, null=False)
+    verification_bool = models.BooleanField(default=False, null=False)
 
     game_room_name = models.CharField(max_length=255, default=None, null=True) 
     game = models.ForeignKey('matchmaking.MatchPreview', default=None, null=True, on_delete=models.SET_NULL) 

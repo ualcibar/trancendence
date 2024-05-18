@@ -195,11 +195,11 @@ def register(request):
     password = data.get('password', '')
     email = data.get('email', '')
     if username and password and email:
-        user = CustomUser.objects.create_user(
-            username=username, email=email, password=password)
         fernet_obj = mail.generateFernetObj()
-        token_url = mail.generate_token()
-        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
+        token_verification = mail.generate_token()
+        user = CustomUser.objects.create_user(
+            username=username, email=email, password=password, token_verification=token_verification)
+        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, fernet_obj), mail.encript(username, fernet_obj)), email)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
@@ -276,7 +276,6 @@ def login(request):
                 
                 response.data = {"Success": "Login successfully", "data": data}
                 token_TwoFA = mail.generate_random_verification_code(6)
-                logger.debug(f"QUE ES ESTOOOoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO {customUser.email}")
                 mail.send_TwoFA_mail(token_TwoFA, customUser.email)
                 return response
             else:

@@ -1,0 +1,14 @@
+/* Error div */
+#sp-div {
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 60rem;
+}
+
+/* Icons */
+i {
+	font-size: 15rem;
+	line-height: 1;
+}
