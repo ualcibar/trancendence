@@ -37,10 +37,14 @@ export class SettingsPLanguageComponent {
     return this.selected_lang === lang;
   }
 
-  saveLanguage() {
-    this.settingsService.setUserConfig('user_language', this.selected_lang);
-    localStorage.setItem('lang', this.selected_lang);
-    this.translateService.use(this.selected_lang);
-    this.user_lang = this.selected_lang;
+  async saveLanguage() {
+    try {
+      await this.settingsService.setUserConfig('user_language', this.selected_lang);
+      localStorage.setItem('lang', this.selected_lang);
+      this.translateService.use(this.selected_lang);
+      this.user_lang = this.selected_lang;
+    } catch (error: any) {
+      console.error('❌ An error ocurred:', error);
+    }
   }
 }

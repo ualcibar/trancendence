@@ -48,6 +48,7 @@ export class AuthService {
   }
 
   getUpdateUserInfo(): UserInfo | undefined {
+    console.log(this.user_info?.username);
     return this.user_info;
   }
 

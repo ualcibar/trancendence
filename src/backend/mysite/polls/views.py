@@ -4,6 +4,7 @@ from django.http import JsonResponse
 
 from django.conf import settings
 
+from django.db import IntegrityError
 
 from django.contrib.auth import authenticate
 
@@ -166,7 +167,7 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-    valid_keys = ['user_color', 'user_language']
+    valid_keys = ['user_color', 'user_language', 'username']
 
     for key, value in data.items():
         if key in valid_keys:
@@ -177,7 +178,14 @@ def setUserConfig(request, user_id=None):
     if not valid_keys:
         return JsonResponse({'message': 'No valid user settings provided'}, status=400)
 
-    user.save()
+    try:
+        user.save()
+    except IntegrityError as e:
+        if 'duplicate key' in str(e):
+            return JsonResponse({'message': 'This username already exists!'}, status=400)
+        else:
+            return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=500)
+
     return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields}, status=201)
 
 @api_view(['POST'])
