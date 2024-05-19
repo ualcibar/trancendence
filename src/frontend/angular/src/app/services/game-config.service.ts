@@ -1,10 +1,37 @@
 import { Injectable } from '@angular/core';
+import { GameState, GameType, MatchmakingService, MatchMakingState, MatchGame} from './matchmaking.service';
+import { GameSettings } from './matchmaking.service';
+
+import { Vector2, Vector3} from 'three';
+import { State } from '../utils/state';
+
+export enum GameConfigState{
+  Standby = 'standby',
+  StartingGame = 'starting game',
+  Ingame = 'in game'
+}
+
+export class Key{
+  up : string;
+  down : string;
+  constructor(up : string, down : string){
+    this.up = up;
+    this.down = down;
+  }
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameConfigService {
-
+//  gameState : GameState;//passed at ngInit?
+//  online : boolean;
+  inGame : boolean;
+  online : boolean;
+  host : boolean;
+  gameSettings? : GameSettings = undefined;
+  matchState? : MatchGame = undefined;
+  state : State<GameConfigState> = new State<GameConfigState>(GameConfigState.Standby);
   public readonly colorPalette = {
     darkestPurple: 0x1C0658,
     swingPurple: 0x5C2686,
@@ -14,7 +41,7 @@ export class GameConfigService {
     white: 0xFFFFFF,
     black: 0x000000,
   };
-
+  public readonly keys : Key[] = [new Key('w', 'r'), new Key('up', 'down')];//each key is a player
   // General game settings
     gameHeight = 2;
     gameWidth = 2;
@@ -53,7 +80,7 @@ export class GameConfigService {
 
     // Quinetity settings
     public readonly ballSpeed = 1;
-    public readonly ballAngle = 0;
+    public readonly ballDir : Vector2 = new Vector2(0,1).normalize();
     // public readonly ballSpeed = 0.01;
     // public readonly ballAngle = Math.PI * -1.4 / 2;
 
@@ -63,41 +90,28 @@ export class GameConfigService {
 
   // Paddle settings
     // Constructor settings
-    public readonly paddleWidth = 0.5;
-    public readonly paddleHeight = 0.02;
-    public readonly paddleDepth = 0.1;
+    public readonly paddleWidth = 0.02;//0.5;
+    public readonly paddleHeight = 0.5;//0.02;
+    public readonly paddleDepth = 0.1;//0.1;
     public readonly paddleColor = this.colorPalette.white;
 
     // Paddle position
-      // Left paddle
-      public readonly leftPaddleX = this.leftLimit;
-      public readonly leftPaddleY = 0;
-      public readonly leftPaddleRotation = Math.PI / 2; // 90 degrees, don't change this
-      // Right paddle
-      public readonly rightPaddleX = this.rightLimit;
-      public readonly rightPaddleY = 0;
-      public readonly rightPaddleRotation = Math.PI / 2; // 90 degrees, don't change this
+      public readonly leftPaddle: Vector3 = new Vector3(this.leftLimit, 0, 0);
+      public readonly rightPaddle: Vector3 = new Vector3(this.rightLimit, 0, 0);
 
     // Paddle movement settings
     public readonly paddleSpeed = 0.77;
 
   // Wall settings
     // Constructor settings
-    public readonly wallWidth = 2 - this.paddleHeight * 2;
+    public readonly wallWidth = 2 - this.paddleWidth * 2;
     public readonly wallHeight = 0.02;
     public readonly wallDepth = 0.2;
     public readonly wallColor = this.colorPalette.white;
 
     // Wall position
-      // Top wall
-      public readonly topWallX = 0;
-      public readonly topWallY = this.topLimit;
-      public readonly topWallZ = 0;
-      // Bottom wall
-      public readonly bottomWallX = 0;
-      public readonly bottomWallY = this.bottomLimit;
-      public readonly bottomWallZ = 0;
-
+    public readonly topWall : Vector3 = new Vector3(0, this.topLimit, 0);
+    public readonly bottomWall : Vector3 = new Vector3(0, this.bottomLimit, 0);
   // IA settings
     public readonly IAisOn = false;
 
@@ -113,5 +127,70 @@ export class GameConfigService {
 
     public readonly deltaFactor = Math.PI / 2;
 
-  constructor() { }
+  constructor(private matchmaking : MatchmakingService) {
+    /*if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
+      if (this.matchmaking.currentMatchInfo === undefined){
+        //!todo
+        console.error('todo!');
+        this.inGame = false;
+        this.online = false;
+        this.host = false;
+      }else{
+        this.inGame = true;
+        this.online = true;
+        this.host = this.matchmaking.amIHost;
+        this.gameSettings = new GameSettings(GameType.Match, this.matchmaking.currentMatchInfo.name,'', false, this.matchmaking.currentMatchInfo.teamSize);
+//        this.state.setValue(GameConfigState.StartingGame);
+        this.matchState = matchmaking.getMatchGame();
+      }
+    }else{
+      console.log('hello');
+      this.online = false;
+      this.host = false; 
+      this.inGame = true;
+      this.gameSettings = new GameSettings(GameType.Match, 'patata', '', false, 1);
+ //     this.state.setValue(GameConfigState.StartingGame);
+      //this.matchState = new MatchState()
+    }*/
+    //why not call the function? typescript doesn't realize for some reason and throws error
+    //!todo fix thi shit
+    this.inGame = false;
+    this.online = false;
+    this.host = false;
+    if (matchmaking.state.getCurrentValue() === MatchMakingState.OnGame)
+      this.initValues();
+    matchmaking.state.observable.subscribe(value => {
+      if (value === MatchMakingState.OnGame)
+        this.initValues();
+    });
+  }
+
+  initValues(){
+    if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
+      if (this.matchmaking.currentMatchInfo === undefined){
+        //!todo
+        console.error('todo!');
+        this.inGame = false;
+        this.online = false;
+        this.host = false;
+      }else{
+        this.inGame = true;
+        this.online = true;
+        this.host = this.matchmaking.amIHost;
+        this.gameSettings = new GameSettings(GameType.Match, this.matchmaking.currentMatchInfo.name,'', false, this.matchmaking.currentMatchInfo.teamSize);
+        this.state.setValue(GameConfigState.StartingGame);
+        setTimeout(()=> this.state.setValue(GameConfigState.Ingame),1000);
+      }
+    }else{
+      console.log('hello');
+      this.online = false;
+      this.host = false; 
+      this.inGame = true;
+      this.gameSettings = new GameSettings(GameType.Match, 'patata', '', false, 1);
+      this.state.setValue(GameConfigState.StartingGame);
+      setTimeout(()=> this.state.setValue(GameConfigState.Ingame),1000);
+      //this.matchState = new MatchState()
+    }
+
+  }
 }

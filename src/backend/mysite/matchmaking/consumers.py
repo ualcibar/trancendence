@@ -186,7 +186,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                             'username': self.user.username,
                             'senderId' : self.user.id,
                             'userInfo': user_info,
-                            'sdp' : data['sdp']
                         }
                     )
                     logger.debug('new match success')
@@ -213,13 +212,21 @@ class MatchMakingConsumer(WebsocketConsumer):
                 ) 
             case '/join/tournament':
                 pass
+            case '/webrtc/offer':
+                async_to_sync(self.channel_layer.group_send)( 
+                    f'inbox_{data['target']}_matchmaking',
+                    {
+                        'type' : 'webrtc_offer',
+                        'offer' : data['offer']
+                    }
+                )
             case '/webrtc/answer':
                 async_to_sync(self.channel_layer.group_send)(
-                    f'inbox_{data['target']}_matchmaking',
+                    f'inbox_{self.user.game.getHostUsername()}_matchmaking',
                     {
                         'type': 'webrtc_answer',
                         'answer': data['answer'],
-                        'targetId' : self.user.id
+                        'targetId' : self.user.id,
                     }
                 ) 
             case '/webrtc/candidate':
@@ -269,6 +276,8 @@ class MatchMakingConsumer(WebsocketConsumer):
     def user_join(self, event):
         self.send(text_data=json.dumps(event))
     def webrtc_answer(self, event):
+        self.send(text_data=json.dumps(event))
+    def webrtc_offer(self, event):
         self.send(text_data=json.dumps(event))
     def webrtc_candidate(self, event):
         self.send(text_data=json.dumps(event))
