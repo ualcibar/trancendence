@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
 import { Vector2 } from 'three';
-
+import { PaddleState } from '../pages/pong/pong.component';
+import { Ball, Block, Paddle} from '../pages/pong/pong.component';
 export enum GameType {
   Tournament = 'Tournament',
   Match = 'Match',
@@ -16,7 +17,7 @@ export enum MatchMakingState{
   OnGame,
 }
 
-export enum GameState{
+export enum OnlineMatchState{
   Joining = 'joining', 
   Connecting = 'connecting',
   WaitingForPlayers = ' waiting for players',
@@ -29,16 +30,16 @@ export enum GameState{
   Error = 'error',
 }
 
+
+
 export class MatchUpdate{
-  paddlesPosition : number[];
-  paddlesDirection : number[];
-  ballsPosition : Vector2[];
-  ballsDirection : Vector2[];
-  ballsSpeed : number[];
+  paddles : Paddle[];
+  balls : Ball[];
+  blocks : Block[];
   id : number;
   constructor(paddlesPosition : number[] | undefined, paddlesDirection : number[] | undefined,
               ballsPosition : Vector2[] | undefined, ballsDirection : Vector2[] | undefined,
-              ballsSpeed : number[] | undefined, id : number| undefined,
+              ballsSpeed : number[] | undefined, paddlesState : PaddleState[], id : number| undefined,
               config : MatchInfo){
     if (paddlesPosition)
       this.paddlesPosition = paddlesPosition;
@@ -69,20 +70,21 @@ export class MatchUpdate{
       this.id = id;
     else
       this.id = 0;
+    this.paddlesState = paddlesState;
   }
 }
 
 export class MatchGame{
-  state : State<GameState>;
+  state : State<OnlineMatchState>;
   score : Score;
   update : MatchUpdate;
-  constructor (state : GameState, score : Score, update : MatchUpdate | undefined, id : number, config : MatchInfo){
+  constructor (state : OnlineMatchState, score : Score, update : MatchUpdate | undefined, id : number, config : MatchInfo){
     this.state = new State(state);
     this.score = score;
     if (update)
       this.update = update;
     else{
-      this.update = new MatchUpdate(undefined,undefined,undefined,undefined,undefined, undefined,config);
+      this.update = new MatchUpdate(undefined,undefined,undefined,undefined,undefined, [],undefined,config);
     }
   } 
 }
@@ -161,37 +163,6 @@ export class MatchInfo{
   }
 }
 
-export class Tournament{
-  host : UserInfo;
-  players : UserInfo[] = [];
-  scores : [number,number][] = [];
-  winners : number[] = [];
-  teamSize : number;
-  name : string;
-  
-  constructor (name : string, teamSize : number, host : UserInfo){
-    this.name = name;
-    this.teamSize = teamSize;
-    this.host = host;
-  }
-
-  addPlayer(newPlayer : UserInfo) : boolean{
-    if (this.players.length === 8 * this.teamSize){
-      return false;
-    }
-    this.players.push(newPlayer);
-    return true;
-  }
-
-  removePlayer(username : string) : boolean{
-    const index_to_remove = this.players.findIndex((player) => player.username === username);
-    if (index_to_remove === -1)
-      return false;
-    this.players.splice(index_to_remove, 1);
-    return true
-  }
-
-}
 
 export enum Maps{
   Default = 'Default',
@@ -240,14 +211,14 @@ export class MatchmakingService {
 
   state : State<MatchMakingState> = new State<MatchMakingState>(MatchMakingState.Standby);
   currentMatchInfo : MatchInfo | undefined;
-  //private currentMatchInfoStateSubject : BehaviorSubject<GameState | undefined>;
-  //currentMatchInfoState$  : Observable<GameState | undefined>;
+  //private currentMatchInfoStateSubject : BehaviorSubject<OnlineMatchState | undefined>;
+  //currentMatchInfoState$  : Observable<OnlineMatchState | undefined>;
   currentMatch : MatchGame | undefined;
 
   constructor(private authService : AuthService,private router : Router){
     this.entries.set(GameType.Match, []);
     this.entries.set(GameType.Tournament,[]);
-    //this.currentMatchInfoStateSubject = new BehaviorSubject<GameState | undefined>(undefined);
+    //this.currentMatchInfoStateSubject = new BehaviorSubject<OnlineMatchState | undefined>(undefined);
     //this.currentMatchInfoState$ = this.currentMatchInfoStateSubject.asObservable();
     this.connectToServer();
     if(this.isConnected()){
@@ -270,7 +241,7 @@ export class MatchmakingService {
         }else{
           this.currentMatch.state.observable.subscribe(state => {
             console.log('ice candidate: current game state', state);
-            if (state === GameState.WaitingForPlayers || state === GameState.Connecting) {
+            if (state === OnlineMatchState.WaitingForPlayers || state === OnlineMatchState.Connecting) {
               console.log("Sending ice candidate to peer", event.candidate);
               const message = { type: '/webrtc/candidate', candidate: event.candidate };
               this.sendMessage(JSON.stringify(message));
@@ -335,12 +306,12 @@ export class MatchmakingService {
       console.error('Data channel error:', error);
     };
   }
-  getCurrentMatchState() : GameState | undefined{
+  getCurrentMatchState() : OnlineMatchState | undefined{
     if (this.currentMatch === undefined)
       console.error('current game state is not initialized');
     return this.currentMatch?.state.getCurrentValue();
   }
-  setCurrentMatchState(state : GameState){
+  setCurrentMatchState(state : OnlineMatchState){
     if (this.currentMatch === undefined)
       console.error('current game state is not initialized');
     else
@@ -433,8 +404,8 @@ export class MatchmakingService {
           switch (data.status){
             case 'success':
               this.currentMatchInfo = new MatchInfo(data.match.name, 1, this.authService.user_info);//info needs to be somewhere else
-              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), undefined, 0,this.currentMatchInfo);
-              //this.setCurrentMatchState(GameState.WaitingForPlayers)
+              this.currentMatch = new MatchGame(OnlineMatchState.WaitingForPlayers, new Score([0,0]), undefined, 0,this.currentMatchInfo);
+              //this.setCurrentMatchState(OnlineMatchState.WaitingForPlayers)
               this.maxCurrentPeerConnections = 2;//info needs to be somewhere else
               this.dataChannels = new Map();
               this.peerConnections = new Map();
@@ -475,9 +446,9 @@ export class MatchmakingService {
               console.log('match info,', data.match);
               this.state .setValue(MatchMakingState.OnGame);
               this.currentMatchInfo = new MatchInfo(data.match.name, data.match.max_players / 2, new UserInfo(data.match.host.username, data.match.host.id, true));
-              //this.setCurrentMatchState(GameState.Connecting);
+              //this.setCurrentMatchState(OnlineMatchState.Connecting);
               //!todo
-              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), undefined,0, this.currentMatchInfo);
+              this.currentMatch = new MatchGame(OnlineMatchState.WaitingForPlayers, new Score([0,0]), undefined,0, this.currentMatchInfo);
               this.maxCurrentPeerConnections = data.match.max_players - 1;
               console.log('successfully joined game group, waiting for webrtc');
               this.amIHost = false;
@@ -558,7 +529,7 @@ export class MatchmakingService {
           }
           player.changeState(OnlinePlayerState.Connected);
           if (data.player === this.authService.user_info.username){
-            this.setCurrentMatchState(GameState.WaitingForPlayers);
+            this.setCurrentMatchState(OnlineMatchState.WaitingForPlayers);
           }
           if (this.amIHost){
             if (this.currentMatchInfo.players.length + 1 === this.currentMatchInfo.teamSize * 2
@@ -571,7 +542,7 @@ export class MatchmakingService {
           break;
         case 'match_all_players_connected':
           setTimeout(() => {
-            this.setCurrentMatchState(GameState.Starting);
+            this.setCurrentMatchState(OnlineMatchState.Starting);
             setTimeout(()=> this.router.navigate(['/play']), 100);
           }, 3000);
           break;

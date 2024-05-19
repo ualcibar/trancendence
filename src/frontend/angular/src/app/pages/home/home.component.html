@@ -26,7 +26,7 @@
 			</div>
 		</div>
 		<div *ngIf="matchmakingService.state.getCurrentValue() === MatchMakingState.OnGame">
-			<div *ngIf="matchmakingService.getCurrentMatchState() === GameState.WaitingForPlayers">
+			<div *ngIf="matchmakingService.getCurrentMatchState() === OnlineMatchState.WaitingForPlayers">
 				<app-lobby-match></app-lobby-match>	
 			</div>
 		</div>
