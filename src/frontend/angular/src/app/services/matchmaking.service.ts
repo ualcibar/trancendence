@@ -249,7 +249,7 @@ export class MatchmakingService {
     this.entries.set(GameType.Tournament,[]);
     //this.currentMatchInfoStateSubject = new BehaviorSubject<GameState | undefined>(undefined);
     //this.currentMatchInfoState$ = this.currentMatchInfoStateSubject.asObservable();
-    this.connectToServer();
+    //this.connectToServer();
     if(this.isConnected()){
       this.sendMessage(JSON.stringify({type : '/getStatus'}));
     }
