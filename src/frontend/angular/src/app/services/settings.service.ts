@@ -61,19 +61,16 @@ export class SettingsService {
         })
       };
 
-      try {
-        const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
-          if (type === 'user_language') {
-            userSettingsInfoVal.user_language = value;
-          } else if (type === 'user_color') {
-            userSettingsInfoVal.user_color = value;
-          } else if (type === 'username') {
-            userSettingsInfoVal.username = value;
-          }
-          console.log('✔️ ', response.message);
-      } catch (error) {
-        throw error;
+      const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+      if (type === 'user_language') {
+        userSettingsInfoVal.user_language = value;
+      } else if (type === 'user_color') {
+        userSettingsInfoVal.user_color = value;
+      } else if (type === 'username') {
+        userSettingsInfoVal.username = value;
       }
+      console.log('✔️ ', response.message);
+      console.log(userSettingsInfoVal.username);
     } else {
       console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
