@@ -53,5 +53,9 @@ export class HomeComponent implements OnInit{
     refresh(){
       this.authService.refreshToken();
     }
+
+    ngOnDestroy() {
+      this.matchmakingService.webSocket?.close();
+    }
 }
 
