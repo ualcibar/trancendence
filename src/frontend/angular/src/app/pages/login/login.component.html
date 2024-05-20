@@ -1,18 +1,18 @@
-<div id="sp-div" class="max-w-xl mx-auto shadow-md rounded-xl overflow-hidden md:max-w-2xl items-center">
-	<div class="p-8 w-full">
+<div id="sp-div" class="mx-auto shadow-md rounded-xl overflow-hidden max-w-full md:max-w-2xl p-4 sm:p-6 md:p-8 items-center col-12 col-md-6">
+	<div class="p-4 sm:p-6 md:p-8">
 		<p class="text-center text-3xl font-semibold">{{'login_title'|translate}}</p>
 		<p class="text-center">{{'login_subtitle'|translate}}  <a routerLink="/register" class="text-amber-300">{{'login_subtitle_link'|translate}}</a></p>
 		<br/>
-		<form #registerForm="ngForm" (ngSubmit)="loginAcc()" class="ml-12 mr-12">
+		<form #registerForm="ngForm" (ngSubmit)="loginAcc()" ngNativeValidate class="mx-4">
 			<div class="form-floating mb-3">
-				<input type="text" name="username" [(ngModel)]="user.username" class="form-control shadow-none" id="floatingInput" placeholder="SpacialUser">
+				<input type="text" name="username" [(ngModel)]="user.username" class="form-control shadow-none" id="floatingInput" placeholder="SpacialUser" required>
 				<label for="floatingInput"><i class="bi bi-person-circle"></i> {{'username'|translate}}</label>
 			</div>
 			<div class="form-floating mb-3 bg-transparent">
-				<input name="password" [(ngModel)]="user.password" type="password" class="form-control shadow-none" id="passwordInput" placeholder="Password">
+				<input name="password" [(ngModel)]="user.password" type="password" class="form-control shadow-none" id="passwordInput" placeholder="Password" required>
 				<label for="passwordInput" class="form-label"><i class="bi bi-incognito"></i> {{'password'|translate}}</label>
 			</div>
-			<div class="flex items-center">
+			<div class="flex flex-col sm:flex-row items-center">
 				<button type="submit"class="mr-3 bg-yellow-400 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
 					<div class="p-3">
 						<div class="text-xs font-medium uppercase text-black">{{'profile_login'|translate}}</div>

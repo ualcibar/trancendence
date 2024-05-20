@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService, UserInfo } from './auth.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -50,7 +50,7 @@ export class SettingsService {
   }
 
   // Esta función nos permite actualizar datos de usuario utilizanddo la view del backend
-  setUserConfig(type: string, value: string) {
+  async setUserConfig(type: string, value: string): Promise<void> {
     const userSettingsInfoVal = this.userSettingsInfoSubject.getValue();
     if (userSettingsInfoVal) {
       const backendURL = '/api/polls/setConfig/' + userSettingsInfoVal.user_id;
@@ -61,21 +61,16 @@ export class SettingsService {
         })
       };
 
-      this.http.post<any>(backendURL, httpReqBody, httpHeader).subscribe({
-        next: (response) => {
-          if (type === 'user_language') {
-            userSettingsInfoVal.user_language = value;
-          } else if (type === 'user_color') {
-            userSettingsInfoVal.user_color = value;
-          } else if (type === 'username') {
-            userSettingsInfoVal.username = value;
-          }
-          console.log('✔️ ', response);
-        },
-        error: (error) => {
-          console.error('❌ An error ocurred:', error);
-        }
-      });
+      const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+      if (type === 'user_language') {
+        userSettingsInfoVal.user_language = value;
+      } else if (type === 'user_color') {
+        userSettingsInfoVal.user_color = value;
+      } else if (type === 'username') {
+        userSettingsInfoVal.username = value;
+      }
+      console.log('✔️ ', response.message);
+      console.log(userSettingsInfoVal.username);
     } else {
       console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;

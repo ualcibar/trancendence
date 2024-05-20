@@ -1,0 +1,24 @@
+<div id="sp-div" class="rounded  h-full p-4">
+    <h1 class="font-bold text-2xl"><i class="bi bi-person-bounding-box"></i> Foto de perfil</h1>
+    <div class="flex mt-2 mb-4">
+        <img src="../../../../assets/img/transcendence_logo.png" class="mt-2 mr-2 w-24 h-24 bg-slate-400 rounded-full">
+        <div class="ml-4 flex items-center flex-col justify-center">
+            <button class="btn btn-warning btn-sm"><i class="bi bi-upload"></i> Subir imagen</button>
+        </div>
+
+    </div>
+    <h1 class="font-bold text-2xl"><i class="bi bi-person-vcard-fill"></i> Nombre de usuario</h1>
+    <p class="text-zinc-300">Escoge un nombre de usuario único para poder identificarte</p>
+    <div class="flex mt-2">
+        <div>
+            <input [(ngModel)]="username" type="text" name="username" class="form-control shadow-none" id="floatingInput" required>
+            <div *ngIf="alreadyUsed" class="alert alert-error mt-2" role="alert">
+                <i class="bi bi-x-circle-fill"></i>¡Este usuario ya está en uso! Elige otro.
+            </div>
+            <div *ngIf="nameChanged" class="alert alert-success mt-2" role="alert">
+                <i class="bi bi-check-circle-fill"></i>¡Hecho!
+            </div>
+        </div>
+    </div>
+    <button [ngClass]="{'grayscale-0': currentUsername !== username,'grayscale disabled opacity-50': currentUsername === username}" (click)="savePublic()" type="button" class="mt-4 btn btn-warning"><i class="bi bi-floppy-fill"></i> {{'save_changes'|translate}}</button>
+</div>

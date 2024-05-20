@@ -21,7 +21,7 @@ export class TournamentMatchMenuComponent {
   @Output() new_match_tournament: EventEmitter<GameSettings> = new EventEmitter<GameSettings>();
 
   constructor(private matchmakingService : MatchmakingService){
-    this.gameSettings = new GameSettings(GameType.Match,'','',true);
+    this.gameSettings = new GameSettings(GameType.Match,'','',true, 1);
   }
   togglePublicPrivate(){
     this.gameSettings.publicGame = !this.gameSettings.publicGame;

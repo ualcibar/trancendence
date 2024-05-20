@@ -6,7 +6,7 @@
 		<div class="w-1/2 p-6">
 			<app-chat [@fadeInOut]></app-chat>
 		</div>
-		<div *ngIf="matchmakingService.state ===  MatchMakingState.Standby" class="w-1/2">
+		<div *ngIf="matchmakingService.state.getCurrentValue() ===  MatchMakingState.Standby" class="w-1/2">
 			<div *ngIf="!isAnimating && state === HomeState.Home" class="menu">
 				<button (click)="changeState(HomeState.Local)" class="card mb-16" [@fadeInOut]>
 					<h2>LOCAL</h2>
@@ -25,8 +25,8 @@
 				<app-tournament-match-menu [multiplayer]="false"></app-tournament-match-menu>
 			</div>
 		</div>
-		<div *ngIf="matchmakingService.state === MatchMakingState.OnGame">
-			<div *ngIf="matchmakingService.currentGameState() === GameState.WaitingForPlayers">
+		<div *ngIf="matchmakingService.state.getCurrentValue() === MatchMakingState.OnGame">
+			<div *ngIf="matchmakingService.getCurrentMatchState() === GameState.WaitingForPlayers">
 				<app-lobby-match></app-lobby-match>	
 			</div>
 		</div>

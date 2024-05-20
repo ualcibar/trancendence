@@ -12,7 +12,6 @@ class CustomTokenRefreshView(TokenRefreshView):
         # Add custom logic before refreshing the token (if needed)
         response = super().post(request, *args, **kwargs)
         if 'access' in response.data:
-            logger.debug('ACCESS EXISTS')
             access_token = response.data['access']
             response.set_cookie(
                 key=settings.SIMPLE_JWT['AUTH_COOKIE'],

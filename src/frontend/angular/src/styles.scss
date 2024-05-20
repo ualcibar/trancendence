@@ -9,7 +9,7 @@ html {
 
 #myVideo {
     width: 100vw;
-    height: 100vh;
+    height: 110vh;
     object-fit: cover;
     position: fixed;
     z-index: -1;
@@ -17,8 +17,7 @@ html {
 
 @media (max-width: 575.98px) {
 	#myVideo {
-		display: none;
-		background: linear-gradient(to right, #3e2665, #2d2637);
+		height: 130vh;
 	}
 }
 
@@ -50,4 +49,10 @@ html {
 
 input {
 	color: white!important;
+	&[required] {
+		background-color:  #3b34937d!important;
+		&:focus {
+			background-color:  #3b34937d!important;
+		}
+	}
 }

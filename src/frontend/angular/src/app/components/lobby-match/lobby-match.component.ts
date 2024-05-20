@@ -23,24 +23,24 @@ export class LobbyMatchComponent {
   LobbyMatchState = LobbyMatchState;
   MatchMakingState = MatchMakingState;
   constructor(private matchmaking: MatchmakingService) {
-    if (matchmaking.state !== MatchMakingState.OnGame){
+    if (matchmaking.state.getCurrentValue() !== MatchMakingState.OnGame){
       this.state = LobbyMatchState.Error;
       console.error('matchmaking state is not connecting')
     }
     else{
       this.state = LobbyMatchState.Ok
-      if (this.matchmaking.currentGame){
-        this.team_a = new Array(this.matchmaking.currentGame.teamSize).fill(undefined);
-        this.team_b = new Array(this.matchmaking.currentGame.teamSize).fill(undefined);
-        this.team_a[0] = this.matchmaking.currentGame.host;
+      if (this.matchmaking.currentMatchInfo){
+        this.team_a = new Array(this.matchmaking.currentMatchInfo.teamSize).fill(undefined);
+        this.team_b = new Array(this.matchmaking.currentMatchInfo.teamSize).fill(undefined);
+        this.team_a[0] = this.matchmaking.currentMatchInfo.host;
         let player_index = 0;
-        for (let i = 1; i < this.matchmaking.currentGame.teamSize; i++){
-          this.team_a[i] = this.matchmaking.currentGame.players[player_index].info;
+        for (let i = 1; i < this.matchmaking.currentMatchInfo.teamSize; i++){
+          this.team_a[i] = this.matchmaking.currentMatchInfo.players[player_index].info;
           player_index++;
         }
-        for (let i = 0; i < this.matchmaking.currentGame.teamSize; i++){
-          if (this.matchmaking.currentGame.players.length < i)
-            this.team_b[i] = this.matchmaking.currentGame.players[player_index].info;
+        for (let i = 0; i < this.matchmaking.currentMatchInfo.teamSize; i++){
+          if (this.matchmaking.currentMatchInfo.players.length < i)
+            this.team_b[i] = this.matchmaking.currentMatchInfo.players[player_index].info;
           else
             this.team_b[i] = undefined;
           player_index++;

@@ -13,7 +13,8 @@ import { fadeInOut } from '../../../assets/animations/fadeInOut';
 export class RegisterComponent {
     user = {
         username: '',
-        password: ''
+        password: '',
+        email: ''
     };
     errorMessage: string = '';
     successMessage: string = '';
@@ -31,7 +32,8 @@ export class RegisterComponent {
         const backendURL = '/api/polls/register/';
             const jsonToSend = {
             username: this.user.username,
-            password: this.user.password
+            password: this.user.password,
+            email: this.user.email
         };
 
         const httpOptions = {
