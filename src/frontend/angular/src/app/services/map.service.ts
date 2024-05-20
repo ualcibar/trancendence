@@ -1,8 +1,9 @@
 import { Vector2, Vector3 } from "three";
 import { MatchUpdate } from "./matchmaking.service";
 import { Ball, Paddle, Block, WallType} from "../pages/pong/pong.component";
-import { GameManagerService, Manager, MatchSettings } from "./game-config.service";
+import { GameManagerService, Key, Manager, MatchSettings } from "./game-config.service";
 import { Injectable } from "@angular/core";
+import { createKeyboardInputPaddle, createMove, createPaddleColision, eventWallColision } from "../utils/behaviour";
 
 export const colorPalette = {
     darkestPurple: 0x1C0658,
@@ -34,7 +35,7 @@ class MapSettingsCreateInfo{
   public ballRadius : number = 0.05;
   public ballColor : number = colorPalette.white;
   public ballInitSpeed : number = 1;
-  public ballInitDir: Vector2 | undefined;//undefined === random
+  public ballInitDir: Vector2 = new Vector2(-1,0);//undefined === random
 
   // Ball light settings
   public ballLightColor : number = this.ballColor;
@@ -63,7 +64,7 @@ class MapSettingsCreateInfo{
   public deltaFactor : number = Math.PI / 2;
 
   createDefaultWalls(manager: Manager): Block[] {
-    return [
+    const blocks = [
       new Block(new Vector2(0, this.topLimit),
         new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
         WallType.Collision,
@@ -77,6 +78,11 @@ class MapSettingsCreateInfo{
         manager
       ),
     ];
+    blocks.forEach(block => {
+      block.bindEvent(eventWallColision)
+    })
+ 
+    return  blocks;
   }
   createDefaultScoreBlocks(manager: Manager): Block[] {
     return [
@@ -159,13 +165,18 @@ export class MapSettings{
   }
   createMatchInitUpdate(info : MatchSettings, manager : Manager) : MatchUpdate{
     const paddles : Paddle[] = new Array<Paddle>(info.teamSize * 2);
-    for (let [index,paddle] of paddles.entries()){
-      const pos : Vector3 = index < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
-      paddle = new Paddle(new Vector2(pos.x,pos.y),
-                          new Vector2(this.paddleWidth, this.paddleHeight),
+    for (let i = 0; i < paddles.length; i++){
+      const pos : Vector3 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
+      paddles[i] = new Paddle(new Vector2(pos.x,pos.y),
+                          new Vector3(this.paddleWidth, this.paddleHeight, this.paddleDepth),
                           WallType.Collision,
                           this.paddleColor,
-                          undefined,manager);
+                          new Vector2(0,0),
+                          this.paddleSpeed,
+                          manager);
+      paddles[i].bindEvent(createPaddleColision(this, paddles[i]));
+      paddles[i].bindTick(createKeyboardInputPaddle(paddles[i], new Key('w','s')))
+                .bindTick(createMove(paddles[i]))
     }
     const balls : Ball[] = new Array<Ball>(1);
     balls[0] = new Ball(this.ballInitDir,
@@ -176,6 +187,7 @@ export class MapSettings{
                         this.ballLightIntensity,
                         manager
     );
+    balls[0].bindTick(createMove(balls[0]));
     return new MatchUpdate(paddles, balls,this.blocks!, 0);  
   }
 }

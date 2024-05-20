@@ -9,7 +9,7 @@ import { MatchUpdate, MatchmakingService } from '../../services/matchmaking.serv
 import {GameManagerService, GameManagerState, Manager, MatchSettings, MatchState } from '../../services/game-config.service';
 import { Router } from '@angular/router';
 
-import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData } from '../../utils/behaviour';
+import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData, TickObject } from '../../utils/behaviour';
 import { MapSettings } from '../../services/map.service';
 
 export const colorPalette = {
@@ -36,13 +36,6 @@ export const colorPalette = {
   }
 }*/
 
-class RenderRectangle {
-  dimmensions: Vector2;
-
-  constructor(dimmensions: THREE.Vector2, mesh: THREE.Mesh) {
-    this.dimmensions = dimmensions;
-  }
-}
 export enum PaddleState{
   Binded = 'binded', //must be keybinded moved by ourselfs
   Unbinded = 'unbinded',
@@ -55,7 +48,7 @@ export enum WallType{
   Death = 'death'
 }
 
-export class Ball implements EventObject {
+export class Ball implements EventObject,  TickObject{
   eventBehaviour : EventBehaviour<Ball>;
   tickBehaviour : TickBehaviour<Ball>;
   dir: Vector2;
@@ -81,12 +74,27 @@ export class Ball implements EventObject {
     this.eventBehaviour.runEvent(type, data);
   }
 
+  runTick(delta: number): void {
+    this.tickBehaviour.runTick(delta);
+  }
+
   getId() : number{
     return this.eventBehaviour.getId();
   }
+
+  subscribeToManager(manager : Manager): void {
+    this.eventBehaviour.subscribeToManager(manager);
+  }
+  bindEvent(fn: any): EventObject {
+    return this.eventBehaviour.bindEvent(fn);
+  }
+  bindTick(fn: any): TickObject {
+    return this.tickBehaviour.bindTick(fn);
+  }
+
 }
 
-export class Block implements EventObject{
+export class Block implements EventObject, TickObject{
   tickBehaviour : TickBehaviour<Block>;
   eventBehaviour : EventBehaviour<Block>;
   pos : Vector2;
@@ -98,7 +106,7 @@ export class Block implements EventObject{
   constructor(pos : Vector2, dimmensions : Vector3, type : WallType, color : number, manager : Manager){
     this.tickBehaviour = new TickBehaviour<Block>(this);
     const accelarate = tickBehaviourAccelerate(10);//example
-    this.tickBehaviour.bind(accelarate);
+    this.tickBehaviour.bindTick(accelarate);
     this.eventBehaviour = new EventBehaviour<Block>(this, manager);
     this.pos = pos;
     this.dimmensions = dimmensions;
@@ -114,26 +122,43 @@ export class Block implements EventObject{
     this.eventBehaviour.runEvent(type, data);
   }
 
+  runTick(delta: number): void {
+    this.tickBehaviour.runTick(delta);
+  }
+
+  subscribeToManager(manager:  Manager): void {
+    this.eventBehaviour.subscribeToManager(manager);
+  }
+
+  bindEvent(fn: any): EventObject {
+    return this.eventBehaviour.bindEvent(fn);
+  }
+  bindTick(fn: any): TickObject {
+    return this.tickBehaviour.bindTick(fn);
+  }
+
 }
 
 
-export class Paddle implements EventObject{
+export class Paddle implements EventObject, TickObject{
   tickBehaviour : TickBehaviour<Paddle>;
   eventBehaviour : EventBehaviour<Paddle>;
   pos : Vector2;
-  dimmensions : Vector2;
+  dir : Vector2;
+  dimmensions : Vector3;
   type : WallType;
   color : number;
   speed : number;
 
-  constructor(pos : Vector2, dimmensions : Vector2, type : WallType, color : number, behaiviour : any, manager : Manager){
+  constructor(pos : Vector2, dimmensions : Vector3, type : WallType, color : number, dir : Vector2, speed : number, manager : Manager){
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
     this.pos = pos;
     this.dimmensions = dimmensions;
     this.type = type;
     this.color = color;
-    this.speed = 0;
+    this.speed = speed;
+    this.dir = dir;
   }
 
   getId(): number {
@@ -144,6 +169,21 @@ export class Paddle implements EventObject{
     this.eventBehaviour.runEvent(type, data);
   }
 
+  runTick(delta: number): void {
+    this.tickBehaviour.runTick(delta);
+  }
+
+  subscribeToManager(manager : Manager): void {
+    this.eventBehaviour.subscribeToManager(manager);
+  }
+
+  bindEvent(fn: any): EventObject {
+    return this.eventBehaviour.bindEvent(fn);
+  }
+
+  bindTick(fn: any): TickObject {
+    return this.tickBehaviour.bindTick(fn);
+  }
 }
 
 @Component({
@@ -281,7 +321,18 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     this.scene.add(ballLight);
 
     // INIT PADDLES
-    const paddleGeometry = new THREE.BoxGeometry(this.map.paddleWidth,
+    this.paddles = new Array<THREE.Mesh>(this.update.paddles.length);
+    for (const [index, paddle] of this.update.paddles.entries()){
+      const paddleGeometry = new THREE.BoxGeometry(
+        paddle.dimmensions.x,
+        paddle.dimmensions.y,
+        paddle.dimmensions.z
+      );
+      const paddleMaterial = new THREE.MeshPhongMaterial({ color: paddle.color });
+      this.paddles[index] = new THREE.Mesh(paddleGeometry, paddleMaterial);
+      this.scene.add(this.paddles[index]);
+    }
+    /*const paddleGeometry = new THREE.BoxGeometry(this.map.paddleWidth,
       this.map.paddleHeight,
       this.map.paddleDepth);
     const paddleMaterial = new THREE.MeshPhongMaterial({ color: this.map.paddleColor });
@@ -290,6 +341,19 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       const paddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
       this.paddles.push(paddle);
       this.scene.add(paddle);
+    }*/
+
+    // INIT BLOCKS
+    this.blocks = new Array<THREE.Mesh>(this.update.blocks.length);
+    for (const [index, block] of this.update.blocks.entries()){
+      const blockGeometry = new THREE.BoxGeometry(
+        block.dimmensions.x,
+        block.dimmensions.y,
+        block.dimmensions.z
+      );
+      const blockMaterial = new THREE.MeshPhongMaterial({ color: block.color });
+      this.blocks[index] = new THREE.Mesh(blockGeometry, blockMaterial);
+      this.scene.add(this.blocks[index]);
     }
     this.updateScene();
     /*    !TODO walls will be passed as an array, disigned beforehand
@@ -342,6 +406,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
 
+    this.update.runTickBehaviour(timeDifference);
     // MOVE BALL
     /* !TODO 
       if (this.manager.online
@@ -350,11 +415,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       }
       we will abstract the online part away using the managers, both send and receive
     */
-
+    /*
     for (const ball of this.update.balls){
       const ballDiferentialDisplacement = timeDifference * ball.speed;
       ball.pos.add(ball.dir.clone().multiplyScalar(ballDiferentialDisplacement));
     }
+    */
 
 
     // HANDLE PADDLE MOVEMENT
@@ -494,6 +560,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
               ball : ball
             },
           };
+          console.log('sending event');
           this.manager.sendEvent(PongEventType.Colision, eventData);
           // ALL THIS LOGIC SHOULD BE ATTACHED TO EVENTS
           //this four ifs are to avoid the ball from getting stuck
@@ -524,7 +591,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
           this.circleRectangleIntersection(new Vector2(ball.pos.x, ball.pos.y),
             this.map.ballRadius,
             new Vector2(paddle.pos.x, paddle.pos.y),
-            paddle.dimmensions);          //todo!
+            new Vector2(paddle.dimmensions.x, paddle.dimmensions.y));          //todo!
         if (intersection[0]) {
           console.log('impact paddle')
           if (intersection[1] === undefined) {

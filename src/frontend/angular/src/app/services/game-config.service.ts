@@ -364,10 +364,11 @@ class TournamentManager implements Manager{
   constructor(config : TournamentConfig, private router : Router){
     this.matchConfig = config.matchConfig;
     this.numberOfPlayers = config.numberOfPlayers;
-    this.currentMatchState = new State<MatchState>(MatchState.Created);
     this.currentMatchScore = new State<Score>(new Score([0,0]));
     this.currentMatchUpdate = this.matchConfig.mapSettings.createMatchInitUpdate(this.matchConfig.matchSettings, this);
     this.state = new State<GameManagerState>(GameManagerState.InGame);
+    this.currentMatchUpdate.subscribeAllToManager(this);
+    this.currentMatchState = new State<MatchState>(MatchState.Created);
     this.currentMatchState.subscribe(
       (state : MatchState) => {
         switch (state){
@@ -462,9 +463,10 @@ class MatchManager implements Manager{
   events : EventMap = new EventMap();
   constructor (config : MatchConfig, private router : Router){
     this.matchConfig = config;
-    this.matchState = new State<MatchState>(MatchState.Created);
     this.matchScore = new State<Score>(new Score([0,0]));
     this.matchUpdate = this.matchConfig.mapSettings.createMatchInitUpdate(this.matchConfig.matchSettings, this);
+    this.matchUpdate.subscribeAllToManager(this);
+    this.matchState = new State<MatchState>(MatchState.Created);
     this.state = new State<GameManagerState>(GameManagerState.InGame);
     this.matchState.subscribe(
       (state : MatchState) => {
@@ -526,11 +528,25 @@ class MatchManager implements Manager{
     }
   }
   sendEvent(type: PongEventType, data : EventData): void {
-    if (!data.senderId)
+    if (data.targetIds === undefined){
+      console.error('send event needs targetsid')
       return;
-    const eventObject = this.events.getById(data.senderId);
-    if (eventObject){
-      eventObject.runEvent(type, data);
+    }
+    if (data.targetIds instanceof Array){
+      for (let i = 0; i < data.targetIds.length; i++){
+      const eventObject = this.events.getById(data.targetIds[i]);
+      if (eventObject) {
+        eventObject.runEvent(type, data);
+      }
+
+      }
+    } else {
+      const eventObject = this.events.getById(data.targetIds);
+      if (eventObject) {
+        eventObject.runEvent(type, data);
+      }else{
+        console.error('couldnt find target id')
+      }
     }
   }
   
@@ -565,10 +581,11 @@ export class OnlineMatchManager implements Manager, OnlineManager{
 
   constructor (config : OnlineMatchConfig, private router : Router){
     this.matchConfig = config;
-    this.matchState = new State<MatchState>(MatchState.Starting);
     this.matchScore = new State<Score>(new Score([0,0]));
     this.matchUpdate = this.matchConfig.mapSettings.createMatchInitUpdate(this.matchConfig.matchSettings.settings, this);
+    this.matchUpdate.subscribeAllToManager(this);
     this.state = new State<GameManagerState>(GameManagerState.InGame);
+    this.matchState = new State<MatchState>(MatchState.Starting);
     this.onlineMatchState = new State<OnlineMatchState>(OnlineMatchState.Connecting);
     this.matchState.subscribe(
       (state : MatchState) => {
@@ -729,6 +746,7 @@ export class GameManagerService implements Manager{
     this.state.setValue(GameManagerState.InGame);
     return true;
   }
+
   createMatch(config : MatchConfig): boolean{
     if (this.state.getCurrentValue() !== GameManagerState.Standby){
       console.error('start match: state must be standby to start match');

@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
 import { Ball, Block, Paddle} from '../pages/pong/pong.component';
-import { GameManagerService,  MatchConfig, OnlineMatchConfig, OnlineMatchManager, OnlineMatchSettings } from './game-config.service';
+import { GameManagerService,  Manager,  MatchConfig, OnlineMatchConfig, OnlineMatchManager, OnlineMatchSettings } from './game-config.service';
 import { MapsName, MapsService } from './map.service';
 export enum GameType {
   Tournament = 'Tournament',
@@ -40,6 +40,22 @@ export class MatchUpdate{
     this.balls = balls;
     this.blocks = blocks;
     this.id = id;
+  }
+  subscribeAllToManager(manager : Manager){
+    this.balls.forEach(ball => ball.subscribeToManager(manager));
+    this.paddles.forEach(paddle => paddle.subscribeToManager(manager));
+    this.blocks.forEach(block => block.subscribeToManager(manager));
+  }
+  runTickBehaviour(delta : number){
+    for (let i = 0; i < this.paddles.length; i++){
+      this.paddles[i].runTick(delta);
+    }
+    for (let i = 0; i < this.balls.length; i++){
+      this.balls[i].runTick(delta);
+    }
+for (let i = 0; i < this.blocks.length; i++){
+      this.blocks[i].runTick(delta);
+    }
   }
 }
 

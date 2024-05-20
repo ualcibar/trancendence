@@ -14,6 +14,7 @@ import { fadeInOut } from '../../../assets/animations/fadeInOut';
 import { GameManagerService, MatchConfig, MatchSettings } from '../../services/game-config.service';
 import { MapSettings, MapsService } from '../../services/map.service';
 import { Router } from '@angular/router';
+import { PaddleState } from '../pong/pong.component';
 
 enum HomeState{
     Home,
@@ -74,8 +75,9 @@ export class HomeComponent implements OnInit{
       return
     }
     if (newGame.gameType === GameType.Match) {
+      console.log('team size before', newGame.teamSize)
       this.gameManager.createMatch(new MatchConfig(
-        new MatchSettings(newGame.name, newGame.size),
+        new MatchSettings(newGame.teamSize, new Array<PaddleState>(newGame.teamSize * 2).fill(PaddleState.Binded)),
         map
       ));
       setTimeout(()=> this.gameManager.start(), 1000);

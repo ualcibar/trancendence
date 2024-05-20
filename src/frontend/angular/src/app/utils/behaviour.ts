@@ -1,8 +1,9 @@
-import { Vector2 } from "three";
+import { Vector2, Vector3 } from "three";
 import { Manager} from "../services/game-config.service";
 import { Ball, Block} from "../pages/pong/pong.component";
 import { MapSettings } from "../services/map.service";
-
+import * as key from 'keymaster'; // Si estás utilizando TypeScript
+import { Key } from "../services/game-config.service";
 /*export interface DefferedMonad<T> {
   bind(f : (delta : number, target : T) => void): this;
   run(delta : number, target : T) : void;
@@ -21,10 +22,10 @@ export interface Dir {
 }
 
 export interface Dimmensions {
-	dimmensions: Vector2;
+	dimmensions: Vector3;
 }
 
-export class TickBehaviour<T> {
+export class TickBehaviour<T>  implements TickObject{
 	private value: T;//a reference to the class we add the behaiviour to
 	private functions: Array<(delta: number, target: T) => void>;//the transformations applied each tick
 
@@ -33,13 +34,13 @@ export class TickBehaviour<T> {
 		this.functions = new Array<(delta: number, target: T) => void>();
 	}
 
-	bind(f: (delta: number, target: T) => void): this {
+	bindTick(f: (delta: number, target: T) => void): this {
 		this.functions.push(f);
 		return this;
 	}
 
-	run(delta: number): void {
-		this.functions.forEach(func => func(delta, this.value))
+	runTick(delta: number): void {
+		this.functions.forEach(fn => fn(delta, this.value))
 	}
 }
 
@@ -59,19 +60,19 @@ export enum PongEventType {
 }
 
 export class EventBehaviour<T> implements EventObject{
-	private id: number;
+	private id!: number;//we will set this id when we subscribeToManager, at the init values
 	private parent: T;
 	private events: Array<(type: PongEventType, data : EventData, parent : T) => void>;
-	private manager : Manager;
+	private manager!: Manager;
 
 	constructor(parent: T, manager : Manager) {
 		this.parent = parent;
 		this.events = new Array<() => void>;
-		this.manager = manager;
-		this.id = this.manager.subscribeEventObject(this);
+		//this.manager = manager;
+		//this.id = this.manager.subscribeEventObject(this);
 	}
 
-	bind(f: (event: PongEventType, data : EventData) => void): this {
+	bindEvent(f: (event: PongEventType, data : EventData) => void): this {
 		this.events.push(f);
 		return this;
 	}
@@ -81,11 +82,21 @@ export class EventBehaviour<T> implements EventObject{
 	getId() : number{
 		return this.id;
 	}
+	subscribeToManager(manger : Manager): void {
+		this.manager = manger;
+		this.id = this.manager.subscribeEventObject(this);
+	}
 }
 
 export interface EventObject {
 	runEvent(type: PongEventType, data : EventData): void;
+	subscribeToManager(manger : Manager) : void;
 	getId() : number;
+	bindEvent(fn : any) : EventObject;
+}
+export interface TickObject {
+	runTick(delta : number): void;
+	bindTick(fn : any) : TickObject;
 }
 
 export interface EventData{
@@ -104,7 +115,7 @@ function createEventScoreColision(manager : Manager, scoreBlock : Block){
 	}
 }
 
-function eventWallColision(type: PongEventType, data: EventData) {
+export function eventWallColision(type: PongEventType, data: EventData) {
 	if (type !== PongEventType.Colision)
 		return;
 	if (data.custom?.intersection === undefined && data.custom?.ball === undefined) {
@@ -128,8 +139,9 @@ function eventWallColision(type: PongEventType, data: EventData) {
 }
 
 
-function createPaddleColision<T extends EventObject & Dimmensions & Pos>(map : MapSettings, paddle : T){
+export function createPaddleColision<T extends EventObject & Dimmensions & Pos>(map : MapSettings, paddle : T){
 	return function eventPaddleColision(type: PongEventType, data: EventData) {
+		console.log('colision event called to paddle', paddle.getId());
 		if (type !== PongEventType.Colision)
 			return;
 		if (data.custom?.intersection === undefined && data.custom?.ball === undefined) {
@@ -150,6 +162,30 @@ function createPaddleColision<T extends EventObject & Dimmensions & Pos>(map : M
 				ball.dir = new Vector2(-1, 0).rotateAround(new Vector2(0, 0), angle);
 			else
 				ball.dir = new Vector2(1, 0).rotateAround(new Vector2(0, 0), angle);
+		}
+	}
+}
+
+export function createMove<T extends Pos & Speed & Dir>(object : T){
+	return function move(delta: number) {
+      object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
+
+	}
+}
+
+export function createMovePaddle<T extends Pos & Speed & Dir>(object : T){
+	return function move(delta: number) {
+      object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
+	}
+}
+export function createKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddle : T, keys : Key ){
+	return function keyboardInputPaddle(delta: number) {
+		paddle.dir.y = 0;
+		if (key.isPressed(keys.up)) {
+			paddle.dir.y = 1;
+		}
+		if (key.isPressed(keys.down)) {
+			paddle.dir.y = -1;
 		}
 	}
 }
