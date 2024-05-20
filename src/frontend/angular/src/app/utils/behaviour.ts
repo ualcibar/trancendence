@@ -1,6 +1,7 @@
 import { Vector2 } from "three";
-import { GameManager, MapSettings } from "../services/game-config.service";
+import { Manager} from "../services/game-config.service";
 import { Ball, Block} from "../pages/pong/pong.component";
+import { MapSettings } from "../services/map.service";
 
 /*export interface DefferedMonad<T> {
   bind(f : (delta : number, target : T) => void): this;
@@ -61,9 +62,9 @@ export class EventBehaviour<T> implements EventObject{
 	private id: number;
 	private parent: T;
 	private events: Array<(type: PongEventType, data : EventData, parent : T) => void>;
-	private manager : GameManager;
+	private manager : Manager;
 
-	constructor(parent: T, manager : GameManager) {
+	constructor(parent: T, manager : Manager) {
 		this.parent = parent;
 		this.events = new Array<() => void>;
 		this.manager = manager;
@@ -94,7 +95,7 @@ export interface EventData{
 	custom? : any;
 }
 
-function createEventScoreColision(manager : GameManager, scoreBlock : Block){
+function createEventScoreColision(manager : Manager, scoreBlock : Block){
 	function eventScoreColision(type: PongEventType, data: EventData) {
 		if (type !== PongEventType.Colision)
 			return;

@@ -1,8 +1,8 @@
 import { Component, Output, Input, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatchmakingService, GameSettings, GameType, Maps} from '../../services/matchmaking.service';
-
+import { MatchmakingService, GameSettings, GameType} from '../../services/matchmaking.service';
+import { MapsName } from '../../services/map.service';
 @Component({
   selector: 'app-tournament-match-menu',
   standalone: true,
@@ -31,11 +31,11 @@ export class TournamentMatchMenuComponent {
   }
   toggleMap(){
     switch(this.gameSettings.map){
-      case Maps.Default:
-        this.gameSettings.map = Maps.Fancy;
+      case MapsName.Default:
+        this.gameSettings.map = MapsName.Fancy;
         break;
-      case Maps.Fancy:
-        this.gameSettings.map = Maps.Default;
+      case MapsName.Fancy:
+        this.gameSettings.map = MapsName.Default;
         break;
     }
   }

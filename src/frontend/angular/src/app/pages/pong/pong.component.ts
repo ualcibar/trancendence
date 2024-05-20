@@ -4,16 +4,13 @@ import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Vector2 } from 'three';
 import { Subscription } from 'rxjs';
 
-import { Input } from '@angular/core';
 
-import { GameSettings, MatchGame, MatchInfo, MatchUpdate, MatchmakingService } from '../../services/matchmaking.service';
-import { GameManager, GameManagerState, MapSettings, MatchConfig, MatchState } from '../../services/game-config.service';
-import { Rect } from '@popperjs/core';
-import { normalize } from 'three/src/math/MathUtils';
+import { MatchInfo, MatchUpdate, MatchmakingService } from '../../services/matchmaking.service';
+import {GameManagerService, GameManagerState, Manager, MatchState } from '../../services/game-config.service';
 import { Router } from '@angular/router';
 
 import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData } from '../../utils/behaviour';
-import { Event } from 'jquery';
+import { MapSettings } from '../../services/map.service';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -64,15 +61,20 @@ export class Ball implements EventObject {
   dir: Vector2;
   speed: number;
   pos : Vector2;
-  light : boolean;
+  lightOn : boolean;
   lightColor : number;
   lightIntensity : number;
 
-  constructor(dir: THREE.Vector2, speed: number, manager : GameManager) {
+  constructor(dir: Vector2, speed: number, lightOn : boolean, pos : Vector2,
+    lightColor : number, lightIntensity : number, manager : Manager) {
     this.dir = dir;
     this.speed = speed;
     this.eventBehaviour = new EventBehaviour<Ball>(this, manager);
     this.tickBehaviour = new TickBehaviour<Ball>(this);
+    this.pos = pos;
+    this.lightOn = lightOn;
+    this.lightColor = lightColor;
+    this.lightIntensity = lightIntensity; 
   }
 
   runEvent(type: PongEventType, data : EventData): void {
@@ -93,7 +95,7 @@ export class Block implements EventObject{
   color : number;
   speed : number;
 
-  constructor(pos : Vector2, dimmensions : Vector2, type : WallType, color : number, manager : GameManager){
+  constructor(pos : Vector2, dimmensions : Vector2, type : WallType, color : number, manager : Manager){
     this.tickBehaviour = new TickBehaviour<Block>(this);
     const accelarate = tickBehaviourAccelerate(10);//example
     this.tickBehaviour.bind(accelarate);
@@ -124,7 +126,7 @@ export class Paddle implements EventObject{
   color : number;
   speed : number;
 
-  constructor(pos : Vector2, dimmensions : Vector2, type : WallType, color : number, behaiviour : any, manager : GameManager){
+  constructor(pos : Vector2, dimmensions : Vector2, type : WallType, color : number, behaiviour : any, manager : Manager){
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
     this.pos = pos;
@@ -177,21 +179,20 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   info!: MatchInfo;
   update!: MatchUpdate;
 
-  currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
+  //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
   configStateSubscription!: Subscription;
 
-  constructor(private matchmakingService: MatchmakingService, private manager: GameManager,
+  constructor(private matchmakingService: MatchmakingService, private manager: GameManagerService,
     private router: Router) {
-
   }
 
   ngAfterViewInit(): void {
-    if (this.manager.state.getCurrentValue() === GameManagerState.Standby) {
+    if (this.manager.getState() === GameManagerState.Standby) {
       console.error('pong, no game has been started');
       this.router.navigate(['/']);
     }
-    this.configStateSubscription = this.manager.subscribeState(
+    this.configStateSubscription = this.manager.subscribeMatchState(
       (state: MatchState) => {
         switch (state) {
           case MatchState.Starting:
@@ -236,7 +237,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-
   initValues() {
     this.map = this.manager.getConfig().settings;
     this.info = this.manager.getConfig().info;
@@ -255,7 +255,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     // INIT SCENE
     this.scene = new THREE.Scene();
 
-    // INIT LIGHT
+    // INIT DEFAULT LIGHT
     if (this.map.defaultLightingIsOn) {
       this.light = new THREE.DirectionalLight(this.map.defaultlightColor,
         this.map.defaultLightIntensity);
@@ -265,7 +265,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.scene.add(this.light);
     }
 
-    // INIT BALL
+    // INIT BALL !TODO more than one ball
     const ballGeometry = new THREE.SphereGeometry(this.map.ballRadius,
       this.map.ballWidthSegments,
       this.map.ballHeightSegments);
@@ -288,19 +288,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
     for (let i = 0; i < this.info.teamSize * 2; i++) {
       const paddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-      const dimmensions = new THREE.Vector2(this.map.paddleWidth, this.map.paddleHeight);
-      if (i < this.info.teamSize) {
-        paddle.position.x = this.map.leftPaddle.x;
-        paddle.position.y = this.map.leftPaddle.y;
-        paddle.rotation.z = this.map.leftPaddle.z;
-      } else {
-        paddle.position.x = this.map.rightPaddle.x;
-        paddle.position.y = this.map.rightPaddle.y;
-        paddle.rotation.z = this.map.rightPaddle.z;
-      }
       this.paddles.push(paddle);
       this.scene.add(paddle);
     }
+    this.updateScene();
     /*    !TODO walls will be passed as an array, disigned beforehand
                 there will no longer be top bottom just walls
     
@@ -730,7 +721,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   updateScene(){//there should be a variable telling if it was changed
     for (const [index, ball] of this.update.balls.entries()){
       this.balls[index].position.set(ball.pos.x, ball.pos.y, 0);
-      if (ball.light)
+      if (ball.lightOn)
         this.ballsLight[index].position.set(ball.pos.x, ball.pos.y, 0);
     }
     for (const [index, paddle] of this.update.paddles.entries()){

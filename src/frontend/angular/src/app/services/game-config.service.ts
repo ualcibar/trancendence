@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
-import { OnlineMatchState, GameType, MatchmakingService, MatchMakingState, MatchGame, MatchInfo, Maps, MatchUpdate} from './matchmaking.service';
-import { GameSettings } from './matchmaking.service';
+import {  MatchInfo, MatchUpdate, OnlineMatchState, OnlinePlayer, OnlinePlayerState} from './matchmaking.service';
 
-import { Event, Vector2, Vector3} from 'three';
 import { State } from '../utils/state';
 import { Score } from './matchmaking.service';
 import { Subscription } from 'rxjs';
 
-import { EventBehaviour, PongEventType, TickBehaviour, EventObject, EventData } from '../utils/behaviour';
+import { PongEventType, EventObject, EventData } from '../utils/behaviour';
 import { EventMap } from '../utils/eventMap';
-import { Event } from 'jquery';
+import { UserInfo } from './auth.service';
+import { MapSettings } from './map.service';
 export enum GameConfigState{
   Standby = 'standby',
   StartingGame = 'starting game',
@@ -32,7 +31,7 @@ export enum MatchState{
   FinishedSuccess = 'finished success',
   Error = 'error',
 }
-
+/*
 export class Tournament{
   private scores : [number,number][] = [];
   private winners : number[] = [];
@@ -70,7 +69,7 @@ export class Tournament{
       })
   }
 
-}
+}*/
 
 export class Key{
   up : string;
@@ -81,6 +80,7 @@ export class Key{
   }
 }
 
+/*
 @Injectable({
   providedIn: 'root'
 })
@@ -189,7 +189,7 @@ export class GameConfigService {
     public readonly deltaFactor = Math.PI / 2;
 
   constructor(private matchmaking : MatchmakingService) {
-    /*if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
+    if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
       if (this.matchmaking.currentMatchInfo === undefined){
         //!todo
         console.error('todo!');
@@ -212,7 +212,7 @@ export class GameConfigService {
       this.gameSettings = new GameSettings(GameType.Match, 'patata', '', false, 1);
  //     this.state.setValue(GameConfigState.StartingGame);
       //this.matchState = new MatchState()
-    }*/
+    }
     //why not call the function? typescript doesn't realize for some reason and throws error
     //!todo fix thi shit
     this.inGame = false;
@@ -225,6 +225,7 @@ export class GameConfigService {
         this.initValues();
     });
   }
+
 
   initValues(){
     if (this.matchmaking.state.getCurrentValue() === MatchMakingState.OnGame){
@@ -252,160 +253,37 @@ export class GameConfigService {
       setTimeout(()=> this.state.setValue(GameConfigState.Ingame),1000);
       //this.matchState = new MatchState()
     }
-
+      
   }
-}
-
-export const colorPalette = {
-    darkestPurple: 0x1C0658,
-    swingPurple: 0x5C2686,
-    roseGarden: 0xFF1690,
-    josefYellow: 0xF4D676,
-    leadCyan: 0x36CDC4,
-    white: 0xFFFFFF,
-    black: 0x000000,
-};
-
-class MapSettingsCreateInfo{
-  public dimmensions : Vector2 = new Vector2(2,2);
-  public leftLimit : number = - this.dimmensions.width / 2; 
-  public rightLimit : number = this.dimmensions.width / 2;
-  public topLimit : number = this.dimmensions.height / 2;
-  public bottomLimit : number = - this.dimmensions.height / 2;
-
-  public defaultLightingIsOn  : boolean = true;
-  public defaultlightColor : number = colorPalette.white;
-  // Light position
-  public defaultLightIntensity : number = 3;
-  public defaultLightPositionX : number = 0;
-  public defaultLightPositionY : number = 2;
-  public defaultLightPositionZ : number = 4;
-
-  // Ball settings
-  // Constructor settings
-  public ballRadius : number = 0.05;
-  public ballColor : number = colorPalette.white;
-  public ballInitSpeed : number = 1;
-  public ballInitDir: Vector2 | undefined;//undefined === random
-
-  // Ball light settings
-  public ballLightColor : number = this.ballColor;
-  public ballLightIntensity : number = 1;
-
-  // Paddle settings
-  public paddleWidth : number = 0.02;
-  public paddleHeight : number =  0.5;
-  public paddleDepth : number = 0.1;
-  public paddleColor : number = colorPalette.white;
-
-  // Paddle position
-  public leftPaddlePos: Vector3 = new Vector3(this.leftLimit, 0, 0);
-  public rightPaddlePos: Vector3 = new Vector3(this.rightLimit, 0, 0);
-
-  // Paddle movement settings
-  public paddleSpeed : number = 0.77;
-  public paddleAceleration : number = 0.025;
-
-  public collisionChangeBallColor : boolean = false;
-  public collisionChangeWallColor : boolean = false;
-  public collisionChangePaddleColor : boolean = false;
-
-  public friction : number = Math.PI / 6;
-
-  public deltaFactor : number = Math.PI / 2;
-}
-
-export class Walls{
-  
-}
-
-export class MapSettings{
-  // General game settings
-  public readonly dimmensions! : Vector2;
-  public readonly leftLimit! : number; 
-  public readonly rightLimit! : number;
-  public readonly topLimit! : number;
-  public readonly bottomLimit! : number;
-
-  public readonly defaultLightingIsOn!  : boolean;
-  public readonly defaultlightColor! : number;
-  // Light position
-  public readonly defaultLightIntensity! : number;
-  public readonly defaultLightPositionX! : number;
-  public readonly defaultLightPositionY! : number;
-  public readonly defaultLightPositionZ! : number;
-
-  // Ball settings
-  // Constructor settings
-  public readonly ballRadius! : number;
-  public readonly ballColor! : number;
-  public readonly ballInitSpeed! : number;
-  public readonly ballInitDir!: Vector2;
-  public readonly ballWidthSegments = 32;
-  public readonly ballHeightSegments = 16;
-
-  // Ball light settings
-  public readonly ballLightColor! : number;
-  public readonly ballLightIntensity! : number;
-
-  // Paddle settings
-  public readonly paddleWidth! : number;
-  public readonly paddleHeight! : number;
-  public readonly paddleDepth! : number;
-  public readonly paddleColor! : number;
-
-  // Paddle position
-  public readonly leftPaddle!: Vector3;
-  public readonly rightPaddle!: Vector3;
-
-  // Paddle movement settings
-  public readonly paddleSpeed! : number;
-  public readonly paddleAceleration! : number;
-
-  public readonly collisionChangeBallColor! : boolean;
-  public readonly collisionChangeWallColor! : boolean;
-  public readonly collisionChangePaddleColor! : boolean;
-
-  public readonly friction! : number;
-
-  public readonly deltaFactor! : number;
-
-  public readonly walls! : Walls[];
-
-  constructor(info : MapSettingsCreateInfo){
-    Object.assign(this, info);
-  }
-}
-
-export enum MapName{
-  Default = 'Default',
-  Fancy = 'Fancy',
-  Inferno = 'Inferno'
-}
-export const  maps : Map<MapName,MapSettings>;
+}*/
 
 export class MatchConfig{
   info : MatchInfo;
-  settings : MatchSettings;
+  settings : MapSettings;
 
-  constructor(info : MatchInfo, settings : MatchSettings){
+  constructor(info : MatchInfo, settings : MapSettings){
     this.info = info;
     this.settings = settings;
   }
 }
 
-interface Manager{
+export interface Manager{
   getConfig() : MatchConfig;
   getMatchState() : MatchState;
   getMatchScore() : Score;
   setMatchState(state : MatchState) : void;
   setMatchScore(score : Score) : void;
-  subscribeState(fn : any) : Subscription;
+  subscribeMatchState(fn : any) : Subscription;
   getMatchUpdate(): MatchUpdate;
   broadcastEvent(event : PongEventType, data : EventData) : void;
   sendEvent(event : PongEventType, data : EventData) : void;
   subscribeEventObject(object : EventObject) : number;
   bindEvent(id : number, type : PongEventType) : boolean;
+  getState() : GameManagerState;
+}
+
+export interface OnlineManager{
+  getOnlineState() : OnlineMatchState;
 }
 
 class TournamentConfig{
@@ -423,13 +301,15 @@ class TournamentManager implements Manager{
   currentMatchScore : State<Score>;//pong exitpoint
   currentMatchUpdate : MatchUpdate;
   numberOfPlayers : number;
+  state : State<GameManagerState>;//manager state, changing it signals the match to start
   events : EventMap = new EventMap();
   constructor(config : TournamentConfig){
     this.matchConfig = config.matchConfig;
     this.numberOfPlayers = config.numberOfPlayers;
     this.currentMatchState = new State<MatchState>(MatchState.Starting);
     this.currentMatchScore = new State<Score>(new Score([0,0]));
-    this.currentMatchUpdate = new MatchUpdate(undefined, undefined, undefined, undefined, undefined,[], 0, config.matchConfig.info);
+    this.currentMatchUpdate = this.matchConfig.settings.createMatchInitUpdate(this.matchConfig.info, this);
+    this.state = new State<GameManagerState>(GameManagerState.InGame);
     this.currentMatchState.subscribe(
       (state : MatchState) => {
         switch (state){
@@ -469,7 +349,7 @@ class TournamentManager implements Manager{
     this.currentMatchState.setValue(state);
   }
 
-  subscribeState(fn: any): Subscription {
+  subscribeMatchState(fn: any): Subscription {
     return this.currentMatchState.observable.subscribe(fn);
   }
 
@@ -500,18 +380,24 @@ class TournamentManager implements Manager{
     return this.events.subscribe(id, type)
   }
 
+  getState(): GameManagerState {
+    return this.state.getCurrentValue();
+  }
+
 }
 class MatchManager implements Manager{
   matchConfig : MatchConfig;//pong entrypoint
   matchState : State<MatchState>;//pong exitpoint
   matchScore : State<Score>;//pong exitpoint
   matchUpdate : MatchUpdate;
+  state : State<GameManagerState>;//manager state, changing it signals the match to start
   events : EventMap = new EventMap();
   constructor (config : MatchConfig){
     this.matchConfig = config;
     this.matchState = new State<MatchState>(MatchState.Starting);
     this.matchScore = new State<Score>(new Score([0,0]));
-    this.matchUpdate = new MatchUpdate(undefined, undefined, undefined, undefined, undefined,[], 0, config.info);
+    this.matchUpdate = this.matchConfig.settings.createMatchInitUpdate(this.matchConfig.info, this);
+    this.state = new State<GameManagerState>(GameManagerState.InGame);
     this.matchState.subscribe(
       (state : MatchState) => {
         switch (state){
@@ -534,6 +420,11 @@ class MatchManager implements Manager{
         }
     })
   }
+
+  startMatch(){
+    this.matchState.setValue(MatchState.Starting);
+  }
+
   getConfig() : MatchConfig{
     return this.matchConfig;
   }
@@ -550,7 +441,7 @@ class MatchManager implements Manager{
     this.matchState.setValue(state);
   }
 
-  subscribeState(fn: any): Subscription {
+  subscribeMatchState(fn: any): Subscription {
     return this.matchState.observable.subscribe(fn);
   }
 
@@ -579,19 +470,32 @@ class MatchManager implements Manager{
   bindEvent(id : number, type: PongEventType): boolean {//false if it fails.
     return this.events.subscribe(id, type)
   }
+
+  getState(): GameManagerState {
+    return this.state.getCurrentValue();
+  }
 }
 
-class OnlineMatchManager implements Manager{
-  matchConfig : MatchConfig;//pong entrypoint
+export class OnlineMatchManager implements Manager, OnlineManager{
+  //basic
+  matchConfig : MatchConfig;//pong entrypoint? maybe it should be in multiplayer
   matchState : State<MatchState>;//pong exitpoint
   matchScore : State<Score>;//pong exitpoint
   matchUpdate : MatchUpdate;
   events : EventMap = new EventMap();
+  state : State<GameManagerState>;//manager state, changing it signals the match to start
+
+  //connectivity
+  amIHost : boolean = false;
+  onlineMatchState : State<OnlineMatchState>;
+
   constructor (config : MatchConfig){
     this.matchConfig = config;
     this.matchState = new State<MatchState>(MatchState.Starting);
     this.matchScore = new State<Score>(new Score([0,0]));
-    this.matchUpdate = new MatchUpdate(undefined, undefined, undefined, undefined, undefined,[], 0, config.info);
+    this.matchUpdate = this.matchConfig.settings.createMatchInitUpdate(this.matchConfig.info, this);
+    this.state = new State<GameManagerState>(GameManagerState.InGame);
+    this.onlineMatchState = new State<OnlineMatchState>(OnlineMatchState.Connecting);
     this.matchState.subscribe(
       (state : MatchState) => {
         switch (state){
@@ -628,8 +532,11 @@ class OnlineMatchManager implements Manager{
     this.matchState.setValue(state);
   }
   
-  subscribeState(fn: any): Subscription {
+  subscribeMatchState(fn: any): Subscription {
     return this.matchState.observable.subscribe(fn);
+  }
+  subscribeOnlineMatchState(fn: any): Subscription {
+    return this.onlineMatchState.observable.subscribe(fn);
   }
 
   getMatchUpdate(): MatchUpdate {
@@ -659,27 +566,65 @@ class OnlineMatchManager implements Manager{
   bindEvent(id : number, type: PongEventType): boolean {//false if it fails.
     return this.events.subscribe(id, type)
   }
+
+  addPlayer(player : UserInfo){
+    if (this.amIHost)
+      this.matchConfig.info.addPlayer(player, OnlinePlayerState.Connecting);
+  }
+
+  getPlayer(id : number) : OnlinePlayer | undefined{
+    return this.matchConfig.info.getPlayer(id);
+  }
+
+  getState(): GameManagerState {
+    return this.state.getCurrentValue();
+  }
+
+  getOnlineState(): OnlineMatchState {
+    return this.onlineMatchState.getCurrentValue();
+  }
+
+  playerConnected(playerId : number | undefined) : OnlinePlayer | undefined{
+    if (playerId === undefined) {
+      console.error('on ice connection state change: targetId not set while being host');
+      return undefined;
+    }
+    const player = this.matchConfig.info.getPlayer(playerId);
+    if (player === undefined) {
+      console.error('on ice connection state change: player wasnt set');
+      console.error('sender id: ', playerId, ' current match:', this.matchConfig.info);
+      return undefined;
+    }
+    player.changeState(OnlinePlayerState.Connected);
+    return player;
+  }
+
+  areAllPlayersConnected(): boolean{
+    return this.matchConfig.info.players.length + 1 === this.matchConfig.info.teamSize * 2
+              && this.matchConfig.info.players.every(player => player.getState() === OnlinePlayerState.Connected);
+  }
+
+  setOnlineMatchState(state : OnlineMatchState){
+    this.onlineMatchState.setValue(state);
+  }
 }
 
 export enum GameManagerState{
   Standby = 'standby',
-  InMatch = 'in match',
-  InOnlineMatch = 'in online match',
-  InTournament = 'in tournament'
+  InGame = 'in game',
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class GameManager implements Manager{
+export class GameManagerService implements Manager{
   state : State<GameManagerState>;//manager state, changing it signals the match to start
   currentManager : Manager | undefined;//a manager for each state 
   
   //currentGameConfig : MatchConfig | undefined;//pong entrypoint
   //currentGameStatus : State<[Score,MatchState]> | undefined;//pong exitpoint
 
-  constructor (matchmaking : MatchmakingService){
-    this.initMaps();
+  constructor (){
     this.state = new State<GameManagerState>(GameManagerState.Standby);
   }
 
@@ -689,7 +634,7 @@ export class GameManager implements Manager{
       return false;
     }
     this.currentManager = new TournamentManager(config);
-    this.state.setValue(GameManagerState.InTournament); 
+    this.state.setValue(GameManagerState.InGame);
     return false;
   }
 
@@ -699,19 +644,25 @@ export class GameManager implements Manager{
       return false;
     }
     this.currentManager = new MatchManager(config);
-    this.state.setValue(GameManagerState.InMatch);
-    return false;
+    this.state.setValue(GameManagerState.InGame);
+    return true;
   }
 
-  startOnlineMatch(config : MatchConfig) : boolean {
+  startOnlineMatch(config : MatchConfig, amIHost : boolean) : boolean {
     if (this.state.getCurrentValue() !== GameManagerState.Standby){
       console.error('start online match: state must be standby to start online match');
       return false;
     }
     this.currentManager = new OnlineMatchManager(config);
-    this.state.setValue(GameManagerState.InOnlineMatch);
+    this.state.setValue(GameManagerState.InGame);
     return false;
   }
+
+  onlineAddPlayer(info : UserInfo){
+    if (this.currentManager instanceof OnlineMatchManager)
+      this.currentManager.addPlayer(info);
+  }
+
   getConfig() : MatchConfig{
     return this.currentManager!.getConfig();
   }
@@ -729,17 +680,11 @@ export class GameManager implements Manager{
     this.currentManager!.setMatchState(state);
   }
 
-  subscribeState(fn: any): Subscription {
-    return this.currentManager!.subscribeState(fn);
+  subscribeMatchState(fn: any): Subscription {
+    return this.currentManager!.subscribeMatchState(fn);
   }
   getMatchUpdate(): MatchUpdate {
     return this.currentManager!.getMatchUpdate();
-  }
-  initMaps(){
-    const defaultInfo = new MapSettingsCreateInfo();
-    maps.set(MapName.Default, new MapSettings(defaultInfo));
-    const infernoInfo = new MapSettingsCreateInfo();
-    maps.set(MapName.Inferno, new MapSettings(infernoInfo));
   }
   broadcastEvent(type: PongEventType, data : EventData) : void {
     this.currentManager!.broadcastEvent(type, data);
@@ -757,4 +702,12 @@ export class GameManager implements Manager{
     return this.subscribeEventObject(object);
   }
 
+
+  getState(): GameManagerState {
+    if (this.currentManager === undefined)
+      return this.state.getCurrentValue();
+    else{
+      return this.currentManager!.getState();
+    }
+  }
 }
