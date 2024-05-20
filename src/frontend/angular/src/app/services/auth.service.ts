@@ -1,9 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { BehaviorSubject, Observable, UnaryFunction, of} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
-
-import { TranslateService } from '@ngx-translate/core';
+import { catchError, map } from 'rxjs/operators';
 
 export class UserInfo{
   user_id : number;
@@ -24,9 +22,7 @@ export class AuthService {
   user_info? : UserInfo;
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 
-  client_locale: string = 'en';
-
-  constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
+  constructor(private http: HttpClient) {
     this.amILoggedIn();
   }
 
@@ -38,8 +34,6 @@ export class AuthService {
       next: (response) => {
         this.user_info = new UserInfo(response['username'], response['userid'], true);
         this.isLoggedInSubject.next(true);
-        this.translateService.setDefaultLang(response['language']);
-        this.translateService.use(response['language']);
       },
       error: () => {
         this.user_info = undefined;
@@ -59,12 +53,13 @@ export class AuthService {
         this.updateUserInfo();
       },
       error: () => {
-        this.client_locale = navigator.language.substring(0,2);
-        this.translateService.setDefaultLang(this.client_locale);
-        this.translateService.use(this.client_locale);
         this.refreshToken();
       }
     })
+  }
+
+  isLoggedIn() : boolean{
+   return this.isLoggedInSubject.value; 
   }
 
   login(username : string, password : string) : Promise<boolean>{
@@ -108,11 +103,12 @@ export class AuthService {
       }
     });
     var accessToken = localStorage.getItem('access_token');
+    // Logic to perform logout
+    //if (accessToken) {
+    //  localStorage.removeItem('access_token');
+    //  localStorage.removeItem('refresh_token');
+    //}
     this.isLoggedInSubject.next(false);
-    setTimeout(() => {
-      this.router.navigate(['/']);
-      window.location.href="/";
-    }, 500)
   }
 
   refreshToken(){

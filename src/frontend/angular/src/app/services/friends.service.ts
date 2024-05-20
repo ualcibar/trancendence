@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
+import { AuthService } from './auth.service';
 
 export class UserInfo{
   user_id : number;
@@ -26,6 +27,7 @@ export class FriendsService {
 
   client_locale: string = 'en';
 
-  constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService, private translateService: TranslateService) {
+    this.authService.amILoggedIn();
   }
 }
