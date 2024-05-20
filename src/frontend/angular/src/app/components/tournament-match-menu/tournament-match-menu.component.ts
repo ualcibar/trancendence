@@ -1,7 +1,7 @@
 import { Component, Output, Input, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatchmakingService, GameSettings, GameType} from '../../services/matchmaking.service';
+import { GameSettings, GameType} from '../../services/matchmaking.service';
 import { MapsName } from '../../services/map.service';
 @Component({
   selector: 'app-tournament-match-menu',
@@ -20,7 +20,7 @@ export class TournamentMatchMenuComponent {
   gameSettings : GameSettings;
   @Output() new_match_tournament: EventEmitter<GameSettings> = new EventEmitter<GameSettings>();
 
-  constructor(private matchmakingService : MatchmakingService){
+  constructor(){
     this.gameSettings = new GameSettings(GameType.Match,'','',true, 1);
   }
   togglePublicPrivate(){
@@ -47,9 +47,9 @@ export class TournamentMatchMenuComponent {
   }
   createMatchTournament(){
     console.log(`match name = ${this.gameSettings.name}`);
-    this.matchmakingService.newGame(this.gameSettings);
-    //this.new_match_tournament.emit(this.gameSettings);
-    this.escapeKeyPressed.emit();
+    //this.matchmakingService.newGame(this.gameSettings);
+    this.new_match_tournament.emit(this.gameSettings);
+    //this.escapeKeyPressed.emit();
   }
 
   onBlur() {

@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
 import { Ball, Block, Paddle} from '../pages/pong/pong.component';
-import { GameManagerService,  MatchConfig, OnlineMatchManager } from './game-config.service';
+import { GameManagerService,  MatchConfig, OnlineMatchConfig, OnlineMatchManager, OnlineMatchSettings } from './game-config.service';
 import { MapsName, MapsService } from './map.service';
 export enum GameType {
   Tournament = 'Tournament',
@@ -100,7 +100,7 @@ export class OnlinePlayer{
   }
 }
 
-export class MatchInfo{
+/*export class MatchInfo{
   host : UserInfo;
   players : OnlinePlayer[] = [];
   score : [number,number] = [0,0];
@@ -131,7 +131,7 @@ export class MatchInfo{
   getPlayer(playerId : number) : OnlinePlayer | undefined{
     return this.players.filter(player => player.info.user_id === playerId)[0];
   }
-}
+}*/
 
 export class GameSettings{
   gameType : GameType;
@@ -246,7 +246,7 @@ export class MatchmakingService {
         const player = this.onlineManager.playerConnected(playerId)
         if (!player) {
           console.error('on ice connection state change: player wasnt set');
-          console.error('sender id: ', playerId, ' current match:', this.onlineManager.getConfig().info);
+          console.error('sender id: ', playerId, ' current match:', this.onlineManager.getMatchSettings());
           return;
         }
         if (this.onlineManager.amIHost){
@@ -404,11 +404,11 @@ export class MatchmakingService {
         case 'new_match_result':
           switch (data.status){
             case 'success':
-              const config = new MatchConfig(
-                new MatchInfo(data.match.name, data.match.teamSize, this.authService.user_info),
+              const config = new OnlineMatchConfig(
+                new OnlineMatchSettings(data.match.settings, data.match.name,this.authService.user_info),
                 this.maps.getMapSettings(MapsName.Default)!
               );
-              this.gameManager.startOnlineMatch(config, true);
+              this.gameManager.createOnlineMatch(config, true);
               //this.currentMatchInfo = new MatchInfo(data.match.name, 1, this.authService.user_info);//info needs to be somewhere else
               //this.currentMatch = new MatchGame(OnlineMatchState.WaitingForPlayers, new Score([0,0]), undefined, 0,this.currentMatchInfo);
               this.maxCurrentPeerConnections = 2;//info needs to be somewhere else
@@ -450,14 +450,15 @@ export class MatchmakingService {
             case 'success':
               console.log('match info,', data.match);
               this.state .setValue(MatchMakingState.OnGame);
-              const config = new MatchConfig(
-                new MatchInfo(data.match.name, data.match.max_players / 2, new UserInfo(data.match.host.username, data.match.host.id, true)),
+              const config = new OnlineMatchConfig(
+                new OnlineMatchSettings(data.match.settings, data.match.name,
+                  new UserInfo(data.match.host.username, data.match.host.id, true)),
                 this.maps.getMapSettings(MapsName.Default)!
               );//!TODO, the map is always default must be passed
               //this.setCurrentMatchState(OnlineMatchState.Connecting);
               //this.currentMatch = new MatchGame(OnlineMatchState.WaitingForPlayers, new Score([0,0]), undefined,0, this.currentMatchInfo);
               this.maxCurrentPeerConnections = data.match.max_players - 1;
-              this.gameManager.startOnlineMatch(config,false);
+              this.gameManager.createOnlineMatch(config,false);
               console.log('successfully joined game group, waiting for webrtc');
               break;
             default:
@@ -735,7 +736,7 @@ export class MatchmakingService {
     }
   }
 
-  getMatchInfo() : MatchInfo | undefined{
-    return this.onlineManager?.getConfig().info;
+  getOnlineMatchSettings() : OnlineMatchSettings | undefined{
+    return this.onlineManager?.getOnlineMatchSettings();
   }
 }

@@ -1,7 +1,7 @@
 import { Vector2, Vector3 } from "three";
-import { MatchInfo, MatchUpdate } from "./matchmaking.service";
+import { MatchUpdate } from "./matchmaking.service";
 import { Ball, Paddle, Block, WallType} from "../pages/pong/pong.component";
-import { Manager } from "./game-config.service";
+import { GameManagerService, Manager, MatchSettings } from "./game-config.service";
 import { Injectable } from "@angular/core";
 
 export const colorPalette = {
@@ -61,6 +61,39 @@ class MapSettingsCreateInfo{
   public friction : number = Math.PI / 6;
 
   public deltaFactor : number = Math.PI / 2;
+
+  createDefaultWalls(manager: Manager): Block[] {
+    return [
+      new Block(new Vector2(0, this.topLimit),
+        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+        WallType.Collision,
+        colorPalette.white,
+        manager
+      ),
+      new Block(new Vector2(0, this.bottomLimit),
+        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+        WallType.Collision,
+        colorPalette.white,
+        manager
+      ),
+    ];
+  }
+  createDefaultScoreBlocks(manager: Manager): Block[] {
+    return [
+      new Block(new Vector2(0, this.topLimit),
+        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+        WallType.Collision,
+        colorPalette.white,
+        manager
+      ),
+      new Block(new Vector2(0, this.topLimit),
+        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+        WallType.Collision,
+        colorPalette.white,
+        manager
+      ),
+    ];
+  }
 }
 
 export class Walls{
@@ -118,12 +151,13 @@ export class MapSettings{
 
   public readonly deltaFactor! : number;
 
-  public readonly blocks! : Block[];
+  public  readonly blocks : Block[];
 
-  constructor(info : MapSettingsCreateInfo){
+  constructor(info : MapSettingsCreateInfo, blocks : Block[]){
     Object.assign(this, info);
+    this.blocks = blocks
   }
-  createMatchInitUpdate(info : MatchInfo, manager : Manager) : MatchUpdate{
+  createMatchInitUpdate(info : MatchSettings, manager : Manager) : MatchUpdate{
     const paddles : Paddle[] = new Array<Paddle>(info.teamSize * 2);
     for (let [index,paddle] of paddles.entries()){
       const pos : Vector3 = index < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
@@ -142,7 +176,7 @@ export class MapSettings{
                         this.ballLightIntensity,
                         manager
     );
-    return new MatchUpdate(paddles, balls,this.blocks, 0);  
+    return new MatchUpdate(paddles, balls,this.blocks!, 0);  
   }
 }
 
@@ -157,14 +191,16 @@ export enum MapsName{
 export class MapsService {
     maps: Map<MapsName, MapSettings> = new Map<MapsName, MapSettings>();
 
-    constructor() {
-        this.initMaps();
+    constructor(private manager : GameManagerService) {
+      this.initMaps()
     }
+
     initMaps() {
         const defaultInfo = new MapSettingsCreateInfo();
-        this.maps.set(MapsName.Default, new MapSettings(defaultInfo));
+
+        this.maps.set(MapsName.Default, new MapSettings(defaultInfo, defaultInfo.createDefaultWalls(this.manager)));
         const infernoInfo = new MapSettingsCreateInfo();
-        this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo));
+        this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, defaultInfo.createDefaultWalls(this.manager)));
     }
     getMapSettings(map: MapsName): MapSettings | undefined {
         return this.maps.get(map);

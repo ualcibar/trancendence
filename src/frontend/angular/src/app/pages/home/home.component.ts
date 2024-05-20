@@ -7,10 +7,13 @@ import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobb
 import { TournamentMatchMenuComponent } from '../../components/tournament-match-menu/tournament-match-menu.component';
 
 import { AuthService } from '../../services/auth.service';
-import { MatchmakingService, MatchMakingState, OnlineMatchState} from '../../services/matchmaking.service';
+import { GameSettings, GameType, MatchmakingService, MatchMakingState, OnlineMatchState} from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
 
 import { fadeInOut } from '../../../assets/animations/fadeInOut';
+import { GameManagerService, MatchConfig, MatchSettings } from '../../services/game-config.service';
+import { MapSettings, MapsService } from '../../services/map.service';
+import { Router } from '@angular/router';
 
 enum HomeState{
     Home,
@@ -27,31 +30,62 @@ enum HomeState{
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
-    chatUnwrapped : boolean = false;
-    isAnimating : boolean = false;
-    state : HomeState;
-    HomeState = HomeState;
-    OnlineMatchState = OnlineMatchState;
-    MatchMakingState = MatchMakingState;
+  chatUnwrapped: boolean = false;
+  isAnimating: boolean = false;
+  state: HomeState;
+  HomeState = HomeState;
+  OnlineMatchState = OnlineMatchState;
+  MatchMakingState = MatchMakingState;
 
-    constructor(public matchmakingService : MatchmakingService, private authService :AuthService) {
-        this.state = HomeState.Home;
-    }
+  constructor(public matchmakingService: MatchmakingService,
+    private authService: AuthService,
+    private gameManager : GameManagerService,
+    private maps : MapsService,
+    private router : Router) {
+    this.state = HomeState.Home;
+  }
 
-    ngOnInit(): void {
-    }
+  ngOnInit(): void {
+  }
 
-    changeState(newState: HomeState): void {
-        this.state = newState; // Cambia el estado
-        this.isAnimating = true;
-        console.log(this.isAnimating); 
-        // Espera un tiempo antes de marcar que la animación ha terminado
-        setTimeout(() => {
-          this.isAnimating = false;
-        }, 301); // Ajusta este valor según la duración de tu animación
+  changeState(newState: HomeState): void {
+    this.state = newState; // Cambia el estado
+    this.isAnimating = true;
+    console.log(this.isAnimating);
+    // Espera un tiempo antes de marcar que la animación ha terminado
+    setTimeout(() => {
+      this.isAnimating = false;
+    }, 301); // Ajusta este valor según la duración de tu animación
+  }
+  refresh() {
+    this.authService.refreshToken();
+  }
+  scapeKeyPressed() {
+    console.log('escape');
+    this.changeState(HomeState.Home);
+  }
+
+  new_match_tournament(newGame: any) {
+    console.log('new match!!!!!!!!!!!!')
+    const map = this.maps.getMapSettings(newGame.map);
+    if (!map) {
+      console.error('no such map');
+      this.changeState(HomeState.Home);
+      return
     }
-    refresh(){
-      this.authService.refreshToken();
+    if (newGame.gameType === GameType.Match) {
+      this.gameManager.createMatch(new MatchConfig(
+        new MatchSettings(newGame.name, newGame.size),
+        map
+      ));
+      setTimeout(()=> this.gameManager.start(), 1000);
+      console.log('match creted')
+      this.router.navigate(['/play']);
+      console.log('redirecting')
     }
+    //!TODO
+//    else if (newGame.gameType === GameType.Tournament)
+//      this.gameManager.startTournament();
+  }
 }
 

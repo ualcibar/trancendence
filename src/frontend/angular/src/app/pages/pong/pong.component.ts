@@ -1,12 +1,12 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
-import { Vector2 } from 'three';
+import { Vector2, Vector3} from 'three';
 import { Subscription } from 'rxjs';
 
 
-import { MatchInfo, MatchUpdate, MatchmakingService } from '../../services/matchmaking.service';
-import {GameManagerService, GameManagerState, Manager, MatchState } from '../../services/game-config.service';
+import { MatchUpdate, MatchmakingService } from '../../services/matchmaking.service';
+import {GameManagerService, GameManagerState, Manager, MatchSettings, MatchState } from '../../services/game-config.service';
 import { Router } from '@angular/router';
 
 import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData } from '../../utils/behaviour';
@@ -90,12 +90,12 @@ export class Block implements EventObject{
   tickBehaviour : TickBehaviour<Block>;
   eventBehaviour : EventBehaviour<Block>;
   pos : Vector2;
-  dimmensions : Vector2;
+  dimmensions : Vector3;
   type : WallType;
   color : number;
   speed : number;
 
-  constructor(pos : Vector2, dimmensions : Vector2, type : WallType, color : number, manager : Manager){
+  constructor(pos : Vector2, dimmensions : Vector3, type : WallType, color : number, manager : Manager){
     this.tickBehaviour = new TickBehaviour<Block>(this);
     const accelarate = tickBehaviourAccelerate(10);//example
     this.tickBehaviour.bind(accelarate);
@@ -176,7 +176,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   lastUpdate: number = 0;
   currentMatchStateId = 0;
   map!: MapSettings;
-  info!: MatchInfo;
+  matchSettings!: MatchSettings;
   update!: MatchUpdate;
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
@@ -238,8 +238,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   initValues() {
-    this.map = this.manager.getConfig().settings;
-    this.info = this.manager.getConfig().info;
+    this.map = this.manager.getMapSettings();
+    this.matchSettings = this.manager.getMatchSettings();
     this.update = this.manager.getMatchUpdate();//its a reference
     //INITIALIZE THREE.JS
     // INIT SCENE
@@ -286,7 +286,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.map.paddleDepth);
     const paddleMaterial = new THREE.MeshPhongMaterial({ color: this.map.paddleColor });
 
-    for (let i = 0; i < this.info.teamSize * 2; i++) {
+    for (let i = 0; i < this.matchSettings.teamSize * 2; i++) {
       const paddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
       this.paddles.push(paddle);
       this.scene.add(paddle);
@@ -477,8 +477,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
         const intersection: [boolean, {pos : Vector2, normal : Vector2} | undefined] =
           this.circleRectangleIntersection(new THREE.Vector2(ball.pos.x, ball.pos.y),
             this.map.ballRadius,
-            new THREE.Vector2(block.pos.x, block.pos.y),
-            block.dimmensions);
+            new Vector2(block.pos.x, block.pos.y),
+            new Vector2(block.dimmensions.x, block.dimmensions.y)
+          );
         //todo!
         if (intersection[0]) {
           if (intersection[1] === undefined) {

@@ -29,20 +29,20 @@ export class LobbyMatchComponent {
     }
     else{
       this.state = LobbyMatchState.Ok
-      const info = this.matchmaking.getMatchInfo();
+      const info = this.matchmaking.getOnlineMatchSettings();
       if (!info){
         this.state = LobbyMatchState.Waiting;
         return;
       }
-      this.team_a = new Array(info.teamSize).fill(undefined);
-      this.team_b = new Array(info.teamSize).fill(undefined);
+      this.team_a = new Array(info.settings.teamSize).fill(undefined);
+      this.team_b = new Array(info.settings.teamSize).fill(undefined);
       this.team_a[0] = info.host;
       let player_index = 0;
-      for (let i = 1; i < info.teamSize; i++) {
+      for (let i = 1; i < info.settings.teamSize; i++) {
         this.team_a[i] = info.players[player_index].info;
         player_index++;
       }
-      for (let i = 0; i < info.teamSize; i++) {
+      for (let i = 0; i < info.settings.teamSize; i++) {
         if (info.players.length < i)
           this.team_b[i] = info.players[player_index].info;
         else
