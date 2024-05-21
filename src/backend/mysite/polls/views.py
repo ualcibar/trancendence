@@ -68,6 +68,7 @@ def getInfo(request, user_id=None):
 
     return JsonResponse({
         'username': user.username,
+        'email': user.email,
         'userid': user.id,
         'status': user.status,
         'total': user.total,
@@ -167,7 +168,7 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-    valid_keys = ['user_color', 'user_language', 'username']
+    valid_keys = ['user_color', 'user_language', 'username', 'email']
 
     for key, value in data.items():
         if key in valid_keys:
