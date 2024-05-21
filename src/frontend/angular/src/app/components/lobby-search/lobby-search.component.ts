@@ -111,8 +111,6 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
     console.debug(`joining game called ${game.name}`);
     if (this.current_entry === GameType.Match)
       this.matchMakingService.joinMatch(game.name);
-    else if (this.current_entry === GameType.Tournament)
-      this.matchMakingService.joinTournament(game.name);
   }
 
 	// Función para hacer autoscroll hacia abajo

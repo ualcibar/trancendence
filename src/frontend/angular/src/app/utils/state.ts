@@ -1,7 +1,8 @@
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, Observable, Subscription} from "rxjs";
 export class State<T>{
     private subject : BehaviorSubject<T>;
     observable : Observable<T>;
+    subscription: Subscription | undefined;
     constructor (val : T){
         this.subject = new BehaviorSubject<T>(val);
         this.observable = this.subject.asObservable();
@@ -11,5 +12,8 @@ export class State<T>{
     }
     setValue(newValue : T){
         this.subject.next(newValue);
+    }
+    subscribe(subscription : any){
+        this.observable.subscribe(subscription);
     }
 }

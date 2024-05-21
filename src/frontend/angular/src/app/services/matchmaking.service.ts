@@ -4,8 +4,9 @@ import { Subject, Observable} from 'rxjs';
 import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
-import { Vector2 } from 'three';
-
+import { Ball, Block, Paddle} from '../pages/pong/pong.component';
+import { GameManagerService,  Manager,  MatchConfig, OnlineMatchConfig, OnlineMatchManager, OnlineMatchSettings } from './game-config.service';
+import { MapsName, MapsService } from './map.service';
 export enum GameType {
   Tournament = 'Tournament',
   Match = 'Match',
@@ -16,7 +17,7 @@ export enum MatchMakingState{
   OnGame,
 }
 
-export enum GameState{
+export enum OnlineMatchState{
   Joining = 'joining', 
   Connecting = 'connecting',
   WaitingForPlayers = ' waiting for players',
@@ -30,62 +31,50 @@ export enum GameState{
 }
 
 export class MatchUpdate{
-  paddlesPosition : number[];
-  paddlesDirection : number[];
-  ballsPosition : Vector2[];
-  ballsDirection : Vector2[];
-  ballsSpeed : number[];
+  paddles : Paddle[];
+  balls : Ball[];
+  blocks : Block[];
   id : number;
-  constructor(paddlesPosition : number[] | undefined, paddlesDirection : number[] | undefined,
-              ballsPosition : Vector2[] | undefined, ballsDirection : Vector2[] | undefined,
-              ballsSpeed : number[] | undefined, id : number| undefined,
-              config : MatchInfo){
-    if (paddlesPosition)
-      this.paddlesPosition = paddlesPosition;
-    else
-      this.paddlesPosition = new Array<number>(config.teamSize * 2).fill(0);
-    
-    if (paddlesDirection)
-      this.paddlesDirection = paddlesDirection;
-    else
-      this.paddlesDirection = new Array<number>(config.teamSize * 2).fill(0);
-
-    if (ballsPosition)
-      this.ballsPosition = ballsPosition;
-    else
-      this.ballsPosition = new Array<Vector2>(1).fill(new Vector2(0,0));
-    
-    if (ballsDirection)
-      this.ballsDirection = ballsDirection;
-    else
-      this.ballsDirection = new Array<Vector2>(1).fill(new Vector2(0,0));
-
-    if (ballsSpeed)
-      this.ballsSpeed = ballsSpeed;
-    else
-      this.ballsSpeed = new Array<number>(1).fill(0);
-
-    if (id)
-      this.id = id;
-    else
-      this.id = 0;
+  constructor(paddles : Paddle[], balls : Ball[], blocks : Block[], id : number){
+    this.paddles = paddles;
+    this.balls = balls;
+    this.blocks = blocks;
+    this.id = id;
+  }
+  subscribeAllToManager(manager : Manager){
+    console.log('online once')
+    this.balls.forEach(ball => ball.subscribeToManager(manager));
+    this.paddles.forEach(paddle => paddle.subscribeToManager(manager));
+    this.blocks.forEach(block => block.subscribeToManager(manager));
+  }
+  runTickBehaviour(delta : number){
+    for (let i = 0; i < this.paddles.length; i++){
+      this.paddles[i].tickBehaviour.runTick(delta);
+    }
+    for (let i = 0; i < this.balls.length; i++){
+      this.balls[i].tickBehaviour.runTick(delta);
+    }
+for (let i = 0; i < this.blocks.length; i++){
+      this.blocks[i].tickBehaviour.runTick(delta);
+    }
   }
 }
 
+/*
 export class MatchGame{
-  state : State<GameState>;
+  state : State<OnlineMatchState>;
   score : Score;
   update : MatchUpdate;
-  constructor (state : GameState, score : Score, update : MatchUpdate | undefined, id : number, config : MatchInfo){
+  constructor (state : OnlineMatchState, score : Score, update : MatchUpdate | undefined, id : number, config : MatchInfo){
     this.state = new State(state);
     this.score = score;
     if (update)
       this.update = update;
     else{
-      this.update = new MatchUpdate(undefined,undefined,undefined,undefined,undefined, undefined,config);
+      this.update = new MatchUpdate(undefined,undefined,undefined,undefined,undefined, [],undefined,config);
     }
   } 
-}
+}*/
 
 export class Score{
   score : [number, number];
@@ -103,7 +92,7 @@ export class Score{
   }
 }
 
-enum OnlinePlayerState{
+export enum OnlinePlayerState{
   Joining,
   Connecting,
   Connected,
@@ -111,7 +100,7 @@ enum OnlinePlayerState{
   Blocked
 }
 
-class OnlinePlayer{
+export class OnlinePlayer{
   state : State<OnlinePlayerState>;
   info : UserInfo;
 
@@ -128,7 +117,7 @@ class OnlinePlayer{
   }
 }
 
-export class MatchInfo{
+/*export class MatchInfo{
   host : UserInfo;
   players : OnlinePlayer[] = [];
   score : [number,number] = [0,0];
@@ -159,44 +148,7 @@ export class MatchInfo{
   getPlayer(playerId : number) : OnlinePlayer | undefined{
     return this.players.filter(player => player.info.user_id === playerId)[0];
   }
-}
-
-export class Tournament{
-  host : UserInfo;
-  players : UserInfo[] = [];
-  scores : [number,number][] = [];
-  winners : number[] = [];
-  teamSize : number;
-  name : string;
-  
-  constructor (name : string, teamSize : number, host : UserInfo){
-    this.name = name;
-    this.teamSize = teamSize;
-    this.host = host;
-  }
-
-  addPlayer(newPlayer : UserInfo) : boolean{
-    if (this.players.length === 8 * this.teamSize){
-      return false;
-    }
-    this.players.push(newPlayer);
-    return true;
-  }
-
-  removePlayer(username : string) : boolean{
-    const index_to_remove = this.players.findIndex((player) => player.username === username);
-    if (index_to_remove === -1)
-      return false;
-    this.players.splice(index_to_remove, 1);
-    return true
-  }
-
-}
-
-export enum Maps{
-  Default = 'Default',
-  Fancy = 'Fancy'
-}
+}*/
 
 export class GameSettings{
   gameType : GameType;
@@ -204,7 +156,7 @@ export class GameSettings{
   tags : string;
   teamSize : number;
   winScore : number = 3;
-  map : Maps = Maps.Default;
+  map : MapsName = MapsName.Default;
   publicGame : boolean;
   constructor( gameType : GameType, name : string, tags : string,
                publicGame: boolean, teamSize : number){
@@ -216,45 +168,52 @@ export class GameSettings{
   }
 }
 
-export enum MatchmakingUptate{
-  Match,
-  Tournament
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatchmakingService {
+  //backend connection
   webSocketUrl = 'wss://localhost:1501/ws/matchmaking/global/';
-  webSocket : WebSocket | undefined;
+  webSocket! : WebSocket;
 
+  //state of the service
+  state : State<MatchMakingState> = new State<MatchMakingState>(MatchMakingState.Standby);
+  
+  //current match info
+  //this should be managed by the gameManager onlineMatch
+/*
+  currentMatchInfo : MatchInfo | undefined;
+  currentMatch : MatchGame | undefined;
   amIHost : boolean = false;
+*/
+//the connection though could stay here
   maxCurrentPeerConnections : number = 0; 
   peerConnections : (Map<number,RTCPeerConnection> | RTCPeerConnection | undefined);
   dataChannels : (Map<number,RTCDataChannel> | RTCDataChannel | undefined);
-  
+ 
+  //info about the current matches available
+  entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
   private dataChangedSubject: Subject<void> = new Subject<void>();
   dataChanged$: Observable<void> = this.dataChangedSubject.asObservable();
 
-  entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
+  //private currentMatchInfoStateSubject : BehaviorSubject<OnlineMatchState | undefined>;
+  //currentMatchInfoState$  : Observable<OnlineMatchState | undefined>;
+  private onlineManager? : OnlineMatchManager | undefined;
 
-  state : State<MatchMakingState> = new State<MatchMakingState>(MatchMakingState.Standby);
-  currentMatchInfo : MatchInfo | undefined;
-  //private currentMatchInfoStateSubject : BehaviorSubject<GameState | undefined>;
-  //currentMatchInfoState$  : Observable<GameState | undefined>;
-  currentMatch : MatchGame | undefined;
-
-  constructor(private authService : AuthService,private router : Router){
+  constructor(private authService : AuthService,private router : Router, private maps : MapsService, private gameManager : GameManagerService){
     this.entries.set(GameType.Match, []);
     this.entries.set(GameType.Tournament,[]);
-    //this.currentMatchInfoStateSubject = new BehaviorSubject<GameState | undefined>(undefined);
+    //this.currentMatchInfoStateSubject = new BehaviorSubject<OnlineMatchState | undefined>(undefined);
     //this.currentMatchInfoState$ = this.currentMatchInfoStateSubject.asObservable();
     this.connectToServer();
     if(this.isConnected()){
       this.sendMessage(JSON.stringify({type : '/getStatus'}));
     }
   }
-  webrtcCreatePeerConnection(playerId: number | undefined = undefined) : RTCPeerConnection{
+  webrtcCreatePeerConnection(playerId: number | undefined = undefined) : RTCPeerConnection | undefined{
+    if (this.onlineManager === undefined)
+      return;
     const pc_config = {
       iceServers: [
         {
@@ -265,24 +224,54 @@ export class MatchmakingService {
     const peerConnection = new RTCPeerConnection(pc_config);
     peerConnection.onicecandidate = event => {
       if (event.candidate){
+        if (!this.onlineManager){
+          console.error('on ice candidate: online manager is not set');
+          return;  
+        }
+        this.onlineManager.subscribeOnlineMatchState((state : OnlineMatchState) => {
+            console.log('ice candidate: current game state', state);
+            if (state === OnlineMatchState.WaitingForPlayers || state === OnlineMatchState.Connecting) {
+              console.log("Sending ice candidate to peer", event.candidate);
+              const message = { type: '/webrtc/candidate', candidate: event.candidate };
+              this.sendMessage(JSON.stringify(message));
+            } 
+        })
+        /*refactored
         if (this.currentMatch === undefined){
           console.error('current match must be set');
         }else{
           this.currentMatch.state.observable.subscribe(state => {
             console.log('ice candidate: current game state', state);
-            if (state === GameState.WaitingForPlayers || state === GameState.Connecting) {
+            if (state === OnlineMatchState.WaitingForPlayers || state === OnlineMatchState.Connecting) {
               console.log("Sending ice candidate to peer", event.candidate);
               const message = { type: '/webrtc/candidate', candidate: event.candidate };
               this.sendMessage(JSON.stringify(message));
             }
           });
-        }
+          
+        }*/
       }
     }
     peerConnection.oniceconnectionstatechange = event => {
       console.log("ICE connection state: ", peerConnection.iceConnectionState);
       if (peerConnection.iceConnectionState === 'connected'){
-        this.state.setValue(MatchMakingState.OnGame);
+        //this.state.setValue(MatchMakingState.OnGame); refactor
+        if (!this.onlineManager){
+          console.error('player connected without online manager being set');
+          return
+        }
+        const player = this.onlineManager.playerConnected(playerId)
+        if (!player) {
+          console.error('on ice connection state change: player wasnt set');
+          console.error('sender id: ', playerId, ' current match:', this.onlineManager.getMatchSettings());
+          return;
+        }
+        if (this.onlineManager.amIHost){
+          const message = { type: '/confirm_join/match', player: player.info.username, playerId: player.info.user_id };
+          console.log('confirming new player connection has been stablished');
+          this.sendMessage(JSON.stringify(message));
+        } 
+        /*refactored
         if (this.amIHost){
           if (playerId === undefined){
             console.error('on ice connection state change: targetId not set while being host');
@@ -299,6 +288,7 @@ export class MatchmakingService {
           console.log('confirming new player connection has been stablished');
           this.sendMessage(JSON.stringify(message));
         }
+        */
       }
     }
     peerConnection.ontrack = event => {
@@ -317,14 +307,14 @@ export class MatchmakingService {
     dataChannel.onopen = () => {
       console.log('Data channel opened');
     };
-    dataChannel.onmessage = (event => {
+    dataChannel.onmessage = (event => {/* TEMP COMMENT
       if (this.currentMatch === undefined)
         return;
       const message = JSON.parse(event.data);
       if (message.type === 'update')
         //console.log('update', message.data)
         this.currentMatch.update = message.data; 
-      //console.log('DATACHANNEL message: ',event.data);
+      //console.log('DATACHANNEL message: ',event.data);*/
     });
     dataChannel.onclose = () => {
       console.log('Data channel closed');
@@ -335,16 +325,15 @@ export class MatchmakingService {
       console.error('Data channel error:', error);
     };
   }
-  getCurrentMatchState() : GameState | undefined{
-    if (this.currentMatch === undefined)
+  getCurrentMatchState() : OnlineMatchState | undefined{
+    return this.onlineManager?.getOnlineState();
+    /*if (this.currentMatch === undefined)
       console.error('current game state is not initialized');
-    return this.currentMatch?.state.getCurrentValue();
+    return this.currentMatch?.state.getCurrentValue();*/
   }
-  setCurrentMatchState(state : GameState){
-    if (this.currentMatch === undefined)
+  setCurrentMatchState(state : OnlineMatchState){
+    if (this.onlineManager?.setOnlineMatchState(state) === undefined)
       console.error('current game state is not initialized');
-    else
-      this.currentMatch.state.setValue(state);
   }
 
   webrtcCandidate(data: any) {
@@ -432,13 +421,17 @@ export class MatchmakingService {
         case 'new_match_result':
           switch (data.status){
             case 'success':
-              this.currentMatchInfo = new MatchInfo(data.match.name, 1, this.authService.user_info);//info needs to be somewhere else
-              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), undefined, 0,this.currentMatchInfo);
-              //this.setCurrentMatchState(GameState.WaitingForPlayers)
+              const config = new OnlineMatchConfig(
+                new OnlineMatchSettings(data.match.settings, data.match.name,this.authService.user_info),
+                this.maps.getMapSettings(MapsName.Default)!
+              );
+              this.gameManager.createOnlineMatch(config, true);
+              //this.currentMatchInfo = new MatchInfo(data.match.name, 1, this.authService.user_info);//info needs to be somewhere else
+              //this.currentMatch = new MatchGame(OnlineMatchState.WaitingForPlayers, new Score([0,0]), undefined, 0,this.currentMatchInfo);
               this.maxCurrentPeerConnections = 2;//info needs to be somewhere else
               this.dataChannels = new Map();
               this.peerConnections = new Map();
-              this.amIHost = true;
+              //this.amIHost = true;
               this.state.setValue(MatchMakingState.OnGame);
               console.log("successfully created match");
               break;
@@ -474,13 +467,16 @@ export class MatchmakingService {
             case 'success':
               console.log('match info,', data.match);
               this.state .setValue(MatchMakingState.OnGame);
-              this.currentMatchInfo = new MatchInfo(data.match.name, data.match.max_players / 2, new UserInfo(data.match.host.username, data.match.host.id, true));
-              //this.setCurrentMatchState(GameState.Connecting);
-              //!todo
-              this.currentMatch = new MatchGame(GameState.WaitingForPlayers, new Score([0,0]), undefined,0, this.currentMatchInfo);
+              const config = new OnlineMatchConfig(
+                new OnlineMatchSettings(data.match.settings, data.match.name,
+                  new UserInfo(data.match.host.username, data.match.host.id, true)),
+                this.maps.getMapSettings(MapsName.Default)!
+              );//!TODO, the map is always default must be passed
+              //this.setCurrentMatchState(OnlineMatchState.Connecting);
+              //this.currentMatch = new MatchGame(OnlineMatchState.WaitingForPlayers, new Score([0,0]), undefined,0, this.currentMatchInfo);
               this.maxCurrentPeerConnections = data.match.max_players - 1;
+              this.gameManager.createOnlineMatch(config,false);
               console.log('successfully joined game group, waiting for webrtc');
-              this.amIHost = false;
               break;
             default:
               console.error(`cant find status ${data.status}`);
@@ -488,20 +484,7 @@ export class MatchmakingService {
           }
           break;
         case 'player_joined_match':
-          if (this.amIHost)
-            return;
-          if (this.currentMatchInfo !== undefined) {
-            this.currentMatchInfo.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true), OnlinePlayerState.Connecting);
-            console.log('player joined match !!!!!!!!!!!!!');
-            //if (this.u this.authService.user_info.username === this.currentMatchInfo?.host.username)
-                return;
-            //}
-            
-          }else{
-            console.error('received a player joined match while not in a game');
-            return 
-          }
-          console.log(`player ${data.username} joined the match`);
+          this.onlineManager?.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true));
           break;
         case 'player_joined_match_to_host':
           console.log('player joined match to host')
@@ -509,14 +492,11 @@ export class MatchmakingService {
             console.error('webrtc answer switch: peerconnection or datachannels is not map');
             return;
           }
-          if (this.currentMatchInfo !== undefined) {
-            this.currentMatchInfo.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true), OnlinePlayerState.Connecting);
-            console.log('player joined match !!!!!!!!!!!!!');
-          } else {
+          if (this.onlineManager?.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true)) === undefined){
             console.error('received a player joined match while not in a game');
             return
           }
-          const peerConnection = this.webrtcCreatePeerConnection(data.senderId);
+          const peerConnection = this.webrtcCreatePeerConnection(data.senderId)!;//we dont care because we already checked for online manager
           this.peerConnections.set(data.senderId, peerConnection);
           const dataChannel = peerConnection.createDataChannel(data.sender);
           this.webrtcSetDataChannel(dataChannel);
@@ -546,32 +526,25 @@ export class MatchmakingService {
           this.webrtcCandidate(data);
           break;
         case 'confirm_join_match_result':
-          if (this.currentMatchInfo === undefined){
+          if (this.onlineManager === undefined){
             console.error('confirm join match result switch: currentMatchInfo undefined');
             return
           }
-          const player = this.currentMatchInfo.getPlayer(data.playerId);
-          if (player === undefined) {
+          if (!this.onlineManager.playerConnected(data.playerId)){
             console.error('confirm join match result switch: playerId doesn\'t match any current player');
-            console.error('current game data, ', this.currentMatchInfo);
             return;
           }
-          player.changeState(OnlinePlayerState.Connected);
           if (data.player === this.authService.user_info.username){
-            this.setCurrentMatchState(GameState.WaitingForPlayers);
+            this.setCurrentMatchState(OnlineMatchState.WaitingForPlayers);
           }
-          if (this.amIHost){
-            if (this.currentMatchInfo.players.length + 1 === this.currentMatchInfo.teamSize * 2
-              && this.currentMatchInfo.players.every(player => player.getState() === OnlinePlayerState.Connected)){
-                const message = {type : '/match/all_players_connected'};
-              this.sendMessage(JSON.stringify(message));
-              this.broadcastWebrtc('checking data channels');
-            }
+          if (this.onlineManager.amIHost && this.onlineManager.areAllPlayersConnected()){
+            const message = {type : '/match/all_players_connected'};
+            this.sendMessage(JSON.stringify(message));
           } 
           break;
         case 'match_all_players_connected':
           setTimeout(() => {
-            this.setCurrentMatchState(GameState.Starting);
+            this.setCurrentMatchState(OnlineMatchState.Starting);
             setTimeout(()=> this.router.navigate(['/play']), 100);
           }, 3000);
           break;
@@ -582,18 +555,19 @@ export class MatchmakingService {
   }
 
   getMatchUpdate() : MatchUpdate | undefined{
-    return this.currentMatch?.update;
-  }
-  getMatchGame() : MatchGame | undefined{
-    return this.currentMatch;
+    return this.onlineManager?.getMatchUpdate();
   }
 
   sendMatchUpdate(update : MatchUpdate) {
-    if (this.currentMatchInfo === undefined || this.dataChannels === undefined){
+    if (this.dataChannels === undefined){
       console.error('send match update: current game is undefined');
       return;
     }
-    if (!this.amIHost){
+    if (this.onlineManager === undefined){
+      console.error('send match update: online manager not set')
+      return; 
+    }
+    if (!this.onlineManager.amIHost){
       console.error('send match update: only host cand send a full update')
       return;
     }
@@ -611,16 +585,20 @@ export class MatchmakingService {
   }
 
   broadcastWebrtc(message : string){
-    if (this.currentMatchInfo === undefined || this.dataChannels === undefined){
-      console.error('send match update: current game is undefined');
+    if (this.dataChannels === undefined){
+      console.error('broadcast webrtc: current game is undefined');
       return;
     }
-    if (!this.amIHost){
-      console.error('send match update: only host cand send a full update')
+    if (this.onlineManager === undefined){
+      console.error('broadcast webrtc: online manager not set')
+      return; 
+    }
+    if (!this.onlineManager.amIHost){
+      console.error('broadcast webrtc: only host cand send a full update')
       return;
     }
     if (this.dataChannels instanceof RTCDataChannel){
-      console.error('send match update: data channels must be intance of map')
+      console.error('broadcast webrt: data channels must be intance of map')
       return;
     }
     for (const chann of this.dataChannels.values()){
@@ -629,8 +607,12 @@ export class MatchmakingService {
   }
 
   webrtcHandleAnswer(data : any){
-    if (!this.amIHost){
-      console.error('webrtc handle answer: only host can handle answers, not clients');
+    if (this.onlineManager === undefined){
+      console.error('webrtc handle answer: online manager not set')
+      return; 
+    }
+    if (!this.onlineManager.amIHost){
+      console.error('webrtc handle answer: only host cand send a full update')
       return;
     }
     if (this.peerConnections === undefined || this.peerConnections instanceof RTCPeerConnection){
@@ -654,7 +636,11 @@ export class MatchmakingService {
       });
   }
   async webrtcCreateAnswer(offer: RTCSessionDescription){
-    if (this.amIHost){
+    if (this.onlineManager === undefined){
+      console.error('webrtc create answer: online manager not set')
+      return; 
+    }
+    if (this.onlineManager.amIHost){
       console.error('webrtc create answer: only client can send answer, state is currently host');
       return;
     }
@@ -733,8 +719,8 @@ export class MatchmakingService {
   async joinMatch(matchName : string){
     console.log('join match called');
     if (this.isConnected()){
-      if (this.amIHost){
-        console.error('join match: already match host');
+      if (this.onlineManager){
+        console.error('join match: already in match');
         return;
       }
       /*this.peerConnections = this.webrtcCreatePeerConnection();
@@ -749,28 +735,9 @@ export class MatchmakingService {
         name: matchName,
       }
       this.sendMessage(JSON.stringify(messageObject))
-      this.amIHost = false;
     }else
       console.error('join match: failled to join match called');
   }
-  async joinTournament(tournamentName : string){
-    if (this.isConnected()){
-      this.peerConnections = this.webrtcCreatePeerConnection();
-      const offer = await this.peerConnections.createOffer();
-      console.log('local description set')
-      await this.peerConnections.setLocalDescription(offer);
-//      const offer = await this.createOffer(this.peerConnections);
-      if (offer !== undefined && offer !== null) {
-        let messageObject = {
-          type: '/tournament/join',
-          name: tournamentName,
-          sdp: offer 
-        }
-        this.sendMessage(JSON.stringify(messageObject));
-      }
-    }
-  }
-
   /*async createOffer() : Promise<RTCSessionDescriptionInit | undefined>{
     return offer;
   }*/
@@ -784,5 +751,9 @@ export class MatchmakingService {
       console.error('WebSocket connection is not open');
       return false;
     }
+  }
+
+  getOnlineMatchSettings() : OnlineMatchSettings | undefined{
+    return this.onlineManager?.getOnlineMatchSettings();
   }
 }
