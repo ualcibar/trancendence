@@ -546,8 +546,7 @@ class MatchManager implements Manager{
           //  eventObjects.forEach(object => object.runEvent(type, data));
         break;
       default:
-          this.runEvents(this.events.getByType(type), type, data);
-        
+          this.runEvents(this.events.getByType(type), type, data); 
     }
   }
   sendEvent(type: PongEventType, data : EventData): void {
