@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 
 import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData, TickObject } from '../../utils/behaviour';
 import { MapSettings } from '../../services/map.service';
+import { BlockParameter } from '@angular/compiler';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -42,7 +43,7 @@ export enum PaddleState{
   Bot = 'bot'
 }
 
-export enum WallType{
+export enum BlockType{
   Score = 'score',
   Collision = 'collision',
   Death = 'death'
@@ -91,7 +92,21 @@ export class Ball implements EventObject,  TickObject{
   bindTick(fn: any): TickObject {
     return this.tickBehaviour.bindTick(fn);
   }
+}
 
+export enum RenderMaterialType{
+  transparent,
+  colored
+}
+
+export class RenderMaterial{
+  type : RenderMaterialType;
+  color? : number | undefined;
+
+  constructor(type : RenderMaterialType, color : number | undefined = undefined){
+    this.type = type;
+    this.color = color;
+  }
 }
 
 export class Block implements EventObject, TickObject{
@@ -99,11 +114,13 @@ export class Block implements EventObject, TickObject{
   eventBehaviour : EventBehaviour<Block>;
   pos : Vector2;
   dimmensions : Vector3;
-  type : WallType;
-  color : number;
+  type : BlockType;
+
+  material : RenderMaterial;
+
   speed : number;
 
-  constructor(pos : Vector2, dimmensions : Vector3, type : WallType, color : number, manager : Manager){
+  constructor(pos : Vector2, dimmensions : Vector3, type : BlockType, material : RenderMaterial, manager : Manager){
     this.tickBehaviour = new TickBehaviour<Block>(this);
     const accelarate = tickBehaviourAccelerate(10);//example
     this.tickBehaviour.bindTick(accelarate);
@@ -111,7 +128,7 @@ export class Block implements EventObject, TickObject{
     this.pos = pos;
     this.dimmensions = dimmensions;
     this.type = type;
-    this.color = color;
+    this.material = material;
     this.speed = 0;
   }
   getId() : number{
@@ -146,11 +163,11 @@ export class Paddle implements EventObject, TickObject{
   pos : Vector2;
   dir : Vector2;
   dimmensions : Vector3;
-  type : WallType;
+  type : BlockType;
   color : number;
   speed : number;
 
-  constructor(pos : Vector2, dimmensions : Vector3, type : WallType, color : number, dir : Vector2, speed : number, manager : Manager){
+  constructor(pos : Vector2, dimmensions : Vector3, type : BlockType, color : number, dir : Vector2, speed : number, manager : Manager){
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
     this.pos = pos;
@@ -223,7 +240,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   configStateSubscription!: Subscription;
 
-  constructor(private matchmakingService: MatchmakingService, private manager: GameManagerService,
+  constructor(private manager: GameManagerService,
     private router: Router) {
   }
 
@@ -232,7 +249,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       console.error('pong, no game has been started');
       this.router.navigate(['/']);
     }
-    this.configStateSubscription = this.manager.subscribeMatchState(
+    this.configStateSubscription = this.manager.subscribeMatchState(//it was done befor it was set??
       (state: MatchState) => {
         switch (state) {
           case MatchState.Starting:
@@ -263,9 +280,18 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  getScore() : string{
+    if (this.matchSettings === undefined)
+      return '0 0'
+    else
+      return `${this.matchSettings.score.score[0]} : ${this.matchSettings.score.score[1]}`
+  }
+
   run() {//should work for both resume and initial run
+
     if (this.renderer) {
-      this.renderer.setAnimationLoop(this.render.bind(this));//!todo better use matute method
+      requestAnimationFrame(this.render.bind(this));
+      // this.renderer.setAnimationLoop(this.render.bind(this));//!todo better use matute method
       this.running = true;
     }
   }
@@ -351,7 +377,11 @@ export class PongComponent implements AfterViewInit, OnDestroy {
         block.dimmensions.y,
         block.dimmensions.z
       );
-      const blockMaterial = new THREE.MeshPhongMaterial({ color: block.color });
+      let blockMaterial : THREE.MeshPhongMaterial;
+      if (block.material.type === RenderMaterialType.transparent)
+        blockMaterial = new THREE.MeshPhongMaterial({color : 0x00ff00, transparent : true})
+      else
+        blockMaterial = new THREE.MeshPhongMaterial({ color: block.material.color });
       this.blocks[index] = new THREE.Mesh(blockGeometry, blockMaterial);
       this.scene.add(this.blocks[index]);
     }
@@ -388,210 +418,48 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   render(time: number) {
     time *= 0.001; // convert time to seconds
-
     let pastIATime = 0;
     let predictedBallY = 0;
-
-    // DISPLAY TIME
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-
-    const timeElement = document.getElementById('time');
-    if (timeElement) {
-      timeElement.innerText = `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s `;
-    }
 
     if (this.pastTime === 0)
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
 
+    let before = Date.now()
+    this.logic(timeDifference);
+    let after = Date.now();
+    if (after - before > 3)
+      console.error('logic', after - before)
+    before = after;
+    this.renderer.render(this.scene, this.camera);
+    after = Date.now();
+    if (after - before > 3)
+      console.error('rende', after - before)
+    this.pastTime = time;
+    //}
+    requestAnimationFrame(this.render.bind(this));
+  }
+  logic(timeDifference : number){ 
     this.update.runTickBehaviour(timeDifference);
-    // MOVE BALL
-    /* !TODO 
-      if (this.manager.online
-        && !this.manager.host && this.matchmakingService.currentMatch!.update.id != this.currentMatchStateId) {
-        this.updateGame();
-      }
-      we will abstract the online part away using the managers, both send and receive
-    */
-    /*
-    for (const ball of this.update.balls){
-      const ballDiferentialDisplacement = timeDifference * ball.speed;
-      ball.pos.add(ball.dir.clone().multiplyScalar(ballDiferentialDisplacement));
-    }
-    */
+    this.allColisions();
+    this.updateScene();
+  }
 
-
-    // HANDLE PADDLE MOVEMENT
-    const pseudoLimit = 1 - this.map.ballRadius;
-    const paddleDiferentialDisplacement = timeDifference * this.map.paddleSpeed;
-
-    // PADDLES MOVEMENT
-    /* !TODO
-    manager should tell which paddle are binded to which keys, and which ones should we
-    check, BOT or ONLINE, at the end it should be a simple array to iterate over
-    for (let i = 0; i < this.info.teamSize; i++) {
-      const paddle = this.paddles[i];
-      if (key.isPressed(this.manager.keys[i].up)) {
-        // console.log('key pressed', i, paddle.mesh.position.y);
-        paddle.mesh.position.y -= paddleDiferentialDisplacement;
-        // console.log('key pressed', i, this.paddles[i].mesh.position.y);
-        //if (paddle.mesh.position.y > this.walls[0].mesh.position.y)
-        // paddle.mesh.position.y = this.walls[0].mesh.position.y - paddle.mesh.position.y;
-      }
-      if (key.isPressed(this.manager.keys[i].down)) {
-        //   console.log('key pressed');
-        paddle.mesh.position.y += paddleDiferentialDisplacement;
-        // if (paddle.mesh.position.y < this.walls[1].mesh.position.y)
-        //  paddle.mesh.position.y = this.walls[1].mesh.position.y - paddle.mesh.position.y;
-      }
-    }
-    
-    if (!this.manager.online) {
-      for (let i = this.conf.settings.gameSettings.teamSize; i < this.conf.settings.gameSettings.teamSize * 2; i++) {
-        const paddle = this.paddles[i];
-        if (key.isPressed(this.manager.keys[i].up)) {
-          paddle.mesh.position.y += paddleDiferentialDisplacement;
-        }
-        if (key.isPressed(this.manager.keys[i].down)) {
-          paddle.mesh.position.y -= paddleDiferentialDisplacement;
-        }
-      }
-    }
-    */
-    /*
-    if (key.isPressed('up') || key.isPressed('left')) {
-      rightPaddleMovement = paddleDiferentialDisplacement;
-    }
-    else if (key.isPressed('down') || key.isPressed('right')) {
-      rightPaddleMovement = - paddleDiferentialDisplacement;
-    }
-*/
-    // RIGHT PADDLE MOVEMENT
-    /*
-    if (IA) {
-      if (time - pastIATime > 1) { // IA only sees the ball every second
-        console.log('IA');
-        pastIATime = time;
-
-          // IA PREDICTION
-          predictedBallY = ball.position.y +(Math.tan(ballAngle - Math.PI) * (rightPaddle.position.x - ball.position.x));
-          while (predictedBallY > pseudoLimit) {
-            predictedBallY = pseudoLimit - (predictedBallY - pseudoLimit);
-          }
-          while (predictedBallY < -pseudoLimit) {
-            predictedBallY = -pseudoLimit - (predictedBallY + pseudoLimit);
-          }
-          predictedBallY  += (Math.random() - Math.random()) * (paddleWidth - radius)/2 ;
-          if (ballAngle < Math.PI / 2 || ballAngle > 3 * Math.PI / 2) {
-            predictedBallY = (predictedBallY + leftPaddle.position.y) / 2;
-          }
-        }
-
-      if (rightPaddle.position.y < predictedBallY - paddleWidth / 42) {
-        rightPaddleMovement = paddleDiferentialDisplacement;
-      }
-      else if (rightPaddle.position.y > predictedBallY + paddleWidth / 42) {
-        rightPaddleMovement = - paddleDiferentialDisplacement;
-      }
-      else {
-        rightPaddleMovement = 0;
-      }
-    }
-    else {
-      if (key.isPressed('up') || key.isPressed('left')) {
-        rightPaddleMovement = paddleDiferentialDisplacement;
-      }
-      else if (key.isPressed('down') || key.isPressed('right')) {
-        rightPaddleMovement = - paddleDiferentialDisplacement;
-      }
-      else {
-        rightPaddleMovement = 0;
-      }
-    }*/
-
-    // MOVE PADDLES
-    /*leftPaddle.position.y += leftPaddleMovement;
-    rightPaddle.position.y += rightPaddleMovement;*/
-
-    // LIMIT PADDLES
-    /*if (leftPaddle.position.y > topWall.position.y) {
-      leftPaddle.position.y = topWall.position.y;
-    }
-    if (leftPaddle.position.y < bottomWall.position.y) {
-      leftPaddle.position.y = bottomWall.position.y;
-    }
-    if (rightPaddle.position.y > topWall.position.y) {
-      rightPaddle.position.y = topWall.position.y;
-    }
-    if (rightPaddle.position.y < bottomWall.position.y) {
-      rightPaddle.position.y = bottomWall.position.y;
-    }*/
-
-    // MOVE LIGHT
-   /* for (let i = 0; i < this.balls.length; i++) {
-      this.ballsLight[i].position.x = this.balls[i].mesh.position.x;
-      this.ballsLight[i].position.y = this.balls[i].mesh.position.y;
-    }*/
-
-    //COLLISIONS
+  allColisions(){
+    let pos1 : Vector2 = new Vector2(0,0);
+    let pos2 : Vector2 = new Vector2(0,0);
+    let dimmension : Vector2 = new Vector2(0,0);
     for (let ballIndex = 0; ballIndex < this.balls.length; ballIndex++) {
       const ball = this.update.balls[ballIndex];
-      for (let blockIndex = 0; blockIndex < this.blocks.length; blockIndex++) {
-        const block = this.update.blocks[blockIndex];
-        const intersection: [boolean, {pos : Vector2, normal : Vector2} | undefined] =
-          this.circleRectangleIntersection(new THREE.Vector2(ball.pos.x, ball.pos.y),
-            this.map.ballRadius,
-            new Vector2(block.pos.x, block.pos.y),
-            new Vector2(block.dimmensions.x, block.dimmensions.y)
-          );
-        //todo!
-        if (intersection[0]) {
-          if (intersection[1] === undefined) {
-            console.error('intersection but no data received');
-            continue;
-          }
-          const eventData : EventData = {
-            senderId : ball.getId(),
-            targetIds : block.getId(),
-            custom : {
-              intersection : intersection[1],
-              ball : ball
-            },
-          };
-          console.log('sending event');
-          this.manager.sendEvent(PongEventType.Colision, eventData);
-          // ALL THIS LOGIC SHOULD BE ATTACHED TO EVENTS
-          //this four ifs are to avoid the ball from getting stuck
-          /*
-          if (intersection[1][1].x < 0 && ball.dir.x < 0)
-            continue;
-          if (intersection[1][1].x > 0 && ball.dir.x > 0)
-            continue;
-          if (intersection[1][1].y < 0 && ball.dir.y < 0)
-            continue;
-          if (intersection[1][1].y > 0 && ball.dir.y > 0)
-            continue;
-          console.log('impact wall')
-          console.log('inter', intersection[1][1])
-          console.log('dir', ball.dir)
-          if (intersection[1][1].x)
-            ball.dir.x *= intersection[1][1].x;
-          if (intersection[1][1].y)
-            ball.dir.y *= -1;//intersection[1][1].y;
-          console.log('dir after', ball.dir);
-          console.log('endddd\n\n')
-          */
-        }
-      }
       for (let paddlesIndex = 0; paddlesIndex < this.paddles.length; paddlesIndex++) {
         const paddle = this.update.paddles[paddlesIndex];
         const intersection: [boolean, {pos : Vector2, normal : Vector2} | undefined] =
-          this.circleRectangleIntersection(new Vector2(ball.pos.x, ball.pos.y),
+          this.circleRectangleIntersection(
+            pos1.set(ball.pos.x, ball.pos.y),
             this.map.ballRadius,
-            new Vector2(paddle.pos.x, paddle.pos.y),
-            new Vector2(paddle.dimmensions.x, paddle.dimmensions.y));          //todo!
+            pos2.set(paddle.pos.x, paddle.pos.y),
+            dimmension.set(paddle.dimmensions.x, paddle.dimmensions.y));          //todo!
         if (intersection[0]) {
           console.log('impact paddle')
           if (intersection[1] === undefined) {
@@ -607,154 +475,39 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             }
           };
           this.manager.sendEvent(PongEventType.Colision, eventData);
-          //this two ifs are to ensure the ball doesn't get stuck
-          /*if (intersection[1][1].x < 0 && ball.dir.x < 0)
+          return;
+        }
+      }
+      for (let blockIndex = 0; blockIndex < this.blocks.length; blockIndex++) {
+        const block = this.update.blocks[blockIndex];
+        const intersection: [boolean, {pos : Vector2, normal : Vector2} | undefined] =
+          this.circleRectangleIntersection(
+            pos1.set(ball.pos.x, ball.pos.y),
+            this.map.ballRadius,
+            pos2.set(block.pos.x, block.pos.y),
+            dimmension.set(block.dimmensions.x, block.dimmensions.y)
+          );
+        //todo!
+        if (intersection[0]) {
+          if (intersection[1] === undefined) {
+            console.error('intersection but no data received');
             continue;
-          if (intersection[1][1].x > 0 && ball.dir.x > 0)
-            continue;
-          if (intersection[1][1].x) {
-            //ball.dir.x *= -intersection[1][1].x;
-            const angle = (intersection[1][0].y - paddle.pos.y) / this.map.paddleHeight * 2 * intersection[1][1].x;
-            if (ball.dir.x > 0)
-              ball.dir = new Vector2(-1, 0).rotateAround(new Vector2(0, 0), angle);
-            else
-              ball.dir = new Vector2(1, 0).rotateAround(new Vector2(0, 0), angle);
           }
-          if (intersection[1][1].y)
-            console.error('shouldn\'t happen');
-          //ball.dir.y *= -intersection[1][1].y;
-          */
+          const eventData : EventData = {
+            senderId : ball.getId(),
+            targetIds : block.getId(),
+            custom : {
+              intersection : intersection[1],
+              ball : ball
+            },
+          };
+          this.manager.sendEvent(PongEventType.Colision, eventData);
+          console.log('sending event COLISION');
         }
-        // console.log('impacto paddle', paddle)
       }
     }
-
-    // COLLISION BALL
-    // COLLISION BOTTOM WALL
-    /*
-    for (let i = 0; i < this.balls.length; i++){
-      const ball = this.balls[i];
-      if (ball.position.y < -pseudoLimit) {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({ color: color });
-          this.ballsLight[i].color = new THREE.Color(color);
-        }
-        if (collisionChangeWallColor) {
-          bottomWall.material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xFFFFFF });
-        }
-        ballAngle = -ballAngle;
-        ball.position.y = -pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
-      }
-      // COLLISION TOP WALL
-      if (ball.position.y > pseudoLimit) {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({ color: color });
-          light.color = new THREE.Color(color);
-        }
-        if (collisionChangeWallColor) {
-          topWall.material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xFFFFFF });
-        }
-        ballAngle = -ballAngle;
-        ball.position.y = pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
-      }
-      // COLLISION LEFT PADDLE
-      if (ball.position.x < - pseudoLimit && ball.position.y + radius * 3 / 4 > leftPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3 / 4 < leftPaddle.position.y + paddleWidth / 2) {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({ color: color });
-          light.color = new THREE.Color(color);
-        }
-        if (collisionChangePaddleColor) {
-          leftPaddle.material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xFFFFFF });
-        }
-
-        const yDifference = (ball.position.y - leftPaddle.position.y) / paddleWidth / 2;
-        ballAngle = deltaFactor * yDifference + Math.PI;
-        if (leftPaddleMovement > 0)
-          ballAngle += friction;
-        if (leftPaddleMovement < 0)
-          ballAngle -= friction;
-        ball.position.x = -pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
-      }
-      // COLLISION RIGHT PADDLE
-      if (ball.position.x > pseudoLimit && ball.position.y + radius * 3 / 4 > rightPaddle.position.y - paddleWidth / 2 && ball.position.y - radius * 3 / 4 < rightPaddle.position.y + paddleWidth / 2) {
-        if (collisionChangeBallColor) {
-          const color = Math.random() * 0xFFFFFF;
-          ball.material = new THREE.MeshPhongMaterial({ color: color });
-          light.color = new THREE.Color(color);
-        }
-        if (collisionChangePaddleColor) {
-          rightPaddle.material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xFFFFFF });
-        }
-
-        const yDifference = (ball.position.y - rightPaddle.position.y) / paddleWidth / 2;
-        ballAngle = - deltaFactor * yDifference;
-        if (rightPaddleMovement > 0)
-          ballAngle -= friction;
-        if (rightPaddleMovement < 0)
-          ballAngle += friction;
-        ball.position.x = pseudoLimit;
-        ballSpeed += aceleration * ballSpeed;
-      }
-  }*/
-
-    // NORMALIZE ANGLE
-    /*while (ballAngle < 0) {
-      ballAngle += 2 * Math.PI;
-    }
-    while (ballAngle > 2 * Math.PI) {
-      ballAngle -= 2 * Math.PI;
-    }*/
-
-    // SET PAST TIME
-    this.pastTime = time;
-
-    // CHECK WINNER
-    /*if (ball.position.x < leftPaddle.position.x - paddleHeight) {
-      alert('Right player wins!');
-      window.location.reload();
-    }
-    if (ball.position.x > rightPaddle.position.x + paddleHeight) {
-      alert('Left player wins!');
-      window.location.reload();
-    }*/
-    /* !TODO
-    abstracted away, should be handled by the manager
-    if (this..settings.host && this.lastUpdate > 0.05) { 
-      this.lastUpdate = 0;
-      //console.log('updating')
-      this.sendUpdate();
-    }
-    */
-    this.updateScene();
-    this.renderer.render(this.scene, this.camera);
-    //requestAnimationFrame(render);
-    //requestAnimationFrame(render); 
   }
 
-  /* !THIS IS MANAGED BY THE SERVER BY ITSELF
-  updateGame() {
-    if (this.matchmakingService.currentMatch === undefined) {
-      console.error('update game: no current match in matchmaking');
-      return;
-    }
-    if (this.matchmakingService.currentMatch.update.id === 0)
-      return;
-    for (let i = 0; i < this.matchmakingService.currentMatch.update.ballsPosition.length; i++) {
-      this.balls[i].pos.x = this.matchmakingService.currentMatch.update.ballsPosition[i].x;
-      this.balls[i].mesh.position.y = this.matchmakingService.currentMatch.update.ballsPosition[i].y;
-    }
-    for (let i = 0; i < this.matchmakingService.currentMatch.update.paddlesPosition.length; i++) {
-      this.paddles[i].mesh.position.y = this.matchmakingService.currentMatch.update.paddlesPosition[i];
-    }
-    this.currentMatchStateId = this.matchmakingService.currentMatch.update.id;
-  }
-  */
   circleRectangleIntersection(circlePos: THREE.Vector2, circleRadious: number,
     rectPos: THREE.Vector2, rectDimmensions: THREE.Vector2): [boolean, {pos : Vector2, normal : Vector2} | undefined] {
 
@@ -794,11 +547,11 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
     for (const [index, paddle] of this.update.paddles.entries()){
       this.paddles[index].position.set(paddle.pos.x, paddle.pos.y,0);
-      this.paddles[index].material = new THREE.MeshPhongMaterial({ color: paddle.color });
+      //this.paddles[index].material = new THREE.MeshPhongMaterial({ color: paddle.color });
     }
     for (const [index, block] of this.update.blocks.entries()){
       this.blocks[index].position.set(block.pos.x, block.pos.y, 0);
-      this.blocks[index].material = new THREE.MeshPhongMaterial({ color: block.color });
+      //his.blocks[index].material = new THREE.MeshPhongMaterial({ color: block.material.color });
     }
   }
 

@@ -40,7 +40,9 @@ export class TickBehaviour<T>  implements TickObject{
 	}
 
 	runTick(delta: number): void {
-		this.functions.forEach(fn => fn(delta, this.value))
+		for(let i = 0; i < this.functions.length; i++)
+			this.functions[i](delta, this.value)
+//		this.functions.forEach(fn => fn(delta, this.value))
 	}
 }
 
@@ -51,12 +53,14 @@ export function tickBehaviourAccelerate(acceleration: number) { //example to giv
 }
 
 export enum PongEventType {
-	MatchStart,
-	Pause,
-	Continue,
-	LocalHit,
-	Colision,
-	Score,
+	MatchStart = 'match start',
+	Pause = 'pause',
+	Continue = 'continue',
+	Reset = 'reset', //just to start another round, after use continue
+	HardReset = 'hard reset', //this resets score and everything
+	LocalHit = 'local hit',
+	Colision = 'colision',
+	Score = 'score',
 }
 
 export class EventBehaviour<T> implements EventObject{
@@ -77,7 +81,9 @@ export class EventBehaviour<T> implements EventObject{
 		return this;
 	}
 	runEvent(type: PongEventType,  data : EventData) {
-		this.events.forEach(eventF => eventF(type, data, this.parent));
+		for (let i = 0; i < this.events.length; i++)
+			this.events[i](type, data, this.parent)
+		//this.events.forEach(eventF => eventF(type, data, this.parent));
 	}
 	getId() : number{
 		return this.id;
@@ -106,16 +112,15 @@ export interface EventData{
 	custom? : any;
 }
 
-function createEventScoreColision(manager : Manager, scoreBlock : Block){
-	function eventScoreColision(type: PongEventType, data: EventData) {
+export function createEventScoreColision(manager : Manager, scoreBlock : Block, team : number){
+	return function eventScoreColision(type: PongEventType, data: EventData) {
 		if (type !== PongEventType.Colision)
-			return;
-		
-		manager.broadcastEvent(PongEventType.Score, {senderId : scoreBlock.getId()});
+			return;	
+		manager.broadcastEvent(PongEventType.Score, {senderId : scoreBlock.getId(), custom : {team : team}});
 	}
 }
 
-export function eventWallColision(type: PongEventType, data: EventData) {
+export function eventEventWallColision(type: PongEventType, data: EventData) {
 	if (type !== PongEventType.Colision)
 		return;
 	if (data.custom?.intersection === undefined && data.custom?.ball === undefined) {
@@ -139,7 +144,7 @@ export function eventWallColision(type: PongEventType, data: EventData) {
 }
 
 
-export function createPaddleColision<T extends EventObject & Dimmensions & Pos>(map : MapSettings, paddle : T){
+export function createEventPaddleColision<T extends EventObject & Dimmensions & Pos>(map : MapSettings, paddle : T){
 	return function eventPaddleColision(type: PongEventType, data: EventData) {
 		console.log('colision event called to paddle', paddle.getId());
 		if (type !== PongEventType.Colision)
@@ -166,19 +171,18 @@ export function createPaddleColision<T extends EventObject & Dimmensions & Pos>(
 	}
 }
 
-export function createMove<T extends Pos & Speed & Dir>(object : T){
-	return function move(delta: number) {
-      object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
-
-	}
-}
-
-export function createMovePaddle<T extends Pos & Speed & Dir>(object : T){
+export function createTickMove<T extends Pos & Speed & Dir>(object : T){
 	return function move(delta: number) {
       object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
 	}
 }
-export function createKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddle : T, keys : Key ){
+
+export function createTickMovePaddle<T extends Pos & Speed & Dir>(object : T){
+	return function move(delta: number) {
+      object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
+	}
+}
+export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddle : T, keys : Key ){
 	return function keyboardInputPaddle(delta: number) {
 		paddle.dir.y = 0;
 		if (key.isPressed(keys.up)) {

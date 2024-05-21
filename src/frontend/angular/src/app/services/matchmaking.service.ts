@@ -42,19 +42,20 @@ export class MatchUpdate{
     this.id = id;
   }
   subscribeAllToManager(manager : Manager){
+    console.log('online once')
     this.balls.forEach(ball => ball.subscribeToManager(manager));
     this.paddles.forEach(paddle => paddle.subscribeToManager(manager));
     this.blocks.forEach(block => block.subscribeToManager(manager));
   }
   runTickBehaviour(delta : number){
     for (let i = 0; i < this.paddles.length; i++){
-      this.paddles[i].runTick(delta);
+      this.paddles[i].tickBehaviour.runTick(delta);
     }
     for (let i = 0; i < this.balls.length; i++){
-      this.balls[i].runTick(delta);
+      this.balls[i].tickBehaviour.runTick(delta);
     }
 for (let i = 0; i < this.blocks.length; i++){
-      this.blocks[i].runTick(delta);
+      this.blocks[i].tickBehaviour.runTick(delta);
     }
   }
 }

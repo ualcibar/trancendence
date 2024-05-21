@@ -2,11 +2,11 @@ import {PongEventType, EventObject } from "./behaviour";
 
 export class EventMap {
     private idToObject: Map<number, EventObject>;
-    private typeToObjects: Map<PongEventType, Set<number>>;
+    private typeToObjects: Map<PongEventType, number[]>;
     private nextId = 0;
     constructor() {
         this.idToObject = new Map<number, EventObject>();
-        this.typeToObjects = new Map<PongEventType, Set<number>>();
+        this.typeToObjects = new Map<PongEventType, number[]>();
     }
 
     bind(eventObject: EventObject): number { 
@@ -21,9 +21,9 @@ export class EventMap {
             return false;
         const events = this.typeToObjects.get(type);
         if (events)
-            events.add(id);
+            events.push(id);
         else
-            this.typeToObjects.set(type, new Set<number>([id]));
+            this.typeToObjects.set(type, [id]);
         return true;
     }
 
@@ -32,11 +32,11 @@ export class EventMap {
        if (!ids)
         return [];
        const eventObjects : EventObject[] = [];
-       ids.forEach(id => {
+       for (const id of ids.values()){
         const object = this.idToObject.get(id);
         if (object)
             eventObjects.push(object);
-       });
+       }
        return eventObjects;
     }
     getById(id : number) : EventObject | undefined{

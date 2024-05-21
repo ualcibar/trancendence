@@ -5,7 +5,7 @@ import { State } from '../utils/state';
 import { Score } from './matchmaking.service';
 import { Subscription } from 'rxjs';
 
-import { PongEventType, EventObject, EventData } from '../utils/behaviour';
+import { PongEventType, EventObject, EventData, EventBehaviour } from '../utils/behaviour';
 import { EventMap } from '../utils/eventMap';
 import { UserInfo } from './auth.service';
 import { MapSettings } from './map.service';
@@ -31,6 +31,7 @@ export enum MatchState{
   Initialized = 'initialized',
   Running = 'running',
   Paused = 'paused',
+  Reset = 'reset',
   FinishedSuccess = 'finished success',
   Error = 'error',
 }
@@ -423,10 +424,11 @@ class TournamentManager implements Manager{
   }
 
   broadcastEvent(type: PongEventType, data : EventData): void {
-    const eventObjects = this.events.getByType(type);
-    if (eventObjects){
-      eventObjects.forEach(object => object.runEvent(type, data));
-    }
+    this.runEvents(this.events.getByType(type), type, data);
+  }
+  runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
+      for (let i = 0; i < eventObjects.length; i++)
+        eventObjects[i].runEvent(type, data); 
   }
   sendEvent(type: PongEventType, data : EventData): void {
     if (!data.senderId)
@@ -522,9 +524,30 @@ class MatchManager implements Manager{
     return this.matchUpdate;
   }
   broadcastEvent(type: PongEventType, data : EventData): void {
-    const eventObjects = this.events.getByType(type);
-    if (eventObjects){
-      eventObjects.forEach(object => object.runEvent(type, data));
+    switch (type) {
+      case PongEventType.Score:
+        {
+          //change score
+          this.matchConfig.matchSettings.score.score[data.custom.team] += 1;
+          //send events
+          this.runEvents(this.events.getByType(type), type, data);
+
+          //reset match and go for the next round if any
+          this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings);
+          /*this.broadcastEvent(PongEventType.Pause, {});
+          this.matchState.setValue(MatchState.Paused);
+          this.broadcastEvent(PongEventType.Reset, {});
+          this.matchState.setValue(MatchState.Reset);
+          this.broadcastEvent(PongEventType.Continue, {});*/
+          break;
+        }
+      case PongEventType.Pause:
+          this.runEvents(this.events.getByType(type), type, data);
+          //  eventObjects.forEach(object => object.runEvent(type, data));
+        break;
+      default:
+          this.runEvents(this.events.getByType(type), type, data);
+        
     }
   }
   sendEvent(type: PongEventType, data : EventData): void {
@@ -542,11 +565,10 @@ class MatchManager implements Manager{
       }
     } else {
       const eventObject = this.events.getById(data.targetIds);
-      if (eventObject) {
+      if (eventObject)
         eventObject.runEvent(type, data);
-      }else{
+      else
         console.error('couldnt find target id')
-      }
     }
   }
   
@@ -563,6 +585,10 @@ class MatchManager implements Manager{
   }
   start(): void {
     this.matchState.setValue(MatchState.Starting);
+  }
+  runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
+      for (let i = 0; i < eventObjects.length; i++)
+        eventObjects[i].runEvent(type, data); 
   }
 }
 
@@ -643,7 +669,9 @@ export class OnlineMatchManager implements Manager, OnlineManager{
   broadcastEvent(type: PongEventType, data : EventData): void {
     const eventObjects = this.events.getByType(type);
     if (eventObjects){
-      eventObjects.forEach(object => object.runEvent(type, data));
+      for (const object of eventObjects.values())
+        object.runEvent(type, data);
+    //  eventObjects.forEach(object => object.runEvent(type, data));
     }
   }
 
@@ -794,7 +822,7 @@ export class GameManagerService implements Manager{
   }
 
   subscribeMatchState(fn: any): Subscription {
-    return this.currentManager!.subscribeMatchState(fn);
+    return this.currentManager!.subscribeMatchState(fn);//got an error
   }
   getMatchUpdate(): MatchUpdate {
     return this.currentManager!.getMatchUpdate();
