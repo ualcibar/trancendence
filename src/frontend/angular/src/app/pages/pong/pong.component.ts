@@ -98,6 +98,9 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
   getId() : number{
     return this.id;
   }
+  get dir() : Vector2{
+    return this._dir;
+  }
 
   get dirX() : number{
     return this.dir.x;
