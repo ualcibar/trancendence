@@ -52,7 +52,7 @@ export enum BlockType{
 export class Ball implements EventObject,  TickObject{
   eventBehaviour : EventBehaviour<Ball>;
   tickBehaviour : TickBehaviour<Ball>;
-  dir: Vector2;
+  _dir: Vector2 = new Vector2(0, 0);
   speed: number;
   pos : Vector2;
   lightOn : boolean;
@@ -81,6 +81,34 @@ export class Ball implements EventObject,  TickObject{
 
   getId() : number{
     return this.eventBehaviour.getId();
+  }
+
+  get dirX() : number{
+    return this.dir.x;
+  }
+
+  get dirY() : number{
+    return this.dir.y;
+  }
+
+  get dirVector() : Vector2{
+    return new Vector2(this.dir.x, this.dir.y);
+  }
+
+  get angle() : number{//medido desde la derecha
+    return Math.atan2(this.dir.y, this.dir.x);
+  }
+
+  set dirX(value : number){
+    this.dir.x = value;
+  }
+
+  set dirY(value : number){
+    this.dir.y = value;
+  }
+
+  set dir(value : Vector2){
+    this._dir = value;
   }
 
   subscribeToManager(manager : Manager): void {
