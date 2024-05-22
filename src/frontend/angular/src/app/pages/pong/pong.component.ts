@@ -91,7 +91,7 @@ export class Ball implements EventObject,  TickObject{
     return this.dir.y;
   }
 
-  get dirVector() : Vector2{
+  get dir() : Vector2{
     return new Vector2(this.dir.x, this.dir.y);
   }
 
