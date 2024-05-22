@@ -21,6 +21,10 @@ export interface Dir {
 	dir: Vector2;
 }
 
+export interface Angle {
+	angle: number;
+}
+
 export interface Dimmensions {
 	dimmensions: Vector3;
 }
