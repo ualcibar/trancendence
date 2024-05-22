@@ -62,7 +62,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
   eventBehaviour : EventBehaviour<Ball>;
   tickBehaviour : TickBehaviour<Ball>;
   private id! : number;
-  dir: Vector2;
+  _dir: Vector2 = new Vector2(0,0);
   speed: number;
   pos : Vector2;
   lightOn : boolean;
