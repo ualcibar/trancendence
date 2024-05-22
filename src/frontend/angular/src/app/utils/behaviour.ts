@@ -109,26 +109,26 @@ export interface EventData{
 	senderId? : number | undefined;
 	targetIds? : number | number[] | undefined;
 	broadcast? : boolean;
-	custom? : any;
+	custom? : {gameObjects? : any, others? : any};
 }
 
 export function createEventScoreColision(manager : Manager, scoreBlock : Block, team : number){
 	return function eventScoreColision(type: PongEventType, data: EventData) {
 		if (type !== PongEventType.Colision)
 			return;	
-		manager.broadcastEvent(PongEventType.Score, {senderId : scoreBlock.getId(), custom : {team : team}});
+		manager.broadcastEvent(PongEventType.Score, {senderId : scoreBlock.getId(), custom : {others : {team : team}}});
 	}
 }
 
 export function eventEventWallColision(type: PongEventType, data: EventData) {
 	if (type !== PongEventType.Colision)
 		return;
-	if (data.custom?.intersection === undefined && data.custom?.ball === undefined) {
+	if (data.custom?.others.intersection === undefined && data.custom?.gameObjects.ball === undefined) {
 		console.error('need intersection data for colision event');
 		return;
 	}
-	const ball: Ball = data.custom.ball;
-	const intersection: { pos: Vector2, normal: Vector2 } = data.custom.intersection;
+	const ball: Ball = data.custom.gameObjects.ball;
+	const intersection: { pos: Vector2, normal: Vector2 } = data.custom.others.intersection;
 	if (intersection.normal.x < 0 && ball.dir.x < 0)
 		return;
 	if (intersection.normal.x > 0 && ball.dir.x > 0)
@@ -149,12 +149,12 @@ export function createEventPaddleColision<T extends EventObject & Dimmensions & 
 		console.log('colision event called to paddle', paddle.getId());
 		if (type !== PongEventType.Colision)
 			return;
-		if (data.custom?.intersection === undefined && data.custom?.ball === undefined) {
+		if (data.custom?.others.objectintersection === undefined && data.custom?.gameObjects.ball === undefined) {
 			console.error('need intersection data for colision event');
 			return;
 		}
-		const ball: Ball = data.custom.ball;
-		const intersection: { pos: Vector2, normal: Vector2 } = data.custom.intersection;
+		const ball: Ball = data.custom.gameObjects.ball;
+		const intersection: { pos: Vector2, normal: Vector2 } = data.custom.others.intersection;
 
 		if (intersection.normal.x < 0 && ball.dir.x < 0)
 			return;

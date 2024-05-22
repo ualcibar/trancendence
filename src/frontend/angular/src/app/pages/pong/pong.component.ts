@@ -535,8 +535,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             senderId : ball.getId(),
             targetIds : paddle.getId(),
             custom : {
-              intersection : intersection[1],
-              ball : ball
+              others : {
+                intersection : intersection[1],
+              },
+              gameObjects:{
+                ball : ball
+              }
             }
           };
           this.manager.sendEvent(PongEventType.Colision, eventData);
@@ -562,8 +566,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             senderId : ball.getId(),
             targetIds : block.getId(),
             custom : {
-              intersection : intersection[1],
-              ball : ball
+              gameObjects : {
+                ball : ball
+              },
+              others : {
+                intersection : intersection[1],
+              }
             },
           };
           this.manager.sendEvent(PongEventType.Colision, eventData);

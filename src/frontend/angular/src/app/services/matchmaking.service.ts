@@ -620,7 +620,7 @@ export class MatchmakingService implements MatchSync{
         }
         if (message.method === 'broadcast')
           this.onlineManager.broadcastRemoteEvent(message.eventType, message.data);  
-        else if (message.mesh === 'send')
+        else if (message.method === 'send')
           this.onlineManager.sendRemoteEvent(message.eventType, message.data);
         else
           this.logger.error('datachannel on message: event: no such method', message.method)

@@ -12,7 +12,7 @@ import { MapSettings } from './map.service';
 import { GameObject, PaddleState } from '../pages/pong/pong.component';
 import { EventType, Router } from '@angular/router';
 import { LogFilter, Logger } from '../utils/debug';
-import { get } from 'jquery';
+import { event, get } from 'jquery';
 export enum GameConfigState{
   Standby = 'standby',
   StartingGame = 'starting game',
@@ -537,7 +537,7 @@ class MatchManager implements Manager{
       case PongEventType.Score:
         {
           //change score
-          this.matchConfig.matchSettings.score.score[data.custom.team] += 1;
+          this.matchConfig.matchSettings.score.score[data.custom?.others.team] += 1;
           //send events
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
 
@@ -697,7 +697,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         {
           if (this.amIHost){
             this.matchSync.broadcastEvent(type, data);
-            this.matchConfig.matchSettings.settings.score.score[data.custom.team] += 1;
+            this.matchConfig.matchSettings.settings.score.score[data.custom?.others.team] += 1;
             this.logger.info('score increated host', this.matchConfig.matchSettings.settings.score.score)
             this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
             this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings.settings);
@@ -711,54 +711,98 @@ export class OnlineMatchManager implements Manager, OnlineManager{
           this.broadcastEvent(PongEventType.Continue, {});*/
           break;
         }
-      case PongEventType.Pause:
-          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
-          //  eventObjects.forEach(object => object.runEvent(type, data));
-        break;
       default:
-          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data); 
+        if (this.amIHost){
+          //this.matchSync.broadcastEvent(type, this.eventDataToSyncData(data));
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
+        }
     }
   }
 
+  eventDataToSyncData(eventData : EventData) : EventData{
+    if (eventData.custom === undefined || eventData.custom.gameObjects === undefined)
+      return eventData;
+    const newObj : {[key : string] : number} = {};
+    for (const key in eventData.custom.gameObjects){
+      newObj[key] = eventData.custom.gameObjects[key].getId();
+    } 
+    const gameObjects : any = newObj;
+    this.logger.info('event data sync: before', eventData.custom.gameObjects, 'after', gameObjects)
+    return {
+      senderId : eventData.senderId,
+      targetIds : eventData.targetIds,
+      broadcast : eventData.broadcast,
+      custom : {
+        others : eventData.custom.others,
+        gameObjects : gameObjects
+      }
+    };
+  }
+  syncEventDataToEventData(eventData : EventData) : EventData{
+    if (eventData.custom === undefined || eventData.custom.gameObjects === undefined)
+      return eventData;
+    const newObj : {[key : string] : GameObject} = {};
+    for (const key in eventData.custom.gameObjects){
+      newObj[key] = this.gameObjects.getGameObjectById(eventData.custom.gameObjects[key])!;
+    } 
+    const gameObjects : any = newObj;
+    this.logger.info('event data sync: before', eventData.custom.gameObjects, 'after', gameObjects)
+    return {
+      senderId : eventData.senderId,
+      targetIds : eventData.targetIds,
+      broadcast : eventData.broadcast,
+      custom : {
+        others : eventData.custom.others,
+        gameObjects : gameObjects
+      }
+    };
+  }
+
   sendEvent(type: PongEventType, data : EventData): void {
+    if (!this.amIHost)
+      return;
     if (data.targetIds === undefined){
       console.error('online send event needs targetsid')
       return;
     }
     if (data.targetIds instanceof Array){
-      for (let i = 0; i < data.targetIds.length; i++){
-      const eventObject = this.gameObjects.getEventObjectById(data.targetIds[i]);
-      if (eventObject) {
-        eventObject.runEvent(type, data);
-      }
-
+      for (let i = 0; i < data.targetIds.length; i++) {
+        const eventObject = this.gameObjects.getEventObjectById(data.targetIds[i]);
+        if (eventObject) {
+          this.matchSync.sendEvent(type, this.eventDataToSyncData(data))
+          eventObject.runEvent(type, data);
+        }
       }
     } else {
       const eventObject = this.gameObjects.getEventObjectById(data.targetIds);
-      if (eventObject)
+      if (eventObject){
+        this.matchSync.sendEvent(type, this.eventDataToSyncData(data))
         eventObject.runEvent(type, data);
+      }
       else
         console.error('online send event: couldnt find target id')
     }
   }
 
   sendRemoteEvent(type : PongEventType, data : EventData){//only for sincronization
-    this.sendEvent(type, data);
+    this.logger.info('received event send', type, data)
+    this.sendEvent(type, this.syncEventDataToEventData(data));
     this.logger.error('!todo') 
   }
   broadcastRemoteEvent(type : PongEventType, data : EventData){//only for sincronization
     //todo should convert the data back to local data
+    this.logger.info('received event broadcast', type, data)
     switch (type){
       case PongEventType.Score:
         if (!this.amIHost){ 
-          this.matchConfig.matchSettings.settings.score.score[data.custom.team] += 1;
+          this.matchConfig.matchSettings.settings.score.score[data.custom?.others.team] += 1;
           this.logger.info('score increated client', this.matchConfig.matchSettings.settings.score.score)
-          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
           this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings.settings); 
         }
         break;
       default:
-        this.logger.error('!todo')
+        this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));//!todo must turn syncdata to local data
     }
   }
 
