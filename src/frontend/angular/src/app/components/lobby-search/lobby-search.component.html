@@ -1,4 +1,4 @@
-<app-tournament-match-menu [multiplayer]="true" (gameCreated)="new_match_tournament($event)" (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center" *ngIf="showMatchTournamentMenu"></app-tournament-match-menu>
+<app-tournament-match-menu [multiplayer]="true" (new_match_tournament)="new_match_tournament($event)" (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center" *ngIf="showMatchTournamentMenu"></app-tournament-match-menu>
 
 <div class="flex items-center justify-center place-content-center">
 	<div [class]="showMatchTournamentMenu ? 'blur-lg' : ''" class="items-center">

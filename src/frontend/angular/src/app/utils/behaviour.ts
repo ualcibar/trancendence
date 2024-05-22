@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "three";
 import { Manager} from "../services/game-config.service";
-import { Ball, Block} from "../pages/pong/pong.component";
+import { Ball, Block, GameObject} from "../pages/pong/pong.component";
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Key } from "../services/game-config.service";
@@ -63,9 +63,9 @@ export enum PongEventType {
 	Score = 'score',
 }
 
-export class EventBehaviour<T> implements EventObject{
-	private id!: number;//we will set this id when we subscribeToManager, at the init values
-	private parent: T;
+export class EventBehaviour<T extends GameObject> implements EventObject{
+//	private id!: number;//we will set this id when we subscribeToManager, at the init values
+	private parent: T;//parent now holds id
 	private events: Array<(type: PongEventType, data : EventData, parent : T) => void>;
 	private manager!: Manager;
 
@@ -85,12 +85,12 @@ export class EventBehaviour<T> implements EventObject{
 			this.events[i](type, data, this.parent)
 		//this.events.forEach(eventF => eventF(type, data, this.parent));
 	}
-	getId() : number{
-		return this.id;
-	}
 	subscribeToManager(manger : Manager): void {
 		this.manager = manger;
-		this.id = this.manager.subscribeEventObject(this);
+		this.manager.subscribeEventObject(this, this.parent.getId());
+	}
+	getId(): number {
+		return this.parent.getId();
 	}
 }
 
