@@ -99,6 +99,34 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     return this.id;
   }
 
+  get dirX() : number{
+    return this.dir.x;
+  }
+
+  get dirY() : number{
+    return this.dir.y;
+  }
+
+  get dirVector() : Vector2{
+    return new Vector2(this.dir.x, this.dir.y);
+  }
+
+  get angle() : number{//medido desde la derecha
+    return Math.atan2(this.dir.y, this.dir.x);
+  }
+
+  set dirX(value : number){
+    this.dir.x = value;
+  }
+
+  set dirY(value : number){
+    this.dir.y = value;
+  }
+
+  set dir(value : Vector2){
+    this._dir = value;
+  }
+
   subscribeToManager(manager : Manager): void {
     this.id = manager.subscribeGameObject(this);
     this.eventBehaviour.subscribeToManager(manager);
