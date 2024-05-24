@@ -324,7 +324,7 @@ class FriendsListView(APIView):
     def get(self, request, user_id):
         user = CustomUser.objects.get(id=user_id)
         friends = user.friends.all()
-        serializer = FriendSerializer(friends, many=True)
+        #serializer = FriendSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, user_id):
