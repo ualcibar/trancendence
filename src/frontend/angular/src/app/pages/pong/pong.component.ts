@@ -106,10 +106,6 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     return this.dir.y;
   }
 
-  get dirVector() : Vector2{
-    return new Vector2(this.dir.x, this.dir.y);
-  }
-
   get angle() : number{//medido desde la derecha
     return Math.atan2(this.dir.y, this.dir.x);
   }
