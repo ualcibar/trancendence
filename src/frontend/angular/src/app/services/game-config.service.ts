@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatchSync, MatchUpdate, MatchmakingService, OnlineMatchState, OnlinePlayer, OnlinePlayerState} from './matchmaking.service';
+import { GameSettings, MatchSync, MatchUpdate, MatchmakingService, OnlineMatchState, OnlinePlayer, OnlinePlayerState} from './matchmaking.service';
 
 import { State } from '../utils/state';
 import { Score } from './matchmaking.service';
@@ -267,11 +267,13 @@ export class MatchSettings{
   paddleStates : PaddleState[];
   score : Score;
   teamSize : number;
+  winScore : number;
  
-  constructor (teamSize : number, paddleStates : PaddleState[]){
+  constructor (teamSize : number, paddleStates : PaddleState[], winScore : number){
     this.teamSize = teamSize;
     this.paddleStates = paddleStates;
     this.score = new Score([0,0]);
+    this.winScore = winScore;
   }
 }
 
@@ -541,6 +543,15 @@ class MatchManager implements Manager{
           //send events
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
 
+          const scorer = data.custom?.others.team;
+          const winScore = this.matchConfig.matchSettings.winScore;
+          const updatedScore = this.matchConfig.matchSettings.score.score[scorer];
+          // console.log('updated score', updatedScore, 'win score', winScore)
+          if (updatedScore >= winScore)
+          {
+            console.log('game over');
+            this.broadcastEvent(PongEventType.GameOver, data = {custom : {others : {winner : scorer}}});
+          }
           //reset match and go for the next round if any
           this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings);
           /*this.broadcastEvent(PongEventType.Pause, {});
@@ -553,6 +564,16 @@ class MatchManager implements Manager{
       case PongEventType.Pause:
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
           //  eventObjects.forEach(object => object.runEvent(type, data));
+        break;
+      case PongEventType.GameOver:
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
+          //  eventObjects.forEach(object => object.runEvent(type, data));
+          const winner = data.custom?.others.winner;
+          const score = this.matchConfig.matchSettings.score.score;
+          const message = 'Player ' + (1 + winner) + ' wins with a score of ' + score[0] + ' - ' + score[1] + '!';
+          // TODO: handle game over properly
+          alert(message);
+          window.location.reload();
         break;
       default:
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data); 

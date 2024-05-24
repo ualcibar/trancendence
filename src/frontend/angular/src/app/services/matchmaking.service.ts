@@ -364,7 +364,7 @@ export class MatchmakingService implements MatchSync{
               const paddleStates : PaddleState[] = Array<PaddleState>(data.match.teamSize).fill(PaddleState.Unbinded);
               paddleStates[0] = PaddleState.Binded;
 
-              const matchSettings = new MatchSettings(data.match.teamSize, paddleStates);
+              const matchSettings = new MatchSettings(data.match.teamSize, paddleStates, data.match.winScore);
               const config = new OnlineMatchConfig(
                 new OnlineMatchSettings(matchSettings, data.match.name,this.authService.user_info),
                 mapSettings
@@ -429,7 +429,7 @@ export class MatchmakingService implements MatchSync{
               const paddleStates : PaddleState[] = Array<PaddleState>(data.match.teamSize).fill(PaddleState.Unbinded);
               paddleStates[1] = PaddleState.Binded;//!todo which one is us for index?
 
-              const matchSettings = new MatchSettings(data.match.teamSize, paddleStates);
+              const matchSettings = new MatchSettings(data.match.teamSize, paddleStates, data.match.winScore);
               
               const config = new OnlineMatchConfig(
                 new OnlineMatchSettings(matchSettings, data.match.name,

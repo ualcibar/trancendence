@@ -480,10 +480,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   render(time: number) {
     time *= 0.001; // convert time to seconds
-    let pastIATime = 0;
-    let predictedBallY = 0;
 
-    if (this.pastTime === 0)
+    if (this.pastTime === 0) // porseacaso
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;

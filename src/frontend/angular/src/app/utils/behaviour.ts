@@ -65,6 +65,7 @@ export enum PongEventType {
 	LocalHit = 'local hit',
 	Colision = 'colision',
 	Score = 'score',
+	GameOver = 'game over',
 }
 
 export class EventBehaviour<T extends GameObject> implements EventObject{

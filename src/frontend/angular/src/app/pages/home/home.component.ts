@@ -80,7 +80,7 @@ export class HomeComponent implements OnInit{
     if (newGame.gameType === GameType.Match) {
       console.log('team size before', newGame.teamSize)
       this.gameManager.createMatch(new MatchConfig(
-        new MatchSettings(newGame.teamSize, new Array<PaddleState>(newGame.teamSize * 2).fill(PaddleState.Binded)),
+        new MatchSettings(newGame.teamSize, new Array<PaddleState>(newGame.teamSize * 2).fill(PaddleState.Binded), newGame.winScore),
         map
       ));
       setTimeout(()=> this.gameManager.start(), 1000);
