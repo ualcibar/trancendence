@@ -21,13 +21,33 @@ export class UserInfo{
   providedIn: 'root'
 })
 export class FriendsService {
-  private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   user_info? : UserInfo;
-  isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 
   client_locale: string = 'en';
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService, private translateService: TranslateService) {
     this.authService.amILoggedIn();
   }
+
+  showFriendList(userId: number): Observable<any> {
+    const url = `api/polls/friendslist/${userId}/`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    console.log(url);
+    // Assuming you might want to send some data in the body of the POST request
+    const body = { /* some data if needed */ };
+
+    return this.http.get(url, body);
+    
+  }
+
+  addFriend(userId: number, friendId: number): Observable<any> {
+    const url = `api/polls/friends/${userId}/${friendId}/`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    console.log(url);
+    // Assuming you might want to send some data in the body of the POST request
+    const body = { /* some data if needed */ };
+
+    return this.http.post(url, body, { headers });
+  }
+
 }

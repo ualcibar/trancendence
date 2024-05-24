@@ -46,8 +46,11 @@ export class UserProfileComponent {
   toggleAddFrined() {
     console.log('Im in profile:', this.user_id);
     console.log('Im the user', this.logged_user_id);
-
-
+    console.log('Before');
+    console.log(this.friendService.showFriendList(this.user_id));
+    this.friendService.addFriend(this.user_id, this.logged_user_id);
+    console.log('After');
+    console.log(this.friendService.showFriendList(this.user_id));
   }
 
   getLoggedUserInfo(): void {
@@ -58,17 +61,7 @@ export class UserProfileComponent {
       } 
     })
   }
-/*
-  addFriend(userId: number, friendId: number): void {
-    const backendURL = 'api/polls/friends/' + userId + '/' + friendId;
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-    const body = {};
-    return this.http.post(backendURL, headers, body);
-    
-  }
-*/
+
   getUserInfo(userId: number): void {
     const backendURL = 'api/polls/getInfo/' + userId;
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({

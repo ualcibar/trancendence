@@ -26,6 +26,7 @@ enum HomeState{
   styleUrl: './home.component.css',
   animations: [fadeInOut]
 })
+
 export class HomeComponent implements OnInit{
     chatUnwrapped : boolean = false;
     isAnimating : boolean = false;

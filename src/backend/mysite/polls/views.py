@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .authenticate import CustomAuthentication
-from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer
+from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer, FriendSerializer
 from .models import CustomUser, Game, Tournament, CustomUserManager
 
 import requests
@@ -51,6 +51,8 @@ def getInfo(request, user_id=None):
     unai aprende ha comentar codigo:
     get endpoint for user information, user id passed on the url, codes : 200, 401,404,
     '''
+    friends = user.friends.all()
+    ''' friend_serializer = FriendSerializer(friends, many=True) '''
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
 
@@ -76,6 +78,7 @@ def getInfo(request, user_id=None):
         'status': user.status,
         'color': user.user_color,
         'language': user.user_language,
+        'friend' : friend_serializer
         }, status=200)
 
 @api_view(['POST'])
@@ -321,7 +324,7 @@ class FriendsListView(APIView):
     def get(self, request, user_id):
         user = CustomUser.objects.get(id=user_id)
         friends = user.friends.all()
-        serializer = CustomUserSerializer(friends, many=True)
+        serializer = FriendSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, user_id):
@@ -341,7 +344,7 @@ class FriendsListView(APIView):
         user.save()
         return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)
 
-class Friends(APIView):
+class FriendsView(APIView):
     def get(self, request, user_id, friend_id):
         user = CustomUser.objects.get(id=user_id)
         friends = user.friends.get(id=friend_id)
