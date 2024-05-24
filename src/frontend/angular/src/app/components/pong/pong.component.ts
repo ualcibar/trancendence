@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Input } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import { Vector2, Vector3} from 'three';
 import { Subscription } from 'rxjs';
@@ -267,7 +267,6 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
 
 @Component({
   selector: 'app-pong',
-  standalone : true,
   templateUrl: './pong.component.html',
   styleUrls: ['./pong.component.css']
 })
@@ -295,9 +294,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   pastTime: number = 0;
   lastUpdate: number = 0;
   currentMatchStateId = 0;
-  @Input() map!: MapSettings;
-  @Input() matchSettings!: MatchSettings;
-  @Input() update!: MatchUpdate;
+  map!: MapSettings;
+  matchSettings!: MatchSettings;
+  update!: MatchUpdate;
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
@@ -312,10 +311,13 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       console.error('pong, no game has been started');
       this.router.navigate(['/']);
     }
-    this.initValues();
     this.configStateSubscription = this.manager.subscribeMatchState(//it was done befor it was set??
       (state: MatchState) => {
         switch (state) {
+          case MatchState.Starting:
+            console.log('VALUES INITIALIZED')
+            this.initValues();
+            break;
           case MatchState.Initialized:
             break;
           case MatchState.Running:
@@ -350,6 +352,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   run() {//should work for both resume and initial run
+
     if (this.renderer) {
       requestAnimationFrame(this.render.bind(this));
       // this.renderer.setAnimationLoop(this.render.bind(this));//!todo better use matute method
@@ -365,9 +368,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   initValues() {
-    //this.map = this.manager.getMapSettings();
-    //this.matchSettings = this.manager.getMatchSettings();
-    //this.update = this.manager.getMatchUpdate();//its a reference
+    this.map = this.manager.getMapSettings();
+    this.matchSettings = this.manager.getMatchSettings();
+    this.update = this.manager.getMatchUpdate();//its a reference
     //INITIALIZE THREE.JS
     // INIT SCENE
     this.canvas = this.pongCanvas.nativeElement;

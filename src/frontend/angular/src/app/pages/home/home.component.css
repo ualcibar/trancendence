@@ -1,7 +1,5 @@
 .chat {
-  height: 100%;
-  border-radius: 8px;
-  margin-bottom: 20px;
+	width: -moz-available;
 }
 .menu {
 	display: flex;
@@ -29,7 +27,8 @@
 	align-items: center;
 	text-align: center;
 	width: 50%;
-	height: 20%;
+	height: 8%;
+	min-width: fit-content;
 	min-height: 100px;
 
 	color: #cfe1e6;
@@ -46,4 +45,17 @@
 	box-shadow:
 		inset 0 0 3px 3px  rgba(236, 247, 248, 0.2),
 		0 0 2px 2px  rgba(236, 247, 248, 0.1);
+}
+
+.backgroundButton{
+	background-color: rgba(53, 131, 131, 0);
+	width:100%;
+	height: 100%;
+
+}
+.backgroundButton:hover{
+	background-color: rgba(124, 199, 83, 0);
+	width:100%;
+	height: 100%;
+	cursor: default;
 }

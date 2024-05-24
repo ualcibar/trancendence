@@ -71,7 +71,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
-    friends = models.ManyToManyField('self', symmetrical=True)
+    friends = models.ManyToManyField('CustomUser', symmetrical=True, blank=True, related_name='my_friends')
 
     USERNAME_FIELD = 'username'
     # Add any additional required fields

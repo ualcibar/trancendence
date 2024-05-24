@@ -4,6 +4,7 @@ import { OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import {AuthService} from './auth.service';
 import {interval, Subscription} from 'rxjs';
 import { LogFilter, Logger } from '../utils/debug';
+import { ChatState, StateService } from './stateService';
 
 export class Message {
   message : string = '';
@@ -40,9 +41,12 @@ export class ChatService {
   newMessage: string = '';
 
   //logger
-  logger : Logger = new Logger(LogFilter.chatServiceLogger, 'chatService :');
+  logger : Logger = new Logger(LogFilter.ChatServiceLogger, 'chatService :');
 
-  constructor(private http: HttpClient, private ngZone: NgZone, private authService : AuthService) { 
+  constructor(private http: HttpClient,
+              private ngZone: NgZone,
+              private authService : AuthService,
+              private state : StateService) { 
     this.chatMessages.set('#global', []);
     this.connectToWebsocket();
     this.connectionInterval = interval(1000)
@@ -70,10 +74,12 @@ export class ChatService {
         this.webSocket.onopen = () => {
           this.logger.info('WebSocket connection opened');
           this.connected = true;
+          this.state.changeChatState(ChatState.Connected)
         };
         this.webSocket.onclose = () => {
           this.logger.info('WebSocket connection closed');
           this.connected = false;
+          this.state.changeChatState(ChatState.Disconnected)
         };
         this.webSocket.onerror = (error) => {
           this.logger.error('WebSocket error:', error);

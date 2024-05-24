@@ -1,9 +1,9 @@
 import { Vector2, Vector3 } from "three";
-import { MatchUpdate } from "./matchmaking.service";
-import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType} from "../pages/pong/pong.component";
-import { GameManagerService, Key, Manager, MatchSettings } from "./game-config.service";
+import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../pages/pong/pong.component";
+import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./gameManager.service";
 import { Injectable } from "@angular/core";
 import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision } from "../utils/behaviour";
+import { Score } from "./matchmaking.service";
 
 export const colorPalette = {
     darkestPurple: 0x1C0658,
@@ -103,8 +103,8 @@ class MapSettingsCreateInfo{
     ];
 
     //blocks.forEach(block => {
-    blocks[0].bindEvent(createEventScoreColision(manager, blocks[0], 0));
-    blocks[1].bindEvent(createEventScoreColision(manager, blocks[1], 1));
+    blocks[0].bindEvent(createEventScoreColision(manager, blocks[0], 1));
+    blocks[1].bindEvent(createEventScoreColision(manager, blocks[1], 0));
     //})
 
     return blocks;
@@ -182,6 +182,7 @@ export class MapSettings{
                           this.paddleColor,
                           new Vector2(0,0),
                           this.paddleSpeed,
+                          PaddleState.Binded,
                           manager);
       paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]));
       paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key('w','s')))
@@ -197,7 +198,7 @@ export class MapSettings{
                         manager
     );
     balls[0].bindTick(createTickMove(balls[0]));
-    return new MatchUpdate(paddles, balls,this.blocks!, 0);  
+    return new MatchUpdate(paddles, balls,this.blocks!, new Score([0,0]),0);  
   }
   setMatchInitUpdate(update : MatchUpdate, info : MatchSettings){
     for (const [index, paddle] of update.paddles.entries()){
@@ -237,7 +238,7 @@ export class MapsService {
 
     initMaps() {
         const defaultInfo = new MapSettingsCreateInfo();
-        defaultInfo.ballInitSpeed = 0.3;
+        defaultInfo.ballInitSpeed = 1;
         const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
         this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
         const infernoInfo = new MapSettingsCreateInfo();

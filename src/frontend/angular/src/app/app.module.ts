@@ -22,7 +22,8 @@ import { NotFoundComponent } from './components/errors/not-found/not-found.compo
 import { SettingsComponent } from './pages/settings/settings.component';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-
+import { NotificationComponent } from './components/notification/notification.component';
+import { StateService } from './services/stateService';
 
 export function HttpLoaderFactory(http:HttpClient){
   return new TranslateHttpLoader(http);
@@ -35,7 +36,8 @@ export function HttpLoaderFactory(http:HttpClient){
     RegisterComponent,
     LoginComponent,
     ProfileComponent,
-    UserProfileComponent
+    UserProfileComponent, 
+    NotificationComponent
   ],
   imports: [
     BrowserModule,
@@ -60,7 +62,8 @@ export function HttpLoaderFactory(http:HttpClient){
   ]
 ,
   providers: [
-    provideAnimationsAsync()
+    provideAnimationsAsync(),
+    StateService
   ],
   bootstrap: [AppComponent]
 })

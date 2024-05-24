@@ -1,9 +1,9 @@
 import { Vector2, Vector3 } from "three";
-import { Manager} from "../services/game-config.service";
+import { Manager} from "../services/gameManager.service";
 import { Ball, Block, GameObject} from "../pages/pong/pong.component";
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
-import { Key } from "../services/game-config.service";
+import { Key } from "../services/gameManager.service";
 /*export interface DefferedMonad<T> {
   bind(f : (delta : number, target : T) => void): this;
   run(delta : number, target : T) : void;

@@ -3,4 +3,20 @@ body {
     inset: 0;
     background-size: cover;
     background-color: aqua;
+    overflow: hidden; 
+    height: 100%;
 }
+/*
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; 
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  inset : 0;
+  background-size: cover;
+}
+*/
