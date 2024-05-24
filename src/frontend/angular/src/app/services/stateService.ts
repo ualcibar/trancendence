@@ -48,7 +48,7 @@ class HomeRenderState{
         for (let i = 0; i < 11; i++){
             this.activity.push(new State<boolean>(false));
         }
-        this.setLocal = true;
+        this.local = true;
     }
 
     get chat() : boolean{return this.activity[chat].getCurrentValue()}
@@ -76,17 +76,17 @@ class HomeRenderState{
     get joiningOnlineMatch$() : Observable<boolean>{return this.activity[joiningOnlineMatch].observable}
     get tournamentTree$() : Observable<boolean>{return this.activity[tournamentTree].observable}
     
-    set setChat(val : boolean){this.activity[chat].setValue(val);}
-    set setLocal(val : boolean){this.activity[local].setValue(val);}
-    set setMultiplayer(val : boolean){this.activity[multiplayer].setValue(val);}
-    set setCommunity(val : boolean){this.activity[community].setValue(val);}
-    set setMatch(val : boolean){this.activity[match_tournament].setValue(val);}
-    set setOnlineMatchSearch(val : boolean){this.activity[onlineMatchSearch].setValue(val);}
-    set setTournamentGenerator(val : boolean){this.activity[tournamentGenerator].setValue(val);}
-    set setMatchGenerator(val : boolean){this.activity[matchGenerator].setValue(val);}
-    set setOnlineMatchGenerator(val : boolean){this.activity[onlineMatchGenerator].setValue(val);}
-    set setJoiningOnlineMatch(val : boolean){this.activity[joiningOnlineMatch].setValue(val);}
-    set setTournamentTree(val : boolean){this.activity[tournamentTree].setValue(val);}
+    set chat(val : boolean){this.activity[chat].setValue(val);}
+    set local(val : boolean){this.activity[local].setValue(val);}
+    set multiplayer(val : boolean){this.activity[multiplayer].setValue(val);}
+    set community(val : boolean){this.activity[community].setValue(val);}
+    set match(val : boolean){this.activity[match_tournament].setValue(val);}
+    set onlineMatchSearch(val : boolean){this.activity[onlineMatchSearch].setValue(val);}
+    set tournamentGenerator(val : boolean){this.activity[tournamentGenerator].setValue(val);}
+    set matchGenerator(val : boolean){this.activity[matchGenerator].setValue(val);}
+    set onlineMatchGenerator(val : boolean){this.activity[onlineMatchGenerator].setValue(val);}
+    set joiningOnlineMatch(val : boolean){this.activity[joiningOnlineMatch].setValue(val);}
+    set tournamentTree(val : boolean){this.activity[tournamentTree].setValue(val);}
 
 
     getActivity() : boolean[]{
