@@ -21,7 +21,7 @@ export class TournamentMatchMenuComponent {
   @Output() new_match_tournament: EventEmitter<GameSettings> = new EventEmitter<GameSettings>();
 
   constructor(){
-    this.gameSettings = new GameSettings(GameType.Match,'','',true, 1);
+    this.gameSettings = new GameSettings(GameType.Match,'','',true, 1, MapsName.Default);
   }
   togglePublicPrivate(){
     this.gameSettings.publicGame = !this.gameSettings.publicGame;
@@ -30,12 +30,12 @@ export class TournamentMatchMenuComponent {
     this.default = !this.default;
   }
   toggleMap(){
-    switch(this.gameSettings.map){
+    switch(this.gameSettings.mapName){
       case MapsName.Default:
-        this.gameSettings.map = MapsName.Fancy;
+        this.gameSettings.mapName = MapsName.Fancy;
         break;
       case MapsName.Fancy:
-        this.gameSettings.map = MapsName.Default;
+        this.gameSettings.mapName = MapsName.Default;
         break;
     }
   }

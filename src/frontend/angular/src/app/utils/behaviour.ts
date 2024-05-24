@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "three";
 import { Manager} from "../services/game-config.service";
-import { Ball, Block} from "../pages/pong/pong.component";
+import { Ball, Block, GameObject} from "../pages/pong/pong.component";
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Key } from "../services/game-config.service";
@@ -67,9 +67,9 @@ export enum PongEventType {
 	Score = 'score',
 }
 
-export class EventBehaviour<T> implements EventObject{
-	private id!: number;//we will set this id when we subscribeToManager, at the init values
-	private parent: T;
+export class EventBehaviour<T extends GameObject> implements EventObject{
+//	private id!: number;//we will set this id when we subscribeToManager, at the init values
+	private parent: T;//parent now holds id
 	private events: Array<(type: PongEventType, data : EventData, parent : T) => void>;
 	private manager!: Manager;
 
@@ -89,12 +89,12 @@ export class EventBehaviour<T> implements EventObject{
 			this.events[i](type, data, this.parent)
 		//this.events.forEach(eventF => eventF(type, data, this.parent));
 	}
-	getId() : number{
-		return this.id;
-	}
 	subscribeToManager(manger : Manager): void {
 		this.manager = manger;
-		this.id = this.manager.subscribeEventObject(this);
+		this.manager.subscribeEventObject(this, this.parent.getId());
+	}
+	getId(): number {
+		return this.parent.getId();
 	}
 }
 
@@ -113,26 +113,26 @@ export interface EventData{
 	senderId? : number | undefined;
 	targetIds? : number | number[] | undefined;
 	broadcast? : boolean;
-	custom? : any;
+	custom? : {gameObjects? : any, others? : any};
 }
 
 export function createEventScoreColision(manager : Manager, scoreBlock : Block, team : number){
 	return function eventScoreColision(type: PongEventType, data: EventData) {
 		if (type !== PongEventType.Colision)
 			return;	
-		manager.broadcastEvent(PongEventType.Score, {senderId : scoreBlock.getId(), custom : {team : team}});
+		manager.broadcastEvent(PongEventType.Score, {senderId : scoreBlock.getId(), custom : {others : {team : team}}});
 	}
 }
 
 export function eventEventWallColision(type: PongEventType, data: EventData) {
 	if (type !== PongEventType.Colision)
 		return;
-	if (data.custom?.intersection === undefined && data.custom?.ball === undefined) {
+	if (data.custom?.others.intersection === undefined && data.custom?.gameObjects.ball === undefined) {
 		console.error('need intersection data for colision event');
 		return;
 	}
-	const ball: Ball = data.custom.ball;
-	const intersection: { pos: Vector2, normal: Vector2 } = data.custom.intersection;
+	const ball: Ball = data.custom.gameObjects.ball;
+	const intersection: { pos: Vector2, normal: Vector2 } = data.custom.others.intersection;
 	if (intersection.normal.x < 0 && ball.dir.x < 0)
 		return;
 	if (intersection.normal.x > 0 && ball.dir.x > 0)
@@ -153,12 +153,12 @@ export function createEventPaddleColision<T extends EventObject & Dimmensions & 
 		console.log('colision event called to paddle', paddle.getId());
 		if (type !== PongEventType.Colision)
 			return;
-		if (data.custom?.intersection === undefined && data.custom?.ball === undefined) {
+		if (data.custom?.others.objectintersection === undefined && data.custom?.gameObjects.ball === undefined) {
 			console.error('need intersection data for colision event');
 			return;
 		}
-		const ball: Ball = data.custom.ball;
-		const intersection: { pos: Vector2, normal: Vector2 } = data.custom.intersection;
+		const ball: Ball = data.custom.gameObjects.ball;
+		const intersection: { pos: Vector2, normal: Vector2 } = data.custom.others.intersection;
 
 		if (intersection.normal.x < 0 && ball.dir.x < 0)
 			return;

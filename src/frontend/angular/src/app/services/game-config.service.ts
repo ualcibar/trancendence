@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
-import { MatchUpdate, OnlineMatchState, OnlinePlayer, OnlinePlayerState} from './matchmaking.service';
+import { MatchSync, MatchUpdate, MatchmakingService, OnlineMatchState, OnlinePlayer, OnlinePlayerState} from './matchmaking.service';
 
 import { State } from '../utils/state';
 import { Score } from './matchmaking.service';
 import { Subscription } from 'rxjs';
 
 import { PongEventType, EventObject, EventData, EventBehaviour } from '../utils/behaviour';
-import { EventMap } from '../utils/eventMap';
+import { GameObjectMap } from '../utils/eventMap';
 import { UserInfo } from './auth.service';
 import { MapSettings } from './map.service';
-import { PaddleState } from '../pages/pong/pong.component';
-import { Router } from '@angular/router';
+import { GameObject, PaddleState } from '../pages/pong/pong.component';
+import { EventType, Router } from '@angular/router';
+import { LogFilter, Logger } from '../utils/debug';
+import { event, get } from 'jquery';
 export enum GameConfigState{
   Standby = 'standby',
   StartingGame = 'starting game',
@@ -277,7 +279,6 @@ export class OnlineMatchSettings{
   settings : MatchSettings;
   host : UserInfo;
   players : OnlinePlayer[] = [];
-  score : [number,number] = [0,0];
   name : string;
   constructor (settings : MatchSettings, name : string, host : UserInfo){
     this.settings = settings;
@@ -335,7 +336,8 @@ export interface Manager{
   getMatchUpdate(): MatchUpdate;
   broadcastEvent(event : PongEventType, data : EventData) : void;
   sendEvent(event : PongEventType, data : EventData) : void;
-  subscribeEventObject(object : EventObject) : number;
+  subscribeEventObject(object : EventObject, id : number) : void;
+  subscribeGameObject(object : GameObject) : number;
   bindEvent(id : number, type : PongEventType) : boolean;
   getState() : GameManagerState;
   start() : void;
@@ -361,7 +363,7 @@ class TournamentManager implements Manager{
   currentMatchUpdate : MatchUpdate;
   numberOfPlayers : number;
   state : State<GameManagerState>;//manager state, changing it signals the match to start
-  events : EventMap = new EventMap();
+  gameObjects : GameObjectMap = new GameObjectMap();
   constructor(config : TournamentConfig, private router : Router){
     this.matchConfig = config.matchConfig;
     this.numberOfPlayers = config.numberOfPlayers;
@@ -388,7 +390,7 @@ class TournamentManager implements Manager{
             break;
         }
     });
-    this.router.navigate(['play']);
+    //this.router.navigate(['play']);
   }
   
   getMapSettings(): MapSettings {
@@ -419,32 +421,38 @@ class TournamentManager implements Manager{
     return this.currentMatchState.observable.subscribe(fn);
   }
 
+  subscribeGameObject(object: GameObject): number {
+    return this.gameObjects.subscribeGameObject(object);
+  }
+ 
+  subscribeEventObject(object : EventObject, id : number){
+    this.gameObjects.subscribeEventObject(object, id);
+  }
+  
+  bindEvent(id : number, type: PongEventType): boolean {//false if it fails.
+    return this.gameObjects.bind(type, id)
+  }
+
+
   getMatchUpdate(): MatchUpdate {
     return this.currentMatchUpdate;
   }
 
   broadcastEvent(type: PongEventType, data : EventData): void {
-    this.runEvents(this.events.getByType(type), type, data);
+    this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
   }
   runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
       for (let i = 0; i < eventObjects.length; i++)
         eventObjects[i].runEvent(type, data); 
   }
   sendEvent(type: PongEventType, data : EventData): void {
+    console.log('event sent!!', type)
     if (!data.senderId)
       return;
-    const eventObject = this.events.getById(data.senderId);
+    const eventObject = this.gameObjects.getEventObjectById(data.senderId);
     if (eventObject){
       eventObject.runEvent(type, data);
     }
-  }
-  
-  subscribeEventObject(object : EventObject): number {
-    return this.events.bind(object);
-  }
-
-  bindEvent(id : number, type: PongEventType): boolean {//false if it fails.
-    return this.events.subscribe(id, type)
   }
 
   getState(): GameManagerState {
@@ -455,6 +463,7 @@ class TournamentManager implements Manager{
     this.currentMatchState.setValue(MatchState.Starting);
   }
 
+
 }
 class MatchManager implements Manager{
   matchConfig : MatchConfig;//pong entrypoint
@@ -462,7 +471,7 @@ class MatchManager implements Manager{
   matchScore : State<Score>;//pong exitpoint
   matchUpdate : MatchUpdate;
   state : State<GameManagerState>;//manager state, changing it signals the match to start
-  events : EventMap = new EventMap();
+  gameObjects : GameObjectMap = new GameObjectMap();
   constructor (config : MatchConfig, private router : Router){
     this.matchConfig = config;
     this.matchScore = new State<Score>(new Score([0,0]));
@@ -528,9 +537,9 @@ class MatchManager implements Manager{
       case PongEventType.Score:
         {
           //change score
-          this.matchConfig.matchSettings.score.score[data.custom.team] += 1;
+          this.matchConfig.matchSettings.score.score[data.custom?.others.team] += 1;
           //send events
-          this.runEvents(this.events.getByType(type), type, data);
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
 
           //reset match and go for the next round if any
           this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings);
@@ -542,11 +551,11 @@ class MatchManager implements Manager{
           break;
         }
       case PongEventType.Pause:
-          this.runEvents(this.events.getByType(type), type, data);
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
           //  eventObjects.forEach(object => object.runEvent(type, data));
         break;
       default:
-          this.runEvents(this.events.getByType(type), type, data); 
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data); 
     }
   }
   sendEvent(type: PongEventType, data : EventData): void {
@@ -556,14 +565,14 @@ class MatchManager implements Manager{
     }
     if (data.targetIds instanceof Array){
       for (let i = 0; i < data.targetIds.length; i++){
-      const eventObject = this.events.getById(data.targetIds[i]);
+      const eventObject = this.gameObjects.getEventObjectById(data.targetIds[i]);
       if (eventObject) {
         eventObject.runEvent(type, data);
       }
 
       }
     } else {
-      const eventObject = this.events.getById(data.targetIds);
+      const eventObject = this.gameObjects.getEventObjectById(data.targetIds);
       if (eventObject)
         eventObject.runEvent(type, data);
       else
@@ -571,13 +580,18 @@ class MatchManager implements Manager{
     }
   }
   
-  subscribeEventObject(object : EventObject): number {
-    return this.events.bind(object);
+  subscribeGameObject(object: GameObject): number {
+    return this.gameObjects.subscribeGameObject(object);
+  }
+ 
+  subscribeEventObject(object : EventObject, id : number){
+    this.gameObjects.subscribeEventObject(object, id);
+  }
+  
+  bindEvent(id : number, type: PongEventType): boolean {//false if it fails.
+    return this.gameObjects.bind(type, id)
   }
 
-  bindEvent(id : number, type: PongEventType): boolean {//false if it fails.
-    return this.events.subscribe(id, type)
-  }
 
   getState(): GameManagerState {
     return this.state.getCurrentValue();
@@ -597,31 +611,43 @@ export class OnlineMatchManager implements Manager, OnlineManager{
   matchState : State<MatchState>;//pong exitpoint
   matchScore : State<Score>;//pong exitpoint
   matchUpdate : MatchUpdate;
-  events : EventMap = new EventMap();
+  gameObjects : GameObjectMap = new GameObjectMap();
   state : State<GameManagerState>;//manager state, changing it signals the match to start
 
   //connectivity
-  amIHost : boolean = false;
+  amIHost : boolean;
   onlineMatchState : State<OnlineMatchState>;
+  updateMatchInterval : number = 0;
+  matchSync! : MatchSync;
 
-  constructor (config : OnlineMatchConfig, private router : Router){
+  //logger
+  logger : Logger = new Logger(LogFilter.managerOnlineLogger, 'online manager:');
+
+  constructor (config : OnlineMatchConfig, private router : Router, matchSync : MatchSync, onlineState : OnlineMatchState, amIHost: boolean){
+    this.amIHost = amIHost;
     this.matchConfig = config;
     this.matchScore = new State<Score>(new Score([0,0]));
     this.matchUpdate = this.matchConfig.mapSettings.createMatchInitUpdate(this.matchConfig.matchSettings.settings, this);
     this.matchUpdate.subscribeAllToManager(this);
     this.state = new State<GameManagerState>(GameManagerState.InGame);
-    this.matchState = new State<MatchState>(MatchState.Starting);
-    this.onlineMatchState = new State<OnlineMatchState>(OnlineMatchState.Connecting);
+    this.matchState = new State<MatchState>(MatchState.Created);
+    this.onlineMatchState = new State<OnlineMatchState>(onlineState);
+    this.matchSync = matchSync;
     this.matchState.subscribe(
       (state : MatchState) => {
         switch (state){
-          case MatchState.Starting:
-            console.error('start online match: should have already started');
+          case MatchState.Initialized:
+            this.setMatchState(MatchState.Running);
             break;
           case MatchState.Error:
             console.error('start online match: there was an error while running a match');
             break;
           case MatchState.Running:
+            if (this.amIHost){
+              this.updateMatchInterval = setInterval(() => {
+                this.matchSync.sendMatchUpdate(this.matchUpdate);
+              }, 50);
+            }
             console.log('start online match: a match has started');
             break;
           case MatchState.FinishedSuccess:
@@ -666,33 +692,135 @@ export class OnlineMatchManager implements Manager, OnlineManager{
   }
 
   broadcastEvent(type: PongEventType, data : EventData): void {
-    const eventObjects = this.events.getByType(type);
-    if (eventObjects){
-      for (const object of eventObjects.values())
-        object.runEvent(type, data);
-    //  eventObjects.forEach(object => object.runEvent(type, data));
+    switch (type) {
+      case PongEventType.Score:
+        {
+          if (this.amIHost){
+            this.matchSync.broadcastEvent(type, data);
+            this.matchConfig.matchSettings.settings.score.score[data.custom?.others.team] += 1;
+            this.logger.info('score increated host', this.matchConfig.matchSettings.settings.score.score)
+            this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
+            this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings.settings);
+//            this.matchSync.broadcastEvent(type, data);
+          }
+          //change score
+          /*this.broadcastEvent(PongEventType.Pause, {});
+          this.matchState.setValue(MatchState.Paused);
+          this.broadcastEvent(PongEventType.Reset, {});
+          this.matchState.setValue(MatchState.Reset);
+          this.broadcastEvent(PongEventType.Continue, {});*/
+          break;
+        }
+      default:
+        if (this.amIHost){
+          //this.matchSync.broadcastEvent(type, this.eventDataToSyncData(data));
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
+        }
     }
+  }
+
+  eventDataToSyncData(eventData : EventData) : EventData{
+    if (eventData.custom === undefined || eventData.custom.gameObjects === undefined)
+      return eventData;
+    const newObj : {[key : string] : number} = {};
+    for (const key in eventData.custom.gameObjects){
+      newObj[key] = eventData.custom.gameObjects[key].getId();
+    } 
+    const gameObjects : any = newObj;
+    this.logger.info('event data sync: before', eventData.custom.gameObjects, 'after', gameObjects)
+    return {
+      senderId : eventData.senderId,
+      targetIds : eventData.targetIds,
+      broadcast : eventData.broadcast,
+      custom : {
+        others : eventData.custom.others,
+        gameObjects : gameObjects
+      }
+    };
+  }
+  syncEventDataToEventData(eventData : EventData) : EventData{
+    if (eventData.custom === undefined || eventData.custom.gameObjects === undefined)
+      return eventData;
+    const newObj : {[key : string] : GameObject} = {};
+    for (const key in eventData.custom.gameObjects){
+      newObj[key] = this.gameObjects.getGameObjectById(eventData.custom.gameObjects[key])!;
+    } 
+    const gameObjects : any = newObj;
+    this.logger.info('event data sync: before', eventData.custom.gameObjects, 'after', gameObjects)
+    return {
+      senderId : eventData.senderId,
+      targetIds : eventData.targetIds,
+      broadcast : eventData.broadcast,
+      custom : {
+        others : eventData.custom.others,
+        gameObjects : gameObjects
+      }
+    };
   }
 
   sendEvent(type: PongEventType, data : EventData): void {
-    if (!data.senderId)
+    if (!this.amIHost)
       return;
-    const eventObject = this.events.getById(data.senderId);
-    if (eventObject){
-      eventObject.runEvent(type, data);
+    if (data.targetIds === undefined){
+      console.error('online send event needs targetsid')
+      return;
+    }
+    if (data.targetIds instanceof Array){
+      for (let i = 0; i < data.targetIds.length; i++) {
+        const eventObject = this.gameObjects.getEventObjectById(data.targetIds[i]);
+        if (eventObject) {
+          this.matchSync.sendEvent(type, this.eventDataToSyncData(data))
+          eventObject.runEvent(type, data);
+        }
+      }
+    } else {
+      const eventObject = this.gameObjects.getEventObjectById(data.targetIds);
+      if (eventObject){
+        this.matchSync.sendEvent(type, this.eventDataToSyncData(data))
+        eventObject.runEvent(type, data);
+      }
+      else
+        console.error('online send event: couldnt find target id')
     }
   }
 
-  subscribeEventObject(object : EventObject): number {
-    return this.events.bind(object);
+  sendRemoteEvent(type : PongEventType, data : EventData){//only for sincronization
+    this.logger.info('received event send', type, data)
+    this.sendEvent(type, this.syncEventDataToEventData(data));
+    this.logger.error('!todo') 
+  }
+  broadcastRemoteEvent(type : PongEventType, data : EventData){//only for sincronization
+    //todo should convert the data back to local data
+    this.logger.info('received event broadcast', type, data)
+    switch (type){
+      case PongEventType.Score:
+        if (!this.amIHost){ 
+          this.matchConfig.matchSettings.settings.score.score[data.custom?.others.team] += 1;
+          this.logger.info('score increated client', this.matchConfig.matchSettings.settings.score.score)
+          this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
+          this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings.settings); 
+        }
+        break;
+      default:
+        this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));//!todo must turn syncdata to local data
+    }
+  }
+
+  subscribeGameObject(object: GameObject): number {
+    return this.gameObjects.subscribeGameObject(object);
+  }
+
+  subscribeEventObject(object : EventObject, id : number): void {
+    this.gameObjects.subscribeEventObject(object, id);
   }
 
   bindEvent(id : number, type: PongEventType): boolean {//false if it fails.
-    return this.events.subscribe(id, type)
+    return this.gameObjects.bind(type, id)
   }
 
+
   addPlayer(player : UserInfo){
-    if (this.amIHost)
+    //if (this.amIHost)
       this.matchConfig.matchSettings.addPlayer(player, OnlinePlayerState.Connecting);
   }
 
@@ -708,11 +836,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
     return this.onlineMatchState.getCurrentValue();
   }
 
-  playerConnected(playerId : number | undefined) : OnlinePlayer | undefined{
-    if (playerId === undefined) {
-      console.error('on ice connection state change: targetId not set while being host');
-      return undefined;
-    }
+  playerConnected(playerId : number) : OnlinePlayer | undefined{//sets player with id to connected, returns it
     const player = this.matchConfig.matchSettings.getPlayer(playerId);
     if (player === undefined) {
       console.error('on ice connection state change: player wasnt set');
@@ -737,6 +861,10 @@ export class OnlineMatchManager implements Manager, OnlineManager{
   }
   start(): void {
     this.matchState.setValue(MatchState.Starting);
+  }
+  runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
+      for (let i = 0; i < eventObjects.length; i++)
+        eventObjects[i].runEvent(type, data); 
   }
 }
 
@@ -784,14 +912,15 @@ export class GameManagerService implements Manager{
     return true;
   }
 
-  createOnlineMatch(config : OnlineMatchConfig, amIHost : boolean) : boolean {
+  createOnlineMatch(config : OnlineMatchConfig, amIHost : boolean, matchSync : MatchSync, onlineState : OnlineMatchState) : OnlineMatchManager | undefined {
     if (this.state.getCurrentValue() !== GameManagerState.Standby){
       console.error('start online match: state must be standby to start online match');
-      return false;
+      return undefined;
     }
-    this.currentManager = new OnlineMatchManager(config, this.router);
+    const manager = new OnlineMatchManager(config, this.router, matchSync, onlineState, amIHost);
+    this.currentManager = manager; 
     this.state.setValue(GameManagerState.InGame);
-    return true;
+    return manager;
   }
 
   onlineAddPlayer(info : UserInfo){
@@ -838,8 +967,12 @@ export class GameManagerService implements Manager{
     return this.currentManager!.bindEvent(id, type);
   }
 
-  subscribeEventObject(object: EventObject): number {
-    return this.currentManager!.subscribeEventObject(object);
+  subscribeEventObject(object: EventObject, id : number): void {
+    this.currentManager!.subscribeEventObject(object, id);
+  }
+
+  subscribeGameObject(object: GameObject): number {
+    return this.currentManager!.subscribeGameObject(object)
   }
 
 
