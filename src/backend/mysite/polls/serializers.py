@@ -2,16 +2,10 @@ from rest_framework import serializers
 from .models import CustomUser, Tournament, Game
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    friendsList = FriendSerializer(many=True)
 
     class Meta:
         model = CustomUser
-        fields = ('id','username','wins','loses','total', 'friendsList')
-
-class FriendSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'username', 'email'] 
+        fields = ('id','username','wins','loses','total')
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

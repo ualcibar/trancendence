@@ -21,33 +21,51 @@ export class UserInfo{
   providedIn: 'root'
 })
 export class FriendsService {
-  user_info? : UserInfo;
+  //user_info? : UserInfo;
 
+  friend_list : UserInfo[] = [];
   client_locale: string = 'en';
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService, private translateService: TranslateService) {
     this.authService.amILoggedIn();
   }
 
-  showFriendList(userId: number): Observable<any> {
-    const url = `api/polls/friendslist/${userId}/`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    console.log(url);
-    // Assuming you might want to send some data in the body of the POST request
-    const body = { /* some data if needed */ };
+  update_FriendList(): void {
+    const id = this.authService.user_info?.user_id;
+    const url = `api/polls/friendslist/${id}/`;
 
-    return this.http.get(url, body);
-    
+    this.http.get<any>(url, { withCredentials: true }).subscribe({
+      next: (response) => {
+        console.log('response friend list', response);
+        this.friend_list = response;
+      },
+      error: () => {
+        console.error('update friend list: error fetching data')
+      }
+    });
   }
 
-  addFriend(userId: number, friendId: number): Observable<any> {
-    const url = `api/polls/friends/${userId}/${friendId}/`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    console.log(url);
-    // Assuming you might want to send some data in the body of the POST request
-    const body = { /* some data if needed */ };
+  addFriend(friendId: number): void {
+    const url = `api/polls/friends/${this.authService.user_info?.user_id}/${friendId}/`;
 
-    return this.http.post(url, body, { headers });
+    const jsonToSend = { 
+
+  };
+
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json'
+      }),
+  };
+
+    this.http.post<any>(url, jsonToSend, httpOptions).subscribe({
+      next: (response) => {
+
+      },
+      error: (error) => {
+          console.error('cant add a friend:', error.status);
+      }
+  })
   }
 
 }

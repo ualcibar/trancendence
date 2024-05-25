@@ -30,7 +30,7 @@ export class RegisterComponent {
 
     registerAcc() {
         const backendURL = '/api/polls/register/';
-            const jsonToSend = {
+        const jsonToSend = {
             username: this.user.username,
             password: this.user.password,
             email: this.user.email

@@ -47,10 +47,10 @@ export class UserProfileComponent {
     console.log('Im in profile:', this.user_id);
     console.log('Im the user', this.logged_user_id);
     console.log('Before');
-    console.log(this.friendService.showFriendList(this.user_id));
-    this.friendService.addFriend(this.user_id, this.logged_user_id);
-    console.log('After');
-    console.log(this.friendService.showFriendList(this.user_id));
+    this.friendService.update_FriendList();
+    this.friendService.addFriend(this.user_id); 
+    this.friendService.update_FriendList();
+    // https://www.infragistics.com/products/ignite-ui-angular/angular/components/list
   }
 
   getLoggedUserInfo(): void {

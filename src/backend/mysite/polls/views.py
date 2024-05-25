@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .authenticate import CustomAuthentication
-from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer, FriendSerializer
+from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer
 from .models import CustomUser, Game, Tournament, CustomUserManager
 
 import requests
@@ -51,7 +51,6 @@ def getInfo(request, user_id=None):
     unai aprende ha comentar codigo:
     get endpoint for user information, user id passed on the url, codes : 200, 401,404,
     '''
-    friends = user.friends.all()
     ''' friend_serializer = FriendSerializer(friends, many=True) '''
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
@@ -77,8 +76,7 @@ def getInfo(request, user_id=None):
         'defeats': user.loses,
         'status': user.status,
         'color': user.user_color,
-        'language': user.user_language,
-        'friend' : friend_serializer
+        'language': user.user_language
         }, status=200)
 
 @api_view(['POST'])
@@ -324,7 +322,7 @@ class FriendsListView(APIView):
     def get(self, request, user_id):
         user = CustomUser.objects.get(id=user_id)
         friends = user.friends.all()
-        #serializer = FriendSerializer(friends, many=True)
+        serializer = CustomUserSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, user_id):
@@ -352,19 +350,18 @@ class FriendsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, user_id, friend_id):
-        user = CustomUser.objects.get(id=user_id)
-        friend_ids = user.friends.get(id=friend_id)
-        user2 = CustomUser.objects.get(id=user_id)
-
-        if user2.DoesNotExist:
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-        if not friend_ids.DoesNotExist:
-            return Response({"error": "Friend already add"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user2 = CustomUser.objects.get(id=friend_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
         
-        friends = CustomUser.objects.filter(id__in=friend_id)
-        user.friends.add(*friends)
-        user.save()
-        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)
+        user.friends.add(user2)
+        return Response({"message": "Friends added successfully"}, status=status.HTTP_200_OK)
 
 
 # File uploading management
