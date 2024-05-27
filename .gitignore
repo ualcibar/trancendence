@@ -8,3 +8,5 @@ src/backend/mysite/chat/__pycache__/
 
 
 *.pyc
+
+src/frontend/angular/src/app/pages/pong/AAA.ts

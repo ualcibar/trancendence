@@ -263,28 +263,53 @@ export class Block implements GameObject, EventObject, TickObject, toJson{
 
 
 export class Paddle implements GameObject, EventObject, TickObject, toJson{
+  mesh : THREE.Mesh;
+  speed : number;
+  friction : number;
+  deltaFactor : number;
+  height : number;
+  width : number;
+  upKey! : string;
+  downKey! : string;
+  goinUp : boolean = false;
+  goinDown : boolean = false;
+  localPlayer : boolean = false;
+  AIplayer : boolean = false;
+  AIprediction : number = 0;
+
   tickBehaviour : TickBehaviour<Paddle>;
   eventBehaviour : EventBehaviour<Paddle>;
   id! : number;
   pos : Vector2;
-  dir : Vector2;
+  dir : Vector2 = new Vector2(0,0);
   dimmensions : Vector3;
   type : BlockType;
   color : number;
-  speed : number;
   state : PaddleState;
 
-  constructor(pos : Vector2, dimmensions : Vector3, type : BlockType, color : number, dir : Vector2, speed : number, state : PaddleState, manager : Manager){
+  constructor(settings : MapSettings, number : number,manager: Manager){
+    this.width = settings.paddleWidth;
+    this.height = settings.paddleHeight;
+    const paddleDepth = settings.paddleDepth;
+    const paddleGeometry = new THREE.BoxGeometry(this.width, this.height, paddleDepth);
+    const paddleColor = settings.paddleColor;
+    const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
+    this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
+
+    this.speed = settings.paddleSpeed;
+    this.friction = settings.friction;
+    this.deltaFactor = settings.deltaFactor;
+
+
     //this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
-    this.pos = pos;
-    this.dimmensions = dimmensions;
-    this.type = type;
-    this.color = color;
-    this.speed = speed;
-    this.state = state;
-    this.dir = dir;
+    this.pos = settings.paddleInitPos[number];
+    this.dimmensions = settings.paddleDimmensions;
+    this.type = settings.paddleType;
+    this.color = settings.paddleColor;
+    this.speed = settings.paddleSpeed;
+    this.state = settings.paddleState[number];
   }
   toJSON() : any{
     const {pos, dimmensions,type, color, speed, dir} = this;
