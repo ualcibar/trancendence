@@ -135,15 +135,17 @@ export class MapSettings{
   // Constructor settings
   public readonly ballRadius! : number;
   public readonly ballColor! : number;
-  public readonly ballInitPos : Vector2 = new Vector2(0,0);
   public readonly ballInitSpeed! : number;
-  public readonly ballInitAcceleration : number = 0.01;
+  public readonly ballInitAcceleration! : number;
   public readonly ballInitDir!: Vector2;
   public readonly ballWidthSegments = 32;
   public readonly ballHeightSegments = 16;
 
+  //Ball position
+  public readonly ballInitPos = new Vector2(0,0);
+
   // Ball light settings
-  public readonly ballLightIsOn : boolean = false;
+  public readonly ballLightIsOn! : boolean;
   public readonly ballLightColor! : number;
   public readonly ballLightIntensity! : number;
 
@@ -152,10 +154,14 @@ export class MapSettings{
   public readonly paddleHeight! : number;
   public readonly paddleDepth! : number;
   public readonly paddleColor! : number;
+  public readonly paddleType! : BlockType;
+  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
 
   // Paddle position
-  public readonly leftPaddlePos!: Vector3;
-  public readonly rightPaddlePos!: Vector3;
+  public readonly leftPaddlePos!: Vector2;
+  public readonly rightPaddlePos!: Vector2;
+  public readonly paddleInitPos: Vector2[] = [this.leftPaddlePos, this.rightPaddlePos];
+  public readonly paddleDimmensions = new Vector3(this.paddleWidth, this.paddleHeight, this.paddleDepth);
 
   // Paddle movement settings
   public readonly paddleSpeed! : number;
@@ -168,7 +174,6 @@ export class MapSettings{
   public readonly friction! : number;
 
   public readonly deltaFactor! : number;
-
   public  readonly blocks : Block[];
 
   constructor(info : MapSettingsCreateInfo, blocks : Block[]){
@@ -178,15 +183,8 @@ export class MapSettings{
   createMatchInitUpdate(info : MatchSettings, manager : Manager) : MatchUpdate{
     const paddles : Paddle[] = new Array<Paddle>(info.teamSize * 2);
     for (let i = 0; i < paddles.length; i++){
-      const pos : Vector3 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
-      paddles[i] = new Paddle(new Vector2(pos.x,pos.y),
-                          new Vector3(this.paddleWidth, this.paddleHeight, this.paddleDepth),
-                          BlockType.Collision,
-                          this.paddleColor,
-                          new Vector2(0,0),
-                          this.paddleSpeed,
-                          PaddleState.Binded,
-                          manager);
+      const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
+      paddles[i] = new Paddle(this, i, manager);
       paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]));
       paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key('w','s')))
                 .bindTick(createTickMove(paddles[i]))
