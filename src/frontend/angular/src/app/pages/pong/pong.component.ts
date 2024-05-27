@@ -2,6 +2,7 @@ import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Input } fro
 import * as THREE from 'three';
 import { Vector2, Vector3} from 'three';
 import { Subscription } from 'rxjs';
+import * as key from 'keymaster';
 
 
 import {GameManagerService, GameManagerState, Manager, MatchSettings, MatchState, MatchUpdate } from '../../services/gameManager.service';
@@ -311,6 +312,83 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.speed = settings.paddleSpeed;
     this.state = settings.paddleState[number];
   }
+
+  addToScene(scene: THREE.Scene) {
+    scene.add(this.mesh);
+  }
+
+  handleKey() {
+    if (key.isPressed(this.upKey)) {
+      this.goinUp = true;
+    }
+    else {
+      this.goinUp = false;
+    }
+    if (key.isPressed(this.downKey)) {
+      this.goinDown = true;
+    }
+    else {
+      this.goinDown = false;
+    }
+  }
+
+  handleIA() {
+    if (this.pos.y < this.AIprediction - this.width / 42) {
+      this.goinUp = true;
+      this.goinDown = false;
+    }
+    else if (this.pos.y > this.AIprediction + this.width / 42) {
+      this.goinUp = false;
+      this.goinDown = true;
+    }
+    else {
+      this.goinUp = false;
+      this.goinDown = false;
+    }
+  }
+
+  update(timeDelta : number) {
+    if (this.localPlayer) {
+      this.handleKey();
+    }
+    if (this.AIplayer) {
+      this.handleIA();
+    }
+    const paddleDiferentialDisplacement = timeDelta * this.speed;
+    if (this.goinUp) {
+      this.pos.y += paddleDiferentialDisplacement;
+    }
+    if (this.goinDown) {
+      this.pos.y -= paddleDiferentialDisplacement;
+    }
+  }
+
+  changeColor(color: number) {
+    this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+  }
+
+  limitYmax(maxY: number) {
+    if (this.pos.y > maxY) {
+      this.pos.y = maxY;
+    }
+  }
+
+  limitYmin(minY: number) {
+    if (this.pos.y < minY) {
+      this.pos.y = minY;
+    }
+  }
+
+  madeLocalPlayer() {
+    this.localPlayer = true;
+    this.AIplayer = false;
+  }
+
+  madeAIPlayer() {
+    this.localPlayer = false;
+    this.AIplayer = true;
+  }
+
   toJSON() : any{
     const {pos, dimmensions,type, color, speed, dir} = this;
     return {pos, dimmensions,type, color, speed, dir}; 
