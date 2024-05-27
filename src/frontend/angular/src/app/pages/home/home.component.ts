@@ -32,7 +32,7 @@ enum HomeState{
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = true;
+  debug : boolean = false;
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   state: HomeState;
