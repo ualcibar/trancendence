@@ -98,6 +98,43 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     this.tickBehaviour = new TickBehaviour<Ball>(this);
   }
 
+  addToScene(scene: THREE.Scene) {
+    scene.add(this.mesh);
+    scene.add(this.light);
+  }
+
+  update(timeDelta : number) {
+    const ballDiferentialDisplacement = timeDelta * this.speed;
+    this.mesh.position.x -= ballDiferentialDisplacement * Math.cos(this.angle);
+    this.mesh.position.y -= ballDiferentialDisplacement * Math.sin(this.angle);
+    this.light.position.x = this.mesh.position.x;
+    this.light.position.y = this.mesh.position.y;
+    this.pos.x = this.mesh.position.x;
+    this.pos.y = this.mesh.position.y;
+  }
+
+  changeColor(color: number) {
+    this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+    if (this.lightOn)
+      this.light.color = new THREE.Color(color);
+  }
+
+  yCollision(y: number) {// y is the ideal position of the ball when it collides
+    this.dir.y = -this.dir.y;
+    this.pos.y = y;
+    this.speed += this.aceleration * this.speed;
+    if (this.colorChange)
+      this.changeColor(Math.random() * 0xFFFFFF);
+  }
+
+  xCollision(x: number) {// x is the ideal position of the ball when it collides
+    this.dir.x = -this.dir.x;
+    this.pos.x = x;
+    this.speed += this.aceleration * this.speed;
+    if (this.colorChange)
+      this.changeColor(Math.random() * 0xFFFFFF);
+  }
+
   toJSON(): any {
     const {pos, speed, dir, lightOn} = this;
     return {pos, speed, dir, lightOn}; 
