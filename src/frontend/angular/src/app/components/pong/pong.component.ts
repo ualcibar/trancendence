@@ -100,8 +100,16 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
 
 
   addToScene(scene: THREE.Scene) {
+    console.log('adding ball to scene');
     scene.add(this.mesh);
-    scene.add(this.light);
+    if (this.lightOn)
+      scene.add(this.light);
+  }
+
+  sincronize(ball : Ball){
+    this.position.set(ball.pos.x, ball.pos.y, 0);
+    this.dir = ball.dir;
+    this.speed = ball.speed;
   }
 
   update(timeDelta : number) {
@@ -172,6 +180,10 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     return Math.atan2(this.dir.y, this.dir.x);
   }
 
+  get position() : Vector3{
+    return this.mesh.position;
+  }
+
   set dirX(value : number){
     this.dir.x = value;
   }
@@ -182,6 +194,13 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
 
   set dir(value : Vector2){
     this._dir = value;
+  }
+
+  set position(value : Vector3){
+    this.mesh.position.copy(value);
+    this.light.position.copy(value);
+    this.pos.x = value.x;
+    this.pos.y = value.y;
   }
 
   subscribeToManager(manager : Manager): void {
@@ -322,6 +341,11 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     scene.add(this.mesh);
   }
 
+  sincronize(paddle : Paddle){
+    this.position.set(paddle.pos.x, paddle.pos.y, 0);
+    this.dir = paddle.dir;
+  }
+
   handleKey() {
     if (key.isPressed(this.upKey)) {
       this.goinUp = true;
@@ -402,6 +426,10 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     return this.id;
   }
 
+  get position() : Vector3{
+    return this.mesh.position;
+  }
+
   runEvent(type: PongEventType, data: EventData): void {
     this.eventBehaviour.runEvent(type, data);
   }
@@ -447,10 +475,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
   light!: THREE.Light;
-  balls: THREE.Mesh[] = [];
+  balls: Ball[] = [];
   ballsLight: THREE.Light[] = [];
   blocks: THREE.Mesh[] = [];//0 is top 1 is bottom
-  paddles: THREE.Mesh[] = [];
+  paddles: Paddle[] = [];
   pastTime: number = 0;
   lastUpdate: number = 0;
   currentMatchStateId = 0;
@@ -549,22 +577,16 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
 
     // INIT BALL !TODO more than one ball
-    const ballGeometry = new THREE.SphereGeometry(this.map.ballRadius,
-      this.map.ballWidthSegments,
-      this.map.ballHeightSegments);
-    const ballMaterial = new THREE.MeshPhongMaterial({ color: this.map.ballColor });
-    const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-    this.balls.push(ball);
-    this.scene.add(ball);
-
-    // INIT BALL LIGHT
-    const ballLight = new THREE.PointLight(this.map.ballLightColor,
-      this.map.ballLightIntensity);
-    this.ballsLight.push(ballLight);
-    this.scene.add(ballLight);
+    // const numberOfBalls = this.map.numberOfBalls;
+    const numberOfBalls = 1;
+    for (let i = 0; i < numberOfBalls ; i++) {
+      const ball = new Ball(this.map, this.manager);
+      ball.addToScene(this.scene);
+      this.balls.push(ball);
+    }
 
     // INIT PADDLES
-    this.paddles = new Array<THREE.Mesh>(this.update.paddles.length);
+    this.paddles = new Array<Paddle>(this.update.paddles.length);
     for (const [index, paddle] of this.update.paddles.entries()){
       const paddleGeometry = new THREE.BoxGeometry(
         paddle.dimmensions.x,
@@ -572,8 +594,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
         paddle.dimmensions.z
       );
       const paddleMaterial = new THREE.MeshPhongMaterial({ color: paddle.color });
-      this.paddles[index] = new THREE.Mesh(paddleGeometry, paddleMaterial);
-      this.scene.add(this.paddles[index]);
+      this.paddles[index] = new Paddle(this.map, index, this.manager);
+      this.paddles[index].addToScene(this.scene);
     }
     // INIT BLOCKS
     this.blocks = new Array<THREE.Mesh>(this.update.blocks.length);
@@ -748,13 +770,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   updateScene(){//there should be a variable telling if it was changed
     for (const [index, ball] of this.update.balls.entries()){
-      this.balls[index].position.set(ball.pos.x, ball.pos.y, 0);
-      if (ball.lightOn)
-        this.ballsLight[index].position.set(ball.pos.x, ball.pos.y, 0);
+      this.balls[index].sincronize(ball);
     }
     for (const [index, paddle] of this.update.paddles.entries()){
-      this.paddles[index].position.set(paddle.pos.x, paddle.pos.y,0);
-      //this.paddles[index].material = new THREE.MeshPhongMaterial({ color: paddle.color });
+      this.paddles[index].sincronize(paddle);
     }
     for (const [index, block] of this.update.blocks.entries()){
       this.blocks[index].position.set(block.pos.x, block.pos.y, 0);

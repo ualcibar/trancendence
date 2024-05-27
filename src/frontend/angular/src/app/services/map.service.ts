@@ -158,8 +158,8 @@ export class MapSettings{
   public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
 
   // Paddle position
-  public readonly leftPaddlePos!: Vector2;
-  public readonly rightPaddlePos!: Vector2;
+  public readonly leftPaddlePos: Vector2 = new Vector2(0,0);
+  public readonly rightPaddlePos: Vector2 = new Vector2(0,0);
   public readonly paddleInitPos: Vector2[] = [this.leftPaddlePos, this.rightPaddlePos];
   public readonly paddleDimmensions = new Vector3(this.paddleWidth, this.paddleHeight, this.paddleDepth);
 
