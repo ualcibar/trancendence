@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import {AuthService} from './auth.service';
 import {interval, Subscription} from 'rxjs';
-import { LogFilter, Logger } from '../utils/debug';
 
 export class Message {
   message : string = '';
@@ -27,22 +26,19 @@ export class Message {
   providedIn: 'root'
 })
 export class ChatService {
-  //backend connection
-  webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
-  webSocket : WebSocket | undefined;
-  connectionInterval : Subscription | undefined;
-  connected : boolean = false;
-
-  //chat
   chatMessages : Map<string, Message[]> = new Map<string, Message[]>();
+  newMessage: string = '';
   current_chat_name : string= '#global';
   users: Set<string> = new Set<string>();
-  newMessage: string = '';
+  connected : boolean = false;
+  connectionInterval : Subscription | undefined;
 
-  //logger
-  logger : Logger = new Logger(LogFilter.chatServiceLogger, 'chatService :');
+  webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
+  //webSocketUrl = 'disabled';
 
-  constructor(private http: HttpClient, private ngZone: NgZone, private authService : AuthService) { 
+  webSocket : WebSocket | undefined;
+
+  constructor(private http: HttpClient, private ngZone: NgZone, private authService : AuthService) {
     this.chatMessages.set('#global', []);
     this.connectToWebsocket();
     this.connectionInterval = interval(1000)
@@ -54,29 +50,27 @@ export class ChatService {
   }
   
   connectToWebsocket(){
-    this.logger.info('am i logged in?',this.authService.isLoggedIn())
+    console.log('am i logged in?',this.authService.isLoggedIn());
     this.authService.isLoggedIn$.subscribe(loggedIn => {
-      this.logger.info('chat chating chat');
-      if (this.isConnected())
-        return;
+      console.log('chat chating chat');
 
       if (loggedIn){
         const jwtToken = this.authService.getCookie('access_token');
         if (jwtToken == null) {
-          this.logger.error('failed to get cookie access token, log in');
+          console.log('failed to get cookie access token, log in');
         }
         this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
 
         this.webSocket.onopen = () => {
-          this.logger.info('WebSocket connection opened');
+          console.log('WebSocket connection opened');
           this.connected = true;
         };
         this.webSocket.onclose = () => {
-          this.logger.info('WebSocket connection closed');
+          console.log('WebSocket connection closed');
           this.connected = false;
         };
         this.webSocket.onerror = (error) => {
-          this.logger.error('WebSocket error:', error);
+          console.error('WebSocket error:', error);
           this.connected = true;
         };
         this.webSocket.onmessage = (event) => {
@@ -86,7 +80,7 @@ export class ChatService {
           let targetChannel = this.current_chat_name;
           let message: string;
           this.ngZone.run(() => {
-            this.logger.info("Channel type: " + data.type);
+            console.log("Channel type: " + data.type);
             switch (data.type) { /// GLOBAL IGNORA SWITCH, LUEGO ENTRA DOS VECES; es posble que #global no entre en data.type
               case 'private_message':
                 if (!this.chatMessages.has(data.user)) {
@@ -96,14 +90,14 @@ export class ChatService {
                 message = data.message;
                 break;
               case 'private_message_delivered':
-                this.logger.info("message was delivered");
+                console.log("message was delivered");
                 targetChannel = data.target;
                 message = data.message;
                 break;
               case 'global_message':
                 targetChannel = '#global';
                 message = data.message;
-                this.logger.info("lo he mandado al global tambien");
+                console.log("lo he mandado al global tambien");
                 break;
               case 'user_list':
                 this.users = new Set(data.users);
@@ -115,8 +109,8 @@ export class ChatService {
                 this.users.delete(data.user);
                 return;
               default:
-                this.logger.info(data);
-                this.logger.info('message no current channel');
+                console.log(data);
+                console.log('message no current channel');
                 return;
             }
 
@@ -124,7 +118,7 @@ export class ChatService {
             if (chatMessage)
               chatMessage.push({ message: message, id: data.id, sender: data.sender, date: actualHour });
             else
-              this.logger.error('no target channel');
+              console.log('no target channel');
           });
         };
       }else{
@@ -155,7 +149,7 @@ export class ChatService {
       this.webSocket?.send(jsonMessage); 
       return true;
     } else {
-      this.logger.error('WebSocket connection is not open');
+      console.error('WebSocket connection is not open');
       return false;
     }
   }

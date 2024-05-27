@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AuthService, UserInfo } from '../../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -25,6 +25,8 @@ export class UserProfileComponent {
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
+    // Aquí obtenemos la última información del perfil del usuario
+    this.authService.updateUserInfo();
     this.authService.isLoggedIn$.subscribe({
       next: (value) => {
         if (value) {

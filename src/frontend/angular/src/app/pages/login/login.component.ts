@@ -1,6 +1,6 @@
 import { Component} from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
 import { fadeInOut } from '../../../assets/animations/fadeInOut';
@@ -18,7 +18,6 @@ export class LoginComponent {
   };
 
   errorMessage: string = '';
-  successMessage: string = '';
 
   constructor(private http: HttpClient, private auth : AuthService, private router: Router) {}
 
@@ -30,11 +29,10 @@ export class LoginComponent {
 
   async loginAcc() {
     if (await this.auth.login(this.user.username, this.user.password)){
-      this.successMessage = 'login successful';
       this.router.navigate(['/']);
-      //window.location.href="/";
+      window.location.href="/";
     }else {
-      this.errorMessage = 'failed to login';
+      this.errorMessage = 'Failed to login!';
     }
   }
 }

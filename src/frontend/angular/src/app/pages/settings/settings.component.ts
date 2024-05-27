@@ -6,19 +6,23 @@ import { AuthService } from '../../services/auth.service';
 
 import { SettingsPColorComponent } from './settings-p-color/settings-p-color.component';
 import { SettingsPLanguageComponent } from './settings-p-language/settings-p-language.component';
+import { SettingsPPublicComponent } from "./settings-p-public/settings-p-public.component";
+import { SettingsPSecurityComponent } from './settings-p-security/settings-p-security.component';
+import { SettingsPPrivacyComponent } from './settings-p-privacy/settings-p-privacy.component';
 import { UnauthorizedComponent } from '../../components/errors/unauthorized/unauthorized.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, SettingsPColorComponent, SettingsPLanguageComponent, UnauthorizedComponent, RouterModule],
+  imports: [CommonModule, SettingsPColorComponent, SettingsPLanguageComponent, SettingsPPublicComponent, SettingsPSecurityComponent, SettingsPPrivacyComponent, UnauthorizedComponent, RouterModule, TranslateModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
 export class SettingsComponent {
   loading: boolean = true;
 
-  activeTab: string | null =  'color';
+  activeTab: string | null =  'security';
 
   constructor (public authService: AuthService) { }
 

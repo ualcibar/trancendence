@@ -16,7 +16,7 @@ li {
 
 /* Media queries */
 .settings-tab {
-	margin-top: 19vh;
+	margin-top: 14vh;
 }
 
 .settings-tab-margin {
@@ -26,6 +26,7 @@ li {
 @media (max-width: 575.98px) {
 	.settings-tab {
 		margin-top: 3vh;
+		margin-bottom: 6vh;
 	}
 
 	.settings-tab-margin {

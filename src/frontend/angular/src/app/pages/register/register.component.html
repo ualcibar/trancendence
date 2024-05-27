@@ -1,30 +1,35 @@
-<div id="sp-div" class="max-w-xl mx-auto shadow-md rounded-xl overflow-hidden md:max-w-2xl items-center">
-	<div class="p-8 w-full">
-		<p class="text-center text-3xl font-semibold">Register to SpacePong!</p>
-		<p class="text-center">Already a user?  <a routerLink="/login" class="text-amber-300">Login here</a></p>
+<div id="sp-div" class="mx-auto shadow-md rounded-xl overflow-hidden max-w-full md:max-w-2xl p-4 sm:p-6 md:p-8 items-center col-12 col-md-6">
+    <div class="p-4 sm:p-6 md:p-8">
+		<p class="text-center text-3xl font-semibold">{{'register_title'|translate}}</p>
+		<p class="text-center">{{'register_subtitle'|translate}}  <a routerLink="/login" class="text-amber-300">{{'register_subtitle_link'|translate}}</a></p>
 		<br/>
-		<form #registerForm="ngForm" (ngSubmit)="registerAcc()" class="ml-12 mr-12">
+		<form #registerForm="ngForm" (ngSubmit)="registerAcc()" ngNativeValidate class="mx-4">
 			<div class="form-floating mb-3">
-				<input type="text" name="username" [(ngModel)]="user.username" class="form-control shadow-none" id="floatingInput" placeholder="SpacialUser">
-				<label for="floatingInput"><i class="bi bi-person-circle"></i> Username</label>
-				<div id="usernameHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> Choose a nice looking username that will be shown to other players</div>
+				<input type="text" name="username" [(ngModel)]="user.username" class="form-control shadow-none" id="floatingInput" placeholder="SpacialUser" required>
+				<label for="floatingInput" class="form-label"><i class="bi bi-person-circle"></i> {{'username'|translate}}</label>
+				<div id="usernameHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> {{'register_username_tip'|translate}}</div>
 			</div>
-			<div class="form-floating mb-3 bg-transparent">
-				<input name="password" [(ngModel)]="user.password" type="password" class="form-control shadow-none" id="passwordInput" placeholder="Password">
-				<label for="passwordInput" class="form-label"><i class="bi bi-incognito"></i> Password</label>
-				<div id="passwordHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> Choose a long password with different characters</div>
+            <div class="form-floating mb-3">
+                <input type="text" name="email" [(ngModel)]="user.email" class="form-control shadow-none" id="emailInput" placeholder="amazingmail@spacepong.me" required>
+                <label for="emailInput" class="form-label"><i class="bi bi-at"></i> {{'email'|translate}}</label>
+                <div id="emailHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> Choose an email account as personal identification</div>
+            </div>
+			<div class="form-floating mb-3">
+				<input name="password" [(ngModel)]="user.password" type="password" class="form-control shadow-none" id="passwordInput" placeholder="Password" required>
+				<label for="passwordInput" class="form-label"><i class="bi bi-incognito"></i> {{'password'|translate}}</label>
+				<div id="passwordHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> {{'register_password_tip'|translate}}</div>
 			</div>
-			<div class="flex items-center">
+            <div class="flex flex-col sm:flex-row items-center">
 				<button type="submit"class="mr-3 bg-yellow-400 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
 					<div class="p-3">
-						<div class="text-xs font-medium uppercase text-black">Register</div>
+						<div class="text-xs font-medium uppercase text-black">{{'profile_register'|translate}}</div>
 					</div>
 				</button>
-				<p class="mr-2">or register using </p>
+				<p class="mr-2">{{'register_finish_tip'|translate}} </p>
 				<button type="button" (click)="register42Api()" class="mr-3 bg-42 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-42-selected hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
 					<img class="h-7 w-7 filter invert" src="../../../assets/img/42_Logo.svg.png">
 					<div class="p-3">
-						<div class="text-xs text-white font-medium uppercase text-black">42 Account</div>
+						<div class="text-xs text-white font-medium uppercase">{{'42_account'|translate}}</div>
 					</div>
 				</button>
 			</div>
@@ -36,7 +41,7 @@
 	<div class="alert max-auto max-w-xl" style="background-color: #db4d4d;">
 		<i class="bi bi-x-circle text-black"></i>
 		<div>
-			<h4 class="font-bold text-black">Oops!</h4>
+			<h4 class="font-bold text-black">{{'error'|translate}}</h4>
 			<p class="text-black">{{ errorMessage }}</p>
 		</div>
 	</div>
@@ -46,9 +51,9 @@
 	<div class="alert alert-success max-auto max-w-xl">
 		<i class="bi bi-check-circle"></i>
 		<div>
-			<h4 class="font-bold">Success!</h4>
+			<h4 class="font-bold">{{'success'|translate}}</h4>
 			{{ successMessage }}
-			<i>Redirecting to the login page...</i>
+			<i>{{'register_redirect'|translate}}</i>
 		</div>
 	</div>
 </div>

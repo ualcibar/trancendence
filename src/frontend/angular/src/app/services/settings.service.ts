@@ -1,18 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService, UserInfo } from './auth.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
+
+import { TranslateService } from '@ngx-translate/core';
 
 // Esta clase nos permite guardar/obtener la config custom del usuario
 // - Para obtener todos los valores, implementamos la clase 'UserInfo' del servicio de 'Auth'
 export class UserSettingsInfo extends UserInfo {
   user_color: string;
   user_language: string;
+  user_email: string;
 
-  constructor (userInfo: UserInfo, user_color: string, user_language: string) {
+  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string) {
     super(userInfo.username, userInfo.user_id, userInfo.online);
     this.user_color = user_color;
     this.user_language = user_language;
+    this.user_email = user_email;
   }
 }
 
@@ -23,7 +27,7 @@ export class SettingsService {
   private userSettingsInfoSubject: BehaviorSubject<UserSettingsInfo | null> = new BehaviorSubject<UserSettingsInfo | null>(null);
   userSettingsInfo$: Observable<UserSettingsInfo | null> = this.userSettingsInfoSubject.asObservable();
 
-  constructor(private http: HttpClient, private authService: AuthService) {
+  constructor(private http: HttpClient, private authService: AuthService, private translateService: TranslateService) {
     this.updateUserConfig();
   }
 
@@ -34,7 +38,7 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language']);
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email']);
           this.userSettingsInfoSubject.next(userSettingsInfo);
         },
         error: () => {
@@ -48,7 +52,7 @@ export class SettingsService {
   }
 
   // Esta función nos permite actualizar datos de usuario utilizanddo la view del backend
-  setUserConfig(type: string, value: string) {
+  async setUserConfig(type: string, value: string): Promise<void> {
     const userSettingsInfoVal = this.userSettingsInfoSubject.getValue();
     if (userSettingsInfoVal) {
       const backendURL = '/api/polls/setConfig/' + userSettingsInfoVal.user_id;
@@ -59,21 +63,16 @@ export class SettingsService {
         })
       };
 
-      this.http.post<any>(backendURL, httpReqBody, httpHeader).subscribe({
-        next: (response) => {
-          if (type === 'user_language') {
-            userSettingsInfoVal.user_language = value;
-          } else if (type === 'user_color') {
-            userSettingsInfoVal.user_color = value;
-          } else if (type === 'username') {
-            userSettingsInfoVal.username = value;
-          }
-          console.log('✔️ ', response);
-        },
-        error: (error) => {
-          console.error('❌ An error ocurred:', error);
-        }
-      });
+      const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+      if (type === 'user_language') {
+        userSettingsInfoVal.user_language = value;
+      } else if (type === 'user_color') {
+        userSettingsInfoVal.user_color = value;
+      } else if (type === 'username') {
+        userSettingsInfoVal.username = value;
+      }
+      console.log('✔️ ', response.message);
+      console.log(userSettingsInfoVal.username);
     } else {
       console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;

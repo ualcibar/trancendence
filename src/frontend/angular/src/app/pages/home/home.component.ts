@@ -32,7 +32,7 @@ enum HomeState{
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = true;
+  debug : boolean = false;
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   state: HomeState;
@@ -88,9 +88,10 @@ export class HomeComponent implements OnInit{
       this.router.navigate(['/play']);
       console.log('redirecting')
     }
-    //!TODO
-//    else if (newGame.gameType === GameType.Tournament)
-//      this.gameManager.startTournament();
+  }
+
+  ngOnDestroy() {
+    this.matchmakingService.webSocket?.close();
   }
 }
 
