@@ -1,0 +1,9 @@
+.dissmiss{
+    border-radius: 30%;
+    color: rgba(43, 36, 92, 0.865);
+}
+
+.dissmiss:hover{
+    border-radius: 30%;
+    color: rgba(0, 0, 0, 0.865);
+}

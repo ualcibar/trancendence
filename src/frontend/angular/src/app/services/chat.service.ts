@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import {AuthService} from './auth.service';
 import {interval, Subscription} from 'rxjs';
+import { LogFilter, Logger } from '../utils/debug';
+import { ChatState, StateService } from './stateService';
 
 export class Message {
   message : string = '';
@@ -26,19 +28,25 @@ export class Message {
   providedIn: 'root'
 })
 export class ChatService {
+  //backend connection
+  webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
+  webSocket : WebSocket | undefined;
+  connectionInterval : Subscription | undefined;
+  connected : boolean = false;
+
+  //chat
   chatMessages : Map<string, Message[]> = new Map<string, Message[]>();
   newMessage: string = '';
   current_chat_name : string= '#global';
   users: Set<string> = new Set<string>();
-  connected : boolean = false;
-  connectionInterval : Subscription | undefined;
 
-  webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
-  //webSocketUrl = 'disabled';
+  //logger
+  logger : Logger = new Logger(LogFilter.ChatServiceLogger, 'chatService :');
 
-  webSocket : WebSocket | undefined;
-
-  constructor(private http: HttpClient, private ngZone: NgZone, private authService : AuthService) {
+  constructor(private http: HttpClient,
+              private ngZone: NgZone,
+              private authService : AuthService,
+              private state : StateService) { 
     this.chatMessages.set('#global', []);
     this.connectToWebsocket();
     this.connectionInterval = interval(1000)
@@ -64,10 +72,12 @@ export class ChatService {
         this.webSocket.onopen = () => {
           console.log('WebSocket connection opened');
           this.connected = true;
+          this.state.changeChatState(ChatState.Connected)
         };
         this.webSocket.onclose = () => {
           console.log('WebSocket connection closed');
           this.connected = false;
+          this.state.changeChatState(ChatState.Disconnected)
         };
         this.webSocket.onerror = (error) => {
           console.error('WebSocket error:', error);

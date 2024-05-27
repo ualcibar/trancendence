@@ -328,19 +328,21 @@ class FriendsListView(APIView):
     def post(self, request, user_id):
         try:
             user = CustomUser.objects.get(id=user_id)
+            usernames = request.data.get('usernames', [])
+            ids = []
+            for username in usernames:
+                id = CustomUser.objects.filter(username=username).values_list('id', flat=True).first()
+                if not id:
+                    continue
+                ids.append(id)
+            if len(ids) == 0: #or user2.DoesNotExist:
+                return Response({"error": "no matching users"}, status=status.HTTP_400_BAD_REQUEST)
+            user.friends.add(ids)
+            friends = user.friends.all()
+            serializer = CustomUserSerializer(friends, many=True)
+            return Response({"message": "Friends added successfully", "friends" : serializer.data}, status=status.HTTP_201_CREATED)
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        friend_ids = request.data.get('friend_ids', [])
-        user2 = CustomUser.objects.get(id=user_id)
-
-        if not friend_ids or user2.DoesNotExist:
-            return Response({"error": "Friend IDs are required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        friends = CustomUser.objects.filter(id__in=friend_ids)
-        user.friends.add(*friends)
-        user.save()
-        return Response({"message": "Friends added successfully"}, status=status.HTTP_201_CREATED)
 
 # File uploading management
 def upload_file(request):

@@ -1,0 +1,18 @@
+<div class="absolute z-1 top-5 right-5 w-1/2 max-w-xl h-full">
+    <ul>
+        <li *ngFor="let notification of notificationQueue" class="alert flex items-center" [@slideInFromRight]
+            style="background-color: #4d78db;">
+            <div class="flex-1">
+                <h4 class="font-bold text-black">{{notification.title}}</h4>
+                <h5 class="text-black">{{notification.body}}</h5>
+            </div>
+            <div *ngIf="notification.action1 !== undefined" class="flex2">
+                <button (click)="notification.callAction1()" class="items-right btn text-white">{{notification.action1.text}}</button>
+            </div>
+            <div *ngIf="notification.action2 !== undefined" class="flex2">
+                <button (click)="notification.callAction2()" class="items-right btn text-white">{{notification.action2.text}}</button>
+            </div>
+            <button (click)="notification.dismissCallBack()" class="dissmiss bi bi-chevron-double-right"></button>
+        </li>
+    </ul>
+</div>

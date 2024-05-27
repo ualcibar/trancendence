@@ -2,8 +2,9 @@
 <!-- NO QUITÉIS ESTO! -->
 <body class="bg-transparent">
 	<app-navbar></app-navbar>
-
-	<router-outlet class="relative z-10"></router-outlet>
-	<app-footer></app-footer>
+	<div class="relative">
+		<app-notification-component></app-notification-component>
+	</div>
+	<router-outlet></router-outlet>
+    <app-footer></app-footer>
 </body>
-<!--  -->
