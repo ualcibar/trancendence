@@ -125,11 +125,15 @@ export class MapSettings{
 
   public readonly defaultLightingIsOn!  : boolean;
   public readonly defaultlightColor! : number;
+ 
   // Light position
   public readonly defaultLightIntensity! : number;
   public readonly defaultLightPositionX! : number;
   public readonly defaultLightPositionY! : number;
   public readonly defaultLightPositionZ! : number;
+
+  // Additional lights
+  public readonly additionalLights : THREE.Light[] = [];
 
   // Ball settings
   // Constructor settings

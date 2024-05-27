@@ -20,20 +20,6 @@ export const colorPalette = {
   black: 0x000000,
 };
 
-/*class Light{
-  const color = this.map.defaultlightColor;
-  const intensity = this.map.defaultLightIntensity;
-  const light = new THREE.DirectionalLight(color, intensity);
-  const X = this.map.defaultLightPositionX;
-  const Y = this.map.defaultLightPositionY;
-  const Z = this.map.defaultLightPositionZ;
-  light.position.set(X, Y, Z);
-
-  constructor(color, intensity, ){
-
-  }
-}*/
-
 export enum PaddleState{
   Binded = 'binded', //must be keybinded moved by ourselfs
   Unbinded = 'unbinded',
@@ -574,6 +560,11 @@ export class PongComponent implements AfterViewInit, OnDestroy {
         this.map.defaultLightPositionY,
         this.map.defaultLightPositionZ);
       this.scene.add(this.light);
+    }
+
+    // ADD ADDITIONAL LIGHTS
+    for (const light of this.map.additionalLights) {
+      this.scene.add(light);
     }
 
     // INIT BALL !TODO more than one ball
