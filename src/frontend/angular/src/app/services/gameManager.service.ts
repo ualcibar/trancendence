@@ -169,8 +169,6 @@ export class MatchUpdate{
       ball.pos.copy(update.balls[index].pos);
       ball.dir.copy(update.balls[index].dir);
       ball.speed = update.balls[index].speed;
-      ball.lightColor = update.balls[index].lightColor;
-      ball.lightIntensity = update.balls[index].lightIntensity;
       ball.lightOn = update.balls[index].lightOn;
     }
     for (const [index, block] of this.blocks.entries()){

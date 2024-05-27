@@ -136,11 +136,16 @@ export class MapSettings{
   public readonly ballRadius! : number;
   public readonly ballColor! : number;
   public readonly ballInitSpeed! : number;
+  public readonly ballInitAcceleration! : number;
   public readonly ballInitDir!: Vector2;
   public readonly ballWidthSegments = 32;
   public readonly ballHeightSegments = 16;
 
+  //Ball position
+  public readonly ballInitPos = new Vector2(0,0);
+
   // Ball light settings
+  public readonly ballLightIsOn! : boolean;
   public readonly ballLightColor! : number;
   public readonly ballLightIntensity! : number;
 
@@ -189,14 +194,7 @@ export class MapSettings{
                 .bindTick(createTickMove(paddles[i]))
     }
     const balls : Ball[] = new Array<Ball>(1);
-    balls[0] = new Ball(this.ballInitDir,
-                        this.ballInitSpeed,
-                        true,
-                        new Vector2(0,0),
-                        this.ballLightColor,
-                        this.ballLightIntensity,
-                        manager
-    );
+    balls[0] = new Ball(this, manager);
     balls[0].bindTick(createTickMove(balls[0]));
     return new MatchUpdate(paddles, balls,this.blocks!, new Score([0,0]),0);  
   }
@@ -214,8 +212,6 @@ export class MapSettings{
       ball.speed = this.ballInitSpeed;
       ball.dir.copy(this.ballInitDir);
       ball.lightOn = true;
-      ball.lightIntensity = this.ballLightIntensity;
-      ball.lightColor = this.ballColor;
     }
   }
 }

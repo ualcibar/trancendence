@@ -65,17 +65,16 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
   lightColor : number;
   lightIntensity : number;
 
-  constructor(dir: Vector2, speed: number, lightOn : boolean, pos : Vector2,
-    lightColor : number, lightIntensity : number, manager : Manager) {
+  constructor(settings : MapSettings, manager: Manager) {
     //this.id = manager.subscribeGameObject(this);
-    this.dir = dir;
-    this.speed = speed;
+    this.dir = settings.ballInitDir;
+    this.speed = settings.ballInitSpeed;
     this.eventBehaviour = new EventBehaviour<Ball>(this, manager);
     this.tickBehaviour = new TickBehaviour<Ball>(this);
-    this.pos = pos;
-    this.lightOn = lightOn;
-    this.lightColor = lightColor;
-    this.lightIntensity = lightIntensity; 
+    this.pos = settings.ballInitPos;
+    this.lightOn = settings.ballLightIsOn;
+    this.lightColor = settings.ballLightColor;
+    this.lightIntensity = settings.ballLightIntensity; 
   }
 
   toJSON(): any {
@@ -287,7 +286,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
   light!: THREE.Light;
-  balls: THREE.Mesh[] = [];
+  // balls: THREE.Mesh[] = [];
   ballsLight: THREE.Light[] = [];
   blocks: THREE.Mesh[] = [];//0 is top 1 is bottom
   paddles: THREE.Mesh[] = [];
