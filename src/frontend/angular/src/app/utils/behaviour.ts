@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "three";
 import { Manager} from "../services/gameManager.service";
-import { Ball, Block, GameObject} from "../pages/pong/pong.component";
+import { Ball, Block, GameObject} from "../components/pong/pong.component";
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Key } from "../services/gameManager.service";

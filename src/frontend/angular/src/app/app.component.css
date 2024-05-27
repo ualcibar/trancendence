@@ -3,8 +3,8 @@ body {
     inset: 0;
     background-size: cover;
     background-color: aqua;
-    overflow: hidden; 
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
 }
 /*
 html, body {

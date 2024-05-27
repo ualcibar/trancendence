@@ -1,4 +1,12 @@
-<app-pong [map]="manager.getMapSettings()" 
-          [matchSettings]="manager.getMatchSettings()"
-          [update]="manager.getMatchUpdate()">
-    </app-pong>
+<app-pong *ngIf="renderState.game$ | async"
+      [map]="manager.getMapSettings()" 
+      [matchSettings]="manager.getMatchSettings()"
+      [update]="manager.getMatchUpdate()">
+</app-pong>
+<app-tournament-tree-component [manager]="tournamentManager!" *ngIf="renderState.tree$ | async">
+</app-tournament-tree-component>
+<button (click)="startNextTournamentround()"
+        class="btn text-white flex"
+        *ngIf="renderState.tree$ | async">
+            START
+</button>

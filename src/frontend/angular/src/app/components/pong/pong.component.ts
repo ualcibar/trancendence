@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Input } from '@angular/core';
 import * as THREE from 'three';
 import { Vector2, Vector3} from 'three';
 import { Subscription } from 'rxjs';
@@ -267,6 +267,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
 
 @Component({
   selector: 'app-pong',
+  standalone: true,
   templateUrl: './pong.component.html',
   styleUrls: ['./pong.component.css']
 })
@@ -280,8 +281,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   public readonly far = 5;
   public readonly cameraZ = 2;
 
-
-  running: boolean = false;
+  stop : boolean = false;
   renderer!: THREE.WebGLRenderer;
   canvas: any;
   camera!: THREE.PerspectiveCamera;
@@ -294,9 +294,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   pastTime: number = 0;
   lastUpdate: number = 0;
   currentMatchStateId = 0;
-  map!: MapSettings;
-  matchSettings!: MatchSettings;
-  update!: MatchUpdate;
+  @Input() map!: MapSettings;
+  @Input() matchSettings!: MatchSettings;
+  @Input() update!: MatchUpdate;
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
@@ -311,13 +311,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       console.error('pong, no game has been started');
       this.router.navigate(['/']);
     }
+    this.initValues()
     this.configStateSubscription = this.manager.subscribeMatchState(//it was done befor it was set??
       (state: MatchState) => {
         switch (state) {
-          case MatchState.Starting:
-            console.log('VALUES INITIALIZED')
-            this.initValues();
-            break;
           case MatchState.Initialized:
             break;
           case MatchState.Running:
@@ -338,10 +335,20 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.configStateSubscription.unsubscribe()
+    // Dispose renderer if exists
     if (this.renderer) {
-      this.renderer.setAnimationLoop(null);
-      this.running = false;
+      this.renderer.dispose();
+      this.stop = true;
     }
+
+    // Clear scene
+    if (this.scene) {
+      while (this.scene.children.length > 0) {
+        this.scene.remove(this.scene.children[0]);
+      }
+    }
+    //this.manager.setMatchState(MatchState.FinishedSuccess);
   }
 
   getScore() : string{
@@ -356,32 +363,18 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     if (this.renderer) {
       requestAnimationFrame(this.render.bind(this));
       // this.renderer.setAnimationLoop(this.render.bind(this));//!todo better use matute method
-      this.running = true;
+      
     }
   }
 
   pause() {
     if (this.renderer) {
       this.renderer.setAnimationLoop(null);//!todo
-      this.running = false;
+      
     }
   }
 
-  initValues() {
-    this.map = this.manager.getMapSettings();
-    this.matchSettings = this.manager.getMatchSettings();
-    this.update = this.manager.getMatchUpdate();//its a reference
-    //INITIALIZE THREE.JS
-    // INIT SCENE
-    this.canvas = this.pongCanvas.nativeElement;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this.canvas });
-
-    this.camera = new THREE.PerspectiveCamera(this.fov,
-      this.aspect,
-      this.near,
-      this.far);
-    this.camera.position.z = this.cameraZ;
-
+  initScene(){
     // INIT SCENE
     this.scene = new THREE.Scene();
 
@@ -422,17 +415,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.paddles[index] = new THREE.Mesh(paddleGeometry, paddleMaterial);
       this.scene.add(this.paddles[index]);
     }
-    /*const paddleGeometry = new THREE.BoxGeometry(this.map.paddleWidth,
-      this.map.paddleHeight,
-      this.map.paddleDepth);
-    const paddleMaterial = new THREE.MeshPhongMaterial({ color: this.map.paddleColor });
-
-    for (let i = 0; i < this.matchSettings.teamSize * 2; i++) {
-      const paddle = new THREE.Mesh(paddleGeometry, paddleMaterial);
-      this.paddles.push(paddle);
-      this.scene.add(paddle);
-    }*/
-
     // INIT BLOCKS
     this.blocks = new Array<THREE.Mesh>(this.update.blocks.length);
     for (const [index, block] of this.update.blocks.entries()){
@@ -450,32 +432,25 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.scene.add(this.blocks[index]);
     }
     this.updateScene();
-    /*    !TODO walls will be passed as an array, disigned beforehand
-                there will no longer be top bottom just walls
-    
-    const wallGeometry = new THREE.BoxGeometry(this.map.wallWidth,
-                                               this.map.wallHeight,
-                                               this.map.wallDepth);
-    const wallMaterial = new THREE.MeshPhongMaterial({color: this.map.wallColor});
-
-    const wallDimmensions = new THREE.Vector2(this.map.wallWidth, this.map.wallHeight) 
-    
-    const topWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    topWall.position.x = this.map.topWall.x;
-    topWall.position.y = this.map.topWall.y;
-    topWall.position.z = this.map.topWall.z;
-    
-    const bottomWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    bottomWall.position.x = this.map.bottomWall.x;
-    bottomWall.position.y = this.map.bottomWall.y;
-    bottomWall.position.z = this.map.bottomWall.z;
-    
-    this.scene.add(topWall);
-    this.scene.add(bottomWall);
-    this.walls.push(new RenderRectangle(wallDimmensions, topWall));
-    this.walls.push(new RenderRectangle(wallDimmensions, bottomWall));
-    */
     this.manager.setMatchState(MatchState.Initialized);
+
+  }
+
+  initValues() {
+    /*this.map = this.manager.getMapSettings();
+    this.matchSettings = this.manager.getMatchSettings();
+    this.update = this.manager.getMatchUpdate();//its a reference*/
+    //INITIALIZE THREE.JS
+    // INIT SCENE
+    this.canvas = this.pongCanvas.nativeElement;
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this.canvas });
+
+    this.camera = new THREE.PerspectiveCamera(this.fov,
+      this.aspect,
+      this.near,
+      this.far);
+    this.camera.position.z = this.cameraZ;
+    this.initScene();
   }
 
   
@@ -501,7 +476,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     if (after - before > 3)
       console.error('rende', after - before)
     this.pastTime = time;
-    requestAnimationFrame(this.render.bind(this));
+    if (!this.stop)
+      requestAnimationFrame(this.render.bind(this));
   }
 
   logic(timeDifference : number){ 

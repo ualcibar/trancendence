@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from "three";
-import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../pages/pong/pong.component";
+import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../components/pong/pong.component";
 import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./gameManager.service";
 import { Injectable } from "@angular/core";
 import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision } from "../utils/behaviour";

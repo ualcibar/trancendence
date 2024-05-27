@@ -4,7 +4,7 @@ import { Subject, Observable} from 'rxjs';
 import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
-import { PaddleState} from '../pages/pong/pong.component';
+import { PaddleState} from '../components/pong/pong.component';
 import { GameManagerService,  Manager, MatchSettings, MatchState, MatchUpdate, OnlineMatchInfo, OnlineMatchManager } from './gameManager.service';
 import { MapsName, MapsService } from './map.service';
 import { toEnum } from '../utils/help_enum';

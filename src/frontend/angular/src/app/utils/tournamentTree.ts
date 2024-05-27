@@ -47,6 +47,7 @@ export class TournamentTree{
         return this.data[this.currentIndex].groups;
     }
     next(score : Score){
+        console.log('NEXT data', this.data, 'current index', this.currentIndex)
         this.data[this.currentIndex].score = score;
         if (this.currentIndex % 2 === 1){
             const prev = this.data[this.currentIndex - 1];

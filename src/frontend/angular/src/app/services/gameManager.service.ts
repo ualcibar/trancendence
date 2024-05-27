@@ -9,7 +9,7 @@ import { PongEventType, EventObject, EventData, EventBehaviour } from '../utils/
 import { GameObjectMap } from '../utils/eventMap';
 import { UserInfo } from './auth.service';
 import { MapSettings, MapsName } from './map.service';
-import { Ball, GameObject, Paddle, PaddleState, Block } from '../pages/pong/pong.component';
+import { Ball, GameObject, Paddle, PaddleState, Block } from '../components/pong/pong.component';
 import { Router } from '@angular/router';
 import { LogFilter, Logger } from '../utils/debug';
 import { TournamentTree } from '../utils/tournamentTree';
@@ -20,23 +20,22 @@ export enum GameConfigState{
   Ingame = 'in game'
 }
 
+
 export enum TournamentState{
-  Standby  = 'standby',
-  Starting = 'starting',
-  Running = 'running',
-  FinishedSuccess = 'finished success',
-  Error = 'error',
+  InGame,
+  InTree,
+  FinishedSuccess,
 }
 
 export enum MatchState{
-  Created = 'Created',
-  Starting = 'starting',
-  Initialized = 'initialized',
-  Running = 'running',
-  Paused = 'paused',
-  Reset = 'reset',
-  FinishedSuccess = 'finished success',
-  Error = 'error',
+  Created,
+  Starting,
+  Initialized,
+  Running,
+  Paused,
+  Reset,
+  FinishedSuccess,
+  Error,
 }
 /*
 export class Tournament{
@@ -268,7 +267,6 @@ export interface OnlineManager{
 }
 
 
-
 export class TournamentManager implements Manager{
 //  matchConfig : MatchConfig;//pong entrypoint
   settings : TournamentSettings;
@@ -280,6 +278,7 @@ export class TournamentManager implements Manager{
   
   state : State<GameManagerState>;//manager state, changing it signals the match to start
   gameObjects : GameObjectMap = new GameObjectMap();
+  tournamentState : State<TournamentState> = new State<TournamentState>(TournamentState.InTree);
   constructor(settings : TournamentSettings, mapSettings : MapSettings, private router : Router){
     this.mapSettings = mapSettings;
     this.settings = settings;
@@ -303,26 +302,30 @@ export class TournamentManager implements Manager{
             console.log('start tournament: a match has started');
             break;
           case MatchState.FinishedSuccess:
-            console.log('start tournament: a match has finished');
-            console.log('start tournament result : ');
-            console.error('!todo, must navigate to tournamet tree and back to pong to reset all')
+            console.log('tournament: match finished, updating tree');
             this.update.tree.next(this.update.currentMatchUpdate.score);
-            this.update.currentMatchUpdate = this.mapSettings.createMatchInitUpdate(this.settings.matchSettings,this);
-            //!todo must reset gameobjects and set them again, maybe map change
+            this.tournamentState.setValue(TournamentState.InTree)
+            this.update.currentMatchUpdate = this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this)
             this.update.currentMatchUpdate.subscribeAllToManager(this);
+            this.update.currentMatchUpdate.score = new Score([0,0]);
+            this.currentMatchState.setValue(MatchState.Created)
             break;
         }
     }); 
   }
 
+  nextRound(){
+    this.tournamentState.setValue(TournamentState.InGame);
+  }
   startMatch(){
+    console.error('!todo: tournament: start match')
     //clear objects
-    this.update.currentMatchUpdate = this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this);
+    /*this.update.currentMatchUpdate = this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this);
     this.update.currentMatchUpdate.subscribeAllToManager(this);
     this.currentMatchState.setValue(MatchState.Created);
     setTimeout(() => this.currentMatchState.setValue(MatchState.Starting), 1000);
     this.router.navigate(['/play']);
-    //navigate to pong?
+    //navigate to pong?*/
   }
   
   getMapSettings(): MapSettings {
@@ -376,8 +379,7 @@ export class TournamentManager implements Manager{
           const score : Score = this.update.currentMatchUpdate.score;
           score.score[data.custom!.others.team] += 1;
           if (score.score[data.custom!.others.team] >= this.settings.matchSettings.roundsToWin){
-            console.log('team: ', this.update.tree.getCurrentGroups()[data.custom!.others.team], 'won')
-            this.router.navigate(['/'])
+            this.currentMatchState.setValue(MatchState.FinishedSuccess);
           }
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
           this.mapSettings.setMatchInitUpdate(this.update.currentMatchUpdate, this.settings.matchSettings);
@@ -846,7 +848,7 @@ export enum RealManagerType{
   providedIn: 'root'
 })
 export class GameManagerService implements Manager{
-  state : State<GameManagerState>;//manager state, changing it signals the match to start
+  private state : State<GameManagerState>;//manager state, changing it signals the match to start
   currentManager : Manager | undefined;//a manager for each state 
   realManagerType : RealManagerType | undefined;
   realManager : MatchManager | TournamentManager | OnlineMatchManager | undefined; 
@@ -923,6 +925,10 @@ export class GameManagerService implements Manager{
   }
   setMatchState(state: MatchState): void {
     this.currentManager!.setMatchState(state);
+    if (state === MatchState.FinishedSuccess && this.realManagerType !== RealManagerType.Tournament){
+      this.currentManager = undefined;
+      this.state.setValue(GameManagerState.Standby);
+    }
   }
 
   subscribeMatchState(fn: any): Subscription {

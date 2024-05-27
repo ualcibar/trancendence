@@ -2,8 +2,16 @@ import { Component, Input,OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TournamentManager} from '../../services/gameManager.service';
-import { Router } from '@angular/router';
+import { State } from '../../utils/state';
+import { Observable } from 'rxjs';
 
+class TreeRender{
+    renderVs : State<boolean> = new State<boolean>(false);
+    renderWinner : State<boolean> = new State<boolean>(false);
+
+    get vs$() : Observable<boolean> {return this.renderVs.observable};
+    get winner$() : Observable<boolean> {return this.renderWinner.observable};
+}
 @Component({
   selector: 'app-tournament-tree-component',
   standalone: true,
@@ -18,19 +26,13 @@ export class TournamentTreeComponent implements OnInit{
   @Input() manager! : TournamentManager;
   preview! : [string, string];
 
-  constructor(private router : Router){}
+  constructor(){}
 
   ngOnInit(){
     this.preview = this.manager.update.getNextMatchPreview();
   }
-  start(){
-    setTimeout(() => {
-      this.router.navigate(['/play']);
-      setTimeout(() => this.manager.start(), 1000);
-    },3000);
-  }
 
   getVs() : string{
-    return `${this.manager.update.getNextMatchPreview()[0]} vs ${this.manager.update.getNextMatchPreview()[0]}`
+    return `${this.preview[0]} vs ${this.preview[1]}`
   }
 }

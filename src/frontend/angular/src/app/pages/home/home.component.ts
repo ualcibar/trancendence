@@ -78,7 +78,7 @@ class LocalGameHandler{
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = false;
+  debug : boolean = true;
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;
