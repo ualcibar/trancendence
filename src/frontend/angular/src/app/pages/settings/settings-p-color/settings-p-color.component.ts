@@ -2,11 +2,12 @@ import { Component, Renderer2, Input, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { SettingsService } from '../../../services/settings.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-settings-p-color',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './settings-p-color.component.html',
   styleUrl: './settings-p-color.component.css'
 })
@@ -15,6 +16,7 @@ export class SettingsPColorComponent {
   user_color = 'default';
 
   @Input() loaded: boolean = false;
+  username = 'Anonymous';
 
   constructor(public authService: AuthService, private renderer: Renderer2, public settingsService: SettingsService) {}
 
@@ -23,6 +25,7 @@ export class SettingsPColorComponent {
       if (userSettings) {
         this.selected_colorId = userSettings.user_color;
         this.user_color = this.selected_colorId;
+        this.username = userSettings.username;
       }
     })
   }
@@ -39,8 +42,12 @@ export class SettingsPColorComponent {
     return this.selected_colorId === color;
   }
 
-  saveColor() {
-    this.settingsService.setUserConfig('user_color', this.selected_colorId);
-    this.user_color = this.selected_colorId;
+  async saveColor() {
+    try {
+      await this.settingsService.setUserConfig('user_color', this.selected_colorId);
+      this.user_color = this.selected_colorId;
+    } catch (error) {
+      console.error('❌ An error ocurred:', error);
+    }
   }
 }

@@ -78,7 +78,7 @@ class LocalGameHandler{
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = true;
+  debug : boolean = false;
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;
@@ -109,7 +109,6 @@ export class HomeComponent implements OnInit{
   }
 
   changeState(newState: HomeState): void {
-//    this.state = newState; // Cambia el estado
     this.state.changeHomeState(newState)
     this.isAnimating = true;
     this.logger.info(this.isAnimating);
@@ -174,33 +173,6 @@ export class HomeComponent implements OnInit{
       return
     }
     this.router.navigate(['/play']);
-    // console.log('match creted')
-    
-    // console.log('redirecting')
-  }
-
-  new_match_tournament(newGame: any) {
-    this.logger.error('TODO!!!!!!!!!!!!')
-    /*const map = this.maps.getMapSettings(newGame.mapName);
-    if (!map) {
-      console.error('no such map');
-      this.changeState(HomeState.Home);
-      return
-    }
-    if (newGame.gameType === GameType.Match) {
-      console.log('team size before', newGame.teamSize)
-      this.gameManager.createMatch(new MatchConfig(
-        new MatchSettings(newGame.teamSize, new Array<PaddleState>(newGame.teamSize * 2).fill(PaddleState.Binded)),
-        map
-      ));
-      setTimeout(()=> this.gameManager.start(), 1000);
-      console.log('match creted')
-      this.router.navigate(['/play']);
-      console.log('redirecting')
-    }*/
-    //!TODO
-//    else if (newGame.gameType === GameType.Tournament)
-//      this.gameManager.startTournament();
   }
 }
 

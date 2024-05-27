@@ -8,25 +8,29 @@
 		<div class="static mx-auto col-12 col-md-6">
 			<div class="flex items-center mb-2">
 				<a routerLink="/profile/{{authService.user_info?.user_id}}">
-					<button type="button" class="mr-2 btn btn-warning rounded-full"><i class="text-xl bi bi-arrow-left"></i> Return</button>
+					<button type="button" class="mr-2 btn btn-warning rounded-full"><i class="text-xl bi bi-arrow-left"></i> {{'return'|translate}}</button>
 				</a>
-				<h2 class="text-2xl text-sp-text font-bold">User settings</h2>
+				<h2 class="text-2xl text-sp-text font-bold">{{'settings_title'|translate}}</h2>
 			</div>
 			<div class="flex flex-col md:flex-row">
 				<div id="sp-div" class="settings-tab-margin pb-4 md:flex-row h-fit rounded">
 					<ul class="pl-4 mr-4 mt-4 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
-						<h2 class="text-2xl text-sp-text font-bold">Profile</h2>
-						<li (click)="activeTab = 'color'" [ngClass]="{'selected': activeTab === 'color'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-palette-fill"></i> Your color</a></li>
-						<li (click)="activeTab = 'language'" [ngClass]="{'selected': activeTab === 'language'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-translate"></i> Language</a></li>
+						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_pro'|translate}}</h2>
+						<li (click)="activeTab = 'color'" [ngClass]="{'selected': activeTab === 'color'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-palette-fill"></i> {{'settings_tab_content_color'|translate}}</a></li>
+						<li (click)="activeTab = 'language'" [ngClass]="{'selected': activeTab === 'language'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-translate"></i> {{'settings_tab_content_lang'|translate}}</a></li>
 					</ul>
 					<ul class="pl-4 mr-4 mt-2 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
-						<h2 class="text-2xl text-sp-text font-bold">Account</h2>
-						<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> Public profile</a></li>
-						<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> Account security</a></li>
+						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_acc'|translate}}</h2>
+						<li (click)="activeTab = 'public'" [ngClass]="{'selected': activeTab === 'public'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> {{'settings_tab_content_public'|translate}}</a></li>
+						<li (click)="activeTab = 'security'" [ngClass]="{'selected': activeTab === 'security'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> {{'settings_tab_content_security'|translate}}</a></li>
+						<li (click)="activeTab = 'privacy'" [ngClass]="{'selected': activeTab === 'privacy'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-shield-shaded"></i> Privacidad</a></li>
 					</ul>
 				</div>
 				<app-settings-p-color [loaded]="loading" *ngIf="activeTab === 'color'" class="w-full"></app-settings-p-color>
 				<app-settings-p-language [loaded]="loading" *ngIf="activeTab === 'language'" class="w-full"></app-settings-p-language>
+                <app-settings-p-public [loaded]="loading" *ngIf="activeTab === 'public'" class="w-full"></app-settings-p-public>
+				<app-settings-p-security [loaded]="loading" *ngIf="activeTab === 'security'" class="w-full"></app-settings-p-security>
+				<app-settings-p-privacy [loaded]="loading" *ngIf="activeTab === 'privacy'" class="w-full"></app-settings-p-privacy>
 			</div>
 		</div>
 	</div>

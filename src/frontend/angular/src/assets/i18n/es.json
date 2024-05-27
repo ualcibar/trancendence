@@ -1,11 +1,52 @@
 {
     "play":"Jugar",
-    "about":"About Us",
-    "share":"Share",
-    "info":"Channel Information",
-    "name":"Names",
-    "email":"Email",
-    "Mobile":"Mobile",
-    "subscribe":"Subscribe Now"
+    "preview":"Vista previa",
+    "return":"Volver",
+    "exit":"Salir",
+    "success":"¡Hecho!",
+    "error":"¡Ups!",
+    "save_changes":"Guardar cambios",
+    "42_account":"Cuenta 42",
 
+    "username":"Usuario",
+    "password":"Contraseña",
+    "email":"Correo",
+    "register_title":"Regístrate a SpacePong!",
+    "register_subtitle":"¿Ya eres usuario?",
+    "register_subtitle_link":"Inicia sesión aquí",
+    "register_username_tip":"Elige un nombre de usuario atractivo que se mostrará al resto de jugadores",
+    "register_password_tip":"Elige una contraseña larga y con distintos carácteres",
+    "register_finish_tip":"o regístrate con",
+    "register_redirect":"Redireccionándote al inicio de sesión...",
+
+    "login_title":"¡Encantados de volver a verte!",
+    "login_subtitle":"¿Nuevo a SpacePong?",
+    "login_subtitle_link":"Regístrate aquí",
+    "login_finish_tip":"o inicia sesión con",
+
+    "profile_logout":"Cerrar sesión",
+    "profile_login":"Iniciar sesión",
+    "profile_register":"Regístrate",
+
+    "profile_lastonline":"última conexión",
+    "profile_stats_gamespl":"Partidas jugadas",
+    "profile_stats_gameswin":"Victorias",
+    "profile_stats_gamesdefeats":"Derrotas",
+    "profile_addasfriend":"Añadir como amigo",
+    "profile_sendamessage":"Mandar un mensaje",
+
+    "settings_title":"Ajustes de Usuario",
+    "settings_tab_title_pro":"Perfil",
+
+    "settings_tab_content_color":"Tu color",
+    "settings_tab_color_title":"Elige tu color",
+    "settings_tab_color_text":"Esto se mostrará a otros jugadores en el juego y en su perfil",
+
+    "settings_tab_content_lang":"Idioma",
+    "settings_tab_lang_title":"Elige tu idioma",
+    "settings_tab_lang_text":"Es posible que la página no esté traducida al 100%",
+
+    "settings_tab_title_acc":"Cuenta",
+    "settings_tab_content_public":"Perfil público",
+    "settings_tab_content_security":"Seguridad de la cuenta"
 }

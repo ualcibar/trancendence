@@ -4,8 +4,8 @@
 		<div>
 			<a class="mx-2 my-1 flex items-center text-neutral-900 hover:text-neutral-900 focus:text-neutral-900 lg:mb-0 lg:mt-0"
 				routerLink="/">
-				<img src="../../assets/img/transcendence_logo.png" class="h-12" loading="Transcendence Logo">
-				<p class="font-semibold text-2xl">Transcendence</p>
+				<img src="../../assets/img/spacepong_logo.svg" class="h-12" loading="Transcendence Logo">
+				<p class="font-semibold text-2xl text-white">SpacePong</p>
 			</a>
 		</div>
 		<a routerLink="/play">
@@ -19,16 +19,21 @@
 						class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
 						Test	
 					</button></a>
+			<a routerLink="/settings">
+					<button type="button"
+					class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
+					Lol	
+				</button></a>
 			<div *ngIf="!(authService.isLoggedIn$ | async)">
 				<a routerLink="/login">
 					<button type="button"
 						class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-						Login
+						{{'profile_login'|translate}}
 					</button></a>
 				<a routerLink="/register">
 					<button type="button"
 						class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-						Register
+						{{'profile_register'|translate}}
 					</button></a>
 			</div>
 			<div *ngIf="authService.isLoggedIn$ | async">
@@ -39,22 +44,15 @@
 					<a routerLink="/profile/{{authService.user_info?.user_id}}">
 						<button type="button"
 							class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-							Perfil
+							{{'settings_tab_title_pro'|translate}}
 						</button>
 					</a>
 				</ng-template>
 				<button (click)="logout()"
 					class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-					LogOut
+					{{'profile_logout'|translate}}
 				</button>
 			</div>
-			<a>
-				<select class="form-select" (change)="ChangeLang($event)" name="" id="">
-					<option [selected]="lang==='eus'" value="eus">Euskera</option>
-					<option [selected]="lang==='es'" value="es">Castellano</option>
-					<option [selected]="lang==='en'" value="en">English</option>
-				</select>
-			</a>
 		</div>
 	</div>
 </nav>

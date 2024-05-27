@@ -1,8 +1,6 @@
-<div class="h-auto">
+<div class="h-full"><!--h-full da problemas con scroll-->
 	<button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button>
 	<div *ngIf="debug">
-		<!--button class="btn text-white" (click)="authService.updateFriendList()">update friends</button>
-		<button class="btn text-white" (click)="authService.addFriend()">add friends</button-->
 		<p class="text-white">chat websocket state: {{chatService.isConnected()}}</p>
 		<p class="text-white">matchmaking websocket state: {{matchmakingService.isConnected()}}</p>
 		<p class="text-white">matchmaking state : {{matchmakingService.state.getCurrentValue()}}</p>
@@ -10,8 +8,8 @@
 		<p class="text-gray-500">to take this messages away set debug in home.component to false(unai ponlo abajo que
 			este mensaje desaparece)</p>
 	</div>
-	<div class="flex h-auto">
-		<!--app-chat *ngIf="state.homeRenderState.chat$ | async" class="flex chat" [@fadeInOut]></app-chat-->
+	<div class="flex h-full"><!--h-full da problemas con scroll-->
+		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="flex chat" [@fadeInOut]></app-chat>
 		<div class="flex flex-col justify-center items-center h-full w-full">
 			<button *ngIf="(state.homeRenderState.local$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.MatchTournament)"
 				class="card mb-16" [@fadeInOut]>
