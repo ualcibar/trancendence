@@ -55,32 +55,52 @@ export interface GameObject{
 }
 
 export class Ball implements GameObject, EventObject,  TickObject, toJson{
+  mesh : THREE.Mesh;
+  light! : THREE.PointLight;
+
+  radius : number;
+  speed : number;
+  aceleration : number;//after a collision
+  colorChange : boolean;
+
   eventBehaviour : EventBehaviour<Ball>;
   tickBehaviour : TickBehaviour<Ball>;
   private id! : number;
   _dir: Vector2 = new Vector2(0,0);
-  speed: number;
   pos : Vector2;
   lightOn : boolean;
-  lightColor : number;
-  lightIntensity : number;
 
-  constructor(dir: Vector2, speed: number, lightOn : boolean, pos : Vector2,
-    lightColor : number, lightIntensity : number, manager : Manager) {
+  constructor(settings : MapSettings, manager : Manager) {
+    this.radius = settings.ballRadius;
+    const widthSegments = settings.ballWidthSegments;
+    const heightSegments = settings.ballHeightSegments;
+    const ballGeometry = new THREE.SphereGeometry(this.radius, widthSegments, heightSegments);
+    const ballColor = settings.ballColor;
+    const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
+    this.mesh = new THREE.Mesh(ballGeometry, ballMaterial);
+
+    this.pos = settings.ballInitPos;
+    this.dir = settings.ballInitDir;
+    this.speed = settings.ballInitSpeed;
+    this.aceleration = settings.ballInitAcceleration;
+
+    this.lightOn = settings.ballLightIsOn;
+    if (this.lightOn) {
+      const color = ballColor;
+      const intensity = settings.ballLightIntensity;
+      this.light = new THREE.PointLight( color, intensity );
+    }
+
+    this.colorChange = settings.collisionChangeBallColor;
+
     //this.id = manager.subscribeGameObject(this);
-    this.dir = dir;
-    this.speed = speed;
     this.eventBehaviour = new EventBehaviour<Ball>(this, manager);
     this.tickBehaviour = new TickBehaviour<Ball>(this);
-    this.pos = pos;
-    this.lightOn = lightOn;
-    this.lightColor = lightColor;
-    this.lightIntensity = lightIntensity; 
   }
 
   toJSON(): any {
-    const {pos, speed, dir, lightColor, lightIntensity, lightOn} = this;
-    return {pos, speed, dir, lightColor, lightIntensity, lightOn}; 
+    const {pos, speed, dir} = this;
+    return {pos, speed, dir}; 
     
   }
   runEvent(type: PongEventType, data : EventData): void {
