@@ -244,6 +244,6 @@ export class MapsService {
         //this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, defaultInfo.createDefaultWalls(this.manager)));
     }
     getMapSettings(map: MapsName): MapSettings | undefined {
-        return this.maps.get(map);
+      return this.maps.get(map);
     }
 }

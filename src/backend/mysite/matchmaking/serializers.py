@@ -6,4 +6,4 @@ class MatchPreviewSerializer(serializers.ModelSerializer):
     host = CustomUserSerializer()
     class Meta:
         model = MatchPreview 
-        fields = ('name','tags', 'max_players', 'players', 'host')
+        fields = ('name','tags', 'teamSize', 'players', 'host', 'mapName')

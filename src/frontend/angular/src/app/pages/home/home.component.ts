@@ -15,6 +15,7 @@ import { GameManagerService, MatchConfig, MatchSettings } from '../../services/g
 import { MapSettings, MapsService } from '../../services/map.service';
 import { Router } from '@angular/router';
 import { PaddleState } from '../pong/pong.component';
+import { ChatService } from '../../services/chat.service';
 
 enum HomeState{
     Home,
@@ -31,6 +32,7 @@ enum HomeState{
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
+  debug : boolean = true;
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   state: HomeState;
@@ -39,10 +41,11 @@ export class HomeComponent implements OnInit{
   MatchMakingState = MatchMakingState;
 
   constructor(public matchmakingService: MatchmakingService,
-    private authService: AuthService,
-    private gameManager : GameManagerService,
-    private maps : MapsService,
-    private router : Router) {
+              public chatService: ChatService,
+              private authService: AuthService,
+              private gameManager : GameManagerService,
+              private maps : MapsService,
+              private router : Router) {
     this.state = HomeState.Home;
   }
 
@@ -68,7 +71,7 @@ export class HomeComponent implements OnInit{
 
   new_match_tournament(newGame: any) {
     console.log('new match!!!!!!!!!!!!')
-    const map = this.maps.getMapSettings(newGame.map);
+    const map = this.maps.getMapSettings(newGame.mapName);
     if (!map) {
       console.error('no such map');
       this.changeState(HomeState.Home);

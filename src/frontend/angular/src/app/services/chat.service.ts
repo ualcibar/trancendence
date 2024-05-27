@@ -52,9 +52,6 @@ export class ChatService {
   connectToWebsocket(){
     console.log('am i logged in?',this.authService.isLoggedIn());
     this.authService.isLoggedIn$.subscribe(loggedIn => {
-      if (this.isConnected()) {
-        return;
-      }
       console.log('chat chating chat');
 
       if (loggedIn){
@@ -118,10 +115,8 @@ export class ChatService {
             }
 
             const chatMessage = this.chatMessages.get(targetChannel);
-            if (chatMessage) {
+            if (chatMessage)
               chatMessage.push({ message: message, id: data.id, sender: data.sender, date: actualHour });
-              console.log(chatMessage);
-            }
             else
               console.log('no target channel');
           });

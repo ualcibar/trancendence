@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData, TickObject } from '../../utils/behaviour';
 import { MapSettings } from '../../services/map.service';
 import { BlockParameter } from '@angular/compiler';
+import { observeNotification } from 'rxjs/internal/Notification';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -49,10 +50,19 @@ export enum BlockType{
   Death = 'death'
 }
 
-export class Ball implements EventObject,  TickObject{
+export interface toJson{
+  toJSON() : any;
+}
+
+export interface GameObject{
+  getId() : number;
+}
+
+export class Ball implements GameObject, EventObject,  TickObject, toJson{
   eventBehaviour : EventBehaviour<Ball>;
   tickBehaviour : TickBehaviour<Ball>;
-  dir: Vector2;
+  private id! : number;
+  _dir: Vector2 = new Vector2(0,0);
   speed: number;
   pos : Vector2;
   lightOn : boolean;
@@ -61,6 +71,7 @@ export class Ball implements EventObject,  TickObject{
 
   constructor(dir: Vector2, speed: number, lightOn : boolean, pos : Vector2,
     lightColor : number, lightIntensity : number, manager : Manager) {
+    //this.id = manager.subscribeGameObject(this);
     this.dir = dir;
     this.speed = speed;
     this.eventBehaviour = new EventBehaviour<Ball>(this, manager);
@@ -71,6 +82,11 @@ export class Ball implements EventObject,  TickObject{
     this.lightIntensity = lightIntensity; 
   }
 
+  toJSON(): any {
+    const {pos, speed, dir, lightColor, lightIntensity, lightOn} = this;
+    return {pos, speed, dir, lightColor, lightIntensity, lightOn}; 
+    
+  }
   runEvent(type: PongEventType, data : EventData): void {
     this.eventBehaviour.runEvent(type, data);
   }
@@ -80,10 +96,38 @@ export class Ball implements EventObject,  TickObject{
   }
 
   getId() : number{
-    return this.eventBehaviour.getId();
+    return this.id;
+  }
+  get dir() : Vector2{
+    return this._dir;
+  }
+
+  get dirX() : number{
+    return this.dir.x;
+  }
+
+  get dirY() : number{
+    return this.dir.y;
+  }
+
+  get angle() : number{//medido desde la derecha
+    return Math.atan2(this.dir.y, this.dir.x);
+  }
+
+  set dirX(value : number){
+    this.dir.x = value;
+  }
+
+  set dirY(value : number){
+    this.dir.y = value;
+  }
+
+  set dir(value : Vector2){
+    this._dir = value;
   }
 
   subscribeToManager(manager : Manager): void {
+    this.id = manager.subscribeGameObject(this);
     this.eventBehaviour.subscribeToManager(manager);
   }
   bindEvent(fn: any): EventObject {
@@ -109,18 +153,21 @@ export class RenderMaterial{
   }
 }
 
-export class Block implements EventObject, TickObject{
+export class Block implements GameObject, EventObject, TickObject, toJson{
   tickBehaviour : TickBehaviour<Block>;
   eventBehaviour : EventBehaviour<Block>;
-  pos : Vector2;
-  dimmensions : Vector3;
+  
+  id! : number;
+  
   type : BlockType;
 
+  pos : Vector2;
+  speed : number;
+  dimmensions : Vector3;
   material : RenderMaterial;
 
-  speed : number;
-
   constructor(pos : Vector2, dimmensions : Vector3, type : BlockType, material : RenderMaterial, manager : Manager){
+    //this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Block>(this);
     const accelarate = tickBehaviourAccelerate(10);//example
     this.tickBehaviour.bindTick(accelarate);
@@ -131,8 +178,12 @@ export class Block implements EventObject, TickObject{
     this.material = material;
     this.speed = 0;
   }
+  toJSON(): any {
+    const { pos, dimmensions, type, speed, material } = this;
+    return { pos, dimmensions, type, speed, material };  
+  }
   getId() : number{
-    return this.eventBehaviour.getId();
+    return this.id;
   }
   
   runEvent(type: PongEventType, data: EventData): void {
@@ -144,6 +195,7 @@ export class Block implements EventObject, TickObject{
   }
 
   subscribeToManager(manager:  Manager): void {
+    this.id = manager.subscribeGameObject(this);
     this.eventBehaviour.subscribeToManager(manager);
   }
 
@@ -157,9 +209,10 @@ export class Block implements EventObject, TickObject{
 }
 
 
-export class Paddle implements EventObject, TickObject{
+export class Paddle implements GameObject, EventObject, TickObject, toJson{
   tickBehaviour : TickBehaviour<Paddle>;
   eventBehaviour : EventBehaviour<Paddle>;
+  id! : number;
   pos : Vector2;
   dir : Vector2;
   dimmensions : Vector3;
@@ -168,6 +221,7 @@ export class Paddle implements EventObject, TickObject{
   speed : number;
 
   constructor(pos : Vector2, dimmensions : Vector3, type : BlockType, color : number, dir : Vector2, speed : number, manager : Manager){
+    //this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
     this.pos = pos;
@@ -177,9 +231,13 @@ export class Paddle implements EventObject, TickObject{
     this.speed = speed;
     this.dir = dir;
   }
+  toJSON() : any{
+    const {pos, dimmensions,type, color, speed, dir} = this;
+    return {pos, dimmensions,type, color, speed, dir}; 
+  }
 
   getId(): number {
-    return this.eventBehaviour.getId();
+    return this.id;
   }
 
   runEvent(type: PongEventType, data: EventData): void {
@@ -191,6 +249,7 @@ export class Paddle implements EventObject, TickObject{
   }
 
   subscribeToManager(manager : Manager): void {
+    this.id = manager.subscribeGameObject(this);
     this.eventBehaviour.subscribeToManager(manager);
   }
 
@@ -201,6 +260,7 @@ export class Paddle implements EventObject, TickObject{
   bindTick(fn: any): TickObject {
     return this.tickBehaviour.bindTick(fn);
   }
+
 }
 
 @Component({
@@ -253,11 +313,13 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       (state: MatchState) => {
         switch (state) {
           case MatchState.Starting:
+            console.log('VALUES INITIALIZED')
             this.initValues();
             break;
           case MatchState.Initialized:
             break;
           case MatchState.Running:
+            console.log('MATCH STARTING')
             this.run();
             break;
           case MatchState.Paused:
@@ -282,7 +344,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   getScore() : string{
     if (this.matchSettings === undefined)
-      return '0 0'
+      return 'undefined'
     else
       return `${this.matchSettings.score.score[0]} : ${this.matchSettings.score.score[1]}`
   }
@@ -437,9 +499,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     if (after - before > 3)
       console.error('rende', after - before)
     this.pastTime = time;
-    //}
     requestAnimationFrame(this.render.bind(this));
   }
+
   logic(timeDifference : number){ 
     this.update.runTickBehaviour(timeDifference);
     this.allColisions();
@@ -461,7 +523,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             pos2.set(paddle.pos.x, paddle.pos.y),
             dimmension.set(paddle.dimmensions.x, paddle.dimmensions.y));          //todo!
         if (intersection[0]) {
-          console.log('impact paddle')
           if (intersection[1] === undefined) {
             console.error('intersection but no data received');
             continue;
@@ -470,8 +531,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             senderId : ball.getId(),
             targetIds : paddle.getId(),
             custom : {
-              intersection : intersection[1],
-              ball : ball
+              others : {
+                intersection : intersection[1],
+              },
+              gameObjects:{
+                ball : ball
+              }
             }
           };
           this.manager.sendEvent(PongEventType.Colision, eventData);
@@ -497,12 +562,16 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             senderId : ball.getId(),
             targetIds : block.getId(),
             custom : {
-              intersection : intersection[1],
-              ball : ball
+              gameObjects : {
+                ball : ball
+              },
+              others : {
+                intersection : intersection[1],
+              }
             },
           };
           this.manager.sendEvent(PongEventType.Colision, eventData);
-          console.log('sending event COLISION');
+//          console.log('sending event COLISION');
         }
       }
     }
