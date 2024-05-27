@@ -13,7 +13,7 @@ export class State<T>{
     setValue(newValue : T){
         this.subject.next(newValue);
     }
-    subscribe(subscription : any){
-        this.observable.subscribe(subscription);
+    subscribe(subscription : any) : Subscription{
+        return this.observable.subscribe(subscription);
     }
 }

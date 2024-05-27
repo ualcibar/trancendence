@@ -5,9 +5,10 @@ import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import {Observable, Subscription} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
-import { TournamentMatchMenuComponent } from '../tournament-match-menu/tournament-match-menu.component';
-import { GameSettings, GameType, MatchmakingService } from '../../services/matchmaking.service';
 
+import { MatchmakingService, OnlineMatchSettings2 } from '../../services/matchmaking.service';
+import { LogFilter, Logger } from '../../utils/debug';
+import { OnlineMatchGeneratorComponent } from '../online-match-generator/online-match-generator-component';
 
 @Component({
   selector: 'app-lobby-search',
@@ -16,7 +17,8 @@ import { GameSettings, GameType, MatchmakingService } from '../../services/match
     FormsModule,
     ReactiveFormsModule,
     AsyncPipe,
-    TournamentMatchMenuComponent],
+    OnlineMatchGeneratorComponent
+  ],
   templateUrl: './lobby-search.component.html',
   styleUrl: './lobby-search.component.css'
 })
@@ -24,7 +26,7 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
   //globalChatMessages : Message[] = [];
   current_entry : string= 'Match';
 //  entries : Map<string, string[]> = new Map<string, string[]>;
-  filtered_games$ : Observable<GameSettings[]>;
+  filtered_games$ : Observable<OnlineMatchSettings2[]>;
 
   private dataChangedSubscription: Subscription;
   myControl = new FormControl<string>('');
@@ -34,6 +36,9 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
 
   @ViewChild('messageBox') messageBox!: ElementRef;
 
+  //logger
+  logger : Logger = new Logger(LogFilter.LobbySearchLogger, 'lobby search:')
+
   constructor(private http: HttpClient, private ngZone: NgZone, private matchMakingService : MatchmakingService) {
     this.filtered_games$ = this.myControl.valueChanges.pipe(
       startWith(''),
@@ -41,7 +46,7 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
         return value ? this._filter(value as string) : this.getMatches(this.current_entry).slice();
       }),
     );
-    this.dataChangedSubscription = this.matchMakingService.dataChanged$.subscribe(() => {
+    this.dataChangedSubscription = this.matchMakingService.dataChanged.subscribe(() => {
       this.filtered_games$ = this.myControl.valueChanges.pipe(
         startWith(''),
         map(value => {
@@ -92,25 +97,17 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
 		this.showMatchTournamentMenu= false;
 	}
 
-  getMatches(entry : string) : GameSettings[]{
-    const matches : GameSettings[] | null = this.matchMakingService.getEntry(entry);
-    if (matches)
-      return matches;
-    return [];
-  }
-
-  getEntries() : string[]{
-    return Array.from(this.matchMakingService.getKeys());
+  getMatches(entry : string) : OnlineMatchSettings2[]{
+    return this.matchMakingService.getMatches(); 
   }
   
-  new_match_tournament(newGame : any){
-    this.matchMakingService.newGame(newGame);
+  new_match(settings : OnlineMatchSettings2){
+    this.matchMakingService.newOnlineMatch(settings);
   }
 
-  joinGame(game : GameSettings){
-    console.debug(`joining game called ${game.name}`);
-    if (this.current_entry === GameType.Match)
-      this.matchMakingService.joinMatch(game.name);
+  joinGame(settings : OnlineMatchSettings2){
+    this.logger.info(`joining game called ${settings.name}`);
+    this.matchMakingService.joinMatch(settings.name);
   }
 
 	// Función para hacer autoscroll hacia abajo
@@ -119,7 +116,7 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
 		if (scrollableDiv != null)
 			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
 	}
-  private _filter(name: string): GameSettings[] {
+  private _filter(name: string): OnlineMatchSettings2[] {
     const filterValue = name.toLowerCase();
     return this.getMatches(this.current_entry).filter(field => field.name.toLowerCase().includes(filterValue));
   }

@@ -1,4 +1,4 @@
-import { GameObject } from "../pages/pong/pong.component";
+import { GameObject } from "../components/pong/pong.component";
 import {PongEventType, EventObject } from "./behaviour";
 
 /*export class EventMap {
