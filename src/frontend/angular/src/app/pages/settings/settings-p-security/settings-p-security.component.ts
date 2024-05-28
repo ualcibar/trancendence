@@ -14,7 +14,8 @@ import { AuthService } from '../../../services/auth.service';
 export class SettingsPSecurityComponent {
   email = '';
   currentEmail = '';
-  password = '';
+  oldPassword = '';
+  newPassword = '';
 
   mailChanged = false;
   alreadyUsed = false;
@@ -32,7 +33,7 @@ export class SettingsPSecurityComponent {
     })
   }
 
-  async saveSecurity() {
+  async saveMailSecurity() {
     try {
       await this.settingsService.setUserConfig('email', this.email);
       this.currentEmail = this.email;
@@ -43,6 +44,16 @@ export class SettingsPSecurityComponent {
       if (error.status === 400) {
         this.mailChanged = false;
         this.alreadyUsed = true;
+      }
+    }
+  }
+
+  async savePassSecurity() {
+    try {
+      await this.settingsService.setUserConfig('password', this.newPassword);
+    } catch (error: any) {
+      if (error.status === 400) {
+        
       }
     }
   }

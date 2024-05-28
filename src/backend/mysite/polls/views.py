@@ -168,10 +168,16 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-    valid_keys = ['user_color', 'user_language', 'username', 'email']
+    valid_keys = ['user_color', 'user_language', 'username', 'password', 'email']
 
     for key, value in data.items():
         if key in valid_keys:
+            if key == 'password':
+                if user.check_password(value):
+                    return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
+                user.set_password(value)
+                updated_fields(key)
+                logger.debug(f"Actualizada la key {key}")
             setattr(user, key, value)
             updated_fields.append(key)
             logger.debug(f"Actualizada la key {key} a {value}")

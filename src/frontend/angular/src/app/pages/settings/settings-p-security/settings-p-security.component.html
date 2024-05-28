@@ -3,15 +3,23 @@
 	<p class="text-zinc-300">Actualiza el correo electrónico asociado a tu cuenta</p>
 	<div class="flex align-items-center max-w-80 mb-4">
 		<input [(ngModel)]="email" type="text" name="email" class="form-control shadow-none" id="floatingInput" required>
-		<button (click)="saveSecurity()" [ngClass]="{'grayscale-0': currentEmail !== email,'grayscale disabled opacity-50': currentEmail === email}" class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
+		<button (click)="saveMailSecurity()" [ngClass]="{'grayscale-0': currentEmail !== email,'grayscale disabled opacity-50': currentEmail === email}" class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
 	</div>
 
 	<h1 class="font-bold text-2xl"><i class="bi bi-asterisk"></i> Contraseña</h1>
-	<p class="text-zinc-300">Cambia tu contraseña que usas para iniciar sesión</p>
-	<div class="flex align-items-center max-w-80 mb-4">
-		<input [(ngModel)]="password" type="password" name="password" class="form-control shadow-none" id="floatingInput" required>
-		<button class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
-	</div>
+	<p class="text-zinc-300">Cambia la contraseña que usas para iniciar sesión</p>
+
+    <div class="form-text text-zinc-300">Contraseña actual</div>
+    <input [(ngModel)]="oldPassword" type="password" name="oldPassword" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
+
+    <div class="form-text text-zinc-300">Nueva contraseña</div>
+    <input [(ngModel)]="newPassword" type="password" name="newPassword1" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
+
+    <div class="form-text text-zinc-300">Repite la nueva contraseña</div>
+    <div class="flex align-items-center max-w-80 mb-4">
+        <input [(ngModel)]="newPassword" type="password" name="newPassword2" class="form-control shadow-none" id="floatingInput" required>
+        <button class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
+    </div>
 
 	<h1 class="font-bold text-2xl"><i class="bi bi-fingerprint"></i> Verificación en dos pasos</h1>
 	<p class="text-zinc-300">Añade más seguridad a tu cuenta activando la V2P</p>
