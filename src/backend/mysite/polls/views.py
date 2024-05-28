@@ -344,9 +344,15 @@ class FriendsListView(APIView):
 
 class FriendsView(APIView):
     def get(self, request, user_id, friend_id):
-        user = CustomUser.objects.get(id=user_id)
-        friends = user.friends.get(id=friend_id)
-        serializer = CustomUserSerializer(friends, many=False)
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+            friend = user.friends.get(id=friend_id)
+        except CustomUser.DoesNotExist:
+             return JsonResponse({'error': 'Friend not found (View)'}, status=404)
+        serializer = CustomUserSerializer(friend, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, user_id, friend_id):
@@ -354,14 +360,15 @@ class FriendsView(APIView):
             user = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user2 = CustomUser.objects.get(id=friend_id)
         except CustomUser.DoesNotExist:
             return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
         
         user.friends.add(user2)
-        return Response({"message": "Friends added successfully"}, status=status.HTTP_200_OK)
+
+        serializer = CustomUserSerializer(user.friends.all(), many=True)
+        return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
 
 
 # File uploading management

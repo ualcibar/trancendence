@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
-import { FriendsService } from '../../../services/friends.service';
+import { FriendsService, UserInfo } from '../../../services/friends.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -23,13 +23,16 @@ export class UserProfileComponent {
   logged_username: any;
   logged_user_id: number = 0;
   user_color: string = "default";
-
-  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService, private friendService: FriendsService) {}
+  staticValue : UserInfo[] = [];
+  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService, public friendService: FriendsService) {}
 
   ngOnInit(): void {
+
+    this.staticValue = FriendsService.friend_list;
+    
     // Aquí obtenemos la última información del perfil del usuario
     this.authService.updateUserInfo();
-    this.authService.isLoggedIn$.subscribe({
+     this.authService.isLoggedIn$.subscribe({
       next: (value) => {
         if (value) {
           this.route.params.subscribe(params => { // Esto hay que mirarlo, porquqe si lo del getUserInfo() falla por no estar con la sesión
@@ -41,15 +44,15 @@ export class UserProfileComponent {
         }
       }
     })
+    if (this.user_id != this.logged_user_id)
+      this.editProfile = this.friendService.friendExist(this.user_id);
   }
 
-  toggleAddFrined() {
-    console.log('Im in profile:', this.user_id);
-    console.log('Im the user', this.logged_user_id);
-    console.log('Before');
-    this.friendService.update_FriendList();
+  toggleAddFriend() {;
+
+    //this.friendService.update_FriendList();
     this.friendService.addFriend(this.user_id); 
-    this.friendService.update_FriendList();
+    //this.friendService.update_FriendList();
     // https://www.infragistics.com/products/ignite-ui-angular/angular/components/list
   }
 
@@ -60,6 +63,18 @@ export class UserProfileComponent {
       this.logged_user_id = response['userid'];
       } 
     })
+  }
+
+  friendExist(friendId: number): boolean {
+    console.log('friend-list in exist->', this.staticValue);
+    //this.findFriend(this.friend_list, friendId);
+    //console.log('my friemd->', this.findFriend(this.friend_list, friendId));
+    if (this.friendService.findFriend(this.staticValue, friendId) != null || friendId == this.authService.user_info?.user_id) {
+      console.log('yes');
+      return true;
+    }
+    console.log('no');
+    return false;
   }
 
   getUserInfo(userId: number): void {

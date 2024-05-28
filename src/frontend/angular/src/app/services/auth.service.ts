@@ -18,6 +18,7 @@ export class UserInfo{
   providedIn: 'root'
 })
 export class AuthService {
+
   private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   user_info? : UserInfo;
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
