@@ -4,6 +4,7 @@ import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./
 import { Injectable } from "@angular/core";
 import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision } from "../utils/behaviour";
 import { Score } from "./matchmaking.service";
+import * as THREE from 'three';
 
 export const colorPalette = {
     darkestPurple: 0x1C0658,
@@ -185,8 +186,16 @@ export class MapSettings{
 
   constructor(info : MapSettingsCreateInfo, blocks : Block[]){
     Object.assign(this, info);
-    this.blocks = blocks
+    this.blocks = blocks;
+        // Additional lights
+        {
+          const light = new THREE.PointLight(colorPalette.white , this.defaultLightIntensity / 10);
+          light.position.set(0, 0, 0);
+          this.additionalLights.push(light);
+        }
+        console.log("additional lights", this.additionalLights)
   }
+
   createMatchInitUpdate(info : MatchSettings, manager : Manager) : MatchUpdate{
     const paddles : Paddle[] = new Array<Paddle>(info.teamSize * 2);
     for (let i = 0; i < paddles.length; i++){
@@ -202,6 +211,7 @@ export class MapSettings{
     balls[0].bindTick(createTickMove(balls[0]));
     return new MatchUpdate(paddles, balls,this.blocks!, new Score([0,0]),0);  
   }
+
   setMatchInitUpdate(update : MatchUpdate, info : MatchSettings){
     for (const [index, paddle] of update.paddles.entries()){
       paddle.pos.copy(index < info.teamSize ? this.leftPaddlePos : this.rightPaddlePos);
@@ -217,6 +227,8 @@ export class MapSettings{
       ball.dir.copy(this.ballInitDir);
       ball.lightOn = true;
     }
+
+
   }
 }
 

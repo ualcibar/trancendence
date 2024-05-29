@@ -569,7 +569,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
 
     // ADD ADDITIONAL LIGHTS
+    console.log("additional lights", this.map.additionalLights)
     for (const light of this.map.additionalLights) {
+      console.log('adding light');
       this.scene.add(light);
     }
 
