@@ -161,6 +161,9 @@ export class MapSettings{
   public readonly paddleType! : BlockType;
   public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
 
+  public readonly paddleUpKey : string[] = ['w','o'];
+  public readonly paddleDownKey : string[] = ['s','l'];
+
   // Paddle position
   public readonly leftPaddlePos: Vector2 = new Vector2(-1,0);
   public readonly rightPaddlePos: Vector2 = new Vector2(1,0);
@@ -190,8 +193,9 @@ export class MapSettings{
       const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
       paddles[i] = new Paddle(this, i, manager);
       paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]));
-      paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key('w','s')))
+      paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key(paddles[i].upKey ,paddles[i].downKey)))
                 .bindTick(createTickMove(paddles[i]))
+      console.log("estoy con jose",paddles[i].upKey, paddles[i].downKey);
     }
     const balls : Ball[] = new Array<Ball>(1);
     balls[0] = new Ball(this, manager);

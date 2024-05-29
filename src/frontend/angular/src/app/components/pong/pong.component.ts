@@ -321,6 +321,12 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.color = settings.paddleColor;
     this.speed = settings.paddleSpeed;
     this.state = settings.paddleState[number];
+
+    if (this.state === PaddleState.Binded) {
+      this.madeLocalPlayer();
+      this.upKey = settings.paddleUpKey[number];
+      this.downKey = settings.paddleDownKey[number];
+    }
   }
 
   addToScene(scene: THREE.Scene) {
