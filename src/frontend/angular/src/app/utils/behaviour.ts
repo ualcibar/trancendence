@@ -190,10 +190,10 @@ export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddl
 	return function keyboardInputPaddle(delta: number) {
 		paddle.dir.y = 0;
 		if (key.isPressed(keys.up)) {
-			paddle.dir.y = 1;
+			paddle.dir.y += 1;
 		}
 		if (key.isPressed(keys.down)) {
-			paddle.dir.y = -1;
+			paddle.dir.y -= 1;
 		}
 	}
 }
