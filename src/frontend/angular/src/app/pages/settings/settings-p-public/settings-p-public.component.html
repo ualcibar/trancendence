@@ -3,7 +3,12 @@
     <div class="flex mt-2 mb-4">
         <img src="../../../../assets/img/transcendence_logo.png" class="mt-2 mr-2 w-24 h-24 bg-slate-400 rounded-full">
         <div class="ml-4 flex items-center flex-col justify-center">
-            <button class="btn btn-warning btn-sm"><i class="bi bi-upload"></i> Subir imagen</button>
+            <!-- <button class="btn btn-warning btn-sm"><i class="bi bi-upload"></i> Subir imagen</button> -->
+            <input
+  style="display: none"
+  type="file" (change)="onFileChanged($event)"
+  #fileInput>
+<button (click)="fileInput.click()"class="btn btn-warning btn-sm"><i class="bi bi-upload"></i>Subir imagen</button>
         </div>
 
     </div>

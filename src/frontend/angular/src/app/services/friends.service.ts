@@ -24,27 +24,31 @@ export class UserInfo{
 })
 export class FriendsService {
 
-  static friend_list : UserInfo[] = [];
+  //friend_list : UserInfo[] = [];
+  private friendListSubject: BehaviorSubject<UserInfo[]> = new BehaviorSubject<UserInfo[]>([]);
+  friendList$: Observable<UserInfo[]> = this.friendListSubject.asObservable();
+  id : any = 0;
   client_locale: string = 'en';
-  friend_exit: boolean = false;
   
   constructor(private http: HttpClient, private router: Router, private authService: AuthService, private translateService: TranslateService) {
     this.authService.amILoggedIn();
+    this.id = this.authService.user_info?.user_id
+    //this.update_FriendList();
+    this.addFriend(0);
+  }
+  
+  ngOnInit(): void {
     this.update_FriendList();
   }
 
-  ngOnInit(): void {
-    //this.update_FriendList();
-  }
-
   update_FriendList(): void {
-    const id = this.authService.user_info?.user_id;
+    const id = this.authService.user_infoSubject.value.user_id;
     const url = `api/polls/friendslist/${id}/`;
-
+    console.log('stoy updateando');
     this.http.get<any>(url, { withCredentials: true }).subscribe({
       next: (response) => {
         console.log('update response friend list', response);
-        FriendsService.friend_list = response;
+        this.friendListSubject.next(response);
      
       },
       error: () => {
@@ -54,7 +58,7 @@ export class FriendsService {
   }
 
   findFriend(friendsList: UserInfo[], friendId: number): UserInfo | null {
-    for (const friend of FriendsService.friend_list) {
+    for (const friend of this.friendListSubject.getValue()) {
         if (friend.id == friendId) {
             return friend;
         }
@@ -64,8 +68,8 @@ export class FriendsService {
 
 
   friendExist(friendId: number): boolean {
-    console.log('friend-list in exist->', FriendsService.friend_list);
-    if (this.findFriend(FriendsService.friend_list, friendId) != null || friendId == this.authService.user_info?.user_id) {
+    console.log('friend-list in exist->', this.friendListSubject.getValue());
+    if (this.findFriend(this.friendListSubject.getValue(), friendId) != null || friendId == this.authService.user_info?.user_id) {
       console.log('yes');
       return true;
     }
@@ -74,7 +78,7 @@ export class FriendsService {
   }
 
   addFriend(friendId: number): void {
-    const url = `api/polls/friends/${this.authService.user_info?.user_id}/${friendId}/`;
+    const url = `api/polls/friends/${this.authService.user_infoSubject.value.user_id}/${friendId}/`;
 
     const jsonToSend = { 
 
@@ -88,7 +92,7 @@ export class FriendsService {
 
     this.http.post<any>(url, jsonToSend, httpOptions).subscribe({
       next: (response) => {
-        FriendsService.friend_list = response.friends;
+        this.friendListSubject.next(response.friends);
       },
       error: (error) => {
           console.error('cant add a friend:', error.status);

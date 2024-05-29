@@ -28,7 +28,7 @@ export class UserProfileComponent {
 
   ngOnInit(): void {
 
-    this.staticValue = FriendsService.friend_list;
+    //this.staticValue = this.friendListSubject.getValue();
     
     // Aquí obtenemos la última información del perfil del usuario
     this.authService.updateUserInfo();

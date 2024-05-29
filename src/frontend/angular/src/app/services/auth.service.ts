@@ -20,8 +20,10 @@ export class UserInfo{
 export class AuthService {
 
   private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  user_infoSubject : BehaviorSubject<UserInfo> = new BehaviorSubject<UserInfo>(new UserInfo("", 0, true));
   user_info? : UserInfo;
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  user_infoObser$: Observable<UserInfo> = this.user_infoSubject.asObservable();
 
   constructor(private http: HttpClient) {
     this.amILoggedIn();
@@ -34,6 +36,7 @@ export class AuthService {
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
         this.user_info = new UserInfo(response['username'], response['userid'], true);
+        this.user_infoSubject.next(new UserInfo(response['username'], response['userid'], true))
         this.isLoggedInSubject.next(true);
       },
       error: () => {
