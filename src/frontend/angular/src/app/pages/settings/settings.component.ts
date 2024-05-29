@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
+import { MatchmakingService } from '../../services/matchmaking.service';
 
 import { SettingsPColorComponent } from './settings-p-color/settings-p-color.component';
 import { SettingsPLanguageComponent } from './settings-p-language/settings-p-language.component';
@@ -24,7 +25,7 @@ export class SettingsComponent {
 
   activeTab: string | null =  'security';
 
-  constructor (public authService: AuthService) { }
+  constructor (public authService: AuthService, private matchmakingService: MatchmakingService) { }
 
   ngOnInit() {
     this.authService.isLoggedIn$.subscribe({
