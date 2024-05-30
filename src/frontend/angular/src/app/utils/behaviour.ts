@@ -186,14 +186,24 @@ export function createTickMovePaddle<T extends Pos & Speed & Dir>(object : T){
       object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
 	}
 }
-export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddle : T, keys : Key ){
+// export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddle : T, keys : Key ){
+// 	return function keyboardInputPaddle(delta: number) {
+// 		paddle.dir.y = 0;
+// 		if (key.isPressed(keys.up)) {
+// 			paddle.dir.y += 1;
+// 		}
+// 		if (key.isPressed(keys.down)) {
+// 			paddle.dir.y -= 1;
+// 		}
+// 	}
+// }
+
+export interface HandleKeys {
+	handleKeys(): void;
+}
+
+export function createTickKeyboardInputPaddle<T extends HandleKeys>(paddle : T, keys : Key ){
 	return function keyboardInputPaddle(delta: number) {
-		paddle.dir.y = 0;
-		if (key.isPressed(keys.up)) {
-			paddle.dir.y += 1;
-		}
-		if (key.isPressed(keys.down)) {
-			paddle.dir.y -= 1;
-		}
+		paddle.handleKeys();
 	}
 }

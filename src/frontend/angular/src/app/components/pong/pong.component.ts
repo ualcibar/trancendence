@@ -338,15 +338,18 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.dir = paddle.dir;
   }
 
-  handleKey() {
+  handleKeys() {
+    this.dir.y = 0;
     if (key.isPressed(this.upKey)) {
       this.goinUp = true;
+      this.dir.y += +1;
     }
     else {
       this.goinUp = false;
     }
     if (key.isPressed(this.downKey)) {
       this.goinDown = true;
+      this.dir.y += -1;
     }
     else {
       this.goinDown = false;
@@ -370,7 +373,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
 
   update(timeDelta : number) {
     if (this.localPlayer) {
-      this.handleKey();
+      this.handleKeys();
     }
     if (this.AIplayer) {
       this.handleIA();

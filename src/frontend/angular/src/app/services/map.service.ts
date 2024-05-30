@@ -187,10 +187,29 @@ export class MapSettings{
   constructor(info : MapSettingsCreateInfo, blocks : Block[]){
     Object.assign(this, info);
     this.blocks = blocks;
+// <        // Additional lights
+//         {
+//           const light = new THREE.PointLight(colorPalette.white , this.defaultLightIntensity / 10);
+//           light.position.set(-1, -1, -1);
+//           this.additionalLights.push(light);
+//         }
         // Additional lights
         {
-          const light = new THREE.PointLight(colorPalette.white , this.defaultLightIntensity / 10);
-          light.position.set(0, 0, 0);
+          const light = new THREE.AmbientLight(colorPalette.white , this.defaultLightIntensity / 10);
+          this.additionalLights.push(light);
+        }
+        // Additional lights
+        {
+          const red = 0xFF0000;
+          const light = new THREE.DirectionalLight(red , this.defaultLightIntensity);
+          light.position.set(1, 0, 0);
+          this.additionalLights.push(light);
+        }
+        // Additional lights
+        {
+          const blue = 0x0000FF;
+          const light = new THREE.DirectionalLight(blue , this.defaultLightIntensity);
+          light.position.set(-1, 0, 0);
           this.additionalLights.push(light);
         }
         console.log("additional lights", this.additionalLights)
