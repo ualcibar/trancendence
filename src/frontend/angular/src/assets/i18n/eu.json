@@ -37,6 +37,9 @@
 
     "settings_tab_title_acc":"Kontua",
     "settings_tab_content_public":"Profil publikoa",
-    "settings_tab_content_security":"Kontuaren segurtasuna"
+    "settings_tab_content_security":"Kontuaren segurtasuna",
 
+    "settings_tab_content_2FA":"Bi urratseko autentifikazioa",
+    "settings_tab_title_2FA":"Bi urratseko autentifikazioa aktibatu",
+    "settings_buttom_activate_2FA":"AKTIBATU"
 }

@@ -75,6 +75,7 @@ def getInfo(request, user_id=None):
         'status': user.status,
         'color': user.user_color,
         'language': user.user_language,
+        '2FA': user.is_2FA_active
         }, status=200)
 
 @api_view(['POST'])
@@ -195,11 +196,11 @@ def register(request):
     password = data.get('password', '')
     email = data.get('email', '')
     if username and password and email:
-        fernet_obj = mail.generateFernetObj()
+        token_fernet = mail.generateFernetObj()
         token_verification = mail.generate_token()
         user = CustomUser.objects.create_user(
             username=username, email=email, password=password, token_verification=token_verification)
-        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, fernet_obj), mail.encript(username, fernet_obj)), email)
+        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(username, token_fernet)), email)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
@@ -275,8 +276,11 @@ def login(request):
                     return JsonResponse({'message': 'This user does not exist!'}, status=404)
                 
                 response.data = {"Success": "Login successfully", "data": data}
-                token_TwoFA = mail.generate_random_verification_code(6)
-                mail.send_TwoFA_mail(token_TwoFA, customUser.email)
+                if customUser.is_2FA_active:
+                    token_TwoFA = mail.generate_random_verification_code(6)
+                    mail.send_TwoFA_mail(token_TwoFA, customUser.email)
+                    customUser.token_2FA = token_TwoFA
+                    customUser.save()
                 return response
             else:
                 return Response({"message": "This account is not active!"}, status=500)

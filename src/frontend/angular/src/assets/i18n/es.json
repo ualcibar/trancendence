@@ -47,5 +47,9 @@
 
     "settings_tab_title_acc":"Cuenta",
     "settings_tab_content_public":"Perfil público",
-    "settings_tab_content_security":"Seguridad de la cuenta"
+    "settings_tab_content_security":"Seguridad de la cuenta",
+
+    "settings_tab_content_2FA":"Autentificación en dos pasos",
+    "settings_tab_title_2FA":"Activar autentificación en dos pasos",
+    "settings_buttom_activate_2FA":"ACTIVAR"
 }

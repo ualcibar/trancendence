@@ -18,15 +18,19 @@
 						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_pro'|translate}}</h2>
 						<li (click)="activeTab = 'color'" [ngClass]="{'selected': activeTab === 'color'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-palette-fill"></i> {{'settings_tab_content_color'|translate}}</a></li>
 						<li (click)="activeTab = 'language'" [ngClass]="{'selected': activeTab === 'language'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-translate"></i> {{'settings_tab_content_lang'|translate}}</a></li>
+						<li (click)="activeTab = 'two-fa'" [ngClass]="{'selected': activeTab === 'two-fa'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-translate"></i> {{'settings_tab_content_2FA'|translate}}</a></li>
+						
 					</ul>
 					<ul class="pl-4 mr-4 mt-2 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
 						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_acc'|translate}}</h2>
 						<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> {{'settings_tab_content_public'|translate}}</a></li>
 						<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> {{'settings_tab_content_security'|translate}}</a></li>
+						
 					</ul>
 				</div>
 				<app-settings-p-color [loaded]="loading" *ngIf="activeTab === 'color'" class="w-full"></app-settings-p-color>
 				<app-settings-p-language [loaded]="loading" *ngIf="activeTab === 'language'" class="w-full"></app-settings-p-language>
+				<app-settings-p-two-fa [loaded]="loading" *ngIf="activeTab === 'two-fa'" class="w-full"></app-settings-p-two-fa>
 			</div>
 		</div>
 	</div>

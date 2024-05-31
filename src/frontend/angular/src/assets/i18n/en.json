@@ -47,5 +47,9 @@
 
     "settings_tab_title_acc":"Account",
     "settings_tab_content_public":"Public profile",
-    "settings_tab_content_security":"Account security"
+    "settings_tab_content_security":"Account security",
+
+    "settings_tab_content_2FA":"Two Step Authentification",
+    "settings_tab_title_2FA":"Activate Two Step Authentification",
+    "settings_buttom_activate_2FA":"ACTIVATE"
 }
