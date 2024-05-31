@@ -38,4 +38,19 @@ export class OnlineMatchGeneratorComponent {
       this.escapeKeyPressed.emit();
     }
   }
+  changeName(event : any){
+    if (event.target.value){
+      this.settings.name = event.target.value;
+    }
+  }
+  changeTags(event : any){
+    if (event.target.value){
+      this.settings.name = event.target.value;
+    }
+  }
+  changePublic(event : any){
+    if (event.target.value){
+      this.settings.name = event.target.value;
+    }
+  }
 }

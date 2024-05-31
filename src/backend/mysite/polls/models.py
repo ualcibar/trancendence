@@ -89,10 +89,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('in_game', 'In Game'),
     )
 
+    PREVIOUS_STATUS_CHOICES = (
+        ('in_game', 'In Game'),
+        ('standby', 'Stand by'),
+    )
+
     status = models.CharField(
             max_length=20,
             choices=STATUS_CHOICES,
             default='disconnected',
+            )
+    previous_status = models.CharField(
+            max_length=20,
+            choices=PREVIOUS_STATUS_CHOICES,
+            default='standby',
             )
     
     USER_COLOR_CHOICES = (

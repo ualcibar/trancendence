@@ -6,7 +6,7 @@ import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.co
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 
 import { AuthService } from '../../services/auth.service';
-import { MatchmakingService, MatchMakingState, OnlineMatchState} from '../../services/matchmaking.service';
+import { MatchmakingService, MatchMakingState, OnlineMatchSettings2, OnlineMatchState} from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
 
 import { fadeInOut, fadeInOuttimeout } from '../../../assets/animations/fadeInOut';
@@ -20,6 +20,7 @@ import { MatchGeneratorComponent } from '../../components/match-generator/match-
 import { LogFilter, Logger } from '../../utils/debug';
 import { ChatState, HomeState, MatchmakingState, StateService } from '../../services/stateService';
 import { TournamentTreeComponent } from '../../components/tournament-tree/tournament-tree.component';
+import { OnlineMatchGeneratorComponent } from '../../components/online-match-generator/online-match-generator-component';
 /*
 enum HomeState {
   Home,
@@ -33,12 +34,16 @@ enum HomeState {
 class LocalGameHandler{
   private matchSettings? : MatchSettings | undefined;
   private tournamentSettings? : TournamentSettings | undefined;
+  private onlineMatchSettings? : OnlineMatchSettings2 | undefined;
 
   defulatMatch() : MatchSettings{//this should be somewhere else
     return new MatchSettings(60,3,2,1,MapsName.Default);//!todo should be in settings
   }
   defulatTournament() : TournamentSettings{//this should be somewhere else
     return new TournamentSettings(this.defulatMatch(),10);//!todo should be in settings
+  }
+  defulatOnlineMatch() : OnlineMatchSettings2{//this should be somewhere else
+    return new OnlineMatchSettings2('default', 'esp', true,this.defulatMatch());//!todo should be in settings
   }
 
   getMatchSettings() : MatchSettings{
@@ -53,8 +58,16 @@ class LocalGameHandler{
       this.tournamentSettings = this.defulatTournament();//!todo should be in settings
     return this.tournamentSettings;
   }
+  getOnlineMatchSettings() : OnlineMatchSettings2{
+    if (!this.onlineMatchSettings)
+      this.onlineMatchSettings = this.defulatOnlineMatch();//!todo should be in settings
+    return this.onlineMatchSettings;
+  }
   resetMatchSettings(){
     this.matchSettings = undefined;
+  }
+  resetOnlineMatchSettings(){
+    this.onlineMatchSettings = undefined;
   }
   resetTournamentSettings(){
     this.tournamentSettings = undefined;
@@ -71,14 +84,15 @@ class LocalGameHandler{
     LobbyTournamentComponent,
     TournamentGeneratorComponent,
     MatchGeneratorComponent,
-    TournamentTreeComponent
+    TournamentTreeComponent,
+    OnlineMatchGeneratorComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = false;
+  debug : boolean = true;
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;
@@ -102,10 +116,11 @@ export class HomeComponent implements OnInit{
               private maps : MapsService,
               private router : Router,
               public state : StateService) {
-                
+    console.log('matchmaking state', MatchmakingState[this.state.matchmakingState])
   }
 
   ngOnInit(): void {
+
   }
 
   changeState(newState: HomeState): void {
@@ -137,6 +152,9 @@ export class HomeComponent implements OnInit{
   getMatch() {
     return this.localGameHandler.getMatchSettings()
   }
+  getOnlineMatch() {
+    return this.localGameHandler.getOnlineMatchSettings()
+  }
   getTournament() {
     return this.localGameHandler.getTournamentSettings()
   }
@@ -156,6 +174,10 @@ export class HomeComponent implements OnInit{
     }
     this.router.navigate(['/play']);
   }
+  createOnlineMatch(){
+    this.matchmakingService.newOnlineMatch(this.localGameHandler.getOnlineMatchSettings());
+  }
+
 
   createTournament(){
     const tournamentSettings = this.localGameHandler.getTournamentSettings();

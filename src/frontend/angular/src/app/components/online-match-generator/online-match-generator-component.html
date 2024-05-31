@@ -1,4 +1,11 @@
 <div>
-	<h1>this is where you set online match settings</h1>
-	<app-match-generator-component></app-match-generator-component>
+	<h1 class="text-white">name</h1>
+	<input [ngModel]="settings.name" (change)="changeName($event)" type="text">
+	<h1 class="text-white">tags</h1>
+	<input [(ngModel)]="settings.tags" (change)="changeTags($event)"type="text">
+	<h1 class="text-white">public</h1>
+	<button class="btn text-white">
+		{{settings.publicMatch}}
+	</button>
+	<app-match-generator-component [settings]="settings.matchSettings"></app-match-generator-component>
 </div>

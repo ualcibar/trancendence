@@ -6,7 +6,6 @@ export function toEnum<T extends { [key: string]: string }>(enumObj: T, value: a
   }
   return undefined;
 }
-
 export function getNextEnumValue<T extends { [s: string]: T[keyof T]; }>(enumObj: T, currentValue: T[keyof T]): T[keyof T] | undefined{
     const values = Object.values(enumObj) as T[keyof T][];
     const currentIndex = values.indexOf(currentValue);

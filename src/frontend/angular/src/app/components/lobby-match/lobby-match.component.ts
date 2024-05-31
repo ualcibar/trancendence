@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatchMakingState, MatchmakingService } from '../../services/matchmaking.service';
 import { AuthService, UserInfo } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { MatchmakingState, StateService } from '../../services/stateService';
 
 enum LobbyMatchState {
   Error,
@@ -22,8 +23,8 @@ export class LobbyMatchComponent {
   state: LobbyMatchState;
   LobbyMatchState = LobbyMatchState;
   MatchMakingState = MatchMakingState;
-  constructor(private matchmaking: MatchmakingService) {
-    if (matchmaking.state.getCurrentValue() !== MatchMakingState.OnGame){
+  constructor(private matchmaking: MatchmakingService, state : StateService) {
+    if (state.matchmakingState !== MatchmakingState.InGame){
       this.state = LobbyMatchState.Error;
       console.error('matchmaking state is not connecting')
     }
@@ -39,14 +40,11 @@ export class LobbyMatchComponent {
       this.team_a[0] = info.host;
       let player_index = 0;
       for (let i = 1; i < info.onlineSettings.matchSettings.teamSize; i++) {
-        this.team_a[i] = info.players[player_index].info;
+        this.team_a[i] = info.players[player_index]?.info;
         player_index++;
       }
       for (let i = 0; i < info.onlineSettings.matchSettings.teamSize; i++) {
-        if (info.players.length < i)
-          this.team_b[i] = info.players[player_index].info;
-        else
-          this.team_b[i] = undefined;
+          this.team_b[i] = info.players[player_index]?.info;
         player_index++;
       }
     }

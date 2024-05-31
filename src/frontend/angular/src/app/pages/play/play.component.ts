@@ -87,7 +87,8 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
     ngAfterViewInit(): void {
     }
     ngOnDestroy(): void {
-        this.manager.setMatchState(MatchState.FinishedSuccess)
+        if (this.manager.getState() === GameManagerState.InGame)
+            this.manager.setMatchState(MatchState.FinishedSuccess)
     }
     startNextTournamentround(){
 

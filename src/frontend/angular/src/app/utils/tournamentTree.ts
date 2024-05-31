@@ -43,11 +43,21 @@ export class TournamentTree{
     getNumberOfLayers() : number{
         return Math.ceil(log2(this.numberOfInitGroups));
     }
-    getCurrentGroups():[string,string]{
+    getCurrentGroups():[string,string] | string{
+        if (this.data.length <= this.currentIndex && this.currentIndex != 0){
+            const score = this.data[this.currentIndex - 1].score.score;
+            if (score[0] >= score[1])
+                return this.data[this.currentIndex - 1].groups[0]
+            else 
+                return this.data[this.currentIndex - 1].groups[1]
+        }
         return this.data[this.currentIndex].groups;
     }
-    next(score : Score){
+    next(score : Score) : boolean{
         console.log('NEXT data', this.data, 'current index', this.currentIndex)
+        if (this.currentIndex >= this.data.length){
+            return false
+        }
         this.data[this.currentIndex].score = score;
         if (this.currentIndex % 2 === 1){
             const prev = this.data[this.currentIndex - 1];
@@ -70,5 +80,6 @@ export class TournamentTree{
             }
         }
         this.currentIndex += 1;
+        return true;
     }
 }

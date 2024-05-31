@@ -1,24 +1,25 @@
-<app-online-match-generator-component (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center" *ngIf="showMatchTournamentMenu"></app-online-match-generator-component>
-
-<div class="flex items-center justify-center place-content-center">
-	<div [class]="showMatchTournamentMenu ? 'blur-lg' : ''" class="items-center">
-		<h1 class="text-center bg-blue-700 hover:bg-blue-800 mr-2 focus:outline-none text-white focus:ring-4 focus:ring-purple-300 w-80 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">MATCHES</h1>	
-		<div class="flex w-full bg-cyan-950 text-white place-content-center rounded-xl shadow-md subpixel-antialiased items-center justify-center mt-4">
-			<div class="flex-1 h-full w-full flex flex-col">
-				<input #inputField class="form-control me-2 w-full max-h-12" [formControl]="myControl" type="text" autofocus placeholder="name #tag">
-				<div class="flex-1 items-start gap-2.5 p-2 min-h-80 max-h-80 overflow-y-scroll items-start gap-5">
-					<div *ngFor="let game of filtered_games$ | async" class="flex items-center font-bold">
-						<div class="flex-1">{{ game.name }}</div>
-						<button (click)="joinGame(game)" class="btn justify-end">join</button>
-					</div>
+<div class="flex flex-col items-center justify-center place-content-center">
+	<h1
+		class="text-center bg-blue-700 hover:bg-blue-800 mr-2 focus:outline-none text-white focus:ring-4 focus:ring-purple-300 w-80 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">
+		MATCHES
+	</h1>
+	<div
+		class="flex w-full bg-cyan-950 text-white place-content-center rounded-xl shadow-md subpixel-antialiased items-center justify-center mt-4">
+		<div class="flex-1 h-full w-full flex flex-col">
+			<input #inputField class="form-control me-2 w-full max-h-12" [formControl]="myControl" type="text" autofocus
+				placeholder="name #tag">
+			<div class="flex-1 items-start gap-2.5 p-2 min-h-80 max-h-80 overflow-y-scroll items-start gap-5">
+				<div *ngFor="let game of filtered_games$ | async" class="flex items-center font-bold">
+					<div class="flex-1">{{ game.name }}</div>
+					<button (click)="joinGame(game)" class="btn justify-end">join</button>
 				</div>
 			</div>
 		</div>
-		<div class="text-center mt-4">
-			<button (click)="toggleMatchTournamentMenu()" type="button" class="mr-2 focus:outline-none text-center text-white focus:ring-4 focus:ring-purple-300 bg-purple-800 font-medium rounded-lg w-80 text-sm px-5 py-2.5 mb-2">Create a new custom game</button>
-		</div>
-		<div class="text-center mt-4">
-			<button (click)="refresh()" type="button" class="mr-2 focus:outline-none text-center text-white focus:ring-4 focus:ring-purple-300 bg-purple-800 font-medium rounded-lg w-80 text-sm px-5 py-2.5 mb-2">Refresh</button>
-		</div>
+	</div>
+	<div class="text-center mt-4">
+		<button (click)="showOnlineMatchGenerator()" type="button"
+			class="mr-2 focus:outline-none text-center text-white focus:ring-4 focus:ring-purple-300 bg-purple-800 font-medium rounded-lg w-80 text-sm px-5 py-2.5 mb-2">
+			Create a new custom game
+		</button>
 	</div>
 </div>

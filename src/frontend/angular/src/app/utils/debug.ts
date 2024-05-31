@@ -75,8 +75,8 @@ const globalLooger : LogLevel = LogLevel.Info;//overwrites all loggers
 const debugConfig : Record<LogFilter, LogLevel> = {
     [LogFilter.ManagerOnlineLogger]: LogLevel.Error,
     [LogFilter.ManagerMatchLogger]: LogLevel.Error,
-    [LogFilter.ManagerTournamentLogger]: LogLevel.Info,
-    [LogFilter.PongLogger]: LogLevel.Info,
+    [LogFilter.ManagerTournamentLogger]: LogLevel.Error,
+    [LogFilter.PongLogger]: LogLevel.Error,
     [LogFilter.ChatServiceLogger]: LogLevel.Error,
     [LogFilter.MatchmakingServiceLogger]: LogLevel.Error,
     [LogFilter.HomeLogger]: LogLevel.Info,
