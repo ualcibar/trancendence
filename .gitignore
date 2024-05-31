@@ -3,6 +3,7 @@
 
 # Archivos de configuración del sistema: 
 .vscode/
+.idea/
 src/backend/mysite/myenv/
 src/backend/mysite/chat/__pycache__/
 

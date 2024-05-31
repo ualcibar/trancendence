@@ -1,39 +1,94 @@
 import { Injectable } from '@angular/core';
 import {AuthService, UserInfo} from './auth.service';
-import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { Subject, Observable} from 'rxjs';
+import { Router } from '@angular/router';
+import { State } from '../utils/state';
 
-export enum GameType {
-  Tournament = 'Tournament',
-  Match = 'Match',
-}
+import { PaddleState} from '../components/pong/pong.component';
+import { GameManagerService,  Manager, MatchSettings, MatchState, MatchUpdate, OnlineMatchInfo, OnlineMatchManager } from './gameManager.service';
+import { MapsName, MapsService } from './map.service';
+import { toEnum } from '../utils/help_enum';
+import { EventData, PongEventType } from '../utils/behaviour';
+import { LogFilter, Logger } from '../utils/debug';
+import { MatchmakingState, StateService } from './stateService';
 
 export enum MatchMakingState{
-  Standby,
-  OnGame,
+  Standby = 'standby',
+  OnGame = 'on game',
 }
 
-export enum GameState{
-  Joining,
-  Connecting,
-  WaitingForPlayers,
-  Starting,
-  Running,
-  FinishedSuccess,
-  HostDisconected,
-  GameCrash,
-  FailedToJoin,
-  Error,
+export enum OnlineMatchState{
+  Joining = 'joining', 
+  Connecting = 'connecting',
+  WaitingForPlayers = ' waiting for players',
+  Starting = 'starting',
+  Running = 'running',
+  FinishedSuccess = 'finished success',
+  HostDisconected = 'host disconnected',
+  GameCrash = 'game crash',
+  FailedToJoin = 'failed to join',
+  Error = 'error',
 }
-
-class Score{
-  state : GameState;
-  score : [number, number];
-  constructor(state : GameState, score : [number, number]){
-    this.score = score;
-    this.state = state;
+/*
+export class MatchUpdate{
+  paddles : Paddle[];
+  balls : Ball[];
+  blocks : Block[];
+  id : number;
+  constructor(paddles : Paddle[], balls : Ball[], blocks : Block[], id : number){
+    this.paddles = paddles;
+    this.balls = balls;
+    this.blocks = blocks;
+    this.id = id;
   }
-  changeState(newState : GameState){
-    this.state = newState;
+  subscribeAllToManager(manager : Manager){
+    this.balls.forEach(ball => ball.subscribeToManager(manager));
+    this.paddles.forEach(paddle => paddle.subscribeToManager(manager));
+    this.blocks.forEach(block => block.subscribeToManager(manager));
+  }
+  runTickBehaviour(delta : number){
+    for (let i = 0; i < this.paddles.length; i++){
+      this.paddles[i].tickBehaviour.runTick(delta);
+    }
+    for (let i = 0; i < this.balls.length; i++){
+      this.balls[i].tickBehaviour.runTick(delta);
+    }
+    for (let i = 0; i < this.blocks.length; i++){
+      this.blocks[i].tickBehaviour.runTick(delta);
+    }
+  }
+
+  update(update : MatchUpdate){
+    for (const [index, paddle] of this.paddles.entries()){
+      paddle.pos.copy(update.paddles[index].pos);
+      paddle.dimmensions.copy(update.paddles[index].dimmensions);
+      paddle.type = update.paddles[index].type;
+      paddle.color = update.paddles[index].color;
+      paddle.dir.copy(update.paddles[index].dir);
+      paddle.speed = update.paddles[index].speed;
+    }
+    for (const [index, ball] of this.balls.entries()){
+      ball.pos.copy(update.balls[index].pos);
+      ball.dir.copy(update.balls[index].dir);
+      ball.speed = update.balls[index].speed;
+      ball.lightColor = update.balls[index].lightColor;
+      ball.lightIntensity = update.balls[index].lightIntensity;
+      ball.lightOn = update.balls[index].lightOn;
+    }
+    for (const [index, block] of this.blocks.entries()){
+      block.pos.copy(update.blocks[index].pos);
+      block.dimmensions.copy(update.blocks[index].dimmensions);
+      block.type = update.blocks[index].type;
+      block.material = update.blocks[index].material;
+      block.speed = update.blocks[index].speed;
+    }
+  }
+}*/
+
+export class Score{
+  score : [number, number];
+  constructor(score : [number, number]){
+    this.score = score;
   }
   scoreA(points : number){
     this.score[0] += points;
@@ -46,7 +101,7 @@ class Score{
   }
 }
 
-enum OnlinePlayerState{
+export enum OnlinePlayerState{
   Joining,
   Connecting,
   Connected,
@@ -54,276 +109,492 @@ enum OnlinePlayerState{
   Blocked
 }
 
-class OnlinePlayer{
-  private stateSubject : BehaviorSubject<OnlinePlayerState>;
-  state$  : Observable<OnlinePlayerState>;
+export class OnlinePlayer{
+  state : State<OnlinePlayerState>;
   info : UserInfo;
 
-  constructor(info : UserInfo, state : OnlinePlayerState = OnlinePlayerState.Connecting){
-    this.stateSubject = new BehaviorSubject<OnlinePlayerState>(state);
-    this.state$ = this.stateSubject.asObservable();
+  constructor(info : UserInfo, state : OnlinePlayerState = OnlinePlayerState.Connecting,
+  ){
+    this.state = new State(state);
     this.info = info;
   }
-  state(): OnlinePlayerState{
-    return this.stateSubject.value;
+  getState(): OnlinePlayerState{
+    return this.state.getCurrentValue();
   }
   changeState(state : OnlinePlayerState){
-    this.stateSubject.next(state);
+    this.state.setValue(state);
   }
 }
 
-export class Match{
-  host : UserInfo;
-  players : OnlinePlayer[] = [];
-  score : [number,number] = [0,0];
-  teamSize : number;
-  name : string;
-  
-  constructor (name : string, teamSize : number, host : UserInfo){
-    this.name = name;
-    this.teamSize = teamSize;
-    this.host = host;
-  }
-  addPlayer(newPlayer : UserInfo, state : OnlinePlayerState) : boolean{
-    if (this.players.length == 2 * this.teamSize){
-      return false;
-    }
-    this.players.push(new OnlinePlayer(newPlayer, state));
-    return true;
-  }
-
-  removePlayer(username : string) : boolean{
-    const index_to_remove = this.players.findIndex((player) => player.info.username == username);
-    if (index_to_remove === -1)
-      return false;
-    this.players.splice(index_to_remove, 1);
-    return true
-  }
-
-  getPlayer(playerId : number) : OnlinePlayer | undefined{
-    return this.players.filter(player => player.info.user_id === playerId)[0];
-  }
-}
-
-export class Tournament{
-  host : UserInfo;
-  players : UserInfo[] = [];
-  scores : [number,number][] = [];
-  winners : number[] = [];
-  teamSize : number;
-  name : string;
-  
-  constructor (name : string, teamSize : number, host : UserInfo){
-    this.name = name;
-    this.teamSize = teamSize;
-    this.host = host;
-  }
-
-  addPlayer(newPlayer : UserInfo) : boolean{
-    if (this.players.length === 8 * this.teamSize){
-      return false;
-    }
-    this.players.push(newPlayer);
-    return true;
-  }
-
-  removePlayer(username : string) : boolean{
-    const index_to_remove = this.players.findIndex((player) => player.username === username);
-    if (index_to_remove === -1)
-      return false;
-    this.players.splice(index_to_remove, 1);
-    return true
-  }
-
-}
-
-export enum Maps{
-  Default = 'Default',
-  Fancy = 'Fancy'
-}
-
-export class GameSettings{
-  gameType : GameType;
+export class OnlineMatchSettings2{
   name : string;
   tags : string;
-  teamSize : number = 1;
-  winScore : number = 3;
-  map : Maps = Maps.Default;
-  publicGame : boolean;
-  constructor (gameType : GameType, name : string, tags : string, publicGame: boolean){
-    this.gameType = gameType;
+  publicMatch : boolean;
+  matchSettings : MatchSettings; 
+  
+  constructor( name : string, tags : string, publicMatch: boolean, 
+               matchSettings : MatchSettings){
     this.name = name;
     this.tags = tags;
-    this.publicGame= publicGame;
+    this.publicMatch = publicMatch;
+    this.matchSettings = matchSettings;
   }
 }
 
-export enum MatchmakingUptate{
-  Match,
-  Tournament
+export interface MatchSync{
+  sendMatchUpdate(update : MatchUpdate) : void;
+  sendEvent(type : PongEventType, data : EventData): void;
+  broadcastEvent(type : PongEventType, data : EventData): void;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class MatchmakingService {
+export class MatchmakingService implements MatchSync{
+  //backend connection
   webSocketUrl = 'wss://localhost:1501/ws/matchmaking/global/';
-  webSocket : WebSocket | undefined;
+  webSocket! : WebSocket;
 
-  amIHost : boolean = false;
+  //state of the service
+  state : State<MatchMakingState> = new State<MatchMakingState>(MatchMakingState.Standby);
+ 
+  //match connections
   maxCurrentPeerConnections : number = 0; 
   peerConnections : (Map<number,RTCPeerConnection> | RTCPeerConnection | undefined);
   dataChannels : (Map<number,RTCDataChannel> | RTCDataChannel | undefined);
-  
-  private dataChangedSubject: Subject<void> = new Subject<void>();
-  dataChanged$: Observable<void> = this.dataChangedSubject.asObservable();
+ 
+  //info about the current matches available
+//  entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
+  availableMatches : OnlineMatchSettings2[] = [];
+  //private dataChangedSubject: Subject<void> = new Subject<void>();
+  //dataChanged$: Observable<void> = this.dataChangedSubject.asObservable();
+  dataChanged : State<void> = new State<void>(undefined);
 
-  entries : Map<GameType, GameSettings[]> = new Map<GameType, GameSettings[]>;
+  //match manager
+  private onlineManager? : OnlineMatchManager | undefined;
 
-  state : MatchMakingState = MatchMakingState.Standby;
-  //gameState : GameState | undefined;
-  currentGame : Match | undefined;
-  private currentGameStateSubject : BehaviorSubject<GameState | undefined>;
-  currentGameState$  : Observable<GameState | undefined>;
+  //logger
+  logger : Logger = new Logger(LogFilter.MatchmakingServiceLogger, 'matchmaking :')
 
-  constructor(private authService : AuthService) {
-    this.entries.set(GameType.Match, []);
-    this.entries.set(GameType.Tournament,[]);
-    this.currentGameStateSubject = new BehaviorSubject<GameState | undefined>(undefined);
-    this.currentGameState$ = this.currentGameStateSubject.asObservable();
-    //this.connectToServer();
+  constructor(private authService : AuthService,
+              private router : Router,
+              private maps : MapsService,
+              private gameManager : GameManagerService,
+              private state2 : StateService){
+   // this.entries.set(GameType.Match, []);
+   // this.entries.set(GameType.Tournament,[]);
+    this.connectToServer();
     if(this.isConnected()){
       this.sendMessage(JSON.stringify({type : '/getStatus'}));
     }
-    /*const pc_config = {
-      iceServers: [
-        {
-          urls: "stun:stun.1.google.com:19302",
-        },
-        {
-          urls : "turn:127.0.0.1:3478", 
-          username: "a",
-          credential: "a",
-        }
-      ],
-    };
-    this.peerConnection = new RTCPeerConnection(pc_config);
-    this.dataChannel = this.peerConnection.createDataChannel('dataChann');
-    this.dataChannel.onmessage = event => {
-      console.log("message received:",event.data);
-    }
-    this.peerConnection.onicecandidate = event => {
-      if (event.candidate){
-        console.log("Sending ice candidate to peer", event.candidate);
-        const message = {type : '/webrtc/candidate', candidate : event.candidate};
-        this.sendMessage(JSON.stringify(message));
-      }
-    }
-    this.peerConnection.oniceconnectionstatechange = event => {
-      console.log("ICE connection state: ", this.peerConnection.iceConnectionState);
-      if (this.peerConnection.iceConnectionState === 'connected'){
-        this.state = MatchMakingState.OnGame;
-        this.gameState = GameState.WaitingForPlayers;
-      }
-    }*/
   }
-  
-  /*webrtcAnswer(data : any) {
-    if (!this.amIHost){
-      console.error('only host should answer');
-      return; 
+
+  //GENERAL
+  isConnected() : boolean{
+    return this.webSocket?.readyState === WebSocket.OPEN;
+  }
+
+  getMatches() : OnlineMatchSettings2[]{
+    return this.availableMatches;
+  }
+
+  newOnlineMatch(settings : OnlineMatchSettings2){
+    if (this.isConnected()){
+      const messageObject = { type: '/new_match', settings : settings }; 
+      this.sendMessage(JSON.stringify(messageObject)); 
     }
-    if (!(this.peerConnections instanceof Map)){
-      console.error('im host jet instance of peer connection is not map')
+  }
+
+  reloadMatchesTournamets(){
+    if (this.isConnected()){
+      let messageObject = {type : '/match_tournament_list'};
+      this.sendMessage(JSON.stringify(messageObject));
+    }
+  }
+
+  async joinMatch(matchName : string){
+    this.logger.info('join match called');
+    if (this.isConnected()){
+      if (this.onlineManager){
+        this.logger.error('join match: already in match');
+        return;
+      }
+      let messageObject = {
+        type: '/join/match',
+        name: matchName,
+      }
+      this.sendMessage(JSON.stringify(messageObject))
+    }else
+      this.logger.error('join match: failled to join match called');
+  }
+
+  sendMessage(message : string): boolean {
+    if (this.isConnected()) {
+      this.webSocket!.send(message); 
+      return true;
+    } else {
+      this.logger.error('WebSocket connection is not open');
+      return false;
+    }
+  }
+
+  getCurrentMatchState() : OnlineMatchState | undefined{
+    if(!this.onlineManager){
+      //console.error('get current match state: online manager is undefined');
+      return undefined;
+    }
+    return this.onlineManager.getOnlineState();
+  }
+  setCurrentMatchState(state : OnlineMatchState){
+    if (this.onlineManager === undefined){
+      this.logger.error('current game state is not initialized');
       return;
     }
-    const peerConnection = this.peerConnections.get(data.senderId);
-    if (!peerConnection){
-      console.error("not recognised id from answer")
+    this.onlineManager.setOnlineMatchState(state);
+    //!todo
+    //if (state === OnlineMatchState.Running)
+      this.onlineManager.setMatchState(MatchState.Running);
+  }
+
+  connectToServer() {
+    if (this.isConnected())
       return;
+    const jwtToken = this.authService.getCookie('access_token');
+    if (jwtToken == null) {
+      this.logger.info('failed to get cookie access token, log in');
     }
-    peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer))
-      .then(() => {
-        console.log("remote description set successfully");
-      })
-      .catch(error => {
-        console.error("Error setting remote description", error);
-      }); 
-  }*/
-  webrtcCreatePeerConnection(playerId: number | undefined = undefined) : RTCPeerConnection{
+    this.webSocketUrl = `${this.webSocketUrl}?token=${jwtToken}`;
+    this.webSocket = new WebSocket(this.webSocketUrl);
+    this.webSocket.onopen = () => {
+      this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+      this.logger.info('matchmaking : WebSocket connection opened');
+    };
+    this.webSocket.onerror = () => {
+      this.logger.info('matchmaking: error on websocket')
+    }
+    this.webSocket.onclose = () => {
+      this.state2.changeMultiplayerState(MatchmakingState.Disconnected);
+      this.logger.info('matchmaking: websocket closed')
+    };
+    this.webSocket.onmessage = (event) => {
+      if (this.authService.user_info === undefined)
+        return;
+      const data = JSON.parse(event.data);
+      this.logger.info('message of type ', data.type, ' received.')
+      switch (data.type) {
+        case 'status':
+          switch (data.status){
+            case 'Connected':
+              this.state.setValue(MatchMakingState.Standby);
+              break;
+            case 'JoiningGame':
+              this.state.setValue(MatchMakingState.OnGame);
+              this.state2.changeMultiplayerState(MatchmakingState.InGame);
+              break;
+            case 'InGame':
+              this.state.setValue(MatchMakingState.OnGame);
+              this.state2.changeMultiplayerState(MatchmakingState.InGame);
+              break;
+            default:
+              this.logger.error(`unknown status : ${data.status}`);
+            }
+          break;
+        case 'new_match':
+          this.availableMatches.push(new OnlineMatchSettings2(data.match.name, data.match.tags, true, data.match.settings));
+          break; 
+        case 'del_match':
+          for (const[index, match] of this.availableMatches.entries()){
+            if (match.name === data.del_match_name){
+              this.availableMatches.splice(index);
+              return;
+            }
+          }
+          break;
+        case 'new_match_result':
+          switch (data.status){
+            case 'success':
+              const mapSettings = this.maps.getMapSettings(data.match.mapName);
+              if (!mapSettings){
+                this.logger.error('failed to create match settings?');
+                this.state.setValue(MatchMakingState.Standby);
+                this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+                return;
+              } 
+              const info = new OnlineMatchInfo(data.match.onlineSettings, this.authService.user_info);
+              const manager = this.gameManager.createOnlineMatch(info, mapSettings, true, this, OnlineMatchState.WaitingForPlayers);
+              if (!manager){
+                this.logger.error('failed to start online manager');
+                this.state.setValue(MatchMakingState.Standby);
+                this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+                return;
+              }
+              this.onlineManager = manager;
+              this.maxCurrentPeerConnections = 2;//info needs to be somewhere else
+              this.dataChannels = new Map();
+              this.peerConnections = new Map();
+              this.state.setValue(MatchMakingState.OnGame);
+              this.state2.changeMultiplayerState(MatchmakingState.InGame);
+              this.logger.info("successfully created match");
+              break;
+            case 'failure_already_host':
+              this.logger.error('failed to create match, already in a match');
+              break;
+            case 'failure_already_in_another_game':
+              this.logger.error('failed to create match, already in a match');
+              break;
+            case 'failure_duplicate_key':
+              this.logger.error('match name already in use');
+              this.state.setValue(MatchMakingState.Standby);
+              this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+              break;
+            case 'failure':
+              this.logger.error('failed to create match, try again');
+              this.state.setValue(MatchMakingState.Standby);
+              this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+              break;
+            default:
+              this.logger.error(`unknown error status: ${data.status}`);
+              this.state.setValue(MatchMakingState.Standby);
+              this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+          }
+          break;
+        case 'join_match_result':
+          switch (data.status){
+            case 'failure_already_in_another_game':
+              this.logger.error('failed to join lobby, already in another game');
+              this.state.setValue(MatchMakingState.Standby);
+              this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+              break;
+            case 'failure':
+              this.logger.error('failed to join lobby');
+              this.state.setValue(MatchMakingState.Standby);
+              this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+              break;
+            case 'success':
+              this.logger.info('match', data.match)
+              const mapName = toEnum(MapsName, data.match.mapName);
+              if (!mapName){
+                this.logger.error('join match result switch: cant find map name')
+                return;
+              }
+              const mapSettings = this.maps.getMapSettings(mapName);
+              if (!mapSettings){
+                this.logger.error('failed to create match settings?');
+                this.state.setValue(MatchMakingState.Standby);
+                this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+                return;
+              }
+              
+              const info = new OnlineMatchInfo(data.match.settings, data.host)
+              const manager = this.gameManager.createOnlineMatch(info, mapSettings,false, this, OnlineMatchState.Connecting);
+              this.maxCurrentPeerConnections = data.match.max_players - 1;
+              
+              if (!manager){
+                this.logger.error('joined match result success switch: failed to create online match');
+                //!todo should tell the game that it disconnected or something
+                return;
+              }
+              this.onlineManager = manager;
+              this.state.setValue(MatchMakingState.OnGame);
+              this.state2.changeMultiplayerState(MatchmakingState.InGame);
+              this.logger.info('successfully joined game group, waiting for webrtc');
+              break;
+            default:
+              this.logger.error(`cant find status ${data.status}`);
+              this.state.setValue(MatchMakingState.Standby);
+              this.state2.changeMultiplayerState(MatchmakingState.StandBy);
+          }
+          break;
+        case 'player_joined_match':
+          if (!this.onlineManager){
+            this.logger.error('player joined match: online manager is undefined')
+            return;
+          }
+          if (!this.onlineManager.amIHost)
+            this.onlineManager.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true));
+          break;
+        case 'player_joined_match_to_host':
+          this.logger.info('player joined match to host')
+          if (!(this.peerConnections instanceof Map) || !(this.dataChannels instanceof Map)){
+            this.logger.error('webrtc answer switch: peerconnection or datachannels is not map');
+            return;
+          }
+          if (this.onlineManager === undefined){
+            this.logger.error('received a player joined match while not in a game');
+            return
+          }
+          this.onlineManager.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true));
+          const peerConnection = this.webrtcCreatePeerConnection(data.senderId)!;//we dont care because we already checked for online manager
+          this.peerConnections.set(data.senderId, peerConnection);
+          const dataChannel = peerConnection.createDataChannel(data.sender);
+          this.webrtcSetDataChannel(dataChannel);
+          this.dataChannels.set(data.senderId, dataChannel);
+          peerConnection.createOffer().then(offer => {
+            peerConnection.setLocalDescription(offer).then(() => {
+              const message = {
+                type: '/webrtc/offer',
+                targetId: data.senderId,
+                target: data.username,
+                offer: offer,
+              }
+              this.sendMessage(JSON.stringify(message));
+            });
+          });
+          break;
+        case 'webrtc_offer':
+          this.webrtcCreateAnswer(data.offer);
+          break;
+        case 'webrtc_answer':
+          this.webrtcHandleAnswer(data);
+          break;
+        case 'webrtc_candidate':
+          console.log(`candidate received from ${data.sender}`);
+          this.webrtcCandidate(data);
+          break;
+        case 'confirm_join_match_result':
+          if (this.onlineManager === undefined){
+            this.logger.error('confirm join match result switch: currentMatchInfo undefined');
+            return
+          }
+          if (!this.onlineManager.playerConnected(data.playerId)){
+            this.logger.error('confirm join match result switch: playerId doesn\'t match any current player');
+            return;
+          }
+          if (data.player === this.authService.user_info.username){
+            this.setCurrentMatchState(OnlineMatchState.WaitingForPlayers);
+          }
+          if (this.onlineManager.amIHost ){
+            this.logger.info('all players may be connected checking...', this.onlineManager.info)
+            if (this.onlineManager.areAllPlayersConnected()){
+              const message = {type : '/match/all_players_connected'};
+              this.sendMessage(JSON.stringify(message));
+            }
+          } 
+          break;
+        case 'match_all_players_connected':
+          setTimeout(() => {
+            this.gameManager.start();
+          }, 1000);
+          this.router.navigate(['/play']);
+          break;
+        default :
+          this.logger.info(`unknown case received: ${data.type}`);
+        }
+    }
+  }
+
+  getMatchUpdate() : MatchUpdate | undefined{
+    return this.onlineManager?.getMatchUpdate();
+  }
+
+  //WEBRTC
+
+  webrtcCreatePeerConnection(playerId: number | undefined = undefined) : RTCPeerConnection | undefined{
+    if (this.onlineManager === undefined)
+      return;
     const pc_config = {
       iceServers: [
         {
           urls: "stun:stun.1.google.com:19302",
         },
-       /* {
-          urls : "turn:127.0.0.1:3478", 
-          username: "a",
-          credential: "a",
-        }*/
       ],
     };
     const peerConnection = new RTCPeerConnection(pc_config);
-    /*this.dataChannel = peerConnection.createDataChannel('dataChann');
-    this.dataChannel.onmessage = event => {
-      console.log("message received:",event.data);
-    }*/
     peerConnection.onicecandidate = event => {
       if (event.candidate){
-        this.currentGameState$?.subscribe(state => {
-          console.log('ice candidate: current game state', state);
-          if (state === GameState.Connecting){
-            console.log("Sending ice candidate to peer", event.candidate);
-            const message = {type : '/webrtc/candidate', candidate : event.candidate};
-            this.sendMessage(JSON.stringify(message));
-          }
-        });
+        if (!this.onlineManager){
+          this.logger.error('on ice candidate: online manager is not set');
+          return;  
+        }
+        this.onlineManager.subscribeOnlineMatchState((state : OnlineMatchState) => {
+            this.logger.info('ice candidate: current game state', state);
+            if (state === OnlineMatchState.WaitingForPlayers || state === OnlineMatchState.Connecting) {
+              this.logger.info("Sending ice candidate to peer", event.candidate);
+              const message = { type: '/webrtc/candidate', candidate: event.candidate };
+              this.sendMessage(JSON.stringify(message));
+            } 
+        })
       }
     }
     peerConnection.oniceconnectionstatechange = event => {
-      console.log("ICE connection state: ", peerConnection.iceConnectionState);
+      this.logger.info("ICE connection state: ", peerConnection.iceConnectionState);
       if (peerConnection.iceConnectionState === 'connected'){
-        this.state = MatchMakingState.OnGame;
-        if (this.amIHost){
+        if (!this.onlineManager){
+          this.logger.error('player connected without online manager being set');
+          return
+        }
+        if (this.onlineManager.amIHost){
+          this.logger.info('am i host?', this.onlineManager.amIHost)
           if (playerId === undefined){
-            console.error('on ice connection state change: targetId not set while being host');
+            this.logger.error('on iceconnection state change: while being host player id must be set')
             return;
           }
-        
-          const player = this.currentGame?.players.filter(player => player.info.user_id === playerId)[0];
-          if (player === undefined){
-            console.error('on ice connection state change: player wasnt set');
-            console.error('sender id: ', playerId ,' current match:', this.currentGame);
+          const player = this.onlineManager.playerConnected(playerId)
+          if (!player) {
+            this.logger.error('on ice connection state change: player wasnt set');
+            this.logger.error('sender id: ', playerId, ' current match:', this.onlineManager.getMatchSettings());
             return;
           }
-          const message = {type : '/confirm_join/match', player : player.info.username, playerId : player.info.user_id};
-          console.log('confirming new player connection has been stablished');
-          this.sendMessage(JSON.stringify(message));
+          if (this.onlineManager.amIHost) {
+            const message = { type: '/confirm_join/match', player: player.info.username, playerId: player.info.user_id };
+            this.logger.info('confirming new player connection has been stablished');
+            this.sendMessage(JSON.stringify(message));
+          } 
+
         }
       }
     }
     peerConnection.ontrack = event => {
-      console.log("received remote track:", event.track);
+      this.logger.info("received remote track:", event.track);
+    }
+    if (playerId === undefined){
+      peerConnection.ondatachannel = event => {
+        this.dataChannels = event.channel;
+        this.webrtcSetDataChannel(this.dataChannels);
+      };
     }
     return peerConnection;
   }
-  currentGameState() : GameState | undefined{
-    return this.currentGameStateSubject?.value;
-  }
-  setCurrentGameState(state : GameState){
-    if (this.currentGameStateSubject === undefined)
-      console.error('current game state is not initialized');
-    else
-      this.currentGameStateSubject.next(state);
-  }
+  webrtcSetDataChannel(dataChannel : RTCDataChannel){
+    dataChannel.onopen = () => {
+      this.logger.info('Data channel opened');
+    };
+    dataChannel.onmessage = (event => {
+      if (this.onlineManager === undefined)
+        return;
+      const message = JSON.parse(event.data);
+      if (message.type === 'update')
+        this.onlineManager.matchUpdate.update(message.data);
+      else if (message.type === 'event'){
+        this.logger.info('event received !!!', message)
+        if (!this.onlineManager){
+          this.logger.error('datachannel on message: pong event: online manager is undefinde')
+          return;
+        }
+        if (message.method === 'broadcast')
+          this.onlineManager.broadcastRemoteEvent(message.eventType, message.data);  
+        else if (message.method === 'send')
+          this.onlineManager.sendRemoteEvent(message.eventType, message.data);
+        else
+          this.logger.error('datachannel on message: event: no such method', message.method)
+      }
+    });
+    dataChannel.onclose = () => {
+      this.logger.info('Data channel closed');
+    };
 
+    // Event handler for errors
+    dataChannel.onerror = (error) => {
+      this.logger.error('Data channel error:', error);
+    };
+  }
   webrtcCandidate(data: any) {
     if (data.sender !== this.authService.user_info?.username) {
-      console.log('adding ice candidate')
+      this.logger.info('adding ice candidate')
       if (this.peerConnections instanceof Map) {
         const peerConnection = this.peerConnections.get(data.senderId);
         if (!peerConnection){
-          console.error('webrtc candidate: target id not recognised');
+          this.logger.error('webrtc candidate: target id not recognised');
           return;
         }else{
           peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
@@ -333,361 +604,159 @@ export class MatchmakingService {
       }
     }
   }
-  connectToServer() {
-    const jwtToken = this.authService.getCookie('access_token');
-    if (jwtToken == null) {
-      console.log('failed to get cookie access token, log in');
+  broadcastWebrtc(message : string){
+    if (this.dataChannels === undefined){
+      this.logger.error('broadcast webrtc: current game is undefined');
+      return;
     }
-    this.webSocketUrl = `${this.webSocketUrl}?token=${jwtToken}`;
-    this.webSocket = new WebSocket(this.webSocketUrl);
-    this.webSocket.onopen = () => {
-      console.log('WebSocket connection opened');
-    };
-    this.webSocket.onerror = () => {
+    if (this.onlineManager === undefined){
+      this.logger.error('broadcast webrtc: online manager not set')
+      return; 
     }
-    this.webSocket.onclose = () => {
-    };
-    this.webSocket.onmessage = (event) => {
-      if (this.authService.user_info === undefined)
-        return;
-      const data = JSON.parse(event.data);
-      console.log('message of type ', data.type, ' received.')
-      switch (data.type) {
-        case 'status':
-          switch (data.status){
-            case 'Connected':
-              this.state = MatchMakingState.Standby;
-              break;
-            case 'JoiningGame':
-              this.state = MatchMakingState.OnGame;
-              break;
-            case 'InGame':
-              this.state = MatchMakingState.OnGame
-              break;
-            default:
-              console.error(`unknown status : ${data.status}`);
-            }
-          break;
-        case 'new_match':
-          this.entries.get(GameType.Match)
-            ?.push(new GameSettings(GameType.Match, data.match.name, data.match.tags, true));
-          break;
-        case 'new_tournament':
-          this.entries.get(GameType.Tournament)
-            ?.push(data.new_tournament_name)
-          break;
-        case 'del_tournament':
-          const tournaments = this.entries.get(GameType.Tournament);
-          if (tournaments) {
-            const index = tournaments.indexOf(data.del_tournament_name);
-            if (index !== -1) {
-              tournaments.splice(index, 1);
-            }
-          }
-          break;
-        case 'del_match':
-          const matches = this.entries.get(GameType.Match);
-          if (matches) {
-            const index = matches.indexOf(data.del_match_name);
-            if (index !== -1) {
-              matches.splice(index, 1);
-            }
-          }
-          break;
-        case 'match_tournament_list':
-          this.entries.set(GameType.Match, data.matches);
-          console.log('match list received', data.matches);
-          this.entries.set(GameType.Tournament, data.tournaments);
-          break;
-        case 'new_match_result':
-          switch (data.status){
-            case 'success':
-              this.state = MatchMakingState.OnGame;
-              this.currentGame = new Match(data.match.name, 1, this.authService.user_info);//info needs to be somewhere else
-              this.setCurrentGameState(GameState.WaitingForPlayers)
-              this.maxCurrentPeerConnections = 2;//info needs to be somewhere else
-              this.dataChannels = new Map();
-              this.peerConnections = new Map();
-              this.amIHost = true;
-              console.log("successfully created match");
-              break;
-            case 'failure_already_host':
-              console.error('failed to create match, already in a match');
-              break;
-            case 'failure_already_in_another_game':
-              console.error('failed to create match, already in a match');
-              break;
-            case 'failure_duplicate_key':
-              console.error('match name already in use');
-              this.state = MatchMakingState.Standby;
-              break;
-            case 'failure':
-              console.error('failed to create match, try again');
-              this.state = MatchMakingState.Standby;
-              break;
-            default:
-              console.error(`unknown error status: ${data.status}`);
-              this.state = MatchMakingState.Standby;
-          }
-          break;
-        case 'join_match_result':
-          switch (data.status){
-            case 'failure_already_in_another_game':
-              console.error('failed to join lobby, already in another game');
-              this.state = MatchMakingState.Standby;
-              break;
-            case 'failure':
-              console.error('failed to join lobby');
-              this.state = MatchMakingState.Standby;
-              break;
-            case 'success':
-              console.log('match info,', data.match);
-              this.state = MatchMakingState.OnGame;
-              this.currentGame = new Match(data.match.name, data.match.max_players / 2, new UserInfo(data.match.host.username, data.match.host.id, true));
-              this.setCurrentGameState(GameState.Connecting);
-              this.maxCurrentPeerConnections = data.match.max_players - 1;
-              console.log('successfully joined game group, waiting for webrtc');
-              this.amIHost = false;
-              break;
-            default:
-              console.error(`cant find status ${data.status}`);
-              this.state = MatchMakingState.Standby;
-          }
-          break;
-        case 'player_joined_match':
-          if (this.amIHost)
-            return;
-          if (this.currentGame !== undefined) {
-            this.currentGame.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true), OnlinePlayerState.Connecting);
-            console.log('player joined match !!!!!!!!!!!!!');
-            //if (this.u this.authService.user_info.username === this.currentGame?.host.username)
-                return;
-            //}
-            
-          }else{
-            console.error('received a player joined match while not in a game');
-            return 
-          }
-          console.log(`player ${data.username} joined the match`);
-          break;
-        case 'player_joined_match_to_host':
-          console.log('player joined match to host')
-          if (this.peerConnections instanceof Map && this.dataChannels instanceof Map){
-            if (this.currentGame !== undefined) {
-              this.currentGame.addPlayer(new UserInfo(data.userInfo.username, data.userInfo.id, true), OnlinePlayerState.Connecting);
-              console.log('player joined match !!!!!!!!!!!!!');
-            }else{
-              console.error('received a player joined match while not in a game');
-              return 
-            }
-            const peerConnection = this.webrtcCreatePeerConnection(data.senderId); 
-            this.peerConnections.set(data.senderId,peerConnection);
-            this.dataChannels.set(data.senderId,peerConnection.createDataChannel('dataChann'));
-          }
-          else{
-            console.error('webrtc answer switch: peerconnection or datachannels is not map');
-            return;
-          }
-          this.webrtcCreateAnswer(data.sdp, data.username, data.senderId);
-          break;
-        case 'webrtc_answer':
-          //console.error('!todo');
-          if (!this.amIHost)
-            this.webrtcHandleAnswer(data);
-          break;
-        case 'webrtc_candidate':
-          console.log(`candidate received from ${data.sender}`);
-          this.webrtcCandidate(data);
-/*          if (data.sender != this.authService.user_info.username)
-            this.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-*/      
-          break;
-        case 'confirm_join_match_result':
-          if (this.currentGame === undefined){
-            console.error('confirm join match result switch: currentGame undefined');
-            return
-          }
-          const player = this.currentGame.getPlayer(data.playerId);
-          if (player === undefined) {
-            console.error('confirm join match result switch: playerId doesn\'t match any current player');
-            console.error('current game data, ', this.currentGame);
-            return;
-          }
-          player.changeState(OnlinePlayerState.Connected);
-          if (data.player === this.authService.user_info.username){
-            this.setCurrentGameState(GameState.WaitingForPlayers);
-          }
-          if (this.amIHost){
-            if (this.currentGame.players.length + 1 === this.currentGame.teamSize * 2
-              && this.currentGame.players.every(player => player.state() === OnlinePlayerState.Connected)){
-                const message = {type : '/match/all_players_connected'};
-              this.sendMessage(JSON.stringify(message));
-            }
-          } 
-          break;
-        case 'match_all_players_connected':
-          setTimeout(() => this.setCurrentGameState(GameState.Starting), 3000);
-          break;
-        default :
-          console.log(`unknown case received: ${data.type}`);
-        }
+    if (!this.onlineManager.amIHost){
+      this.logger.error('broadcast webrtc: only host cand send a full update')
+      return;
     }
+    if (this.dataChannels instanceof RTCDataChannel){
+      this.logger.error('broadcast webrt: data channels must be intance of map')
+      return;
+    }
+    for (const chann of this.dataChannels.values()){
+      chann.send(message);
+    } 
   }
 
   webrtcHandleAnswer(data : any){
-    if (this.amIHost){
-      console.error('webrtc handle answer: only clients can handle answers, not hosts');
+    if (this.onlineManager === undefined){
+      this.logger.error('webrtc handle answer: online manager not set')
+      return; 
+    }
+    if (!this.onlineManager.amIHost){
+      this.logger.error('webrtc handle answer: only host can handle answer')
       return;
     }
-    if (!(this.peerConnections instanceof RTCPeerConnection)){
-      console.error('webrtc handle answer: peerconnections is not instance of RTCPeerConnection');
+    if (this.peerConnections === undefined || this.peerConnections instanceof RTCPeerConnection){
+      this.logger.error('webrtc handle answer: peerconnections is not instance of RTCPeerConnection');
       return;
     }
-    this.peerConnections.setRemoteDescription(new RTCSessionDescription(data.answer))
+    const peerConnection = this.peerConnections.get(data.targetId);
+    if (!peerConnection){
+      this.logger.error('webrtc handle answer: cannot find target id in map');
+      return;
+    }
+    peerConnection.setRemoteDescription(data.answer)
       .then(() => {
-        if (this.peerConnections instanceof RTCPeerConnection){
-          if (this.peerConnections.signalingState && this.peerConnections.localDescription && this.peerConnections.remoteDescription){
-            console.log("remote and local description set successfully");
-            console.log('current game state', this.currentGameStateSubject?.value);
-          }
-        }else{
-          console.error("webrtc handle answer: peerconnection is not RTCPeerConnection instance");
+        if (peerConnection.signalingState && peerConnection.localDescription && peerConnection.remoteDescription) {
+          this.logger.info("remote and local description set successfully");
+          this.logger.info('current game state', this.getCurrentMatchState());
         }
       })
       .catch(error => {
-        console.error("Error setting remote description", error);
+        this.logger.error("Error setting remote description", error);
       });
   }
-  async webrtcCreateAnswer(offer: RTCSessionDescription, sender :string, senderId : number){
-    if (!this.amIHost){
-      console.error('webrtc create answer: only host can create answer, state is not currently host');
+
+  async webrtcCreateAnswer(offer: RTCSessionDescription){
+    if (this.onlineManager === undefined){
+      this.logger.error('webrtc create answer: online manager not set')
+      return; 
+    }
+    if (this.onlineManager.amIHost){
+      this.logger.error('webrtc create answer: only client can send answer, state is currently host');
       return;
     }
-    if (!(this.peerConnections instanceof Map)){
-      console.error('webrtc create answer: state is host jet peerconnections is not instance of map');
+    this.peerConnections = this.webrtcCreatePeerConnection();
+    if (!this.peerConnections){
+      this.logger.error('webrtc create answer: peer connection not created');
       return;
     }
-    const peerConnection = this.peerConnections.get(senderId);
-    if (!peerConnection){
-      console.error('webrtc create answer: target id not recognised');
-      return;
-    }
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    //await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await peerConnection.createAnswer();
-    peerConnection.setLocalDescription(answer)
+    await this.peerConnections.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await this.peerConnections.createAnswer();
+    this.peerConnections.setLocalDescription(answer)
       .then(() => {
-        if (peerConnection.signalingState && peerConnection.localDescription && peerConnection.remoteDescription)
-            console.log("remote and local description set successfully");
+        if (this.peerConnections === undefined || this.peerConnections instanceof Map) {
+          this.logger.error('webrtc create answer: peerConnetions is not instance of RTCPeerconnnection');
+          return;
+        }
+        if (this.peerConnections.signalingState && this.peerConnections.localDescription && this.peerConnections.remoteDescription)
+          this.logger.info("remote and local description set successfully");
         else
-          console.error("webrtc create answer: remote and local not set");
+          this.logger.error("webrtc create answer: remote and local not set");
       })
       .catch(error => {
-        console.error("webrtc create answer: Error setting remote description", error);
+        this.logger.error("webrtc create answer: Error setting remote description", error);
       });
-    const message = JSON.stringify({type : '/webrtc/answer', answer : answer, target : sender});
-    console.log('send message : ', {type : '/webrtc/answer', answer : answer, target : sender})
+    const message = JSON.stringify({ type: '/webrtc/answer', answer: answer });
+    this.logger.info('send message : ', { type: '/webrtc/answer', answer: answer })
     this.sendMessage(message);
   }
 
-  isConnected() : boolean{
-    return this.webSocket?.readyState === WebSocket.OPEN;
-  }
-  getEntry(entry_name : string) : GameSettings[] | null{
-    let type; 
-    if (entry_name === GameType.Match)
-      type = GameType.Match; 
-    else if (entry_name === GameType.Tournament)
-      type = GameType.Tournament; 
-    else
-      return null;
-    const entry = this.entries.get(type);
-    if (entry)
-      return entry;
-    return null;
-  }
-  getKeys() : string[]{
-    return Array.from(this.entries.keys());
-  }
-  newGame(gameSettings : GameSettings){
-    if (this.isConnected()){
-      let messageObject;
-      if (gameSettings.gameType === GameType.Tournament){
-        messageObject = { type: '/new_tournament', settings : gameSettings} ;
-      } else if (gameSettings.gameType === GameType.Match){
-        messageObject = { type: '/new_match', settings : gameSettings };
-      }else
-        return;
-      this.sendMessage(JSON.stringify(messageObject));
-      console.log('new game called');
+
+  //MATCH SYNC
+
+  sendMatchUpdate(update : MatchUpdate) : void {
+    if (this.dataChannels === undefined){
+      this.logger.error('send match update: current game is undefined');
+      return;
     }
-  }
-  reloadMatchesTournamets(){
-    if (this.isConnected()){
-      let messageObject = {type : '/match_tournament_list'};
-      this.sendMessage(JSON.stringify(messageObject));
+    if (this.onlineManager === undefined){
+      this.logger.error('send match update: online manager not set')
+      return; 
+    }
+    if (!this.onlineManager.amIHost){
+      this.logger.error('send match update: only host cand send a full update')
+      return;
+    }
+    if (this.dataChannels instanceof RTCDataChannel){
+      this.logger.error('send match update: data channels must be intance of map')
+      return;
+    }
+    const message = JSON.stringify({
+      type : 'update',
+      data : update,
+    });
+    for (const chann of this.dataChannels.values()){
+      chann.send(message);
     }
   }
 
-  async joinMatch(matchName : string){
-    console.log('join match called');
-    if (this.isConnected()){
-      if (this.amIHost){
-        console.error('join match: already match host');
-        return;
-      }
-      this.peerConnections = this.webrtcCreatePeerConnection();
-      this.dataChannels = this.peerConnections.createDataChannel('dataChann');
-      const offer = await this.peerConnections.createOffer();
-      console.log('local description set')
-      await this.peerConnections.setLocalDescription(offer);
-      //const sdp = await this.createOffer(this.peerConnections);
-      if (offer !== undefined && offer !== null) {
-          let messageObject = {
-            type: '/join/match',
-            name: matchName,
-            sdp: offer 
-          }
-        this.sendMessage(JSON.stringify(messageObject))
-        this.amIHost = false;
-      }else{
-        console.error('join match: failed to create offer');
-        this.peerConnections.close();
-        return;
-      }
-    }else
-      console.error('join match: failled to join match called');
-  }
-  async joinTournament(tournamentName : string){
-    if (this.isConnected()){
-      this.peerConnections = this.webrtcCreatePeerConnection();
-      const offer = await this.peerConnections.createOffer();
-      console.log('local description set')
-      await this.peerConnections.setLocalDescription(offer);
-//      const offer = await this.createOffer(this.peerConnections);
-      if (offer !== undefined && offer !== null) {
-        let messageObject = {
-          type: '/tournament/join',
-          name: tournamentName,
-          sdp: offer 
-        }
-        this.sendMessage(JSON.stringify(messageObject));
-      }
+  sendEvent(type: PongEventType, data: EventData): void {
+    if (!this.onlineManager){
+      this.logger.error('send event: online manager not set')
+      return;
     }
+    const message = {
+      type : 'event',
+      event : 'pongEvent',
+      method : 'send',
+      eventType : type,
+      data : data
+    };//!todo, data must be converted to sendable data. so that
+      //object references are turned to ids, that will be turned
+      //back to their corresponding ids in the receiver
+    this.broadcastWebrtc(JSON.stringify(message));
+  }
+  broadcastEvent(type: PongEventType, data: EventData): void {
+    if (!this.onlineManager){
+      this.logger.error('send event: online manager not set')
+      return;
+    }
+    const message = {
+      type : 'event',
+      method : 'broadcast',
+      eventType : type,
+      data : data
+    };//!todo, data must be converted to sendable data. so that
+      //object references are turned to ids, that will be turned
+      //back to their corresponding ids in the receiver
+    this.logger.info('broadcasting event to others', message)
+    this.broadcastWebrtc(JSON.stringify(message));
+  }
+  getOnlineMatchSettings() : OnlineMatchSettings2 | undefined{
+    return this.onlineManager?.getOnlineMatchSettings();
+  }
+  getOnlineMatchInfo() : OnlineMatchInfo | undefined{
+    return this.onlineManager?.info;
   }
 
-  /*async createOffer() : Promise<RTCSessionDescriptionInit | undefined>{
-    return offer;
-  }*/
-
-  sendMessage(message : string): boolean {
-    if (this.isConnected()) {
-      //const jsonMessage = JSON.stringify(message); // Convert the object to JSON string
-      this.webSocket?.send(message); // Send the JSON string over the WebSocket connection
-      return true;
-    } else {
-      console.error('WebSocket connection is not open');
-      return false;
-    }
-  }
 }

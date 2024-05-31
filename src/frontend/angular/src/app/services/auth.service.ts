@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
+import { LogFilter, Logger } from '../utils/debug';
 
 export class UserInfo{
   user_id : number;
@@ -23,7 +24,10 @@ export class AuthService {
   private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   user_info? : UserInfo;
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  friends? : UserInfo[];
 
+  //logger
+  logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
   client_locale: string = 'en';
 
   constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
@@ -46,8 +50,49 @@ export class AuthService {
       }
     });
   }
+  updateFriendList(){
+    if (!this.user_info){
+      this.logger.error('update user info: userinfo is undefined')
+      return
+    }
+    const backendURL = `api/polls/friends/${this.user_info.user_id}/`;
+    this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
+      next: (response) => {
+        this.logger.info('response friend list', response);
+      },
+      error: () => {
+        this.user_info = undefined;
+        this.logger.error('update friend list: error fetching data')
+      }
+    });
+  }
+  addFriend(){
+    if (!this.user_info){
+      this.logger.error('update user info: userinfo is undefined')
+      return
+    }
+    const backendURL = `api/polls/friends/${this.user_info.user_id}/`;
+    const jsonToSend = {
+      usernames : ['nice']
+    };
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    this.http.post<any>(backendURL, jsonToSend).subscribe({
+      next: (response) => {
+        this.logger.info('response friend list', response);
+      },
+      error: () => {
+        this.user_info = undefined;
+        this.logger.error('update friend list: error fetching data')
+      }
+    });
+  }
 
   getUpdateUserInfo(): UserInfo | undefined {
+    console.log(this.user_info?.username);
     return this.user_info;
   }
 
@@ -55,7 +100,7 @@ export class AuthService {
     let backendURL = 'api/polls/imLoggedIn';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: () => {
-        console.log("|!| You are logged in!")
+        this.logger.info("|!| You are logged in!")
         this.updateUserInfo();
       },
       error: () => {
@@ -65,6 +110,10 @@ export class AuthService {
         this.refreshToken();
       }
     })
+  }
+
+  isLoggedIn() : boolean{
+   return this.isLoggedInSubject.value; 
   }
 
   login(username : string, password : string) : Promise<boolean>{
@@ -126,14 +175,14 @@ export class AuthService {
     const backendURL = 'api/polls/token/refresh/';
     this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
       next: (response) => {
-        console.log('success refresh?', response);
+        this.logger.info('success refresh?', response);
         this.updateUserInfo();
         
         //this.amILoggedIn();
       },
       error: () => {
        // return false;
-       console.error('failed refresh token')
+       this.logger.error('failed refresh token')
        this.isLoggedInSubject.next(false);
       }
     });

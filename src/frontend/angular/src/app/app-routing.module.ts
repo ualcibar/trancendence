@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { PongComponent } from './pages/pong/pong.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
@@ -11,10 +10,12 @@ import { NotFoundComponent } from './components/errors/not-found/not-found.compo
 import { TestComponent } from './pages/test/test.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { VerifyComponent } from './pages/verify/verify.component';
+import { PlayComponent } from './pages/play/play.component';
+
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'play', component: PongComponent },
+  { path: 'play', component: PlayComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'settings', component: SettingsComponent },

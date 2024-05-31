@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { SettingsService } from '../../../services/settings.service';
@@ -37,10 +37,14 @@ export class SettingsPLanguageComponent {
     return this.selected_lang === lang;
   }
 
-  saveLanguage() {
-    this.settingsService.setUserConfig('user_language', this.selected_lang);
-    localStorage.setItem('lang', this.selected_lang);
-    this.translateService.use(this.selected_lang);
-    this.user_lang = this.selected_lang;
+  async saveLanguage() {
+    try {
+      await this.settingsService.setUserConfig('user_language', this.selected_lang);
+      localStorage.setItem('lang', this.selected_lang);
+      this.translateService.use(this.selected_lang);
+      this.user_lang = this.selected_lang;
+    } catch (error: any) {
+      console.error('❌ An error ocurred:', error);
+    }
   }
 }

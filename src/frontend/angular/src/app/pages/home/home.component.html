@@ -1,34 +1,49 @@
-<div class="bg-transparent">
-	<button (click)="changeState(HomeState.Home)" class="btn text-white">reset</button>
-	<button (click)="refresh()" class="btn text-white">refresh</button>
-	<div class="flex justify-center items-center h-auto">
-		<!-- <div class="w-1/2 min-w-1/2 chat p-6"> -->
-		<div class="w-1/2 p-6">
-			<app-chat [@fadeInOut]></app-chat>
-		</div>
-		<div *ngIf="matchmakingService.state ===  MatchMakingState.Standby" class="w-1/2">
-			<div *ngIf="!isAnimating && state === HomeState.Home" class="menu">
-				<button (click)="changeState(HomeState.Local)" class="card mb-16" [@fadeInOut]>
-					<h2>LOCAL</h2>
+<div class="h-50real"><!--h-full da problemas con scroll-->
+	<button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button>
+	<div *ngIf="debug">
+		<p class="text-white">chat websocket state: {{chatService.isConnected()}}</p>
+		<p class="text-white">matchmaking websocket state: {{matchmakingService.isConnected()}}</p>
+		<p class="text-white">matchmaking state : {{matchmakingService.state.getCurrentValue()}}</p>
+		<p class="text-white">current online match state: {{matchmakingService.getCurrentMatchState()}}</p>
+		<p class="text-gray-500">to take this messages away set debug in home.component to false(unai ponlo abajo que
+			este mensaje desaparece)</p>
+	</div>
+	<div class="flex h-full"><!--h-full da problemas con scroll-->
+		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="flex chat" [@fadeInOut]></app-chat>
+		<div class="flex flex-col justify-center items-center h-full w-full">
+			<button *ngIf="(state.homeRenderState.local$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.MatchTournament)"
+				class="card mb-16" [@fadeInOut]>
+				<h2>LOCAL</h2>
+			</button>
+			<button *ngIf="(state.homeRenderState.multiplayer$ | async) && (state.homeRenderState.render$)"
+				(click)="changeState(HomeState.SearchingOnlineGame)" class="card mb-16" [@fadeInOut]>
+				<h2>MULTIPLAYER</h2>
+			</button>
+			<button *ngIf="(state.homeRenderState.community$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.Community)"
+				class="card mb-16" [@fadeInOut]>
+				<h2>COMMUNITY</h2>
+			</button>
+			<div *ngIf="(state.homeRenderState.match_tournament$ | async) && (state.homeRenderState.render$)" class="flex flex-col w-full justify-center items-center">
+				<button (click)="changeState(HomeState.MatchGenerator)" class="card mb-16" [@fadeInOut]>
+					<h2>MATCH</h2>
 				</button>
-				<button (click)="changeState(HomeState.Multiplayer)" class="card mb-16" [@fadeInOut]>
-					<h2>MULTIPLAYER</h2>
-				</button>
-				<button (click)="changeState(HomeState.Multiplayer)" class="card mb-16" [@fadeInOut]>
-					<h2>COMMUNITY</h2>
+				<button (click)="changeState(HomeState.TournamentGenerator)" class="card mb-16" [@fadeInOut]>
+					<h2>TOURNAMENT</h2>
 				</button>
 			</div>
-			<div *ngIf="state === HomeState.Multiplayer" class="w-1/2 multiplayer" [@fadeInOut]="state" (@fadeInOut.done)="isAnimating = false">
-				<app-lobby-search></app-lobby-search>
+			<div *ngIf="(state.homeRenderState.tournamentGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut]>
+				<app-tournament-generator-component [settings]="getTournament()"></app-tournament-generator-component>
+				<button (click)="createTournament()" class="btn text-white">START</button>
 			</div>
-			<div *ngIf="state === HomeState.Local" class="w-1/2 menu" [@fadeInOut]>
-				<app-tournament-match-menu [multiplayer]="false"></app-tournament-match-menu>
+			<div *ngIf="(state.homeRenderState.matchGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut]>
+				<app-match-generator-component [settings]="getMatch()"></app-match-generator-component>
+				<button (click)="createMatch()" class="btn text-white">START</button>
 			</div>
-		</div>
-		<div *ngIf="matchmakingService.state === MatchMakingState.OnGame">
-			<div *ngIf="matchmakingService.currentGameState() === GameState.WaitingForPlayers">
-				<app-lobby-match></app-lobby-match>	
+			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" [@fadeInOut]>
+				<app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>
 			</div>
+			<app-lobby-match *ngIf="(state.homeRenderState.joiningOnlineMatch$ | async) && (state.homeRenderState.render$)"></app-lobby-match>
+			<app-lobby-search *ngIf="(state.homeRenderState.onlineMatchSearch$ | async) && (state.homeRenderState.render$)"></app-lobby-search>
 		</div>
 	</div>
 </div>

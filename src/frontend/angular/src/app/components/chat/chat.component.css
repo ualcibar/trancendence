@@ -1,3 +1,9 @@
+.chat{
+	background-color: rgba(47, 98, 179, 0.088);
+    backdrop-filter: blur(3px) brightness(0.7) saturate(0.9);
+/*    border: 3px solid transparent;*/
+    border-top-right-radius: 20px;
+}
 .chat-container {
     width: 300px; /* Adjust width as needed */
     height: 200px; /* Adjust height as needed */

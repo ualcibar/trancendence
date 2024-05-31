@@ -1,0 +1,19 @@
+i {
+	transition-duration: 90ms;
+}
+
+.btn {
+	background-color: rgb(147, 51, 234);
+	color: white;
+	--bs-btn-border-color: rgb(147, 51, 234);
+	--bs-btn-hover-border-color: rgb(125, 31, 214);
+	--bs-btn-active-border-color: rgb(120, 29, 206);
+}
+
+.btn:hover {
+	background-color: rgb(125, 31, 214);
+}
+
+.btn:active {
+	background-color: rgb(120, 29, 206);
+}

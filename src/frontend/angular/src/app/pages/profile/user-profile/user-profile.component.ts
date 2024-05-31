@@ -25,6 +25,8 @@ export class UserProfileComponent {
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
+    // Aquí obtenemos la última información del perfil del usuario
+    this.authService.updateUserInfo();
     this.authService.isLoggedIn$.subscribe({
       next: (value) => {
         if (value) {

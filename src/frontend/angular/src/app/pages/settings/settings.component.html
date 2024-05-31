@@ -23,14 +23,26 @@
 					</ul>
 					<ul class="pl-4 mr-4 mt-2 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
 						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_acc'|translate}}</h2>
+<<<<<<< HEAD
 						<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> {{'settings_tab_content_public'|translate}}</a></li>
 						<li class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> {{'settings_tab_content_security'|translate}}</a></li>
 						
+=======
+						<li (click)="activeTab = 'public'" [ngClass]="{'selected': activeTab === 'public'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> {{'settings_tab_content_public'|translate}}</a></li>
+						<li (click)="activeTab = 'security'" [ngClass]="{'selected': activeTab === 'security'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> {{'settings_tab_content_security'|translate}}</a></li>
+						<li (click)="activeTab = 'privacy'" [ngClass]="{'selected': activeTab === 'privacy'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-shield-shaded"></i> Privacidad</a></li>
+>>>>>>> origin/frontend
 					</ul>
 				</div>
 				<app-settings-p-color [loaded]="loading" *ngIf="activeTab === 'color'" class="w-full"></app-settings-p-color>
 				<app-settings-p-language [loaded]="loading" *ngIf="activeTab === 'language'" class="w-full"></app-settings-p-language>
+<<<<<<< HEAD
 				<app-settings-p-two-fa [loaded]="loading" *ngIf="activeTab === 'two-fa'" class="w-full"></app-settings-p-two-fa>
+=======
+                <app-settings-p-public [loaded]="loading" *ngIf="activeTab === 'public'" class="w-full"></app-settings-p-public>
+				<app-settings-p-security [loaded]="loading" *ngIf="activeTab === 'security'" class="w-full"></app-settings-p-security>
+				<app-settings-p-privacy [loaded]="loading" *ngIf="activeTab === 'privacy'" class="w-full"></app-settings-p-privacy>
+>>>>>>> origin/frontend
 			</div>
 		</div>
 	</div>

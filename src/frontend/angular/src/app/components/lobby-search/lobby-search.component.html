@@ -1,11 +1,8 @@
-<app-tournament-match-menu [multiplayer]="true" (gameCreated)="new_match_tournament($event)" (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center" *ngIf="showMatchTournamentMenu"></app-tournament-match-menu>
+<app-online-match-generator-component (escapeKeyPressed)="scapekey()" class="z-20 absolute inset-0 flex items-center justify-center" *ngIf="showMatchTournamentMenu"></app-online-match-generator-component>
 
 <div class="flex items-center justify-center place-content-center">
 	<div [class]="showMatchTournamentMenu ? 'blur-lg' : ''" class="items-center">
-		<h1 class="text-white text-4xl mb-8 text-center">Search for a game</h1>
-		<div class="text-center">
-			<button [class]="entry === current_entry ? 'bg-blue-700 hover:bg-blue-800' : 'bg-purple-700 hover:bg-purple-800'" *ngFor="let entry of getEntries()" (click)="changeEntry(entry)" type="button" class="mr-2 focus:outline-none text-white focus:ring-4 focus:ring-purple-300 w-80 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">{{entry}}</button>
-		</div>
+		<h1 class="text-center bg-blue-700 hover:bg-blue-800 mr-2 focus:outline-none text-white focus:ring-4 focus:ring-purple-300 w-80 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">MATCHES</h1>	
 		<div class="flex w-full bg-cyan-950 text-white place-content-center rounded-xl shadow-md subpixel-antialiased items-center justify-center mt-4">
 			<div class="flex-1 h-full w-full flex flex-col">
 				<input #inputField class="form-control me-2 w-full max-h-12" [formControl]="myControl" type="text" autofocus placeholder="name #tag">
