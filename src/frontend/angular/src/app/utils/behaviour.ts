@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from "three";
-import { Manager} from "../services/gameManager.service";
+import { Manager, MatchState} from "../services/gameManager.service";
 import { Ball, Block, GameObject} from "../components/pong/pong.component";
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
@@ -44,6 +44,8 @@ export class TickBehaviour<T>  implements TickObject{
 	}
 
 	runTick(delta: number): void {
+		// console.log('running tick');
+		// console.log('delta', delta);
 		for(let i = 0; i < this.functions.length; i++)
 			this.functions[i](delta, this.value)
 //		this.functions.forEach(fn => fn(delta, this.value))
@@ -205,5 +207,29 @@ export interface HandleKeys {
 export function createTickKeyboardInputPaddle<T extends HandleKeys>(paddle : T, keys : Key ){
 	return function keyboardInputPaddle(delta: number) {
 		paddle.handleKeys();
+	}
+}
+
+export interface update {
+	update(delta: number): void;
+}
+
+export function createTickUpdate<T extends update>(object : T, getState: () => MatchState){
+	return function update(delta: number) {
+		if (getState() === MatchState.Paused)
+			return;
+		// console.log('updating object', object);
+		// console.log('delta', delta);
+		object.update(delta);
+	}
+}
+
+export interface pause {
+	pause(): void;
+}
+
+export function createTickPause<T extends pause>(object : T){
+	return function pause() {
+		object.pause();
 	}
 }

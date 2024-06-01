@@ -2,7 +2,7 @@ import { Vector2, Vector3 } from "three";
 import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../components/pong/pong.component";
 import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./gameManager.service";
 import { Injectable } from "@angular/core";
-import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision } from "../utils/behaviour";
+import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision, createTickUpdate } from "../utils/behaviour";
 import { Score } from "./matchmaking.service";
 import * as THREE from 'three';
 
@@ -31,6 +31,7 @@ class MapSettingsCreateInfo{
   public defaultLightPositionY : number = 2;
   public defaultLightPositionZ : number = 4;
 
+  public additionalLights : THREE.Light[] = [];
   // Ball settings
   // Constructor settings
   public ballRadius : number = 0.05;
@@ -110,10 +111,39 @@ class MapSettingsCreateInfo{
 
     return blocks;
   }
-}
 
-export class Walls{
-  
+  createDefaultAdditionalLights(): THREE.Light[] {  
+    // <        // Additional lights
+//         {
+//           const light = new THREE.PointLight(colorPalette.white , this.defaultLightIntensity / 10);
+//           light.position.set(-1, -1, -1);
+//           this.additionalLights.push(light);
+//         }
+      const settings = this;
+      // Additional lights
+      const additionalLights : THREE.Light[] = [];
+      {
+        const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity / 10);
+        additionalLights.push(light);
+      }
+      // Additional lights
+      {
+        const red = 0xFF0000;
+        const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity);
+        light.position.set(1, 0, 0);
+        settings.additionalLights.push(light);
+      }
+      // Additional lights
+      {
+        const blue = 0x0000FF;
+        const light = new THREE.DirectionalLight(blue , settings.defaultLightIntensity);
+        light.position.set(-1, 0, 0);
+        settings.additionalLights.push(light);
+      }
+      console.log("additional lights", this.additionalLights)
+
+      return settings.additionalLights;
+  }
 }
 
 export class MapSettings{
@@ -160,7 +190,7 @@ export class MapSettings{
   public readonly paddleDepth! : number;
   public readonly paddleColor! : number;
   public readonly paddleType! : BlockType;
-  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
+  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Bot];
 
   public readonly paddleUpKey : string[] = ['w','o'];
   public readonly paddleDownKey : string[] = ['s','l'];
@@ -187,32 +217,7 @@ export class MapSettings{
   constructor(info : MapSettingsCreateInfo, blocks : Block[]){
     Object.assign(this, info);
     this.blocks = blocks;
-// <        // Additional lights
-//         {
-//           const light = new THREE.PointLight(colorPalette.white , this.defaultLightIntensity / 10);
-//           light.position.set(-1, -1, -1);
-//           this.additionalLights.push(light);
-//         }
-        // Additional lights
-        {
-          const light = new THREE.AmbientLight(colorPalette.white , this.defaultLightIntensity / 10);
-          this.additionalLights.push(light);
-        }
-        // Additional lights
-        {
-          const red = 0xFF0000;
-          const light = new THREE.DirectionalLight(red , this.defaultLightIntensity);
-          light.position.set(1, 0, 0);
-          this.additionalLights.push(light);
-        }
-        // Additional lights
-        {
-          const blue = 0x0000FF;
-          const light = new THREE.DirectionalLight(blue , this.defaultLightIntensity);
-          light.position.set(-1, 0, 0);
-          this.additionalLights.push(light);
-        }
-        console.log("additional lights", this.additionalLights)
+
   }
 
   createMatchInitUpdate(info : MatchSettings, manager : Manager) : MatchUpdate{
@@ -221,8 +226,12 @@ export class MapSettings{
       const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
       paddles[i] = new Paddle(this, i, manager);
       paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]));
-      paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key(paddles[i].upKey ,paddles[i].downKey)))
-                .bindTick(createTickMove(paddles[i]))
+      // paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key(paddles[i].upKey ,paddles[i].downKey)))
+      //           .bindTick(createTickMove(paddles[i]));
+      paddles[i].bindTick(createTickUpdate(paddles[i], () => manager.getMatchState()));
+      // if (paddles[i].state === PaddleState.Bot){
+      //   paddles[i].bindTick(createTickMove(paddles[i]));
+      // }
       console.log("estoy con jose",paddles[i].upKey, paddles[i].downKey);
     }
     const balls : Ball[] = new Array<Ball>(1);
@@ -270,6 +279,7 @@ export class MapsService {
     initMaps() {
         const defaultInfo = new MapSettingsCreateInfo();
         defaultInfo.ballInitSpeed = 1;
+        defaultInfo.additionalLights = defaultInfo.createDefaultAdditionalLights();
         const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
         this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
         const infernoInfo = new MapSettingsCreateInfo();
@@ -278,4 +288,6 @@ export class MapsService {
     getMapSettings(map: MapsName): MapSettings | undefined {
       return this.maps.get(map);
     }
+
+    
 }

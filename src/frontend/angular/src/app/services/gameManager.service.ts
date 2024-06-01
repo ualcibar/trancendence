@@ -142,7 +142,10 @@ export class MatchUpdate{
     this.paddles.forEach(paddle => paddle.subscribeToManager(manager));
     this.blocks.forEach(block => block.subscribeToManager(manager));
   }
+
   runTickBehaviour(delta : number){
+    // console.log('running tick behaviour')
+    // console.log('delta', delta)
     for (let i = 0; i < this.paddles.length; i++){
       this.paddles[i].tickBehaviour.runTick(delta);
     }

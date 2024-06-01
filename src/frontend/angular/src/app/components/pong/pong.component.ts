@@ -273,6 +273,32 @@ export class Block implements GameObject, EventObject, TickObject, toJson{
 }
 
 
+// if (rightPaddle.isAI()) {
+//   if (time - pastIATime > 1) { // IA only sees the ball every second
+//     console.log('IA');
+//     pastIATime = time;
+//     let predictedBallY = 0;
+
+//     // IA PREDICTION
+//     predictedBallY = ball.getPosition().y +(Math.tan(ball.getAngle() - Math.PI) * (rightPaddle.getPosition().x - ball.getPosition().x)); //trigonometria
+//     const pseudoLimitMax = topWall.getPosition().y - topWall.height / 2 - ball.getRadius();
+//     const pseudoLimitMin = bottomWall.getPosition().y + bottomWall.height / 2 + ball.getRadius();
+//     while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
+//       if (predictedBallY > pseudoLimitMax) {
+//         predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
+//       }
+//       if (predictedBallY < pseudoLimitMin) {
+//         predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
+//       }
+//     }
+//     predictedBallY  += (Math.random() - Math.random()) * (rightPaddle.getWidth() - ball.getRadius())/2 ;
+//     if (ball.getAngle() < Math.PI / 2 || ball.getAngle() > 3 * Math.PI / 2) {
+//       predictedBallY = (predictedBallY + leftPaddle.getPosition().y) / 2;
+//     }
+//     rightPaddle.setAIprediction(predictedBallY);
+//   }
+// }
+
 export class Paddle implements GameObject, EventObject, TickObject, toJson{
   mesh : THREE.Mesh;
   speed : number;
@@ -297,6 +323,10 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   type : BlockType;
   color : number;
   state : PaddleState;
+
+  paused : boolean = false;
+
+  lastIAupdate : number = 0;
 
   constructor(settings : MapSettings, number : number,manager: Manager){
     this.width = settings.paddleWidth;
@@ -338,48 +368,89 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.dir = paddle.dir;
   }
 
-  handleKeys() {
+  goUp() {
+    this.goinUp = true;
+    this.goinDown = false;
+    this.dir.y = +1;
+  }
+
+  goDown() {
+    this.goinDown = true;
+    this.goinUp = false;
+    this.dir.y = -1;
+  }
+
+  stop() {
+    this.goinDown = false;
+    this.goinUp = false;
     this.dir.y = 0;
-    if (key.isPressed(this.upKey)) {
-      this.goinUp = true;
-      this.dir.y += +1;
+  }
+
+  handleKeys() {
+    if (this.paused) {
+      this.stop();
+      return;
+    }
+    // console.log('handling keys');
+    if (key.isPressed(this.upKey) && !key.isPressed(this.downKey)) {
+      // console.log('going up');
+      this.goUp();
+    }
+    else if (key.isPressed(this.downKey) && !key.isPressed(this.upKey)) {
+      // console.log('going down');
+      this.goDown();
     }
     else {
-      this.goinUp = false;
-    }
-    if (key.isPressed(this.downKey)) {
-      this.goinDown = true;
-      this.dir.y += -1;
-    }
-    else {
-      this.goinDown = false;
+      this.stop();
     }
   }
 
+  isIAupdateable() : boolean{
+    return (Date.now() - this.lastIAupdate > 1000) // IA only sees the ball every second (1000ms)
+  }
+
+  updateAIprediction(prediction : number){
+    this.AIprediction = prediction;
+    this.lastIAupdate = Date.now();
+  }
+
   handleIA() {
-    if (this.pos.y < this.AIprediction - this.width / 42) {
-      this.goinUp = true;
-      this.goinDown = false;
+    if (this.paused) {
+      this.stop();
+      return;
     }
-    else if (this.pos.y > this.AIprediction + this.width / 42) {
-      this.goinUp = false;
-      this.goinDown = true;
+    // console.log('handling IA IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+    console.log('this', this);
+    console.log('IA prediction', this.AIprediction);
+    const antiVibrationFactor = this.width / 42; // 42 is the answer to everything (yes, it's a magic number)
+    if (this.pos.y < this.AIprediction - antiVibrationFactor) {
+      this.goUp();
+      console.log('going up');
+    }
+    else if (this.pos.y > this.AIprediction + antiVibrationFactor) {
+      this.goDown();
+      console.log('going down');
     }
     else {
-      this.goinUp = false;
-      this.goinDown = false;
+      this.stop();
     }
   }
 
   update(timeDelta : number) {
+    // console.log('updating paddle!!!');
     if (this.localPlayer) {
+      // console.log('local player');
       this.handleKeys();
     }
-    if (this.AIplayer) {
+    if (this.isAI()) {
+      // console.log('AI player');
       this.handleIA();
     }
+
     const paddleDiferentialDisplacement = timeDelta * this.speed;
+    // console.log('timeDelta AAAAAAAAAAAAAAAAAAAAAAA', timeDelta);
     if (this.goinUp) {
+      // console.log('going up', paddleDiferentialDisplacement);
       this.pos.y += paddleDiferentialDisplacement;
     }
     if (this.goinDown) {
@@ -406,19 +477,38 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   madeLocalPlayer() {
     this.localPlayer = true;
     this.AIplayer = false;
+    this.state = PaddleState.Binded;
   }
 
   madeAIPlayer() {
     this.localPlayer = false;
     this.AIplayer = true;
+    this.state = PaddleState.Bot;
+  }
+
+  madeUnbinded() {
+    this.localPlayer = false;
+    this.AIplayer = false;
+    this.state = PaddleState.Unbinded;
   }
 
   toJSON() : any{
     const {pos, dimmensions,type, color, speed, dir} = this;
     return {pos, dimmensions,type, color, speed, dir}; 
   }
+
+  isAI() : boolean{
+    if (this.state === PaddleState.Bot)
+      this.madeAIPlayer();
+    return this.AIplayer;
+  }
+
   getId(): number {
     return this.id;
+  }
+
+  getState() : PaddleState{
+    return this.state;
   }
 
   get position() : Vector3{
@@ -572,9 +662,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
 
     // ADD ADDITIONAL LIGHTS
-    console.log("additional lights", this.map.additionalLights)
     for (const light of this.map.additionalLights) {
-      console.log('adding light');
       this.scene.add(light);
     }
 
@@ -664,10 +752,71 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       requestAnimationFrame(this.render.bind(this));
   }
 
-  logic(timeDifference : number){ 
+  logic(timeDifference : number){
     this.update.runTickBehaviour(timeDifference);
     this.allColisions();
+    this.checkAI();
     this.updateScene();
+  }
+
+  makePrediction(paddle : Paddle){ // slightly hardcoded for default map
+    const ball = this.balls[0];
+    let predictedBallY = 0;
+
+    // IA PREDICTION
+
+    console.log('MAKING PREDICTION');
+
+    predictedBallY = ball.position.y +(Math.tan(ball.angle - Math.PI) * (paddle.position.x - ball.position.x)); //trigonometria
+    
+    // predict collision with walls
+    const topWallPos = this.map.blocks[2].pos;
+    const topWallDimmensions = this.map.blocks[2].dimmensions;
+    const bottomWallPos = this.map.blocks[3].pos;
+    const bottomWallDimmensions = this.map.blocks[3].dimmensions;
+    const pseudoLimitMax = topWallPos.y - topWallDimmensions.y / 2 - ball.radius;
+    const pseudoLimitMin = bottomWallPos.y + bottomWallDimmensions.y / 2 + ball.radius;
+    let i = 0;
+    while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
+      if (predictedBallY > pseudoLimitMax) {
+        predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
+      }
+      if (predictedBallY < pseudoLimitMin) {
+        predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
+      }
+      i++;
+      if (i > 10) {
+        console.error('infinite loop');
+        break;
+      }
+    }
+
+    // randomize a bit the prediction (makes it more human like)
+    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius)/2 ;
+
+    // if the ball is going to the left, make the prediction less extreme
+    if (ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2) {
+      predictedBallY = (predictedBallY + this.paddles[0].position.y) / 2;
+    }
+
+    // update the prediction
+    console.log('predictedBallY', predictedBallY);
+    console.log('paddle', paddle);
+    paddle.updateAIprediction(predictedBallY);
+    console.log('prediction made');
+    console.log('paddle', paddle);
+    console.log('AI prediction', paddle.AIprediction);
+  }
+
+  checkAI(){
+    for (const paddle of this.paddles){
+      console.log('checking AI');
+      console.log('paddle', paddle);
+      if (paddle.isAI() && paddle.isIAupdateable()) {
+        console.log('IA¡!');
+        this.makePrediction(paddle);
+      }
+    }
   }
 
   allColisions(){
