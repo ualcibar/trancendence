@@ -52,5 +52,6 @@
 
     "settings_tab_content_2FA":"Autentificación en dos pasos",
     "settings_tab_title_2FA":"Activar autentificación en dos pasos",
-    "settings_buttom_activate_2FA":"ACTIVAR"
+    "settings_buttom_activate_2FA":"Activar Verificación",
+    "settings_more_2FA":"Añade más seguridad a tu cuenta activando la V2P"
 }

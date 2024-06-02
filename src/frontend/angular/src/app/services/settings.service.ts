@@ -11,12 +11,14 @@ export class UserSettingsInfo extends UserInfo {
   user_color: string;
   user_language: string;
   user_email: string;
+  user_twofa: boolean;
 
-  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string) {
+  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_twofa: boolean) {
     super(userInfo.username, userInfo.user_id, userInfo.online);
     this.user_color = user_color;
     this.user_language = user_language;
     this.user_email = user_email;
+    this.user_twofa = user_twofa;
   }
 }
 
@@ -38,7 +40,7 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email']);
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['twofa']);
           this.userSettingsInfoSubject.next(userSettingsInfo);
         },
         error: () => {
@@ -71,6 +73,29 @@ export class SettingsService {
       } else if (type === 'username') {
         userSettingsInfoVal.username = value;
       }
+      console.log('✔️ ', response.message);
+      console.log(userSettingsInfoVal.username);
+    } else {
+      console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
+      return;
+    }
+  }
+
+  async setUserConfigBool(type: string, value: boolean): Promise<void> {
+    const userSettingsInfoVal = this.userSettingsInfoSubject.getValue();
+    if (userSettingsInfoVal) {
+      const backendURL = '/api/polls/setConfig/' + userSettingsInfoVal.user_id;
+      const httpReqBody = { [type]: value };
+      const httpHeader = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json'
+        })
+      };
+
+      const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+      if (type === 'user_twofa') {
+        userSettingsInfoVal.user_twofa = value;
+      } 
       console.log('✔️ ', response.message);
       console.log(userSettingsInfoVal.username);
     } else {

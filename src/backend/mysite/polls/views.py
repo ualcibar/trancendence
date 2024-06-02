@@ -77,7 +77,7 @@ def getInfo(request, user_id=None):
         'status': user.status,
         'color': user.user_color,
         'language': user.user_language,
-        '2FA': user.is_2FA_active
+        'twofa': user.is_2FA_active
         }, status=200)
 
 @api_view(['POST'])

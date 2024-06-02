@@ -3,11 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { SettingsService } from '../../../services/settings.service';
 import { AuthService } from '../../../services/auth.service';
+import { TranslateModule } from '@ngx-translate/core';
+
+/* import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs'; */
 
 @Component({
   selector: 'app-settings-p-security',
   standalone: true,
-  imports: [FormsModule, NgClass],
+  imports: [FormsModule, NgClass, TranslateModule],
   templateUrl: './settings-p-security.component.html',
   styleUrl: './settings-p-security.component.css'
 })
@@ -20,15 +24,18 @@ export class SettingsPSecurityComponent {
   mailChanged = false;
   alreadyUsed = false;
 
+  is_2FA_active = false;
+
   @Input() loaded: boolean = false;
 
-  constructor(private settingsService: SettingsService, private authService: AuthService) {}
+  constructor(/* private http: HttpClient,  */private settingsService: SettingsService, private authService: AuthService) {}
 
   ngOnInit() {
     this.settingsService.userSettingsInfo$.subscribe(data => {
       if (data) {
         this.email = data.user_email;
         this.currentEmail = this.email;
+        this.is_2FA_active = data.user_twofa;
       }
     })
   }
@@ -55,6 +62,16 @@ export class SettingsPSecurityComponent {
       if (error.status === 400) {
         
       }
+    }
+  }
+
+  async saveTwoFAStatus() {
+    try {
+      const new2FAStatus = !this.is_2FA_active;
+      await this.settingsService.setUserConfigBool('user_twofa', new2FAStatus);
+      this.is_2FA_active = new2FAStatus;
+    } catch (error: any) {
+      console.error('❌ Error updating 2FA status:', error);
     }
   }
 }

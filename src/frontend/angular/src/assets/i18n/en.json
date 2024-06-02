@@ -51,5 +51,6 @@
 
     "settings_tab_content_2FA":"Two Step Authentification",
     "settings_tab_title_2FA":"Activate Two Step Authentification",
-    "settings_buttom_activate_2FA":"ACTIVATE"
+    "settings_buttom_activate_2FA":"Activate verification",
+    "settings_more_2FA":"Add more security to your account activating 2FA"
 }
