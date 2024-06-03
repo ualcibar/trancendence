@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { SettingsService } from '../../../services/settings.service';
-import { AuthService } from '../../../services/auth.service';
+import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-settings-p-security',
@@ -21,12 +20,12 @@ export class SettingsPSecurityComponent {
 
   @Input() loaded: boolean = false;
 
-  constructor(private settingsService: SettingsService, private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    this.settingsService.userSettingsInfo$.subscribe(data => {
-      if (data) {
-        this.email = data.user_email;
+    this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
+      if (userInfo) {
+        this.email = userInfo.gmail;
         this.currentEmail = this.email;
       }
     })
@@ -34,7 +33,7 @@ export class SettingsPSecurityComponent {
 
   async saveSecurity() {
     try {
-      await this.settingsService.setUserConfig('email', this.email);
+      await this.authService.setUserConfig('email', this.email);
       this.currentEmail = this.email;
       this.alreadyUsed = false;
       this.mailChanged = true;

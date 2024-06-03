@@ -1,35 +1,17 @@
 from rest_framework import serializers
-from .models import CustomUser, Tournament, Game
-
-class CustomUserSerializer(serializers.ModelSerializer):
+from .models import CustomUser
+class LightUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id','username','wins','loses','total')
+        fields = ('id','username','status')
 
-class UserSerializer(serializers.ModelSerializer):
+class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = '__all__'
-    
-class GameSerializer(serializers.ModelSerializer):
-    player1 = serializers.StringRelatedField(read_only=True)
-    player2 = serializers.StringRelatedField(read_only=True)
-    winner = serializers.StringRelatedField(read_only=True)
-
+        fields = ('id','username','status','user_color', 'wins', 'loses')
+class PrivateUserInfoSerializer(serializers.ModelSerializer):
+    info = UserInfoSerializer(source='*')
+    friends = UserInfoSerializer(many=True, read_only=True)
     class Meta:
-        model = Game
-        fields = '__all__'
-
-class TournamentSerializer(serializers.ModelSerializer):
-    quarterfinal1 = GameSerializer(read_only=True)
-    quarterfinal2 = GameSerializer(read_only=True)
-    quarterfinal3 = GameSerializer(read_only=True)
-    quarterfinal4 = GameSerializer(read_only=True)
-    semifinal1 = GameSerializer(read_only=True)
-    semifinal2 = GameSerializer(read_only=True)
-    final = GameSerializer(read_only=True)
-    tournamentPlayers = CustomUserSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Tournament
-        fields = '__all__'
+        model = CustomUser
+        fields = ('info', 'friends', 'user_language')

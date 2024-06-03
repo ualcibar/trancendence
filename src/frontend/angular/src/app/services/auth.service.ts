@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, UnaryFunction, of} from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, UnaryFunction, firstValueFrom, of, shareReplay} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
 import { LogFilter, Logger } from '../utils/debug';
+import { State } from '../utils/state';
 
-export class UserInfo{
+export class LightUserInfo{
   user_id : number;
   username : string;
   online : boolean;
@@ -17,21 +18,67 @@ export class UserInfo{
   }
 }
 
+export class UserInfo{
+  user_id : number;
+  username : string;
+  online : boolean;
+  color : string;
+  wins : number;
+  loses : number;
+  constructor (username : string, user_id : number, online : boolean, color : string,wins:number ,loses:number){
+    this.username = username;
+    this.user_id = user_id;
+    this.online = online;
+    this.color = color;
+    this.wins = wins;
+    this.loses = loses;
+  }
+}
+export class PrivateUserInfo{
+  info : UserInfo;
+  friends : UserInfo[];
+  language : string;
+  gmail : string;
+  constructor (info : UserInfo, friends : UserInfo[], laeguage : string, gmail : string){
+    this.info = info;
+    this.friends = friends;
+    this.gmail = gmail;
+    this.language = laeguage;
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  user_info? : UserInfo;
-  isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
-  friends? : UserInfo[];
+  private _userInfo : State<PrivateUserInfo | undefined>;
 
   //logger
-  logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
-  client_locale: string = 'en';
+  private logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
 
   constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
-    this.amILoggedIn();
+    this._userInfo = new State<PrivateUserInfo | undefined>(undefined);
+    console.log('start info', this._userInfo)
+    this.refreshToken()
+    console.log('start info', this._userInfo)
+  }
+
+  get amIloggedIn() : boolean{
+    if (!(this._userInfo instanceof State)){
+      return false;
+    }
+    return this._userInfo.getCurrentValue() !== undefined
+  }
+
+  get userInfo() : PrivateUserInfo | undefined{
+    return this._userInfo.getCurrentValue()
+  }
+  get userInfo$() : Observable<PrivateUserInfo | undefined>{
+    return this._userInfo.observable;
+  }
+
+  subscribe(fn : any) : Subscription{
+    return this._userInfo.subscribe(fn);
   }
 
   // Función para obtener los datos del usuario en el momento en el que sea llamada
@@ -40,38 +87,35 @@ export class AuthService {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
-        this.user_info = new UserInfo(response['username'], response['userid'], true);
-        this.isLoggedInSubject.next(true);
-        this.translateService.setDefaultLang(response['language']);
-        this.translateService.use(response['language']);
+        this._userInfo.setValue(response.privateUserInfo);
       },
       error: () => {
-        this.user_info = undefined;
+        this._userInfo.setValue(undefined)
       }
     });
   }
   updateFriendList(){
-    if (!this.user_info){
+    if (!this.amIloggedIn){
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const backendURL = `api/polls/friends/${this.user_info.user_id}/`;
+    const backendURL = `api/polls/friends/${this.userInfo!.info.user_id}/`;
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
         this.logger.info('response friend list', response);
       },
       error: () => {
-        this.user_info = undefined;
         this.logger.error('update friend list: error fetching data')
+        this.updateUserInfo()
       }
     });
   }
   addFriend(){
-    if (!this.user_info){
+    if (!this.amIloggedIn){
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const backendURL = `api/polls/friends/${this.user_info.user_id}/`;
+    const backendURL = `api/polls/friends/${this.userInfo!.info.user_id}/`;
     const jsonToSend = {
       usernames : ['nice']
     };
@@ -85,18 +129,43 @@ export class AuthService {
         this.logger.info('response friend list', response);
       },
       error: () => {
-        this.user_info = undefined;
         this.logger.error('update friend list: error fetching data')
+        this.updateUserInfo()
       }
     });
   }
+  registerAcc(username : string, password : string, email : string) : Observable<any> {
+    this.logger.info('registering', username)
+    const backendURL = '/api/polls/register/';
+    const jsonToSend = {
+      username: username,
+      password: password,
+      email: email
+    };
 
-  getUpdateUserInfo(): UserInfo | undefined {
-    console.log(this.user_info?.username);
-    return this.user_info;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type' : 'application/json'
+      }),
+    };
+
+    const register$ = this.http.post<any>(backendURL, jsonToSend, httpOptions).pipe(
+      shareReplay(1)
+    )
+    register$.subscribe({
+      next: (response) => {
+        this.logger.info('successful register')
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 1000);
+      },
+      error: (error) => {
+        this.logger.error('An error ocurred registering this account:', error.status);
+      }
+    })
+    return register$;
   }
-
-  amILoggedIn(){
+  /*amILoggedIn(){
     let backendURL = 'api/polls/imLoggedIn';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: () => {
@@ -109,14 +178,10 @@ export class AuthService {
         this.translateService.use(this.client_locale);
         this.refreshToken();
       }
-    })
-  }
-
-  isLoggedIn() : boolean{
-   return this.isLoggedInSubject.value; 
-  }
+    })*/
 
   login(username : string, password : string) : Promise<boolean>{
+    console.log('start info', this._userInfo)
     return new Promise<boolean>((value) => {
       try { 
         const backendURL = 'api/polls/login/';
@@ -131,8 +196,13 @@ export class AuthService {
         };
 
         this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
-          next: () => {
-            this.isLoggedInSubject.next(true);
+          next: (response) => {
+            console.log('login info:', response)
+            const privateUserInfo : PrivateUserInfo = response.privateUserInfo;
+            if (privateUserInfo === undefined)
+              console.error('private user info: ', privateUserInfo)
+            console.log('info',this._userInfo, 'type', typeof this._userInfo)
+            this._userInfo.setValue(privateUserInfo);
             value(true);
           },
           error: () => {
@@ -157,10 +227,10 @@ export class AuthService {
       }
     });
     var accessToken = localStorage.getItem('access_token');
-    this.isLoggedInSubject.next(false);
+    this._userInfo.setValue(undefined);
     setTimeout(() => {
       this.router.navigate(['/']);
-      window.location.href="/";
+//      window.location.href="/";
     }, 500)
   }
 
@@ -169,21 +239,19 @@ export class AuthService {
     const refresh = this.getCookie('refresh_token');
     if (refresh === null){
       console.error('cant find refresh token')
-      this.isLoggedInSubject.next(false);
-      //return new Promise<boolean>(()=>false);
+      this._userInfo.setValue(undefined);
     }
     const backendURL = 'api/polls/token/refresh/';
     this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
       next: (response) => {
         this.logger.info('success refresh?', response);
-        this.updateUserInfo();
-        
+        this.updateUserInfo(); 
         //this.amILoggedIn();
       },
       error: () => {
        // return false;
        this.logger.error('failed refresh token')
-       this.isLoggedInSubject.next(false);
+       this._userInfo.setValue(undefined);
       }
     });
     //return new Promise<boolean>(() => false);
@@ -200,5 +268,24 @@ export class AuthService {
       .map(cookie => {
         return decodeURIComponent(cookie.substring(nameLenPlus));
       })[0] || null;
+  }
+  async setUserConfig(type: string, value: string): Promise<void> {
+    if (this.userInfo) {
+      const backendURL = '/api/polls/setConfig/' + this.userInfo.info.user_id;
+      const httpReqBody = { [type]: value };
+      const httpHeader = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json'
+        })
+      };
+
+      const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+      this._userInfo.setValue(response.privateUserInfo)
+      this.logger.info('✔️ ', response.message);
+      this.logger.info(this.userInfo.info.username);
+    } else {
+      this.logger.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
+      return;
+    }
   }
 }

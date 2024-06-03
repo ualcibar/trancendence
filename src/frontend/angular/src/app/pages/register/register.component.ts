@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { fadeInOut } from '../../../assets/animations/fadeInOut';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-register',
@@ -19,7 +20,7 @@ export class RegisterComponent {
     errorMessage: string = '';
     successMessage: string = '';
 
-    constructor(private http: HttpClient, private router: Router) {}
+    constructor(private authService : AuthService) {}
 
     ngOnInit(): void {
     }
@@ -29,30 +30,15 @@ export class RegisterComponent {
     }
 
     registerAcc() {
-        const backendURL = '/api/polls/register/';
-            const jsonToSend = {
-            username: this.user.username,
-            password: this.user.password,
-            email: this.user.email
-        };
-
-        const httpOptions = {
-            headers: new HttpHeaders({
-                'Content-Type' : 'application/json'
-            }),
-        };
-
-        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
-            next: (response) => {
-                this.successMessage = response.message;
-                setTimeout(() => {
-                    this.router.navigate(['/login']);
-                }, 3000);
-            },
-            error: (error) => {
-                console.error('An error ocurred registering this account:', error.status);
-                this.errorMessage = error.error.reason;
-            }
-        })
+        this.authService.registerAcc(this.user.username, this.user.password, this.user.email).subscribe(
+            {
+                next: (response) => {
+                    this.successMessage = response.message;
+                },
+                error: (error) => {
+                    console.error('An error ocurred registering this account component:', error.status);
+                    this.errorMessage = error.error.reason;
+                }
+            })
     }
 }

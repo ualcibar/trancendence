@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import TokenError, AccessToken
 from channels.exceptions import DenyConnection
 
 from polls.models import CustomUser
-from polls.serializers import UserSerializer
+from polls.serializers import UserInfoSerializer
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -216,7 +216,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                     self.user.game_room_name = f'{match_game.name}_match'
                     self.user.status = 'joining_game'
                     self.user.save()
-                    user_info =  UserSerializer(self.user).data
+                    user_info =  UserInfoSerializer(self.user).data
                     result = self.user.game.add_player(self.user)
                     if (result['res'] == False):
                         self.send(json.dumps({

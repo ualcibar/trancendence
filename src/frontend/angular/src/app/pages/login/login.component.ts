@@ -30,7 +30,7 @@ export class LoginComponent {
   async loginAcc() {
     if (await this.auth.login(this.user.username, this.user.password)){
       this.router.navigate(['/']);
-      window.location.href="/";
+      //window.location.href="/";
     }else {
       this.errorMessage = 'Failed to login!';
     }

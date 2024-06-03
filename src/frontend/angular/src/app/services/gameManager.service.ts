@@ -35,7 +35,7 @@ export enum MatchState{
   Paused,
   Reset,
   FinishedSuccess,
-  Error,
+  FinishedError,
 }
 /*
 export class Tournament{
@@ -203,10 +203,13 @@ export class OnlineMatchInfo{
   onlineSettings : OnlineMatchSettings2;
   host : UserInfo;
   players : Array<OnlinePlayer | undefined> = [];
-  constructor (onlineSettings : OnlineMatchSettings2, host : UserInfo){
+  constructor (onlineSettings : OnlineMatchSettings2, host : UserInfo, players : (OnlinePlayer | undefined)[] | undefined){
     this.onlineSettings = onlineSettings;
     this.host = host;
-    this.players = new Array<OnlinePlayer | undefined>(onlineSettings.matchSettings.teamSize * 2 - 1).fill(undefined)
+    if (players)
+      this.players = players;
+    else
+      this.players = new Array<OnlinePlayer | undefined>(this.onlineSettings.matchSettings.teamSize * 2 - 1).fill(undefined);
   }
   addPlayer(newPlayer : UserInfo, state : OnlinePlayerState, index : number) : boolean{
     if (this.players.length == 2 * this.onlineSettings.matchSettings.teamSize){
@@ -312,7 +315,7 @@ export class TournamentManager implements Manager{
           case MatchState.Initialized:
             this.setMatchState(MatchState.Running);
             break;
-          case MatchState.Error:
+          case MatchState.FinishedError:
             console.error('start tournament: there was an error while running a match');
             break;
           case MatchState.Running:
@@ -469,7 +472,7 @@ export class MatchManager implements Manager{
           case MatchState.Initialized:
             this.setMatchState(MatchState.Running);
             break;
-          case MatchState.Error:
+          case MatchState.FinishedError:
             console.error('start match: there was an error while running a match');
             break;
           case MatchState.Running:
@@ -630,9 +633,9 @@ export class OnlineMatchManager implements Manager, OnlineManager{
       (state : MatchState) => {
         switch (state){
           case MatchState.Initialized:
-            this.setMatchState(MatchState.Running);
+            this.setMatchState(MatchState.Running);//wrong
             break;
-          case MatchState.Error:
+          case MatchState.FinishedError:
             console.error('start online match: there was an error while running a match');
             break;
           case MatchState.Running:
@@ -870,7 +873,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         this.logger.error('couldn\' get player')
         return
       }
-      player.state.setValue(OnlinePlayerState.Disconected);
+      player.state.setValue(OnlinePlayerState.Disconnected);
     }
   }
 

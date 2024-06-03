@@ -4,7 +4,18 @@ import logging
 
 logger = logging.getLogger('std')
 class Player(models.Model):
+    ONLINE_STATE_CHOICES = (
+        ('Joining', 'Joining'),
+        ('Connecting', 'Connecting'),
+        ('Connected', 'Connected'),
+        ('Disconnected', 'Disconnected'),
+        ('Blocked', 'Blocked'))
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, unique=True)
+    state = models.CharField(
+            max_length=20,
+            choices=ONLINE_STATE_CHOICES,
+            default='Disconnected',
+            )
     index = models.PositiveIntegerField(default=0, null=False)
 
 class MatchPreview(models.Model):

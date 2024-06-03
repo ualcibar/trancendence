@@ -1,8 +1,8 @@
 import {Component, Input} from '@angular/core';
 import { TranslateModule } from "@ngx-translate/core";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import { SettingsService } from "../../../services/settings.service";
 import {NgClass, NgIf} from "@angular/common";
+import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-settings-p-public',
@@ -26,13 +26,13 @@ export class SettingsPPublicComponent {
   @Input() loaded: boolean = false;
 
 
-  constructor(private settingsService: SettingsService) {
+  constructor(private authService : AuthService) {
   }
 
   ngOnInit() {
-    this.settingsService.userSettingsInfo$.subscribe(userSettingsInfo => {
-      if (userSettingsInfo) {
-        this.username = userSettingsInfo.username;
+    this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
+      if (userInfo) {
+        this.username = userInfo.info.username;
         this.currentUsername = this.username;
       }
     })
@@ -40,7 +40,7 @@ export class SettingsPPublicComponent {
 
   async savePublic() {
     try {
-      await this.settingsService.setUserConfig('username', this.username);
+      await this.authService.setUserConfig('username', this.username);
       this.alreadyUsed = false;
       this.nameChanged = true;
       this.currentUsername = this.username;

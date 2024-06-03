@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AuthService } from '../../../services/auth.service';
+import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -26,10 +26,9 @@ export class UserProfileComponent {
 
   ngOnInit(): void {
     // Aquí obtenemos la última información del perfil del usuario
-    this.authService.updateUserInfo();
-    this.authService.isLoggedIn$.subscribe({
-      next: (value) => {
-        if (value) {
+    this.authService.subscribe({
+      next: (userInfo : PrivateUserInfo) => {
+        if (userInfo) {
           this.route.params.subscribe(params => { // Esto hay que mirarlo, porquqe si lo del getUserInfo() falla por no estar con la sesión
             // iniciada, entonces se queda "cargando" infinitamente
             const userId = params['userId'];
@@ -52,7 +51,7 @@ export class UserProfileComponent {
         this.user_color = response['color'];
 
         this.loading = false;
-        if (this.authService.user_info?.username === this.username) {
+        if (this.authService.userInfo!.info.username === this.username) {
           this.editProfile = true;
         } else if (this.username === "admin") {
           this.user_not_found = true;

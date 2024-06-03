@@ -16,6 +16,7 @@ export enum LogFilter{
     AuthServiceLogger,
     LobbySearchLogger,
     StateServiceLogger,
+    SettingsLogger,
     Others,
 }
 
@@ -79,9 +80,10 @@ const debugConfig : Record<LogFilter, LogLevel> = {
     [LogFilter.PongLogger]: LogLevel.Error,
     [LogFilter.ChatServiceLogger]: LogLevel.Error,
     [LogFilter.MatchmakingServiceLogger]: LogLevel.Error,
-    [LogFilter.HomeLogger]: LogLevel.Info,
+    [LogFilter.HomeLogger]: LogLevel.Error,
     [LogFilter.AuthServiceLogger]: LogLevel.Error,
     [LogFilter.LobbySearchLogger] : LogLevel.Error,
-    [LogFilter.StateServiceLogger] : LogLevel.Info,
+    [LogFilter.StateServiceLogger] : LogLevel.Error,
+    [LogFilter.SettingsLogger] : LogLevel.Error,
     [LogFilter.Others] : LogLevel.Info,
 }

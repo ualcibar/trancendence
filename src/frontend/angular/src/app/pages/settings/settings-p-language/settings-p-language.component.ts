@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../services/auth.service';
-import { SettingsService } from '../../../services/settings.service';
+import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -18,12 +17,12 @@ export class SettingsPLanguageComponent {
 
   @Input() loaded: boolean = false;
 
-  constructor(public authService: AuthService, public settingsService: SettingsService, private translateService: TranslateService) {}
+  constructor(public authService: AuthService, private translateService: TranslateService) {}
 
   ngOnInit() {
-    this.settingsService.userSettingsInfo$.subscribe(userSettingsInfo => {
-      if (userSettingsInfo) {
-        this.selected_lang = userSettingsInfo.user_language;
+    this.authService.subscribe((userInfo : PrivateUserInfo | undefined )=> {
+      if (userInfo) {
+        this.selected_lang = userInfo.language;
         this.user_lang = this.selected_lang;
       }
     });
@@ -39,7 +38,7 @@ export class SettingsPLanguageComponent {
 
   async saveLanguage() {
     try {
-      await this.settingsService.setUserConfig('user_language', this.selected_lang);
+      await this.authService.setUserConfig('user_language', this.selected_lang);
       localStorage.setItem('lang', this.selected_lang);
       this.translateService.use(this.selected_lang);
       this.user_lang = this.selected_lang;
