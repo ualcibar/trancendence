@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "three";
 import { Manager} from "../services/gameManager.service";
-import { Ball, Block, GameObject} from "../components/pong/pong.component";
+import { Ball, Block, GameObject, PaddleState} from "../components/pong/pong.component";
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Key } from "../services/gameManager.service";
@@ -27,6 +27,11 @@ export interface Angle {
 
 export interface Dimmensions {
 	dimmensions: Vector3;
+}
+
+export interface PaddleI{
+	state : PaddleState;
+	updateAIprediction(delta: number): void;
 }
 
 export class TickBehaviour<T>  implements TickObject{
@@ -183,17 +188,27 @@ export function createTickMove<T extends Pos & Speed & Dir>(object : T){
 
 export function createTickMovePaddle<T extends Pos & Speed & Dir>(object : T){
 	return function move(delta: number) {
-      object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
+    	object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
 	}
 }
-export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddle : T, keys : Key ){
+export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir & PaddleI>(paddle : T, keys : Key ){
+	let lastAiUpdateSec : number = 0;
 	return function keyboardInputPaddle(delta: number) {
-		paddle.dir.y = 0;
-		if (key.isPressed(keys.up)) {
-			paddle.dir.y = 1;
-		}
-		if (key.isPressed(keys.down)) {
-			paddle.dir.y = -1;
+		if (paddle.state === PaddleState.Binded) {
+			paddle.dir.y = 0;
+			if (key.isPressed(keys.up)) {
+				paddle.dir.y = 1;
+			}
+			if (key.isPressed(keys.down)) {
+				paddle.dir.y = -1;
+			}
+
+		}else if (paddle.state === PaddleState.Bot){
+			if (lastAiUpdateSec >= 1){
+				paddle.updateAIprediction(delta)
+				lastAiUpdateSec = 0;
+			}else
+				lastAiUpdateSec += delta
 		}
 	}
 }

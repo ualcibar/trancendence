@@ -52,17 +52,17 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=20, unique=True, blank=False,
                                 null=False)
 
-    # avatar = models.ImageField(upload_to='avatars/', blank=True, null=False)
+    avatar = models.ImageField(default='avatars/default.jpg', upload_to='avatars/', blank=True, null=False)
     # install pyllow to make it work
 
-    email = models.CharField(max_length=320, unique=True, blank=False, null=True)
+    email = models.EmailField(max_length=320, unique=True, blank=False, null=True)
 
-    game_room_name = models.CharField(max_length=255, default=None, null=True) 
-    game = models.ForeignKey('matchmaking.MatchPreview', default=None, null=True, on_delete=models.SET_NULL) 
+    game_room_name = models.CharField(max_length=255, default=None, blank=True, null=True) 
+    game = models.ForeignKey('matchmaking.MatchPreview', default=None,blank=True, null=True, on_delete=models.SET_NULL) 
     is_42_user = models.BooleanField(default=False, null=False)
-    id42 = models.UUIDField(None, null=True, editable=True, unique=True)
-    token42 = models.CharField(max_length=255, default=None, null=True)
-    refresh_token42 = models.CharField(default=None, max_length=255, null=True)
+    id42 = models.UUIDField(None, default=None, blank=True, null=True, editable=True, unique=True)
+    token42 = models.CharField(max_length=255, default=None, blank=True, null=True)
+    refresh_token42 = models.CharField(default=None, max_length=255, blank=True, null=True)
 
     is_active = models.BooleanField(default=True, null=False)
 

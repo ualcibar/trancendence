@@ -420,12 +420,11 @@ export class MatchmakingService implements MatchSync{
                 this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
                 return;
               }
-              const dataPlayers : ({info : UserInfo, state : OnlinePlayerState} | null)[] = data.match.players;
-              const players : (OnlinePlayer | undefined)[] = [] 
-              for (const player of dataPlayers.values()) {
-                const onlinePlayer = player === null ? undefined : new OnlinePlayer(player.info, toEnum(OnlinePlayerState, player.state)!)
-                console.log('player', onlinePlayer)
-                players.push(onlinePlayer)
+              const dataPlayers : ({info : UserInfo, state : string} | null)[] = data.match.players;
+              let players : (OnlinePlayer | undefined)[] = []//new Array<OnlinePlayer | undefined>(data.match.teamSize * 2 - 1).fill(undefined) 
+              for (const player of dataPlayers) {
+                players.push(player === null ? undefined : new OnlinePlayer(player.info, toEnum(OnlinePlayerState, player.state)!))
+                //console.log('player', onlinePlayer)
               }
               console.log('next', players)
               const info = new OnlineMatchInfo(onlineMatchSettings, data.match.host,players)
