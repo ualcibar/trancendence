@@ -523,6 +523,7 @@ export class MatchManager implements Manager{
     }
   }
   sendEvent(type: PongEventType, data : EventData): void {
+    console.log('send event', type, data);
     if (data.targetIds === undefined){
       console.error('send event needs targetsid')
       return;

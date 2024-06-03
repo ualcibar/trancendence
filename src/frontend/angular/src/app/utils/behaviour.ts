@@ -67,6 +67,7 @@ export enum PongEventType {
 	LocalHit = 'local hit',
 	Colision = 'colision',
 	Score = 'score',
+	IAPrediction = 'ia prediction',
 }
 
 export class EventBehaviour<T extends GameObject> implements EventObject{
@@ -174,6 +175,20 @@ export function createEventPaddleColision<T extends EventObject & Dimmensions & 
 			else
 				ball.dir = new Vector2(1, 0).rotateAround(new Vector2(0, 0), angle);
 		}
+	}
+}
+
+export interface updateAIprediction {
+	updateAIprediction(delta: number): void;
+}
+
+export function createEventIAprediction<T extends updateAIprediction>(object : T){
+	return function eventIAprediction(type: PongEventType, data: EventData) {
+		console.log('event called', type);
+		if (type !== PongEventType.IAPrediction)
+			return;
+		console.log('updating prediction (event)');
+		object.updateAIprediction(data.custom?.others?.prediction);
 	}
 }
 

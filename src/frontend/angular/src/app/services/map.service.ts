@@ -2,7 +2,7 @@ import { Vector2, Vector3 } from "three";
 import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../components/pong/pong.component";
 import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./gameManager.service";
 import { Injectable } from "@angular/core";
-import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision, createTickUpdate } from "../utils/behaviour";
+import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision, createTickUpdate, createEventIAprediction } from "../utils/behaviour";
 import { Score } from "./matchmaking.service";
 import * as THREE from 'three';
 
@@ -232,6 +232,8 @@ export class MapSettings{
       // if (paddles[i].state === PaddleState.Bot){
       //   paddles[i].bindTick(createTickMove(paddles[i]));
       // }
+      // emmm
+      paddles[i].bindEvent(createEventIAprediction(paddles[i]));
       console.log("estoy con jose",paddles[i].upKey, paddles[i].downKey);
     }
     const balls : Ball[] = new Array<Ball>(1);

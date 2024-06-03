@@ -342,7 +342,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.deltaFactor = settings.deltaFactor;
 
 
-    //this.id = manager.subscribeGameObject(this);
+    // this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
     this.pos = settings.paddleInitPos[number];
@@ -493,8 +493,8 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   toJSON() : any{
-    const {pos, dimmensions,type, color, speed, dir} = this;
-    return {pos, dimmensions,type, color, speed, dir}; 
+    const {pos, dimmensions,type, color, speed, dir, AIprediction} = this;
+    return {pos, dimmensions,type, color, speed, dir, AIprediction}; 
   }
 
   isAI() : boolean{
@@ -800,12 +800,29 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
 
     // update the prediction
-    console.log('predictedBallY', predictedBallY);
-    console.log('paddle', paddle);
-    paddle.updateAIprediction(predictedBallY);
-    console.log('prediction made');
-    console.log('paddle', paddle);
-    console.log('AI prediction', paddle.AIprediction);
+    // console.log('predictedBallY', predictedBallY);
+    // console.log('paddle', paddle);
+    // paddle.updateAIprediction(predictedBallY);
+    // console.log('prediction made');
+    // console.log('paddle', paddle);
+    // console.log('AI prediction', paddle.AIprediction);
+    this.sendIAprediction(paddle, predictedBallY);
+  }
+
+  sendIAprediction(paddle : Paddle, prediction : number){
+    console.log(paddle);
+    console.log(paddle.getId());
+    const eventData : EventData = {
+      senderId : paddle.getId(),// not sure about what is what
+      targetIds : paddle.getId(),
+      custom : {
+        others : {
+          prediction : prediction,
+        },
+      }
+    };
+    console.log('sending event IA prediction', eventData);
+    this.manager.sendEvent(PongEventType.IAPrediction, eventData);
   }
 
   checkAI(){
