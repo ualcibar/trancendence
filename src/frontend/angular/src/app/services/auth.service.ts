@@ -50,6 +50,7 @@ export class AuthService {
       }
     });
   }
+
   updateFriendList(){
     if (!this.user_info){
       this.logger.error('update user info: userinfo is undefined')
@@ -66,6 +67,7 @@ export class AuthService {
       }
     });
   }
+
   addFriend(){
     if (!this.user_info){
       this.logger.error('update user info: userinfo is undefined')

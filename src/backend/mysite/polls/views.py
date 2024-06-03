@@ -80,6 +80,16 @@ def getInfo(request, user_id=None):
         }, status=200)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def checkInfo(request):
+    current_password = request.POST.get('currentPass')
+    user = request.user
+    if user.check_password(current_password):
+        return JsonResponse({'message': 'The password is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The password its not the same'}, status=400)
+
+@api_view(['POST'])
 def loginWith42Token(request):
     logger.debug('login with 42')
     code = request.data.get('code')
@@ -173,14 +183,16 @@ def setUserConfig(request, user_id=None):
     for key, value in data.items():
         if key in valid_keys:
             if key == 'password':
+                if not value:
+                    return JsonResponse({'message': 'The password cannot be empty'}, status=400)
                 if user.check_password(value):
                     return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
                 user.set_password(value)
-                updated_fields(key)
                 logger.debug(f"Actualizada la key {key}")
-            setattr(user, key, value)
-            updated_fields.append(key)
-            logger.debug(f"Actualizada la key {key} a {value}")
+            else:
+                setattr(user, key, value)
+                updated_fields.append(key)
+                logger.debug(f"Actualizada la key {key} a {value}")
 
     if not valid_keys:
         return JsonResponse({'message': 'No valid user settings provided'}, status=400)

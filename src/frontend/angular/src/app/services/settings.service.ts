@@ -72,10 +72,23 @@ export class SettingsService {
         userSettingsInfoVal.username = value;
       }
       console.log('✔️ ', response.message);
-      console.log(userSettingsInfoVal.username);
     } else {
       console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
     }
+  }
+
+  //Esta función permite comprobar que la contraseña actual sea la correcta
+  async verifyPassword(value: string): Promise<void> {
+    const backendURL = '/api/polls/checkInfo/';
+    const httpReqBody = `currentPass=${value}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
   }
 }

@@ -37,6 +37,7 @@ urlpatterns = [
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
     path("getInfo/", views.getInfo, name="get_info"),
     path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),
+    path("checkInfo/", views.checkInfo, name="check_info"),
     path("setConfig/", views.setUserConfig, name="set_user_config"),
     path("setConfig/<int:user_id>", views.setUserConfig, name="set_user_config_by_id"),
     #path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

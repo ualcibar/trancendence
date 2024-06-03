@@ -109,6 +109,10 @@ export class HomeComponent implements OnInit{
     
   }
 
+/*  ngOnDestroy(): void {
+    this.matchmakingService.webSocket.close();
+  }*/
+
   changeState(newState: HomeState): void {
     this.state.changeHomeState(newState)
     this.isAnimating = true;

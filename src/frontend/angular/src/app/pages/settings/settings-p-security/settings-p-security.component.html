@@ -1,4 +1,7 @@
-<div id="sp-div" class="rounded h-full p-8">
+<div id="sp-div" class="rounded h-full p-4">
+    <!--
+    CAMBIAR el CORREO
+    -->
 	<h1 class="font-bold text-2xl"><i class="bi bi-at"></i> Correo electrónico</h1>
 	<p class="text-zinc-300">Actualiza el correo electrónico asociado a tu cuenta</p>
 	<div class="flex align-items-center max-w-80 mb-4">
@@ -6,21 +9,57 @@
 		<button (click)="saveMailSecurity()" [ngClass]="{'grayscale-0': currentEmail !== email,'grayscale disabled opacity-50': currentEmail === email}" class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
 	</div>
 
+    <!-- Error -->
+    <div *ngIf="alreadyUsed" class="alert alert-error alert-dismissible fade show mt-2 max-w-96" role="alert" [@easeOut]>
+        <i class="bi bi-x-circle-fill mr-2"></i>¡Este correo ya está en uso!
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- OK -->
+    <div *ngIf="mailChanged" class="alert alert-success alert-dismissible fade show mt-2 max-w-96" role="alert" [@easeOut]>
+        <i class="bi bi-check-circle-fill mr-2"></i>¡Correo cambiado con éxito!
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!--
+    CAMBIAR la CONTRASEÑA
+    -->
 	<h1 class="font-bold text-2xl"><i class="bi bi-asterisk"></i> Contraseña</h1>
 	<p class="text-zinc-300">Cambia la contraseña que usas para iniciar sesión</p>
 
-    <div class="form-text text-zinc-300">Contraseña actual</div>
-    <input [(ngModel)]="oldPassword" type="password" name="oldPassword" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
+    <form class="needs-validation" novalidate (ngSubmit)="savePassSecurity()">
+        <div class="form-text text-zinc-300">Contraseña actual</div>
+        <input [(ngModel)]="oldPassword" [class.is-invalid]="wrongPassword" [class.is-valid]="!wrongPassword && formSent" type="password" name="oldPassword" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
 
-    <div class="form-text text-zinc-300">Nueva contraseña</div>
-    <input [(ngModel)]="newPassword" type="password" name="newPassword1" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
+        <div class="form-text text-zinc-300">Nueva contraseña</div>
+        <input [(ngModel)]="newPassword" [class.is-invalid]="!passwordsMatch" [class.is-valid]="passwordsMatch && formSent" type="password" name="newPassword1" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
 
-    <div class="form-text text-zinc-300">Repite la nueva contraseña</div>
-    <div class="flex align-items-center max-w-80 mb-4">
-        <input [(ngModel)]="newPassword" type="password" name="newPassword2" class="form-control shadow-none" id="floatingInput" required>
-        <button class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
+        <div class="form-text text-zinc-300">Repite la nueva contraseña</div>
+        <div class="flex align-items-center max-w-80 mb-4">
+            <input [(ngModel)]="confirmNewPassword" [class.is-invalid]="!passwordsMatch" [class.is-valid]="passwordsMatch && formSent" type="password" name="newPassword2" class="form-control shadow-none" id="floatingInput" required>
+            <button *ngIf="!formSent" (click)="savePassSecurity()" class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
+            <button *ngIf="formSent" (click)="savePassSecurity()" class="btn btn-warning btn-sm ml-4 grayscale disabled opacity-50"><div class="spinner-border spinner-border-sm"></div></button>
+        </div>
+    </form>
+
+    <!-- Errores -->
+    <div *ngIf="error" class="alert alert-error alert-dismissible fade show mt-2 max-w-96" role="alert" [@easeOut]>
+        <p *ngIf="wrongPassword"><i class="bi bi-x-circle-fill mr-2"></i>La contraseña actual no es correcta.</p>
+        <p *ngIf="!passwordsMatch"><i class="bi bi-x-circle-fill mr-2"></i>La nueva contraseña no coincide!</p>
+        <p *ngIf="passwordsMatchEmpty"><i class="bi bi-x-circle-fill mr-2"></i>La nueva contraseña no puede estar vacía!</p>
+        <p *ngIf="passwordsMatchDuplicate"><i class="bi bi-x-circle-fill mr-2"></i>La nueva contraseña no puede ser igual que la actual!</p>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
+    <!-- OK -->
+    <div *ngIf="success" class="alert alert-success alert-dismissible fade show mt-2 max-w-96" role="alert" [@easeOut]>
+        <i class="bi bi-check-circle-fill mr-2"></i>¡Contraseña cambiada con éxito!
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!--
+    AUTENTIFICACIÓN en DOS PASOS
+    -->
 	<h1 class="font-bold text-2xl"><i class="bi bi-fingerprint"></i> Verificación en dos pasos</h1>
 	<p class="text-zinc-300">Añade más seguridad a tu cuenta activando la V2P</p>
 	<button class="btn btn-warning btn-sm mt-2"><i class="bi bi-lock-fill"></i> Activar Verificación</button>
