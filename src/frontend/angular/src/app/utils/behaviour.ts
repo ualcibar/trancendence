@@ -205,7 +205,7 @@ export function createTickMovePaddle<T extends Pos & Speed & Dir>(object : T){
 }
 export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 	let lastUpdateSec: number = 0;
-	let prediction : number | undefined;
+	let prediction : number = 0;
 	let update : MatchUpdate | undefined = undefined;
 	return function paddleUpdate(delta: number) {
 		if (!update){
@@ -222,8 +222,12 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 		}else if(paddle.state === PaddleState.Bot){
 			lastUpdateSec += delta;
 			if (lastUpdateSec >= 1){
-				paddle.handleIA(update.getAiPrediction(paddle));
+				lastUpdateSec = 0;
+				console.log('updating prediction', lastUpdateSec);
+				prediction = update.getAiPrediction(paddle);
 			}
+			console.log('prediction', prediction);
+			paddle.handleIA(prediction);
 		}
 	}
 }

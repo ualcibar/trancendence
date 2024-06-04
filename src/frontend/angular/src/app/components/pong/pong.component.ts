@@ -420,8 +420,8 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
       return;
     }
     // console.log('handling IA IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-    console.log('this', this);
-    console.log('IA prediction', this.AIprediction);
+    // console.log('this', this);
+    // console.log('IA prediction', aiPrediction);
     const antiVibrationFactor = this.width / 42; // 42 is the answer to everything (yes, it's a magic number)
     if (this.pos.y < aiPrediction - antiVibrationFactor) {
       this.goUp();
