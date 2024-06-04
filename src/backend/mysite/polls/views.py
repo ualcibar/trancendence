@@ -178,7 +178,7 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-    valid_keys = ['user_color', 'user_language', 'username', 'password', 'email']
+    valid_keys = ['user_color', 'user_language', 'username', 'password', 'email', 'anonymise']
 
     for key, value in data.items():
         if key in valid_keys:
@@ -189,6 +189,11 @@ def setUserConfig(request, user_id=None):
                     return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
                 user.set_password(value)
                 logger.debug(f"Actualizada la key {key}")
+            if key == 'anonymise':
+                user.anonymise()
+                logger.debug(f"Actualizada la key {key}")
+                updated_fields.append(key)
+                break
             else:
                 setattr(user, key, value)
                 updated_fields.append(key)
@@ -205,7 +210,13 @@ def setUserConfig(request, user_id=None):
         else:
             return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=500)
 
-    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields}, status=201)
+    anonymised_data = {
+        'username': user.username,
+        'email': user.email,
+        'is_anonymised': 'anonymise' in updated_fields
+    }
+
+    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields, 'anonymised_data': anonymised_data}, status=201)
 
 @api_view(['POST'])
 def logout(request):

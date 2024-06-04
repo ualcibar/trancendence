@@ -1,5 +1,6 @@
 Django==5.0.0
 psycopg2-binary==2.9.9
+django-gdpr-assist==1.4.2
 django-cors-headers==4.3.1
 django-extensions==3.2.3
 djangorestframework==3.14.0

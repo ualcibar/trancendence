@@ -71,7 +71,7 @@ export class SettingsService {
       } else if (type === 'username') {
         userSettingsInfoVal.username = value;
       }
-      console.log('✔️ ', response.message);
+      console.log('✔️ ', response);
     } else {
       console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
