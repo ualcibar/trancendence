@@ -183,9 +183,12 @@ export class MatchUpdate{
     this.score.changeScore(update.score.score);
   }
   getAiPrediction(paddle: Paddle): number {
+    console.log('paddle position', paddle.pos);
+    // this.update(this); // update the current state???
     const ball = this.balls[0];
     console.log('getAiPrediction ball', ball);
     console.log('getAiPrediction paddle', paddle);
+    console.log('getAiPrediction this.paddle', this.paddles[1]);
     let predictedBallY = 0;
 
     // IA PREDICTION
@@ -196,35 +199,35 @@ export class MatchUpdate{
     console.log('getAiPrediction predictedBallY', predictedBallY, '=', ball.position.y, '+', 'tan(', ball.angle, ') * (', paddle.position.x, '-', ball.position.x);
     console.log('padddle position x', paddle.position.x);
     console.log('ball position', ball.position);
-    // // predict collision with walls
-    // const topWallPos = this.blocks[2].pos;
-    // const topWallDimmensions = this.blocks[2].dimmensions;
-    // const bottomWallPos = this.blocks[3].pos;
-    // const bottomWallDimmensions = this.blocks[3].dimmensions;
-    // const pseudoLimitMax = topWallPos.y - topWallDimmensions.y / 2 - ball.radius;
-    // const pseudoLimitMin = bottomWallPos.y + bottomWallDimmensions.y / 2 + ball.radius;
-    // let i = 0;
-    // while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
-    //   if (predictedBallY > pseudoLimitMax) {
-    //     predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
-    //   }
-    //   if (predictedBallY < pseudoLimitMin) {
-    //     predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
-    //   }
-    //   i++;
-    //   if (i > 10) {
-    //     console.error('infinite loop');
-    //     break;
-    //   }
-    // }
+    // predict collision with walls
+    const topWallPos = this.blocks[2].pos;
+    const topWallDimmensions = this.blocks[2].dimmensions;
+    const bottomWallPos = this.blocks[3].pos;
+    const bottomWallDimmensions = this.blocks[3].dimmensions;
+    const pseudoLimitMax = topWallPos.y - topWallDimmensions.y / 2 - ball.radius;
+    const pseudoLimitMin = bottomWallPos.y + bottomWallDimmensions.y / 2 + ball.radius;
+    let i = 0;
+    while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
+      if (predictedBallY > pseudoLimitMax) {
+        predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
+      }
+      if (predictedBallY < pseudoLimitMin) {
+        predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
+      }
+      i++;
+      if (i > 10) {
+        console.error('infinite loop');
+        break;
+      }
+    }
 
-    // // randomize a bit the prediction (makes it more human like)
-    // predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius)/2 ;
+    // randomize a bit the prediction (makes it more human like)
+    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius)/2 ;
 
-    // // if the ball is going to the left, make the prediction less extreme
-    // if (ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2) {
-    //   predictedBallY = (predictedBallY + this.paddles[0].position.y) / 2;
-    // }
+    // if the ball is going to the left, make the prediction less extreme
+    if (!(ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2)) {
+      predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
+    }
     return predictedBallY
   }
 }

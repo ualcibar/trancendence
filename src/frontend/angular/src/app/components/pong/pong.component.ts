@@ -61,7 +61,8 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     const widthSegments = settings.ballWidthSegments;
     const heightSegments = settings.ballHeightSegments;
     const ballGeometry = new THREE.SphereGeometry(this.radius, widthSegments, heightSegments);
-    const ballColor = settings.ballColor;
+    // const ballColor = settings.ballColor;
+    const ballColor = colorPalette.josefYellow; //blue
     const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
     this.mesh = new THREE.Mesh(ballGeometry, ballMaterial);
 
@@ -167,6 +168,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
   }
 
   get position() : Vector3{
+    this.mesh.position.set(this.pos.x, this.pos.y, 0);
     return this.mesh.position;
   }
 
@@ -333,7 +335,8 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.height = settings.paddleHeight;
     const paddleDepth = settings.paddleDepth;
     const paddleGeometry = new THREE.BoxGeometry(this.width, this.height, paddleDepth);
-    const paddleColor = settings.paddleColor;
+    // const paddleColor = settings.paddleColor;
+    const paddleColor = colorPalette.roseGarden;
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
 
@@ -351,6 +354,8 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.color = settings.paddleColor;
     this.speed = settings.paddleSpeed;
     this.state = settings.paddleState[number];
+
+    this.pos.x = 42;
 
     if (this.state === PaddleState.Binded) {
       this.madeLocalPlayer();
@@ -513,6 +518,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   get position() : Vector3{
+    this.mesh.position.set(this.pos.x, this.pos.y, 0);
     return this.mesh.position;
   }
 

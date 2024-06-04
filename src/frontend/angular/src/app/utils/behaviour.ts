@@ -208,9 +208,9 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 	let prediction : number = 0;
 	let update : MatchUpdate | undefined = undefined;
 	return function paddleUpdate(delta: number) {
-		if (!update){
+		// if (!update){
 			update = manager.getMatchUpdate()
-		}
+		// }
 		if (paddle.state === PaddleState.Binded) {
 			paddle.dir.y = 0;
 			if (key.isPressed(paddle.upKey)) {
@@ -224,6 +224,8 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 			if (lastUpdateSec >= 1){
 				lastUpdateSec = 0;
 				console.log('updating prediction', lastUpdateSec);
+				console.log('padddle', paddle);
+				console.log('paddle pos', paddle.pos);
 				prediction = update.getAiPrediction(paddle);
 			}
 			console.log('prediction', prediction);
