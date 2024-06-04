@@ -2,7 +2,7 @@ import { Vector2, Vector3 } from "three";
 import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../components/pong/pong.component";
 import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./gameManager.service";
 import { Injectable } from "@angular/core";
-import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision, createTickUpdate, createEventIAprediction } from "../utils/behaviour";
+import { createEventScoreColision, createTickMove, createEventPaddleColision, eventEventWallColision, createTickUpdate, createEventIAprediction, createPaddleUpdate } from "../utils/behaviour";
 import { Score } from "./matchmaking.service";
 import * as THREE from 'three';
 
@@ -225,10 +225,13 @@ export class MapSettings{
     for (let i = 0; i < paddles.length; i++){
       const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
       paddles[i] = new Paddle(this, i, manager);
-      paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]));
+      paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]))
       // paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key(paddles[i].upKey ,paddles[i].downKey)))
       //           .bindTick(createTickMove(paddles[i]));
-      paddles[i].bindTick(createTickUpdate(paddles[i], () => manager.getMatchState()));
+  
+  //    paddles[i].bindTick(createTickUpdate(paddles[i], () => manager.getMatchState()));
+      paddles[i].bindTick(createPaddleUpdate(paddles[i], manager))
+        .bindTick(createTickMove(paddles[i]))
       // if (paddles[i].state === PaddleState.Bot){
       //   paddles[i].bindTick(createTickMove(paddles[i]));
       // }

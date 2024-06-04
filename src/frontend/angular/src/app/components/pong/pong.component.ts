@@ -414,7 +414,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.lastIAupdate = Date.now();
   }
 
-  handleIA() {
+  handleIA(aiPrediction : number) {
     if (this.paused) {
       this.stop();
       return;
@@ -423,11 +423,11 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     console.log('this', this);
     console.log('IA prediction', this.AIprediction);
     const antiVibrationFactor = this.width / 42; // 42 is the answer to everything (yes, it's a magic number)
-    if (this.pos.y < this.AIprediction - antiVibrationFactor) {
+    if (this.pos.y < aiPrediction - antiVibrationFactor) {
       this.goUp();
       console.log('going up');
     }
-    else if (this.pos.y > this.AIprediction + antiVibrationFactor) {
+    else if (this.pos.y > aiPrediction + antiVibrationFactor) {
       this.goDown();
       console.log('going down');
     }
@@ -437,6 +437,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   update(timeDelta : number) {
+    console.error('dont use this with the new ai ')
     // console.log('updating paddle!!!');
     if (this.localPlayer) {
       // console.log('local player');
@@ -444,7 +445,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     }
     if (this.isAI()) {
       // console.log('AI player');
-      this.handleIA();
+      //this.handleIA();
     }
 
     const paddleDiferentialDisplacement = timeDelta * this.speed;
@@ -705,7 +706,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
     this.updateScene();
     this.manager.setMatchState(MatchState.Initialized);
-
   }
 
   initValues() {
@@ -755,7 +755,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   logic(timeDifference : number){
     this.update.runTickBehaviour(timeDifference);
     this.allColisions();
-    this.checkAI();
+    //this.checkAI();
     this.updateScene();
   }
 

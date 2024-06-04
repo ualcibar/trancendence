@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "three";
-import { Manager, MatchState} from "../services/gameManager.service";
-import { Ball, Block, GameObject} from "../components/pong/pong.component";
+import { Manager, MatchState, MatchUpdate} from "../services/gameManager.service";
+import { Ball, Block, GameObject, Paddle, PaddleState} from "../components/pong/pong.component";
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Key } from "../services/gameManager.service";
@@ -203,27 +203,40 @@ export function createTickMovePaddle<T extends Pos & Speed & Dir>(object : T){
       object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
 	}
 }
-// export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir>(paddle : T, keys : Key ){
-// 	return function keyboardInputPaddle(delta: number) {
-// 		paddle.dir.y = 0;
-// 		if (key.isPressed(keys.up)) {
-// 			paddle.dir.y += 1;
-// 		}
-// 		if (key.isPressed(keys.down)) {
-// 			paddle.dir.y -= 1;
-// 		}
-// 	}
-// }
+export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
+	let lastUpdateSec: number = 0;
+	let prediction : number | undefined;
+	let update : MatchUpdate | undefined = undefined;
+	return function paddleUpdate(delta: number) {
+		if (!update){
+			update = manager.getMatchUpdate()
+		}
+		if (paddle.state === PaddleState.Binded) {
+			paddle.dir.y = 0;
+			if (key.isPressed(paddle.upKey)) {
+				paddle.dir.y = 1;
+			}
+			if (key.isPressed(paddle.downKey)) {
+				paddle.dir.y = -1;
+			}
+		}else if(paddle.state === PaddleState.Bot){
+			lastUpdateSec += delta;
+			if (lastUpdateSec >= 1){
+				paddle.handleIA(update.getAiPrediction(paddle));
+			}
+		}
+	}
+}
 
 export interface HandleKeys {
 	handleKeys(): void;
 }
 
-export function createTickKeyboardInputPaddle<T extends HandleKeys>(paddle : T, keys : Key ){
+/*export function createTickKeyboardInputPaddle<T extends HandleKeys>(paddle : T, keys : Key ){
 	return function keyboardInputPaddle(delta: number) {
 		paddle.handleKeys();
 	}
-}
+}*/
 
 export interface update {
 	update(delta: number): void;
