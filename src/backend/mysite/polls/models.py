@@ -82,30 +82,35 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
 
-    STATUS_CHOICES = (
-        ('connected', 'Connected'),
-        ('disconnected', 'Disconnected'),
-        ('joining_game', 'Joining Game'),
-        ('in_game', 'In Game'),
-    )
+    CONNECTED = "Connected"
+    DISCONNECTED = "Disconnected"
+    JOINING_GAME = "JoiningGame"
+    IN_GAME = "InGame"
+    STAND_BY = "Standby"
+    STATUS_CHOICES = {
+        CONNECTED: 'Connected',
+        DISCONNECTED: 'Disconnected',
+        JOINING_GAME: 'JoiningGame',
+        IN_GAME: 'InGame',
+    }
 
     PREVIOUS_STATUS_CHOICES = (
-        ('in_game', 'In Game'),
-        ('standby', 'Stand by'),
+        (IN_GAME, 'InGame'),
+        (STAND_BY, 'Standby'),
     )
 
     status = models.CharField(
             max_length=20,
             choices=STATUS_CHOICES,
-            default='disconnected',
+            default=DISCONNECTED,
             )
     previous_status = models.CharField(
             max_length=20,
             choices=PREVIOUS_STATUS_CHOICES,
-            default='standby',
+            default=STAND_BY,
             )
     
-    USER_COLOR_CHOICES = (
+    COLOR_CHOICES = (
         ('default','Default'),
         ('rojo', 'Rojo'),
         ('naranja', 'Naranja'),
@@ -115,21 +120,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('purpura', 'Purpura'),
     )
 
-    user_color = models.CharField(
+    color = models.CharField(
         max_length=10,
-        choices=USER_COLOR_CHOICES,
+        choices=COLOR_CHOICES,
         default='default',
     )
 
-    USER_LANGUAGE_CHOICES = (
+    LANGUAGE_CHOICES = (
         ('eu', 'Euskera'),
         ('en', 'English'),
         ('es', 'Spanish'),
     )
 
-    user_language = models.CharField(
+    language = models.CharField(
         max_length=8,
-        choices=USER_LANGUAGE_CHOICES,
+        choices=LANGUAGE_CHOICES,
         default='en',
     )
 

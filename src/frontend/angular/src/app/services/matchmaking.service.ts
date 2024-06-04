@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {AuthService, PrivateUserInfo, UserInfo} from './auth.service';
+import {AuthService, PrivateUserInfo, UserInfo, UserInfoI} from './auth.service';
 import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
@@ -109,13 +109,18 @@ export enum OnlinePlayerState{
   Blocked = 'Blocked'
 }
 
+export interface OnlinePlayerI{
+  state : string;
+  info : UserInfoI;
+}
+
 export class OnlinePlayer{
   state : State<OnlinePlayerState>;
   info : UserInfo;
 
   constructor(info : UserInfo, state : OnlinePlayerState = OnlinePlayerState.Connecting,
   ){
-    this.state = new State(state);
+    this.state = new State<OnlinePlayerState>(state);
     this.info = info;
   }
   getState(): OnlinePlayerState{
@@ -124,6 +129,20 @@ export class OnlinePlayer{
   changeState(state : OnlinePlayerState){
     this.state.setValue(state);
   }
+  static fromI(values : OnlinePlayerI) : OnlinePlayer | undefined{
+    const state = toEnum(OnlinePlayerState, values.state);
+    console.log('online state', state)
+    if (!state){
+      console.error('online player: fromI: failed to parse state')
+      return undefined
+    }
+    const info = UserInfo.fromI(values.info);
+    if (!info){
+      console.error('online player: fromI: failed to parse user info')
+      return undefined
+    }
+    return new OnlinePlayer(info, state)
+  } 
 }
 
 export class OnlineMatchSettings2{
@@ -420,11 +439,21 @@ export class MatchmakingService implements MatchSync{
                 this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
                 return;
               }
-              const dataPlayers : ({info : UserInfo, state : string} | null)[] = data.match.players;
-              let players : (OnlinePlayer | undefined)[] = []//new Array<OnlinePlayer | undefined>(data.match.teamSize * 2 - 1).fill(undefined) 
-              for (const player of dataPlayers) {
-                players.push(player === null ? undefined : new OnlinePlayer(player.info, toEnum(OnlinePlayerState, player.state)!))
-                //console.log('player', onlinePlayer)
+              console.log(JSON.stringify(data.match.players))
+              const dataPlayers : Array<(OnlinePlayerI | null)> = data.match.players;
+              let players : (OnlinePlayer | undefined)[] = new Array<OnlinePlayer | undefined>(data.match.teamSize * 2 - 1).fill(undefined) 
+              for (let i = 0; i < dataPlayers.length;i++) {
+                if (dataPlayers[i] !== null){
+                  const player = OnlinePlayer.fromI(dataPlayers[i]!)
+                  if (!player){
+                    this.logger.error('join match result: failed to parse player')
+                    this.sendCancelJoinMatch()
+                    this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
+                    return;   
+                  }
+                  players[i] = player;  
+                }
+
               }
               console.log('next', players)
               const info = new OnlineMatchInfo(onlineMatchSettings, data.match.host,players)
@@ -534,7 +563,7 @@ export class MatchmakingService implements MatchSync{
             if (!this.authService.userInfo){
               const subscribtion = this.authService.subscribe((userInfo : PrivateUserInfo | undefined)=>{
                 if (userInfo) {
-                  if (userInfo.info.user_id == data.playerId) {
+                  if (userInfo.info.id == data.playerId) {
                     setTimeout(() => {
                       this.stateService.changeMultiplayerState(MatchmakingState.InGame)
                       this.gameManager.start();
@@ -547,7 +576,7 @@ export class MatchmakingService implements MatchSync{
                 }
               })
             }else{
-              if (this.authService.userInfo.info.user_id == data.playerId) {
+              if (this.authService.userInfo.info.id == data.playerId) {
                 setTimeout(() => {
                   this.stateService.changeMultiplayerState(MatchmakingState.InGame)
                   this.gameManager.start();
@@ -744,13 +773,13 @@ export class MatchmakingService implements MatchSync{
               this.logger.error('on ice connection state change: player wasnt set');
               return;
             }
-            const message = { type: '/confirm_join/match', player: player.info.username, playerId: player.info.user_id };
+            const message = { type: '/confirm_join/match', player: player.info.username, playerId: player.info.id };
             this.logger.info('confirming new player connection has been stablished');
             this.sendMessage(JSON.stringify(message));
           }else{
             const player = this.onlineManager.playerReconnected(playerId);
             if (player) {
-              const message = { type: '/match/confirm_reconnect', player: player.info.username, playerId: player.info.user_id };
+              const message = { type: '/match/confirm_reconnect', player: player.info.username, playerId: player.info.id };
               this.logger.info('confirming new player reconnection has been stablished');
               this.sendMessage(JSON.stringify(message));
             }else{

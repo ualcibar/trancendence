@@ -8,10 +8,11 @@ class LightUserInfoSerializer(serializers.ModelSerializer):
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id','username','status','user_color', 'wins', 'loses')
+        fields = ('id','username', 'status','color', 'wins', 'loses')
+
 class PrivateUserInfoSerializer(serializers.ModelSerializer):
     info = UserInfoSerializer(source='*')
     friends = UserInfoSerializer(many=True, read_only=True)
     class Meta:
         model = CustomUser
-        fields = ('info', 'friends', 'user_language')
+        fields = ('info', 'friends', 'language', 'email')

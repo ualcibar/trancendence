@@ -25,7 +25,7 @@ export class SettingsPSecurityComponent {
   ngOnInit() {
     this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
       if (userInfo) {
-        this.email = userInfo.gmail;
+        this.email = userInfo.email;
         this.currentEmail = this.email;
       }
     })

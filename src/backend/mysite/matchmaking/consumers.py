@@ -38,12 +38,12 @@ class MatchMakingConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_add)(self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.global_room_name, self.channel_name)
         self.accept()
-        if self.user.previous_status == 'in_game':
+        if self.user.previous_status == CustomUser.IN_GAME:
             if self.user.game == None or self.user.game_room_name == None:
                 self.user.game = None
                 self.user.game_room_name = None
                 logger.debug(f'game {self.user.game} room {self.user.game_room_name}, match was deleted')
-                self.user.status = 'connected'
+                self.user.status = CustomUser.CONNECTED
                 try:
                     player = Player.objects.get(user=self.user)
                     player.delete()
@@ -65,9 +65,9 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'player' : self.user.username
                     }
                 )
-                self.user.status = 'in_game'
+                self.user.status = CustomUser.IN_GAME
         else:
-            self.user.status = 'connected'
+            self.user.status = CustomUser.CONNECTED
         self.send_match_list_to_self()
         self.isInit = True
         self.user.save()
@@ -76,8 +76,8 @@ class MatchMakingConsumer(WebsocketConsumer):
         if self.isInit:
             self.user.refresh_from_db()
             logger.debug(f'player disconnected {self.user.username} status {self.user.status}')
-            self.user.previous_status = 'standby'
-            if self.user.status == 'joining_game':
+            self.user.previous_status = CustomUser.STAND_BY
+            if self.user.status == CustomUser.JOINING_GAME:
                 #tell room group about the lobby falling
                 try:
                     player = Player.objects.get(user=self.user)
@@ -105,7 +105,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                             'player': self.user.username,
                         }
                     )
-            elif self.user.status == 'in_game':
+            elif self.user.status == CustomUser.IN_GAME:
                 self.user.previous_status = self.user.status
                 async_to_sync(self.channel_layer.group_send)(
                     self.user.game_room_name,
@@ -116,7 +116,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                     }
                 )
             logger.debug(f'Disconnect: status: {self.user.status}, previous: {self.user.previous_status}')
-            self.user.status = 'Disconnected'
+            self.user.status = CustomUser.DISCONNECTED
             self.user.save()
             async_to_sync(self.channel_layer.group_discard)(self.global_room_name, self.channel_name)
             async_to_sync(self.channel_layer.group_discard)(self.user_inbox, self.channel_name)
@@ -132,11 +132,11 @@ class MatchMakingConsumer(WebsocketConsumer):
                     'status' : self.user.status
                 }))
             case "/reset":
-                self.user.status = 'connected'
+                self.user.status = CustomUser.CONNECTED
                 self.user.save()
             case "/new_match":
                 logger.debug('Receive: new match: new match requested')
-                if self.user.status != 'connected':
+                if self.user.status != CustomUser.CONNECTED:
                     self.send(json.dumps({
                         'type': 'new_match_result',
                         'status': 'failure_already_in_another_game',
@@ -171,7 +171,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'match' : data['settings']
                     }))
                     self.user.game_room_name = f'{data['settings']['name']}_match'
-                    self.user.status = 'joining_game'
+                    self.user.status = CustomUser.JOINING_GAME
                     self.user.save()
                     async_to_sync(self.channel_layer.group_add)(self.user.game_room_name, self.channel_name)
                     logger.debug('Receive: new match: new match success')
@@ -202,7 +202,7 @@ class MatchMakingConsumer(WebsocketConsumer):
             case '/match_list':
                 self.send_match_list_to_self()
             case '/join/match':
-                if self.user.status != 'connected':
+                if self.user.status != CustomUser.CONNECTED:
                     self.send(json.dumps({
                         'type': 'join_match_result',
                         'status': 'failure_already_in_another_game',
@@ -214,7 +214,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                     )
                     self.user.game = match_game
                     self.user.game_room_name = f'{match_game.name}_match'
-                    self.user.status = 'joining_game'
+                    self.user.status = CustomUser.JOINING_GAME
                     self.user.save()
                     user_info =  UserInfoSerializer(self.user).data
                     result = self.user.game.add_player(self.user)
@@ -225,7 +225,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                         }))
                         self.user.game = None 
                         self.user.game_room_name = None 
-                        self.user.status = 'connected'
+                        self.user.status = CustomUser.CONNECTED
                         self.user.save() 
                         return
                     index = result['index']
@@ -260,7 +260,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                 except Exception as e:
                     self.user.game = None 
                     self.user.game_room_name = None 
-                    self.user.status = 'connected'
+                    self.user.status = CustomUser.CONNECTED
                     self.user.save() 
                     self.send(json.dumps({
                         'type': 'join_match_result',
@@ -284,7 +284,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                     logger.debug('Receive: match cancel join: failed to remove player')
                     
                 self.user.game_room_name = None
-                self.user.status = 'connected'
+                self.user.status = CustomUser.CONNECTED
                 self.user.save()
                 #send group or host? player left match
                 #leave match chat
@@ -307,7 +307,7 @@ class MatchMakingConsumer(WebsocketConsumer):
             case '/confirm_join/match':
                 try:
                     user = CustomUser.objects.get(id=data['playerId']) 
-                    user.status = 'in_game'
+                    user.status = CustomUser.IN_GAME
                     user.save()
                     user = CustomUser.objects.get(id=data['playerId']) 
                     logger.debug(f'changed state {user, user.status}')
@@ -388,7 +388,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                     logger.error('match confirm reconnect: SHOULD NEVER HAPPEN{e}')
 
             case '/leave/game':
-                self.user.status = 'connected'
+                self.user.status = CustomUser.CONNECTED
                 self.user.save()
                 async_to_sync(self.channel_layer.group_discard)(self.game_room_name, self.channel_name)
             case _ :

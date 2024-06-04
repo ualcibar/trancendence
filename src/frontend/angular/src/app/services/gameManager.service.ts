@@ -230,14 +230,14 @@ export class OnlineMatchInfo{
   removePlayerWithId(id : number) : boolean{
     if (id === undefined)
       return false;
-    const index_to_remove = this.players.findIndex((player) => player?.info.user_id === id);
+    const index_to_remove = this.players.findIndex((player) => player?.info.id === id);
     console.log('removing player:', this.players[index_to_remove])
     this.players[index_to_remove] = undefined;
     return true;
   }
 
   getPlayer(playerId : number) : OnlinePlayer | undefined{
-    return this.players.filter(player => player?.info.user_id === playerId)[0];
+    return this.players.filter(player => player?.info.id === playerId)[0];
   }
 }
 

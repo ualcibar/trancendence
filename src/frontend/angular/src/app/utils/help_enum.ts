@@ -1,6 +1,13 @@
 import { LogFilter, Logger } from "./debug";
 
-export function toEnum<T extends { [key: string]: string }>(enumObj: T, value: any): T[keyof T] | undefined {
+function capitalizeFirst(input: string): string {
+  if (input.length === 0) return input; // Handle empty string
+  return input[0].toUpperCase() + input.slice(1).toLowerCase();
+}
+
+
+export function toEnum<T extends { [key: string]: string }>(enumObj: T, value: string): T[keyof T] | undefined {
+  value = capitalizeFirst(value) 
   if (Object.values(enumObj).includes(value)) {
     return value as T[keyof T];
   }

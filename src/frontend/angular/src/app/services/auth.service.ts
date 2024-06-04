@@ -6,44 +6,100 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LogFilter, Logger } from '../utils/debug';
 import { State } from '../utils/state';
+import { toEnum } from '../utils/help_enum';
+
+export interface LighUserInfoI{
+  id : number;
+  username : string;
+  status : string;
+}
 
 export class LightUserInfo{
-  user_id : number;
+  id : number;
   username : string;
-  online : boolean;
-  constructor (username : string, user_id : number, online : boolean){
+  status : UserStatus;
+  constructor (username : string, id : number, status : UserStatus){
     this.username = username;
-    this.user_id = user_id;
-    this.online = online;
+    this.id = id;
+    this.status = status;
+  }
+  static fromI(values : LighUserInfoI){
+    const status = toEnum(UserStatus, values.status);
+    if (!status)
+      return undefined
+    return new LightUserInfo(values.username, values.id, status)
   }
 }
 
-export class UserInfo{
-  user_id : number;
-  username : string;
-  online : boolean;
+export interface UserInfoI extends LighUserInfoI{  
   color : string;
   wins : number;
   loses : number;
-  constructor (username : string, user_id : number, online : boolean, color : string,wins:number ,loses:number){
+}
+
+enum UserStatus{
+  Connected = 'Connected',
+  Disconnected = 'Disconnected',
+  JoiningGame = 'JoiningGame',
+  InGame = 'InGame',
+}
+
+export class UserInfo{
+  id : number;
+  username : string;
+  status : string;
+  color : string;
+  wins : number;
+  loses : number;
+  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number){
     this.username = username;
-    this.user_id = user_id;
-    this.online = online;
+    this.id = user_id;
+    this.status = status;
     this.color = color;
     this.wins = wins;
     this.loses = loses;
   }
+  static fromI(values : UserInfoI) : UserInfo | undefined{
+    console.log('status', values.status)
+    const status = toEnum(UserStatus, values.status);
+    if (!status){
+      console.error('user info: fromI: failed to parse status enum:', values.status)
+      return undefined
+    }
+    return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses)
+  }
 }
+export interface PrivateUserInfoI{ 
+  info : UserInfo;
+  friends : UserInfoI[];
+  language : string;
+  email : string;
+}
+
 export class PrivateUserInfo{
   info : UserInfo;
   friends : UserInfo[];
   language : string;
-  gmail : string;
-  constructor (info : UserInfo, friends : UserInfo[], laeguage : string, gmail : string){
+  email : string;
+  constructor (info : UserInfo, friends : UserInfo[], language : string, email : string){
     this.info = info;
     this.friends = friends;
-    this.gmail = gmail;
-    this.language = laeguage;
+    this.email = email;
+    this.language = language;
+  }
+  static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
+    
+    const friends : UserInfo[] = [];
+    for (const friend of values.friends){
+      const info = UserInfo.fromI(friend)
+      if (!info)
+        return undefined
+      friends.push(info)
+    }
+    const userInfo = UserInfo.fromI(values.info)
+    if (!userInfo)
+      return undefined
+    return new PrivateUserInfo(userInfo, friends, values.language, values.email )
   }
 }
 
@@ -58,9 +114,8 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
     this._userInfo = new State<PrivateUserInfo | undefined>(undefined);
-    console.log('start info', this._userInfo)
     this.refreshToken()
-    console.log('start info', this._userInfo)
+  
   }
 
   get amIloggedIn() : boolean{
@@ -87,7 +142,11 @@ export class AuthService {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
-        this._userInfo.setValue(response.privateUserInfo);
+        console.log('auth log1', response.privateUserInfo)
+        console.log('auth log2', PrivateUserInfo.fromI(response.privateUserInfo))
+        console.log('status type', typeof PrivateUserInfo.fromI(response.privateUserInfo)?.info.status)
+        console.log('status should be', typeof UserStatus.Connected)
+        this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
       },
       error: () => {
         this._userInfo.setValue(undefined)
@@ -99,7 +158,7 @@ export class AuthService {
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const backendURL = `api/polls/friends/${this.userInfo!.info.user_id}/`;
+    const backendURL = `api/polls/friends/${this.userInfo!.info.id}/`;
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
         this.logger.info('response friend list', response);
@@ -115,7 +174,7 @@ export class AuthService {
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const backendURL = `api/polls/friends/${this.userInfo!.info.user_id}/`;
+    const backendURL = `api/polls/friends/${this.userInfo!.info.id}/`;
     const jsonToSend = {
       usernames : ['nice']
     };
@@ -271,7 +330,7 @@ export class AuthService {
   }
   async setUserConfig(type: string, value: string): Promise<void> {
     if (this.userInfo) {
-      const backendURL = '/api/polls/setConfig/' + this.userInfo.info.user_id;
+      const backendURL = '/api/polls/setConfig/' + this.userInfo.info.id;
       const httpReqBody = { [type]: value };
       const httpHeader = {
         headers: new HttpHeaders({
