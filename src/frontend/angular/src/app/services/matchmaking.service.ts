@@ -130,6 +130,7 @@ export class OnlinePlayer{
     this.state.setValue(state);
   }
   static fromI(values : OnlinePlayerI) : OnlinePlayer | undefined{
+    console.log('fromI online values:', values);
     const state = toEnum(OnlinePlayerState, values.state);
     console.log('online state', state)
     if (!state){
@@ -445,18 +446,25 @@ export class MatchmakingService implements MatchSync{
               for (let i = 0; i < dataPlayers.length;i++) {
                 if (dataPlayers[i] !== null){
                   const player = OnlinePlayer.fromI(dataPlayers[i]!)
-                  if (!player){
+                  console.log('player',player)
+                  if (!player || !player.info || !(player.info instanceof UserInfo)){
                     this.logger.error('join match result: failed to parse player')
                     this.sendCancelJoinMatch()
                     this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-                    return;   
+                    return; 
                   }
-                  players[i] = player;  
+                  players[i] = player;
                 }
-
+              }
+              const host = UserInfo.fromI(data.match.host)
+              if (!host){
+                this.logger.error('join match result: failed to parse host')
+                this.sendCancelJoinMatch()
+                this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
+                return; 
               }
               console.log('next', players)
-              const info = new OnlineMatchInfo(onlineMatchSettings, data.match.host,players)
+              const info = new OnlineMatchInfo(onlineMatchSettings, host,players)
               const manager = this.gameManager.createOnlineMatch(info, mapSettings, false, this, OnlineMatchState.Connecting);
               this.maxCurrentPeerConnections = data.match.max_players - 1;
 

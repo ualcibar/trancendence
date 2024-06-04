@@ -7,7 +7,7 @@ function capitalizeFirst(input: string): string {
 
 
 export function toEnum<T extends { [key: string]: string }>(enumObj: T, value: string): T[keyof T] | undefined {
-  value = capitalizeFirst(value) 
+  //value = capitalizeFirst(value) 
   if (Object.values(enumObj).includes(value)) {
     return value as T[keyof T];
   }
