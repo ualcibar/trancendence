@@ -573,6 +573,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   @Input() matchSettings!: MatchSettings;
   @Input() update!: MatchUpdate;
 
+  paused : boolean = false;
+
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
   configStateSubscription!: Subscription;
@@ -738,6 +740,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
 
+    if (key.isPressed('p')) {
+      this.paused = !this.paused;
+    }
+
     let before = Date.now()
     this.logic(timeDifference);
     let after = Date.now();
@@ -754,7 +760,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   logic(timeDifference : number){
-    this.update.runTickBehaviour(timeDifference);
+    console.log('pausing', this.paused); 
+    if (!this.paused)
+      this.update.runTickBehaviour(timeDifference);
     this.allColisions();
     //this.checkAI();
     this.updateScene();
