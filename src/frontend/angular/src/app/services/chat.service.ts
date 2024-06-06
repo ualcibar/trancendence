@@ -130,9 +130,7 @@ export class ChatService {
     return this.webSocket?.readyState === WebSocket.OPEN;
   }
   isClosed(): boolean{
-    if (this.webSocket === undefined)
-      return true
-    return this.webSocket.readyState === WebSocket.CLOSED;
+    return this.webSocket === undefined || this.webSocket.readyState === WebSocket.CLOSED;
   }
 
   getKeys() : string[]{

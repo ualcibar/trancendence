@@ -18,8 +18,15 @@ class MatchPreviewSerializer(serializers.ModelSerializer):
         return players
     
 
-class PlayerSerializer(serializers.ModelSerializer):
-    info = UserInfoSerializer(source='user')
+class PlayerSerializer(serializers.ModelSerializer): 
+    username = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
     class Meta:
         model = Player
-        fields = ('info', 'state')
+        fields = ('username', 'id', 'state')
+   
+    def get_username(self, obj):
+        return obj.user.username
+
+    def get_id(self, obj):
+        return obj.user.id

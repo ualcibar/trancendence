@@ -43,7 +43,6 @@ export class LobbyMatchComponent {
           this.lobby = info;
           console.log('lobby', this.lobby)
           console.log('important', this.lobby.players)
-          console.log('player', this.lobby.players[0])
           this.state = LobbyMatchState.Ok
           break;
         case MatchmakingState.StandBy:

@@ -1,5 +1,4 @@
 <div class="mx-auto px-4">
-	<h1 class="text-white">{{lobby.onlineSettings.matchSettings.teamSize}}</h1>
 	<div *ngIf="state === LobbyMatchState.Ok">
 		<h1 class="text-white text-4xl mb-8 text-center">Searching for a players...</h1>
 		<div class="flex items-center">
@@ -17,7 +16,7 @@
 							<span class="visually-hidden">Searching for player...</span>
 						</div>
 						<div *ngIf="player !== undefined" class="text-secondary" role="status">
-							<h1 class="text-white text-4xl flex-grow text-center">{{ player.info.username }}</h1>
+							<h1 class="text-white text-4xl flex-grow text-center">{{ player.username}} {{i}}</h1>
 						</div>
 					</div>
 				</div>
@@ -31,7 +30,7 @@
 							<span class="visually-hidden">Searching for player...</span>
 						</div>
 						<div *ngIf="player !== undefined" class="text-secondary" role="status">
-							<h1 class="text-white text-4xl flex-grow text-center">{{ player.info.username }}</h1>
+							<h1 class="text-white text-4xl flex-grow text-center">{{ player.username }}</h1>
 						</div>
 					</div>
 				</div>

@@ -211,18 +211,18 @@ export class OnlineMatchInfo{
     else
       this.players = new Array<OnlinePlayer | undefined>(this.onlineSettings.matchSettings.teamSize * 2 - 1).fill(undefined);
   }
-  addPlayer(newPlayer : UserInfo, state : OnlinePlayerState, index : number) : boolean{
+  addPlayer(username: string, id : number, state : OnlinePlayerState, index : number) : boolean{
     if (this.players.length == 2 * this.onlineSettings.matchSettings.teamSize){
       return false;
     }
-    this.players[index] = new OnlinePlayer(newPlayer, state);
+    this.players[index] = new OnlinePlayer(username, id, state);
     return true;
   }
 
   removePlayer(username : string) : boolean{
     if (username === undefined)
       return false;
-    const index_to_remove = this.players.findIndex((player) => player?.info.username === username);
+    const index_to_remove = this.players.findIndex((player) => player?.username === username);
     console.log('removing player:', this.players[index_to_remove])
     this.players[index_to_remove] = undefined;
     return true;
@@ -230,14 +230,14 @@ export class OnlineMatchInfo{
   removePlayerWithId(id : number) : boolean{
     if (id === undefined)
       return false;
-    const index_to_remove = this.players.findIndex((player) => player?.info.id === id);
+    const index_to_remove = this.players.findIndex((player) => player?.id === id);
     console.log('removing player:', this.players[index_to_remove])
     this.players[index_to_remove] = undefined;
     return true;
   }
 
   getPlayer(playerId : number) : OnlinePlayer | undefined{
-    return this.players.filter(player => player?.info.id === playerId)[0];
+    return this.players.filter(player => player?.id === playerId)[0];
   }
 }
 
@@ -816,9 +816,9 @@ export class OnlineMatchManager implements Manager, OnlineManager{
   }
 
 
-  addPlayer(player : UserInfo, index : number){
+  addPlayer(username: string, id : number, index : number){
     //if (this.amIHost)
-      this.info.addPlayer(player, OnlinePlayerState.Connecting, index);
+      this.info.addPlayer(username, id, OnlinePlayerState.Connecting, index);
   }
 
   getPlayer(id : number) : OnlinePlayer | undefined{
@@ -968,9 +968,9 @@ export class GameManagerService implements Manager{
     return manager;
   }
 
-  onlineAddPlayer(info : UserInfo, index : number){
+  onlineAddPlayer(username : string, id : number, index : number){
     if (this.currentManager instanceof OnlineMatchManager)
-      this.currentManager.addPlayer(info, index);
+      this.currentManager.addPlayer(username, id, index);
   }
 
   getMapSettings(): MapSettings {
