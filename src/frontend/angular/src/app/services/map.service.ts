@@ -185,8 +185,7 @@ export class MapSettings{
                           PaddleState.Binded,
                           manager);
       paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]));
-      paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key('w','s')))
-                .bindTick(createTickMove(paddles[i]))
+      paddles[i].bindTick(createTickMove(paddles[i]))
     }
     const balls : Ball[] = new Array<Ball>(1);
     balls[0] = new Ball(this.ballInitDir,

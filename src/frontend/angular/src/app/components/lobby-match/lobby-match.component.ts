@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { MatchMakingState, MatchmakingService } from '../../services/matchmaking.service';
 import { AuthService, UserInfo } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { MatchmakingState, StateService } from '../../services/stateService';
+import { OnlineMatchInfo } from '../../services/gameManager.service';
 
 enum LobbyMatchState {
   Error,
@@ -17,40 +19,38 @@ enum LobbyMatchState {
   styleUrl: './lobby-match.component.css'
 })
 export class LobbyMatchComponent {
-  team_a: (UserInfo| undefined)[] = [];
-  team_b: (UserInfo| undefined)[] = [];
+  //team_a: (UserInfo| undefined)[] = [];
+  //team_b: (UserInfo| undefined)[] = [];
+  lobby! : OnlineMatchInfo;
   state: LobbyMatchState;
-  LobbyMatchState = LobbyMatchState;
-  MatchMakingState = MatchMakingState;
-  constructor(private matchmaking: MatchmakingService) {
-    if (matchmaking.state.getCurrentValue() !== MatchMakingState.OnGame){
-      this.state = LobbyMatchState.Error;
-      console.error('matchmaking state is not connecting')
-    }
-    else{
-      this.state = LobbyMatchState.Ok
-      const info = this.matchmaking.getOnlineMatchInfo();
-      if (!info){
-        this.state = LobbyMatchState.Waiting;
-        return;
-      }
-      this.team_a = new Array(info.onlineSettings.matchSettings.teamSize).fill(undefined);
-      this.team_b = new Array(info.onlineSettings.matchSettings.teamSize).fill(undefined);
-      this.team_a[0] = info.host;
-      let player_index = 0;
-      for (let i = 1; i < info.onlineSettings.matchSettings.teamSize; i++) {
-        this.team_a[i] = info.players[player_index].info;
-        player_index++;
-      }
-      for (let i = 0; i < info.onlineSettings.matchSettings.teamSize; i++) {
-        if (info.players.length < i)
-          this.team_b[i] = info.players[player_index].info;
-        else
-          this.team_b[i] = undefined;
-        player_index++;
-      }
-    }
-  }
 
+  LobbyMatchState = LobbyMatchState;
+  MatchmakingState = MatchmakingState;
+  constructor(private matchmaking: MatchmakingService, state : StateService) {
+    this.state = LobbyMatchState.Waiting;
+    state.matchmakingState$.subscribe(state => {
+      switch (state) {
+        case MatchmakingState.Disconnected:
+          this.state = LobbyMatchState.Error
+          console.error('lobby match: should never reach here with matchmaking state disconnected')
+          break;
+        case MatchmakingState.InGame:
+          const info = this.matchmaking.getOnlineMatchInfo();
+          if (!info) {
+            this.state = LobbyMatchState.Waiting;
+            return;
+          }
+          this.lobby = info;
+          console.log('lobby', this.lobby)
+          console.log('important', this.lobby.players)
+          this.state = LobbyMatchState.Ok
+          break;
+        case MatchmakingState.StandBy:
+          this.state = LobbyMatchState.Error
+          console.error('lobby match: should never reach here with matchmaking state standby')
+          break;
+      }
+    })
+  }
 }
 

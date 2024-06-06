@@ -7,7 +7,7 @@
 	<div class="settings-tab container-fluid d-flex justify-content-center align-items-center">
 		<div class="static mx-auto col-12 col-md-6">
 			<div class="flex items-center mb-2">
-				<a routerLink="/profile/{{authService.user_info?.user_id}}">
+				<a routerLink="/profile/{{authService.userInfo!.info.id}}">
 					<button type="button" class="mr-2 btn btn-warning rounded-full"><i class="text-xl bi bi-arrow-left"></i> {{'return'|translate}}</button>
 				</a>
 				<h2 class="text-2xl text-sp-text font-bold">{{'settings_title'|translate}}</h2>

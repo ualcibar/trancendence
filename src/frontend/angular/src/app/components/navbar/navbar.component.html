@@ -14,17 +14,7 @@
 				{{'play'|translate}}
 			</button></a>
 		<div class="flex items-center">
-			<a routerLink="/test">
-					<button type="button"
-						class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-						Test	
-					</button></a>
-			<a routerLink="/settings">
-					<button type="button"
-					class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-					Lol	
-				</button></a>
-			<div *ngIf="!(authService.isLoggedIn$ | async)">
+			<div *ngIf="!(authService.userInfo$ | async)">
 				<a routerLink="/login">
 					<button type="button"
 						class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
@@ -36,12 +26,12 @@
 						{{'profile_register'|translate}}
 					</button></a>
 			</div>
-			<div *ngIf="authService.isLoggedIn$ | async">
+			<div *ngIf="authService.userInfo$ | async">
 				<div *ngIf="loading; else userProfile">
 					<div class="spinner-border text-warning" role="status"></div>
 				</div>
 				<ng-template #userProfile>
-					<a routerLink="/profile/{{authService.user_info?.user_id}}">
+					<a routerLink="/profile/{{authService.userInfo!.info.id}}">
 						<button type="button"
 							class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
 							{{'settings_tab_title_pro'|translate}}

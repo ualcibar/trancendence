@@ -1,8 +1,7 @@
-import { Injectable } from "@angular/core";
 import { State } from "../utils/state";
 import { Observable, Subject, Subscription } from "rxjs";
 import { LogFilter, Logger } from "../utils/debug";
-import { BooleanKeyframeTrack } from "three";
+import { Injectable } from "@angular/core";
 export enum HomeState {
   Home,
   SearchingOnlineGame,
@@ -11,7 +10,7 @@ export enum HomeState {
   MatchGenerator,
   TournamentGenerator,
   OnlineMatchGenerator,
-  TournamentTree,
+  //TournamentTree,
 }
 
 export enum MatchmakingState{
@@ -162,7 +161,7 @@ class HomeRenderManager{//manages wether they are active or not
                     this.states.update(wantRender);
                     break;
                 }
-                case HomeState.TournamentTree: {
+                /*case HomeState.TournamentTree: {
                     const wantRender = this.createActiveArray()
                     wantRender[tournamentTree] = true;
                     wantRender[chat] = this.active.chat;
@@ -170,7 +169,7 @@ class HomeRenderManager{//manages wether they are active or not
                         console.error('state service: home switch: map length error');
                     this.states.update(wantRender);
                     break;
-                }
+                }*/
                 case HomeState.SearchingOnlineGame: {
                     const wantRender = this.createActiveArray()
                     wantRender[onlineMatchSearch] = true;
@@ -204,23 +203,27 @@ class HomeRenderManager{//manages wether they are active or not
             }    
         })
         matchmakingState$.subscribe(state => {
+            const wantRender = this.createActiveArray()
             switch (state){
                 case MatchmakingState.StandBy:
                     this.active.matchmaking = true;
+                    wantRender[multiplayer] = this.active.matchmaking;
+                    wantRender[local] = true;
                     break;
                 case MatchmakingState.InGame:
                     this.active.matchmaking = true;
+                    wantRender[joiningOnlineMatch] = true;
                     break;
                 case MatchmakingState.Disconnected:
                     this.active.matchmaking = false;
+                    wantRender[multiplayer] = this.active.matchmaking;
+                    wantRender[local] = true;
+                    break;
             }
-            if (!this.renderingBlock){
-                const wantRender = this.createActiveArray()
-                wantRender[multiplayer] = this.active.matchmaking;
+            //if (!this.renderingBlock){
                 wantRender[chat] = this.active.chat;
-                wantRender[local] = true;
                 this.states.update(wantRender);
-            }
+            //}
         })
         chatState$.subscribe(state => {
             switch (state){
@@ -253,6 +256,9 @@ class HomeRenderManager{//manages wether they are active or not
     }
 }
 
+@Injectable({
+  providedIn: 'root'
+})
 export class StateService {
     private _homeState : State<HomeState>;
     private _matchmakingState : State<MatchmakingState>;

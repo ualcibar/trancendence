@@ -18,8 +18,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .authenticate import CustomAuthentication
-from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer
-from .models import CustomUser, Game, Tournament, CustomUserManager
+from .serializers import UserInfoSerializer, LightUserInfoSerializer, PrivateUserInfoSerializer
+from .models import CustomUser, CustomUserManager
 
 import requests
 import json
@@ -56,28 +56,17 @@ def getInfo(request, user_id=None):
 
     if user_id is not None:
         try:
-            user = CustomUser.objects.get(id=user_id)
+            response = Response({'userInfo' : UserInfoSerializer(CustomUser.objects.get(id=user_id)).data})
         except CustomUser.DoesNotExist:
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     else:
         try:
-            user = CustomUser.objects.get(username=request.user.username)
+            response = Response({'privateUserInfo' : PrivateUserInfoSerializer(request.user).data})
         except CustomUser.DoesNotExist:
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
-
-    return JsonResponse({
-        'username': user.username,
-        'email': user.email,
-        'userid': user.id,
-        'status': user.status,
-        'total': user.total,
-        'wins': user.wins,
-        'defeats': user.loses,
-        'status': user.status,
-        'color': user.user_color,
-        'language': user.user_language,
-        }, status=200)
+    response.status = 200
+    return response
 
 @api_view(['POST'])
 def loginWith42Token(request):
@@ -101,7 +90,10 @@ def loginWith42Token(request):
         return JsonResponse({'message': 'failed to get me info'}, status=500)
     logger.debug(f"\tcontent = {response42.json()}")
     response42Json = response42.json()
-    user = CustomUser.objects.get(is_42_user=True, id42=response42Json['id'])
+    try:
+        user = CustomUser.objects.get(is_42_user=True, id42=response42Json['id'])
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'This user does not exist!'}, status=404)
     response = Response()
     if user is not None:
         if user.is_active:
@@ -117,7 +109,7 @@ def loginWith42Token(request):
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
             )
             # csrf.get_token(request)
-            response.data = {"Success": "Login successfully", "data": data}
+            response.data = {"Success": "Login successfully", "data": data, 'privateUserInfo' : PrivateUserInfoSerializer(user).data}
             return response
         else:
             return Response({"No active": "This account is not active!"}, status=status.HTTP_404_NOT_FOUND)
@@ -186,8 +178,8 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This username already exists!'}, status=400)
         else:
             return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=500)
-
-    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields}, status=201)
+    privateUserInfo = PrivateUserInfoSerializer(user)
+    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields, 'privateUserInfo' : privateUserInfo.data}, status=201)
 
 @api_view(['POST'])
 def logout(request):
@@ -204,8 +196,12 @@ def register(request):
     password = data.get('password', '')
     email = data.get('email', '')
     if username and password and email:
-        user = CustomUser.objects.create_user(
-            username=username, email=email, password=password)
+        try:
+            user = CustomUser.objects.create_user(
+                username=username, email=email, password=password)
+        except Exception as e:
+            return JsonResponse({'reason': 'Failed to create user!'}, status=400)
+
         fernet_obj = mail.generateFernetObj()
         token_url = mail.generate_token()
         mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
@@ -252,11 +248,11 @@ def get_tokens_for_user(user):
 def login(request):
         logger.debug('login request received')
         data = request.data
-        response = Response()
         username = data.get('username', None)
         password = data.get('password', None)
         user = authenticate(username=username, password=password)
-
+        privateUserInfo = PrivateUserInfoSerializer(user).data
+        response = JsonResponse({'privateUserInfo' : privateUserInfo})
         if user is not None:
             if user.is_active:
                 refresh = RefreshToken.for_user(user)
@@ -276,17 +272,11 @@ def login(request):
                     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
-                # csrf.get_token(request)
-
-                try:
-                    customUser = CustomUser.objects.get(username=username)
-                except CustomUser.DoesNotExist:
-                    return JsonResponse({'message': 'This user does not exist!'}, status=404)
-                
-                response.data = {"Success": "Login successfully", "data": data}
+                # csrf.get_token(request) 
                 token_TwoFA = mail.generate_random_verification_code(6)
-                logger.debug(f"QUE ES ESTOOOoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO {customUser.email}")
-                mail.send_TwoFA_mail(token_TwoFA, customUser.email)
+                logger.debug(f"QUE ES ESTOOOoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO {user.email}")
+                mail.send_TwoFA_mail(token_TwoFA, user.email)
+                response.status = 200
                 return response
             else:
                 return Response({"message": "This account is not active!"}, status=500)
@@ -299,7 +289,7 @@ class CustomUserView(APIView):
             usuario = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CustomUserSerializer(usuario)
+        serializer = UserInfoSerializer(usuario)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class GameHistoryView(APIView):
@@ -308,10 +298,11 @@ class GameHistoryView(APIView):
         player2_games = Game.objects.filter(player2_id=user_id)
 
         all_games = player1_games | player2_games
-        serialized_games = GameSerializer(all_games, many = True)
-        return Response(serialized_games, status=status.HTTP_200_OK)
+        #serialized_games = GameSerializer(all_games, many = True)
+        return Response(None, status=status.HTTP_200_OK)
     
     def post(self, request):
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
         serializer = GameSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -322,7 +313,7 @@ class FriendsListView(APIView):
     def get(self, request, user_id):
         user = CustomUser.objects.get(id=user_id)
         friends = user.friends.all()
-        serializer = CustomUserSerializer(friends, many=True)
+        serializer = UserInfoSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, user_id):
@@ -339,7 +330,7 @@ class FriendsListView(APIView):
                 return Response({"error": "no matching users"}, status=status.HTTP_400_BAD_REQUEST)
             user.friends.add(ids)
             friends = user.friends.all()
-            serializer = CustomUserSerializer(friends, many=True)
+            serializer = UserInfoSerializer(friends, many=True)
             return Response({"message": "Friends added successfully", "friends" : serializer.data}, status=status.HTTP_201_CREATED)
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)

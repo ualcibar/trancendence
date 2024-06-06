@@ -1,12 +1,18 @@
 import { LogFilter, Logger } from "./debug";
 
-export function toEnum<T extends { [key: string]: string }>(enumObj: T, value: any): T[keyof T] | undefined {
+function capitalizeFirst(input: string): string {
+  if (input.length === 0) return input; // Handle empty string
+  return input[0].toUpperCase() + input.slice(1).toLowerCase();
+}
+
+
+export function toEnum<T extends { [key: string]: string }>(enumObj: T, value: string): T[keyof T] | undefined {
+  //value = capitalizeFirst(value) 
   if (Object.values(enumObj).includes(value)) {
     return value as T[keyof T];
   }
   return undefined;
 }
-
 export function getNextEnumValue<T extends { [s: string]: T[keyof T]; }>(enumObj: T, currentValue: T[keyof T]): T[keyof T] | undefined{
     const values = Object.values(enumObj) as T[keyof T][];
     const currentIndex = values.indexOf(currentValue);

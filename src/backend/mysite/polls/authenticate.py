@@ -7,12 +7,12 @@ from channels.generic.websocket import WebsocketConsumer
 
 import logging
 
-logger = logging.getLogger('polls')
+logger = logging.getLogger('std')
 
 
 class CustomAuthentication(JWTAuthentication):
     def authenticate(self, request):
-        #logger.debug('custom authentication class is being used')
+        logger.debug('custom authentication class is being used')
         if request is None:
             return None
         #logger.debug('custom authentication class request exists')
