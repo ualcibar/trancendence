@@ -23,7 +23,7 @@ class MapSettingsCreateInfo{
   public topLimit : number = this.dimmensions.height / 2;
   public bottomLimit : number = - this.dimmensions.height / 2;
 
-  public defaultLightingIsOn  : boolean = true;
+  public defaultLightingIsOn  : boolean = false;
   public defaultlightColor : number = colorPalette.white;
   // Light position
   public defaultLightIntensity : number = 3;
@@ -123,21 +123,21 @@ class MapSettingsCreateInfo{
       // Additional lights
       const additionalLights : THREE.Light[] = [];
       {
-        const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity / 10);
-        additionalLights.push(light);
+        const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity /10);
+        settings.additionalLights.push(light);
       }
       // Additional lights
       {
         const red = 0xFF0000;
         const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity);
-        light.position.set(1, 0, 0);
+        light.position.set(1, 0.1, 0);
         settings.additionalLights.push(light);
       }
       // Additional lights
       {
         const blue = 0x0000FF;
         const light = new THREE.DirectionalLight(blue , settings.defaultLightIntensity);
-        light.position.set(-1, 0, 0);
+        light.position.set(-1, -0.1, 0);
         settings.additionalLights.push(light);
       }
       console.log("additional lights", this.additionalLights)
@@ -237,7 +237,7 @@ export class MapSettings{
       // }
       // emmm
       paddles[i].bindEvent(createEventIAprediction(paddles[i]));
-      console.log("estoy con jose",paddles[i].upKey, paddles[i].downKey);
+      // console.log("estoy con jose",paddles[i].upKey, paddles[i].downKey);
     }
     const balls : Ball[] = new Array<Ball>(1);
     balls[0] = new Ball(this, manager);

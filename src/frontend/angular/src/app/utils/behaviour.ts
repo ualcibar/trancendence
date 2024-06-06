@@ -163,7 +163,7 @@ export function createEventPaddleColision<T extends EventObject & Dimmensions & 
 		const ball: Ball = data.custom.gameObjects.ball;
 		const intersection: { pos: Vector2, normal: Vector2 } = data.custom.others.intersection;
 
-		if (intersection.normal.x < 0 && ball.dir.x < 0)
+		if (intersection.normal.x < 0 && ball.dir.x < 0)// not reaally a colision then???
 			return;
 		if (intersection.normal.x > 0 && ball.dir.x > 0)
 			return;
@@ -228,7 +228,6 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 				console.log('paddle pos', paddle.pos);
 				prediction = update.getAiPrediction(paddle);
 			}
-			console.log('prediction', prediction);
 			paddle.handleIA(prediction);
 		}
 	}
