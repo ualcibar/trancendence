@@ -147,12 +147,26 @@ class MapSettingsCreateInfo{
 
   createInfernoAdditionalLights(): THREE.Light[] {  
     const settings = this;
+    //ambient light
+    {
+      const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity /15);
+      settings.additionalLights.push(light);
+    }
     // Infernal lights
     const additionalLights : THREE.Light[] = [];
     {
       const red = 0xFF0000;
       const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity * 50);
       light.position.set(1, 0.1, 0);
+      settings.additionalLights.push(light);
+    }
+    // fire lights
+    {
+      const fire = 0xFFA500;
+      const light = new THREE.PointLight(fire , settings.defaultLightIntensity * 50);
+      const light2 = new THREE.PointLight(fire , settings.defaultLightIntensity * 50);
+      light.position.set(-1.5, 0, 0.1);
+      light2.position.set(-1.5, 0, -0.1);
       settings.additionalLights.push(light);
     }
     return settings.additionalLights;
@@ -203,7 +217,7 @@ export class MapSettings{
   public readonly paddleDepth! : number;
   public readonly paddleColor! : number;
   public readonly paddleType! : BlockType;
-  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Bot];
+  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
 
   public readonly paddleUpKey : string[] = ['w','o'];
   public readonly paddleDownKey : string[] = ['s','l'];
@@ -296,12 +310,17 @@ export class MapsService {
 
     initMaps() {
         const defaultInfo = new MapSettingsCreateInfo();
-        // defaultInfo.ballInitSpeed = 1;
-        // defaultInfo.additionalLights = defaultInfo.createDefaultAdditionalLights();
-        // const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
-        // this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
+        defaultInfo.ballInitSpeed = 1;
+        defaultInfo.additionalLights = defaultInfo.createDefaultAdditionalLights();
+        const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
+        this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
         const infernoInfo = new MapSettingsCreateInfo();
-        infernoInfo.ballInitSpeed = 2;
+        infernoInfo.ballInitSpeed = defaultInfo.ballInitSpeed * 2;
+        infernoInfo.ballColor = colorPalette.roseGarden;
+        infernoInfo.ballLightColor = colorPalette.roseGarden;
+        infernoInfo.ballLightIntensity = 2;
+        infernoInfo.paddleSpeed = defaultInfo.paddleSpeed * 2;
+        // infernoInfo.ballInitDir = new Vector2(Math.random() * Math.PI / 16,0);
         infernoInfo.additionalLights = infernoInfo.createInfernoAdditionalLights();
 
         this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, defaultInfo.createDefaultWalls(this.manager)));
