@@ -1,17 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
-from gdpr_assist import register
-from gdpr_assist.deletion import ANONYMISE
-from gdpr_assist.signals import pre_anonymise
-
-import uuid
-
 import logging
 logger = logging.getLogger('std')
-
-class CustomUserPrivacyMeta:
-    fields = ["username", "email"]
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password, **extra_fields):
@@ -66,6 +57,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # install pyllow to make it work
 
     email = models.EmailField(max_length=254, unique=True, blank=False, null=True)
+    is_anonymized = models.BooleanField(default=False, null=False)
+    anonymized_at = models.DateTimeField(null=True, blank=True)
 
     game_room_name = models.CharField(max_length=255, default=None, null=True) 
     game = models.ForeignKey('matchmaking.MatchPreview', default=None, null=True, on_delete=models.SET_NULL) 
@@ -146,12 +139,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
-
-    class PrivacyMeta:
-        fields = ["username","email"]
-        search_fields = ["email"]
-
-register(CustomUser, CustomUserPrivacyMeta, gdpr_default_manager_name="objects")
 
 '''
 class MatchState(models.Model):

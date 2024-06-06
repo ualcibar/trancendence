@@ -10,6 +10,8 @@ from django.contrib.auth import authenticate
 
 from django.middleware import csrf
 
+from django.utils import timezone
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -24,6 +26,8 @@ from .models import CustomUser, Game, Tournament, CustomUserManager
 import requests
 import json
 import logging
+import uuid
+import hashlib
 from . import mail
 
 logger = logging.getLogger('std')
@@ -190,10 +194,18 @@ def setUserConfig(request, user_id=None):
                 user.set_password(value)
                 logger.debug(f"Actualizada la key {key}")
             if key == 'anonymise':
-                user.anonymise()
-                logger.debug(f"Actualizada la key {key}")
-                updated_fields.append(key)
-                break
+                if not user.is_anonymized:
+                    random_str = str(uuid.uuid4())
+                    hashed_username = hashlib.md5(random_str.encode()).hexdigest()[:8]
+                    user.username = f"user_{hashed_username}"
+                    user.email = f"{user.username}@spacepong.me"
+
+                    user.is_anonymized = True
+                    user.anonymized_at = timezone.now()
+                    logger.debug(f"Actualizada la key {key}")
+                    updated_fields.append(key)
+                else:
+                    logger.debug(f"El usuario ya está anonimizado")
             else:
                 setattr(user, key, value)
                 updated_fields.append(key)

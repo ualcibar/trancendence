@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    'gdpr_assist',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -106,16 +105,7 @@ DATABASES = {
         'HOST': 'postgre',
         'PORT': '5432',
     },
-    'gdpr_log': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'postgre',
-        'PORT': '5432',
-    },
 }
-DATABASE_ROUTERS = ['gdpr_assist.routers.EventLogRouter']
 
 # CORS
 CORS_ALLOW_CREDENTIALS = True
