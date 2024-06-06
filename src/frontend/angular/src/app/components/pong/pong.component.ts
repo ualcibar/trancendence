@@ -741,6 +741,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     this.lastUpdate += timeDifference;
 
     if (key.isPressed('p')) {
+      console.log('pausing');
       this.paused = !this.paused;
     }
 

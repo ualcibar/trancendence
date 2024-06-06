@@ -99,6 +99,7 @@ export class MatchSettings{//no matter what map this settings are always applica
       this.maxTimeRoundSec = maxTimeRoundSec;
       this.roundsToWin = roundsToWin;
       this.teamSize = teamSize;
+      console.log('mapname', mapName);
       this.mapName = mapName;
   }
 }

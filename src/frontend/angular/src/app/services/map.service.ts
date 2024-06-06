@@ -144,6 +144,19 @@ class MapSettingsCreateInfo{
 
       return settings.additionalLights;
   }
+
+  createInfernoAdditionalLights(): THREE.Light[] {  
+    const settings = this;
+    // Infernal lights
+    const additionalLights : THREE.Light[] = [];
+    {
+      const red = 0xFF0000;
+      const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity * 50);
+      light.position.set(1, 0.1, 0);
+      settings.additionalLights.push(light);
+    }
+    return settings.additionalLights;
+  }
 }
 
 export class MapSettings{
@@ -283,12 +296,15 @@ export class MapsService {
 
     initMaps() {
         const defaultInfo = new MapSettingsCreateInfo();
-        defaultInfo.ballInitSpeed = 1;
-        defaultInfo.additionalLights = defaultInfo.createDefaultAdditionalLights();
-        const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
-        this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
+        // defaultInfo.ballInitSpeed = 1;
+        // defaultInfo.additionalLights = defaultInfo.createDefaultAdditionalLights();
+        // const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
+        // this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
         const infernoInfo = new MapSettingsCreateInfo();
-        //this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, defaultInfo.createDefaultWalls(this.manager)));
+        infernoInfo.ballInitSpeed = 2;
+        infernoInfo.additionalLights = infernoInfo.createInfernoAdditionalLights();
+
+        this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, defaultInfo.createDefaultWalls(this.manager)));
     }
     getMapSettings(map: MapsName): MapSettings | undefined {
       return this.maps.get(map);
