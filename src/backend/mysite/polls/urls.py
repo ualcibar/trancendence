@@ -44,6 +44,7 @@ urlpatterns = [
     path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),
     path('player_games/', GameHistoryView.as_view(), name='game_history'), 
     path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'), 
-    path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh') 
+    path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('send_mail/', views.send_mail, name='send_mail')
 ]
 

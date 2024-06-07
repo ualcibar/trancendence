@@ -1,34 +1,40 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { NgClass, CommonModule } from '@angular/common';
 import { SettingsService } from '../../../services/settings.service';
 import { AuthService } from '../../../services/auth.service';
 import { TranslateModule } from '@ngx-translate/core';
-
-/* import { HttpClient, HttpHeaders } from '@angular/common/http';
-import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs'; */
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-settings-p-security',
   standalone: true,
-  imports: [FormsModule, NgClass, TranslateModule],
+  imports: [FormsModule, NgClass, TranslateModule, CommonModule],
   templateUrl: './settings-p-security.component.html',
   styleUrl: './settings-p-security.component.css'
 })
+
 export class SettingsPSecurityComponent {
   email = '';
   currentEmail = '';
   oldPassword = '';
   newPassword = '';
+  entered_token = '';
+  token_2FA = '';
 
   mailChanged = false;
   alreadyUsed = false;
 
   is_2FA_active = false;
+  buttonClicked1 = false;
+  buttonClicked2 = false;
+ 
+
 
   @Input() loaded: boolean = false;
 
-  constructor(/* private http: HttpClient,  */private settingsService: SettingsService, private authService: AuthService) {}
+  
+  constructor(private settingsService: SettingsService, private authService: AuthService, private http: HttpClient) {}
 
   ngOnInit() {
     this.settingsService.userSettingsInfo$.subscribe(data => {
@@ -36,6 +42,7 @@ export class SettingsPSecurityComponent {
         this.email = data.user_email;
         this.currentEmail = this.email;
         this.is_2FA_active = data.user_twofa;
+        this.token_2FA = data.user_tokentwofa;
       }
     })
   }
@@ -74,4 +81,50 @@ export class SettingsPSecurityComponent {
       console.error('❌ Error updating 2FA status:', error);
     }
   }
+
+  async onButtonClick1True() {
+      this.buttonClicked1 = true;
+  }
+
+  async onButtonClick1False() {
+    this.buttonClicked1 = false;
+    this.buttonClicked2 = false;
+  }
+
+  async send_mail(): Promise<void> {
+    console.log('sending a mail here: ', this.email);
+    const backendURL = 'api/polls/send_mail/';
+    const httpReqBody = `currentMail=${this.email}`;
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type': 'application/json'
+      })
+    };
+    this.http.post<any>(backendURL, httpReqBody, httpOptions);
+    this.buttonClicked2 = true;
+  }
+
+  async compareTwoFAToken() {
+    console.log('comparing entered token: ', this.entered_token);
+    console.log('to actual token: ', this.token_2FA);
+    if (this.entered_token == this.token_2FA){
+    //this.saveTwoFAStatus();
+    this.buttonClicked1 = false;
+    }
+    else{
+      console.log('try again ig idk');
+    }
+  }
 }
+
+
+
+
+
+
+  
+
+
+
+
+

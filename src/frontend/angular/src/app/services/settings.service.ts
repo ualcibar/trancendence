@@ -11,14 +11,16 @@ export class UserSettingsInfo extends UserInfo {
   user_color: string;
   user_language: string;
   user_email: string;
+  user_tokentwofa:string;
   user_twofa: boolean;
 
-  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_twofa: boolean) {
+  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_twofa: boolean, user_tokentwofa: string) {
     super(userInfo.username, userInfo.user_id, userInfo.online);
     this.user_color = user_color;
     this.user_language = user_language;
     this.user_email = user_email;
     this.user_twofa = user_twofa;
+    this.user_tokentwofa = user_tokentwofa;
   }
 }
 
@@ -40,7 +42,7 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['twofa']);
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['twofa'], response['tokentwofa']);
           this.userSettingsInfoSubject.next(userSettingsInfo);
         },
         error: () => {
@@ -86,6 +88,7 @@ export class SettingsService {
     if (userSettingsInfoVal) {
       const backendURL = '/api/polls/setConfig/' + userSettingsInfoVal.user_id;
       const httpReqBody = { [type]: value };
+      console.log('httpReqBody', httpReqBody)
       const httpHeader = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json'
@@ -104,3 +107,4 @@ export class SettingsService {
     }
   }
 }
+

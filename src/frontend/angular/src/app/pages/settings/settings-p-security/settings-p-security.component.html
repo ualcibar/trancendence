@@ -20,13 +20,24 @@
         <input [(ngModel)]="newPassword" type="password" name="newPassword2" class="form-control shadow-none" id="floatingInput" required>
         <button class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
     </div>
-
 	<h1 class="font-bold text-2xl"><i class="bi bi-fingerprint"></i> {{'settings_tab_content_2FA'|translate}}</h1>
 	<p class="text-zinc-300">{{'settings_more_2FA'|translate}}</p>
-	<button (click)="saveTwoFAStatus()" class="btn btn-warning btn-sm mt-2"><i class="bi bi-lock-fill"></i> {{'settings_buttom_activate_2FA'|translate}}</button>
-	<!--<div id="sp-div" class="rounded  h-full p-4">
-		<h1 class="font-bold text-2xl"><i class="bi bi-translate"></i> {{'settings_tab_title_2FA'|translate}}</h1>
-		<div class="flex mt-2 mb-4">
-		</div>
-	</div>-->
+	<div *ngIf="buttonClicked1 == false">
+	<button (click)="onButtonClick1True()" class="btn btn-warning btn-sm mt-2"><i class="bi bi-lock-fill"></i> {{'settings_buttom_activate_2FA'|translate}}</button>
+	</div>
+	<div *ngIf="buttonClicked1 == true && buttonClicked2 == false" id="sp-div" class="pl-4 mr-4 mt-2 w-85 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
+		<h1 class="text-300 mt-2"> {{'settings_sure_2FA'|translate}}</h1>
+		<button (click)="send_mail()" class="btn btn-warning btn-sm mt-3 mb-3 mr-3 ml-80"><i class="bi bi-lock-fill"></i> {{'settings_yes_2FA'|translate}}</button>
+		<button (click)="onButtonClick1False()" class="btn btn-warning btn-sm mt-3 mb-3 mr-3"><i class="bi bi-lock-fill"></i> {{'settings_no_2FA'|translate}}</button>
+	</div>
+	<div *ngIf="buttonClicked1 == true && buttonClicked2 == true" id="sp-div" class="pl-4 mr-4 mt-2 w-85 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
+		<div class="text-300 mt-2"> {{'settings_enter_2FA'|translate}}</div>
+		<div class="form-text mt-2"> {{'settings_enter2_2FA'|translate}}</div>
+        <div class="code-input flex">
+			<input [(ngModel)]="entered_token" type="text" name="entered_token" maxlength="6" pattern="\d" class="form-control shadow-none btn-sm mb-3 mr-3" style="max-width: 7rem" id="floatingInput" required>
+        	<button (click)="compareTwoFAToken()" class="btn btn-warning btn-sm ml-3>"><i class="bi bi-floppy-fill"></i></button>
+			<button (click)="onButtonClick1False()" class="btn btn-warning btn-sm ml-3"><i class="bi bi-lock-fill"></i> {{'settings_cancel_2FA'|translate}}</button>
+    	</div>
+	</div>
 </div>
+

@@ -50,5 +50,11 @@
     "settings_tab_content_2FA":"Bi urratseko autentifikazioa",
     "settings_tab_title_2FA":"Bi urratseko autentifikazioa aktibatu",
     "settings_buttom_activate_2FA":"Aktibatu berifikazioa",
-    "settings_more_2FA":"Gehitu segurtasun gehiago zure kontuan 2UB-a aktibatuz"
+    "settings_more_2FA":"Gehitu segurtasun gehiago zure kontuan 2UB-a aktibatuz",
+    "settings_sure_2FA": "Seguru zaude 2UB-a aktibatu nahi duzula?",
+    "settings_enter_2FA": "Email bat bidali da zure kontu pertsonalera kode batekin, Begiratu!",
+    "settings_enter2_2FA": "Kodea sartu:",
+    "settings_yes_2FA": "Bai",
+    "settings_no_2FA": "Ez",
+    "settings_cancel_2FA": "Utzi"
 }

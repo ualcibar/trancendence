@@ -52,5 +52,11 @@
     "settings_tab_content_2FA":"Two Step Authentification",
     "settings_tab_title_2FA":"Activate Two Step Authentification",
     "settings_buttom_activate_2FA":"Activate verification",
-    "settings_more_2FA":"Add more security to your account activating 2FA"
+    "settings_more_2FA":"Add more security to your account activating 2FA",
+    "settings_sure_2FA": "Are you sure you want to activate the 2FA?",
+    "settings_enter_2FA": "An email has been sent to your personal account with a code, check it!",
+    "settings_enter2_2FA": "Enter the code:",
+    "settings_yes_2FA": "Yes",
+    "settings_no_2FA": "No",
+    "settings_cancel_2FA": "Cancel"
 }
