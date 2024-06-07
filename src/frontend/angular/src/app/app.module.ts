@@ -15,6 +15,7 @@ import { ForbiddenComponent } from './components/errors/forbidden/forbidden.comp
 import { UnauthorizedComponent } from './components/errors/unauthorized/unauthorized.component';
 
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
+import { FriendsComponent } from './components/friends/friends.component';
 
 import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -39,6 +40,7 @@ export function HttpLoaderFactory(http:HttpClient){
   ],
   imports: [
     BrowserModule,
+    FriendsComponent,
     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,

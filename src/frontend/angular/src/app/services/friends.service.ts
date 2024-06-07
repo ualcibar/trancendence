@@ -33,12 +33,16 @@ export class FriendsService {
   constructor(private http: HttpClient, private router: Router, private authService: AuthService, private translateService: TranslateService) {
     this.authService.amILoggedIn();
     this.id = this.authService.user_info?.user_id
-    //this.update_FriendList();
-    this.addFriend(0);
+    this.authService.isLoggedIn$.subscribe((value) => {
+      if (value == true) {
+        this.id = this.authService.user_info!.user_id; 
+        this.update_FriendList();
+      }
+      })
+    console.log('id ', this.id);
   }
   
   ngOnInit(): void {
-    this.update_FriendList();
   }
 
   update_FriendList(): void {

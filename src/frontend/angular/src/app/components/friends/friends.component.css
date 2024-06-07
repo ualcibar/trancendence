@@ -1,0 +1,7 @@
+#sp-div {
+	position: absolute;
+	margin-top: 15vh;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 60rem;
+}

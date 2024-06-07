@@ -1,23 +1,24 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
-import { AuthService } from '../../../services/auth.service';
-import { FriendsService, UserInfo } from '../../../services/friends.service';
+import { AuthService } from '../../services/auth.service';
+import { FriendsService, UserInfo } from '../../services/friends.service';
+
 
 @Component({
-  selector: 'app-user-profile',
-  templateUrl: './user-profile.component.html',
-  styleUrl: './user-profile.component.css'
+  selector: 'app-friends',
+  standalone: true,
+  imports: [],
+  templateUrl: './friends.component.html',
+  styleUrl: './friends.component.css'
 })
-export class UserProfileComponent {
+export class FriendsComponent {
   username = 'Loading...';
   user_id: number = 0;
   total: number = 0;
   wins: number = 0;
   defeats: number = 0;
-
-  
   user_not_found = false;
   unauthorizedAccess = false;
   loading = true;
