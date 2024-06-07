@@ -11,12 +11,14 @@ export class UserSettingsInfo extends UserInfo {
   user_color: string;
   user_language: string;
   user_email: string;
+  user_active: boolean;
 
-  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string) {
+  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_active: boolean) {
     super(userInfo.username, userInfo.user_id, userInfo.online);
     this.user_color = user_color;
     this.user_language = user_language;
     this.user_email = user_email;
+    this.user_active = user_active;
   }
 }
 
@@ -38,7 +40,7 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email']);
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['is_active']);
           this.userSettingsInfoSubject.next(userSettingsInfo);
         },
         error: () => {
@@ -70,6 +72,8 @@ export class SettingsService {
         userSettingsInfoVal.user_color = value;
       } else if (type === 'username') {
         userSettingsInfoVal.username = value;
+      } else if (type === 'anonymize') {
+        userSettingsInfoVal.user_active = false;
       }
       console.log('✔️ ', response);
     } else {

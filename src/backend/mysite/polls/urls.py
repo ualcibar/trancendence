@@ -34,6 +34,7 @@ urlpatterns = [
     path('login42/', views.loginWith42Token, name='login42'),
     path('register42/', views.registerWith42Token, name='register42'),
     path("logout/", views.logout, name='logout'),
+    path("delete/", views.delete, name='delete'),
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
     path("getInfo/", views.getInfo, name="get_info"),
     path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),

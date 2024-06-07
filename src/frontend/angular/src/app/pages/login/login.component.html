@@ -13,12 +13,14 @@
 				<label for="passwordInput" class="form-label"><i class="bi bi-incognito"></i> {{'password'|translate}}</label>
 			</div>
 			<div class="flex flex-col sm:flex-row items-center">
-				<button type="submit"class="mr-3 bg-yellow-400 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-					<div class="p-3">
-						<div class="text-xs font-medium uppercase text-black">{{'profile_login'|translate}}</div>
-					</div>
-				</button>
-				<p class="mr-2">{{'login_finish_tip'|translate}} </p>
+                <button *ngIf="!formSent" type="submit" class="btn btn-warning">
+                    <p class="mx-6 text-xs font-medium uppercase text-black">{{'profile_login'|translate}}</p>
+                </button>
+                <button *ngIf="formSent" type="submit" class="btn btn-warning grayscale disabled opacity-50">
+                    <div class="ml-2 spinner-border spinner-border-sm"></div>
+                    <p class="mr-3 text-xs font-medium uppercase text-black">Cargando</p>
+                </button>
+				<p class="mx-2">{{'login_finish_tip'|translate}} </p>
 				<button type="button" (click)="login42Api()" class="mr-3 bg-42 rounded px-6 rounded-xl shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-42-selected hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
 					<img class="h-7 w-7 filter invert" src="../../../assets/img/42_Logo.svg.png">
 					<div class="p-3">
@@ -30,12 +32,15 @@
 	</div>
 </div>
 
-<div *ngIf="errorMessage" class="pt-6 flex items-center justify-center" [@fadeInOut]>
-	<div class="alert max-auto max-w-xl" style="background-color: #db4d4d;">
-		<i class="bi bi-x-circle text-black"></i>
-		<div>
-			<h4 class="font-bold text-black">Oops!</h4>
-			<p class="text-black">{{ errorMessage }}</p>
-		</div>
-	</div>
+<div *ngIf="error" class="pt-6 flex items-center justify-center" [@easeOut]>
+    <div class="alert alert-error alert-dismissible fade show max-auto max-w-xl">
+        <i class="bi bi-x-circle text-black"></i>
+        <div>
+            <h4 class="font-bold text-black">{{'error'|translate}}</h4>
+            <p *ngIf="userDoesntExist">¡Este usuario no existe!</p>
+            <p *ngIf="userInactive">¡Esta cuenta está desactivada!</p>
+            <p *ngIf="userWrongCredentials">¡Usuario o contraseña incorrectos!</p>
+        </div>
+        <button (click)="error = false; userDoesntExist = false; userInactive = false; userWrongCredentials = false;" type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 </div>
