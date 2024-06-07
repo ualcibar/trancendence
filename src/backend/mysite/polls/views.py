@@ -363,3 +363,7 @@ def upload_file(request):
     else:
         form = UploadFileForm()
     return render(request, "upload.html", {"form": form})
+
+@api_view(['POST'])
+def send_mail(request):
+    logger.debug("SENDING MAIL FROM VIEWS")
