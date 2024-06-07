@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
-import uuid
+import logging
+logger = logging.getLogger('std')
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password, token_verification=None, **extra_fields):
@@ -61,6 +62,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     token_verification = models.CharField(max_length=64, blank=True, null=True)
     verification_bool = models.BooleanField(default=False, null=False)
     
+    is_anonymized = models.BooleanField(default=False, null=False)
+    anonymized_at = models.DateTimeField(null=True, blank=True)
+
     game_room_name = models.CharField(max_length=255, default=None, null=True) 
     game = models.ForeignKey('matchmaking.MatchPreview', default=None, null=True, on_delete=models.SET_NULL) 
     is_42_user = models.BooleanField(default=False, null=False)

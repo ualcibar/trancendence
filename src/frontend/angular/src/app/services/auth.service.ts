@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, UnaryFunction, of} from 'rxjs';
+import {BehaviorSubject, Observable, UnaryFunction, of, firstValueFrom} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -50,6 +50,7 @@ export class AuthService {
       }
     });
   }
+
   updateFriendList(){
     if (!this.user_info){
       this.logger.error('update user info: userinfo is undefined')
@@ -66,6 +67,7 @@ export class AuthService {
       }
     });
   }
+
   addFriend(){
     if (!this.user_info){
       this.logger.error('update user info: userinfo is undefined')
@@ -92,7 +94,6 @@ export class AuthService {
   }
 
   getUpdateUserInfo(): UserInfo | undefined {
-    console.log(this.user_info?.username);
     return this.user_info;
   }
 
@@ -116,34 +117,21 @@ export class AuthService {
    return this.isLoggedInSubject.value; 
   }
 
-  login(username : string, password : string) : Promise<boolean>{
-    return new Promise<boolean>((value) => {
-      try { 
-        const backendURL = 'api/polls/login/';
-        const jsonToSend = {
-          username: username,
-          password: password
-        };
-        const httpOptions = {
-          headers: new HttpHeaders({
-            'Content-Type': 'application/json'
-          })
-        };
+  async login(username : string, password : string): Promise<void> {
+    const backendURL = 'api/polls/login/';
+    const jsonToSend = {
+      username: username,
+      password: password
+    };
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
 
-        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
-          next: () => {
-            this.isLoggedInSubject.next(true);
-            value(true);
-          },
-          error: () => {
-            value(false);
-          }
-        });
-      } catch (error) {
-        console.error('An error occurred while contacting the registration server:');
-        value(false);
-      }
-    });
+    const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
+    this.isLoggedInSubject.next(true);
+    console.log("✔️ You've successfully logged in. Welcome!");
   }
 
   logout() {
@@ -159,9 +147,15 @@ export class AuthService {
     var accessToken = localStorage.getItem('access_token');
     this.isLoggedInSubject.next(false);
     setTimeout(() => {
-      this.router.navigate(['/']);
       window.location.href="/";
     }, 500)
+  }
+
+  async delete(): Promise<void> {
+    const backendURL = '/api/polls/delete';
+
+    await firstValueFrom(this.http.delete<any>(backendURL));
+    console.log("✔️ Account deletion processed. Thank you for playing SpacePong!");
   }
 
   refreshToken(){

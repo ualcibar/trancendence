@@ -13,20 +13,23 @@ export class UserSettingsInfo extends UserInfo {
   user_email: string;
   user_tokentwofa:string;
   user_twofa: boolean;
+  user_active: boolean;
 
-  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_twofa: boolean, user_tokentwofa: string) {
+  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_twofa: boolean, user_tokentwofa: string, user_active: boolean) {
     super(userInfo.username, userInfo.user_id, userInfo.online);
     this.user_color = user_color;
     this.user_language = user_language;
     this.user_email = user_email;
     this.user_twofa = user_twofa;
     this.user_tokentwofa = user_tokentwofa;
+    this.user_active = user_active;
   }
 }
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class SettingsService {
   private userSettingsInfoSubject: BehaviorSubject<UserSettingsInfo | null> = new BehaviorSubject<UserSettingsInfo | null>(null);
   userSettingsInfo$: Observable<UserSettingsInfo | null> = this.userSettingsInfoSubject.asObservable();
@@ -42,7 +45,7 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['twofa'], response['tokentwofa']);
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['twofa'], response['tokentwofa'], response['is_active']);
           this.userSettingsInfoSubject.next(userSettingsInfo);
         },
         error: () => {
@@ -74,9 +77,10 @@ export class SettingsService {
         userSettingsInfoVal.user_color = value;
       } else if (type === 'username') {
         userSettingsInfoVal.username = value;
+      } else if (type === 'anonymize') {
+        userSettingsInfoVal.user_active = false;
       }
-      console.log('✔️ ', response.message);
-      console.log(userSettingsInfoVal.username);
+      console.log('✔️ ', response);
     } else {
       console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
@@ -105,6 +109,19 @@ export class SettingsService {
       console.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
     }
+  }
+  //Esta función permite comprobar que la contraseña actual sea la correcta
+  async verifyPassword(value: string): Promise<void> {
+    const backendURL = '/api/polls/checkInfo/';
+    const httpReqBody = `currentPass=${value}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
   }
 }
 

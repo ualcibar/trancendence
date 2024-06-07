@@ -10,6 +10,8 @@ from django.contrib.auth import authenticate
 
 from django.middleware import csrf
 
+from django.utils import timezone
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -24,6 +26,8 @@ from .models import CustomUser, Game, Tournament, CustomUserManager
 import requests
 import json
 import logging
+import uuid
+import hashlib
 from . import mail
 
 logger = logging.getLogger('std')
@@ -77,8 +81,19 @@ def getInfo(request, user_id=None):
         'status': user.status,
         'color': user.user_color,
         'language': user.user_language,
-        'twofa': user.is_2FA_active
+        'twofa': user.is_2FA_active,
+        'is_active': user.is_active,
         }, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def checkInfo(request):
+    current_password = request.POST.get('currentPass')
+    user = request.user
+    if user.check_password(current_password):
+        return JsonResponse({'message': 'The password is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The password its not the same'}, status=400)
 
 @api_view(['POST'])
 def loginWith42Token(request):
@@ -169,19 +184,35 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-    valid_keys = ['user_color', 'user_language', 'username', 'password', 'email']
+    valid_keys = ['user_color', 'user_language', 'username', 'password', 'email', 'anonymise']
 
     for key, value in data.items():
         if key in valid_keys:
             if key == 'password':
+                if not value:
+                    return JsonResponse({'message': 'The password cannot be empty'}, status=400)
                 if user.check_password(value):
                     return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
                 user.set_password(value)
-                updated_fields(key)
                 logger.debug(f"Actualizada la key {key}")
-            setattr(user, key, value)
-            updated_fields.append(key)
-            logger.debug(f"Actualizada la key {key} a {value}")
+            if key == 'anonymise':
+                if not user.is_anonymized:
+                    random_str = str(uuid.uuid4())
+                    hashed_username = hashlib.md5(random_str.encode()).hexdigest()[:8]
+                    user.username = f"user_{hashed_username}"
+                    user.email = f"{user.username}@spacepong.me"
+
+                    user.is_anonymized = True
+                    user.is_active = False
+                    user.anonymized_at = timezone.now()
+                    logger.debug(f"La cuenta {user.username} ha sido deshabilitada y anonimizada")
+                    updated_fields.append(key)
+                else:
+                    logger.debug(f"El usuario ya está anonimizado")
+            else:
+                setattr(user, key, value)
+                updated_fields.append(key)
+                logger.debug(f"Actualizada la key {key} a {value}")
 
     if not valid_keys:
         return JsonResponse({'message': 'No valid user settings provided'}, status=400)
@@ -203,23 +234,95 @@ def logout(request):
     response.delete_cookie('refresh_token')
     return response
 
+@api_view(['DELETE'])
+def delete(request):
+    try:
+        user = CustomUser.objects.get(username=request.user.username)
+
+        response = JsonResponse({'message': 'Account deletion complete'}, status=201)
+        response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
+        response.delete_cookie('refresh_token')
+        user.delete()
+
+        logger.debug(f'{user.username} Account deletion success')
+        return response
+    except CustomUser.DoesNotExist:
+        logger.debug('Account deletion request failed: The user does not exist')
+        return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
 @api_view(['POST'])
 @authentication_classes([])
 def register(request):
+    logger.debug('Registration request received')
     data = json.loads(request.body)
     username = data.get('username', '')
     password = data.get('password', '')
     email = data.get('email', '')
     if username and password and email:
-        token_fernet = mail.generateFernetObj()
-        token_verification = mail.generate_token()
-        user = CustomUser.objects.create_user(
-            username=username, email=email, password=password, token_verification=token_verification)
-        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(username, token_fernet)), email)
+        try:
+            user = CustomUser.objects.create_user(
+                username=username, email=email, password=password)
+            fernet_obj = mail.generateFernetObj()
+            token_url = mail.generate_token()
+            mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
+        except IntegrityError as e:
+            if 'duplicate key' in str(e):
+                return JsonResponse({'message': 'This username already exists!'}, status=400)
+            else:
+                return JsonResponse({'message': 'An error occurred while registering the user.'}, status=500)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
 
+
+@api_view(['POST'])
+@authentication_classes([])
+def login(request):
+        logger.debug('Login request received')
+        data = request.data
+        response = Response()
+        username = data.get('username', None)
+        password = data.get('password', None)
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            if user.is_active:
+                try:
+                    customUser = CustomUser.objects.get(username=username)
+                except CustomUser.DoesNotExist:
+                    logger.debug('Login request failed: The user does not exist')
+                    return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
+                refresh = RefreshToken.for_user(user)
+                response.set_cookie(
+                    key=settings.SIMPLE_JWT['AUTH_COOKIE'],
+                    value=refresh.access_token,
+                    expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                )
+                response.set_cookie(
+                    key='refresh_token',
+                    value=refresh,
+                    expires=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
+                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                )
+                # csrf.get_token(request)
+
+                logger.debug('Login request succeed')
+                response.data = {"Success": "Login successfully", "data": data}
+                token_TwoFA = mail.generate_random_verification_code(6)
+                mail.send_TwoFA_mail(token_TwoFA, customUser.email)
+                return response
+            else:
+                logger.debug('Login request failed: The account is not active')
+                return Response({"message": "This account is not active!"}, status=400)
+        else:
+            logger.debug('Login request failed: Invalid username or password')
+            return Response({"message": "Invalid username or password!"}, status=400)
 
 # @csrf_exempt
 # @api_view(['POST'])
