@@ -606,7 +606,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             break;
           case MatchState.FinishedSuccess:
             break;
-          case MatchState.Error:
+          case MatchState.FinishedError:
             this.pause();
             break;
         }

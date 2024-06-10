@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-import { AuthService } from '../../services/auth.service';
+import { AuthService, PrivateUserInfo } from '../../services/auth.service';
 
 import { SettingsPColorComponent } from './settings-p-color/settings-p-color.component';
 import { SettingsPLanguageComponent } from './settings-p-language/settings-p-language.component';
@@ -22,14 +22,14 @@ import { TranslateModule } from '@ngx-translate/core';
 export class SettingsComponent {
   loading: boolean = true;
 
-  activeTab: string | null =  'security';
+  activeTab: string | null =  'color';
 
   constructor (public authService: AuthService) { }
 
   ngOnInit() {
-    this.authService.isLoggedIn$.subscribe({
-      next: (value) => {
-        if (value) {
+    this.authService.subscribe({
+      next: (userInfo : PrivateUserInfo | undefined) => {
+        if (userInfo) {
           this.loading = false;
         }
       },

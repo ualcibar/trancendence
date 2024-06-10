@@ -10,6 +10,8 @@ from django.contrib.auth import authenticate
 
 from django.middleware import csrf
 
+from django.utils import timezone
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -18,12 +20,14 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .authenticate import CustomAuthentication
-from .serializers import UserSerializer, CustomUserSerializer, GameSerializer, TournamentSerializer
-from .models import CustomUser, Game, Tournament, CustomUserManager
+from .serializers import UserInfoSerializer, LightUserInfoSerializer, PrivateUserInfoSerializer
+from .models import CustomUser, CustomUserManager
 
 import requests
 import json
 import logging
+import uuid
+import hashlib
 from . import mail
 
 logger = logging.getLogger('std')
@@ -56,28 +60,27 @@ def getInfo(request, user_id=None):
 
     if user_id is not None:
         try:
-            user = CustomUser.objects.get(id=user_id)
+            response = Response({'userInfo' : UserInfoSerializer(CustomUser.objects.get(id=user_id)).data})
         except CustomUser.DoesNotExist:
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     else:
         try:
-            user = CustomUser.objects.get(username=request.user.username)
+            response = Response({'privateUserInfo' : PrivateUserInfoSerializer(request.user).data})
         except CustomUser.DoesNotExist:
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
+    response.status = 200
+    return response
 
-    return JsonResponse({
-        'username': user.username,
-        'email': user.email,
-        'userid': user.id,
-        'status': user.status,
-        'total': user.total,
-        'wins': user.wins,
-        'defeats': user.loses,
-        'status': user.status,
-        'color': user.user_color,
-        'language': user.user_language,
-        }, status=200)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def checkInfo(request):
+    current_password = request.POST.get('currentPass')
+    user = request.user
+    if user.check_password(current_password):
+        return JsonResponse({'message': 'The password is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The password its not the same'}, status=400)
 
 @api_view(['POST'])
 def loginWith42Token(request):
@@ -101,7 +104,10 @@ def loginWith42Token(request):
         return JsonResponse({'message': 'failed to get me info'}, status=500)
     logger.debug(f"\tcontent = {response42.json()}")
     response42Json = response42.json()
-    user = CustomUser.objects.get(is_42_user=True, id42=response42Json['id'])
+    try:
+        user = CustomUser.objects.get(is_42_user=True, id42=response42Json['id'])
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'This user does not exist!'}, status=404)
     response = Response()
     if user is not None:
         if user.is_active:
@@ -117,7 +123,7 @@ def loginWith42Token(request):
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
             )
             # csrf.get_token(request)
-            response.data = {"Success": "Login successfully", "data": data}
+            response.data = {"Success": "Login successfully", "data": data, 'privateUserInfo' : PrivateUserInfoSerializer(user).data}
             return response
         else:
             return Response({"No active": "This account is not active!"}, status=status.HTTP_404_NOT_FOUND)
@@ -168,13 +174,36 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-    valid_keys = ['user_color', 'user_language', 'username', 'email']
+    valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise']
 
     for key, value in data.items():
         if key in valid_keys:
-            setattr(user, key, value)
-            updated_fields.append(key)
-            logger.debug(f"Actualizada la key {key} a {value}")
+            if key == 'password':
+                if not value:
+                    return JsonResponse({'message': 'The password cannot be empty'}, status=400)
+                if user.check_password(value):
+                    return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
+                user.set_password(value)
+                updated_fields.append(key)
+                logger.debug(f"Actualizada la key {key}")
+            if key == 'anonymise':
+                if not user.is_anonymized:
+                    random_str = str(uuid.uuid4())
+                    hashed_username = hashlib.md5(random_str.encode()).hexdigest()[:8]
+                    user.username = f"user_{hashed_username}"
+                    user.email = f"{user.username}@spacepong.me"
+
+                    user.is_anonymized = True
+                    user.is_active = False
+                    user.anonymized_at = timezone.now()
+                    logger.debug(f"La cuenta {user.username} ha sido deshabilitada y anonimizada")
+                    updated_fields.append(key)
+                else:
+                    logger.debug(f"El usuario ya está anonimizado")
+            else:
+                setattr(user, key, value)
+                updated_fields.append(key)
+                logger.debug(f"Actualizada la key {key} a {value}")
 
     if not valid_keys:
         return JsonResponse({'message': 'No valid user settings provided'}, status=400)
@@ -186,8 +215,8 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This username already exists!'}, status=400)
         else:
             return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=500)
-
-    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields}, status=201)
+    privateUserInfo = PrivateUserInfoSerializer(user)
+    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields, 'privateUserInfo' : privateUserInfo.data}, status=201)
 
 @api_view(['POST'])
 def logout(request):
@@ -196,23 +225,92 @@ def logout(request):
     response.delete_cookie('refresh_token')
     return response
 
+@api_view(['DELETE'])
+def delete(request):
+    try:
+        user = CustomUser.objects.get(username=request.user.username)
+
+        response = JsonResponse({'message': 'Account deletion complete'}, status=201)
+        response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
+        response.delete_cookie('refresh_token')
+        user.delete()
+
+        logger.debug(f'{user.username} Account deletion success')
+        return response
+    except CustomUser.DoesNotExist:
+        logger.debug('Account deletion request failed: The user does not exist')
+        return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
 @api_view(['POST'])
 @authentication_classes([])
 def register(request):
+    logger.debug('Registration request received')
     data = json.loads(request.body)
     username = data.get('username', '')
     password = data.get('password', '')
     email = data.get('email', '')
     if username and password and email:
-        user = CustomUser.objects.create_user(
-            username=username, email=email, password=password)
-        fernet_obj = mail.generateFernetObj()
-        token_url = mail.generate_token()
-        mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
+        try:
+            user = CustomUser.objects.create_user(
+                username=username, email=email, password=password)
+            fernet_obj = mail.generateFernetObj()
+            token_url = mail.generate_token()
+            mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
+        except IntegrityError as e:
+            if 'duplicate key' in str(e):
+                return JsonResponse({'message': 'This username already exists!'}, status=400)
+            else:
+                return JsonResponse({'message': 'An error occurred while registering the user.'}, status=500)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
 
+
+@api_view(['POST'])
+@authentication_classes([])
+def login(request):
+        logger.debug('Login request received')
+        data = request.data
+        response = Response()
+        username = data.get('username', None)
+        password = data.get('password', None)
+        user = authenticate(username=username, password=password)
+        privateUserInfo = PrivateUserInfoSerializer(user).data
+        response = JsonResponse({'privateUserInfo' : privateUserInfo})
+
+        if user is not None:
+            if user.is_active:
+                refresh = RefreshToken.for_user(user)
+                response.set_cookie(
+                    key=settings.SIMPLE_JWT['AUTH_COOKIE'],
+                    value=refresh.access_token,
+                    expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                )
+                response.set_cookie(
+                    key='refresh_token',
+                    value=refresh,
+                    expires=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
+                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                )
+                # csrf.get_token(request)
+
+                logger.debug('Login request succeed')
+                response.data = {"Success": "Login successfully", "data": data}
+                token_TwoFA = mail.generate_random_verification_code(6)
+                mail.send_TwoFA_mail(token_TwoFA, user.email)
+                response.status = 200
+                return response
+            else:
+                logger.debug('Login request failed: The account is not active')
+                return Response({"message": "This account is not active!"}, status=400)
+        else:
+            logger.debug('Login request failed: Invalid username or password')
+            return Response({"message": "Invalid username or password!"}, status=400)
 
 # @csrf_exempt
 # @api_view(['POST'])
@@ -246,60 +344,13 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
-
-@api_view(['POST'])
-@authentication_classes([])
-def login(request):
-        logger.debug('login request received')
-        data = request.data
-        response = Response()
-        username = data.get('username', None)
-        password = data.get('password', None)
-        user = authenticate(username=username, password=password)
-
-        if user is not None:
-            if user.is_active:
-                refresh = RefreshToken.for_user(user)
-                response.set_cookie(
-                    key=settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value=refresh.access_token,
-                    expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-                )
-                response.set_cookie(
-                    key='refresh_token',
-                    value=refresh,
-                    expires=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
-                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-                )
-                # csrf.get_token(request)
-
-                try:
-                    customUser = CustomUser.objects.get(username=username)
-                except CustomUser.DoesNotExist:
-                    return JsonResponse({'message': 'This user does not exist!'}, status=404)
-                
-                response.data = {"Success": "Login successfully", "data": data}
-                token_TwoFA = mail.generate_random_verification_code(6)
-                logger.debug(f"QUE ES ESTOOOoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO {customUser.email}")
-                mail.send_TwoFA_mail(token_TwoFA, customUser.email)
-                return response
-            else:
-                return Response({"message": "This account is not active!"}, status=500)
-        else:
-            return Response({"message": "Invalid username or password!"}, status=500)
-
 class CustomUserView(APIView):
     def get(self, request, user_id):
         try:
             usuario = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CustomUserSerializer(usuario)
+        serializer = UserInfoSerializer(usuario)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class GameHistoryView(APIView):
@@ -308,10 +359,11 @@ class GameHistoryView(APIView):
         player2_games = Game.objects.filter(player2_id=user_id)
 
         all_games = player1_games | player2_games
-        serialized_games = GameSerializer(all_games, many = True)
-        return Response(serialized_games, status=status.HTTP_200_OK)
+        #serialized_games = GameSerializer(all_games, many = True)
+        return Response(None, status=status.HTTP_200_OK)
     
     def post(self, request):
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
         serializer = GameSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -322,7 +374,7 @@ class FriendsListView(APIView):
     def get(self, request, user_id):
         user = CustomUser.objects.get(id=user_id)
         friends = user.friends.all()
-        serializer = CustomUserSerializer(friends, many=True)
+        serializer = UserInfoSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, user_id):
@@ -339,7 +391,7 @@ class FriendsListView(APIView):
                 return Response({"error": "no matching users"}, status=status.HTTP_400_BAD_REQUEST)
             user.friends.add(ids)
             friends = user.friends.all()
-            serializer = CustomUserSerializer(friends, many=True)
+            serializer = UserInfoSerializer(friends, many=True)
             return Response({"message": "Friends added successfully", "friends" : serializer.data}, status=status.HTTP_201_CREATED)
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)

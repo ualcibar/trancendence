@@ -63,7 +63,6 @@ export function HttpLoaderFactory(http:HttpClient){
 ,
   providers: [
     provideAnimationsAsync(),
-    StateService
   ],
   bootstrap: [AppComponent]
 })

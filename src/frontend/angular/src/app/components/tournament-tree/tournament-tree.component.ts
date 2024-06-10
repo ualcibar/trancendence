@@ -24,15 +24,21 @@ class TreeRender{
 })
 export class TournamentTreeComponent implements OnInit{
   @Input() manager! : TournamentManager;
-  preview! : [string, string];
+  preview? : [string, string];
+  winner? : string;
 
   constructor(){}
 
   ngOnInit(){
-    this.preview = this.manager.update.getNextMatchPreview();
+    const preview = this.manager.update.getNextMatchPreview();
+    console.log('current', preview)
+    if (typeof preview === 'string')
+      this.winner = preview;
+    else
+      this.preview = preview;
   }
 
   getVs() : string{
-    return `${this.preview[0]} vs ${this.preview[1]}`
+    return `${this.preview![0]} vs ${this.preview![1]}`
   }
 }

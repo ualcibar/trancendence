@@ -265,7 +265,6 @@ export class MapSettings{
       // }
       // emmm
       paddles[i].bindEvent(createEventIAprediction(paddles[i]));
-      // console.log("estoy con jose",paddles[i].upKey, paddles[i].downKey);
     }
     const balls : Ball[] = new Array<Ball>(1);
     balls[0] = new Ball(this, manager);
