@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { easeOut } from '../../../assets/animations/easeOut';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-register',
@@ -23,13 +24,14 @@ export class RegisterComponent {
     success: boolean = false;
     error: boolean = false;
 
-    constructor(private http: HttpClient, private router: Router) {}
+    constructor(private authService : AuthService) {}
 
     register42Api() {
         window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2Flocalhost%3A4200&response_type=code&state=register';
     }
 
     registerAcc() {
+<<<<<<< HEAD
         this.formSent = true;
         const backendURL = '/api/polls/register/';
             const jsonToSend = {
@@ -66,5 +68,17 @@ export class RegisterComponent {
                 this.formSent = false;
             }
         })
+=======
+        this.authService.registerAcc(this.user.username, this.user.password, this.user.email).subscribe(
+            {
+                next: (response) => {
+                    this.successMessage = response.message;
+                },
+                error: (error) => {
+                    console.error('An error ocurred registering this account component:', error.status);
+                    this.errorMessage = error.error.reason;
+                }
+            })
+>>>>>>> origin/main
     }
 }

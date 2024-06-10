@@ -7,7 +7,7 @@ from channels.generic.websocket import WebsocketConsumer
 
 import logging
 
-logger = logging.getLogger('polls')
+logger = logging.getLogger('std')
 
 
 class CustomAuthentication(JWTAuthentication):

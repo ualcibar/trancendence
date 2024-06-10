@@ -6,19 +6,19 @@
 </div> -->
 
 <div id="sp-div" *ngIf="loading; else content" class="flex flex-col items-center justify-center rounded" style="width: 20rem;">
-	<h1 class="m-4">Loading data... </h1>
+	<h1 class="m-4 text-white">Loading data... </h1>
 	<div class="spinner-border text-warning mb-4" role="status"></div>
 </div>
 
 <ng-template #content>
-	<div *ngIf="!user_not_found && !unauthorizedAccess" id="sp-div" class="items-center p-2 max-w-xl md:max-w-4xl md:flex-row mx-auto h-fixed rounded-xl">
+	<div *ngIf="!user_not_found && !unauthorizedAccess && info" id="sp-div" class="items-center p-2 max-w-xl md:max-w-4xl md:flex-row mx-auto h-fixed rounded-xl">
 		<div class="md:shrink-0 flex items-center">
 			<div class="w-full shadow-md rounded">
-				<div [ngClass]="'gradient-id-' + user_color" class="md:flex rounded">
+				<div [ngClass]="'gradient-id-' + info.color" class="md:flex rounded">
 					<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-36 h-36 ml-4 mt-4 mb-4 flex items-center justify-center bg-neutral-400" alt="Foto de perfil del jugador">
 					<div class="ml-4 flex flex-col justify-center">
 						<div class="flex items-center">
-							<h1 class="text-5xl font-bold">{{ username }}</h1>
+							<h1 class="text-5xl font-bold">{{ info.username }}</h1>
 							<div class="w-4 h-4 rounded-full bg-green-400 ml-2 mt-2"></div>
 						</div>
 						<h1 class="text-gray-600" style="color: #a7bec4;">{{'profile_lastonline'|translate}}: 4/04/2084</h1>
@@ -38,7 +38,7 @@
 						<i class="bi bi-controller text-2xl text-primary"></i>
 					</div>
 					<div class="stat-title text-slate-500">{{'profile_stats_gamespl'|translate}}</div>
-					<div class="stat-value text-primary">{{ total }}</div>
+					<div class="stat-value text-primary">{{ info.wins + info.loses }}</div>
 				</div>
 				
 				<div class="stat">
@@ -46,7 +46,7 @@
 						<i class="bi bi-trophy-fill text-2xl" style="color: #35bc9d;"></i>
 					</div>
 					<div class="stat-title text-slate-500">{{'profile_stats_gameswin'|translate}}</div>
-					<div class="stat-value" style="color: #35bc9d;">{{ wins }}</div>
+					<div class="stat-value" style="color: #35bc9d;">{{ info.wins }}</div>
 				</div>
 				
 				<div class="stat">
@@ -54,7 +54,7 @@
 						<i class="bi bi-x-octagon-fill text-2xl text-error"></i>
 					</div>
 					<div class="stat-title text-slate-500">{{'profile_stats_gamesdefeats'|translate}}</div>
-					<div class="stat-value text-error">{{ defeats }}</div>
+					<div class="stat-value text-error">{{ info.loses }}</div>
 				</div>
 
 				<div class="stat">

@@ -9,6 +9,7 @@ import {map, startWith} from 'rxjs/operators';
 import { MatchmakingService, OnlineMatchSettings2 } from '../../services/matchmaking.service';
 import { LogFilter, Logger } from '../../utils/debug';
 import { OnlineMatchGeneratorComponent } from '../online-match-generator/online-match-generator-component';
+import { HomeState, StateService } from '../../services/stateService';
 
 @Component({
   selector: 'app-lobby-search',
@@ -39,7 +40,9 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
   //logger
   logger : Logger = new Logger(LogFilter.LobbySearchLogger, 'lobby search:')
 
-  constructor(private http: HttpClient, private ngZone: NgZone, private matchMakingService : MatchmakingService) {
+  constructor(private matchMakingService : MatchmakingService,
+              private state : StateService)
+  {
     this.filtered_games$ = this.myControl.valueChanges.pipe(
       startWith(''),
       map(value => {
@@ -65,7 +68,7 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
     }
   }
   refresh(){
-    this.matchMakingService.reloadMatchesTournamets();
+    this.matchMakingService.reloadMatches();
   }
 
   isConnected(){
@@ -86,9 +89,9 @@ export class LobbySearchComponent implements OnInit, OnDestroy{
     this.inputField.nativeElement.focus();
   }
 
-	toggleMatchTournamentMenu() {
-		this.showMatchTournamentMenu = !this.showMatchTournamentMenu;
-	}
+  showOnlineMatchGenerator(){
+    this.state.changeHomeState(HomeState.OnlineMatchGenerator)
+  }
 
 	scapekey() {
 		this.showMatchTournamentMenu = false;

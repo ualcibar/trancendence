@@ -1,7 +1,6 @@
 import { Component, Renderer2, Input, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../services/auth.service';
-import { SettingsService } from '../../../services/settings.service';
+import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -18,14 +17,14 @@ export class SettingsPColorComponent {
   @Input() loaded: boolean = false;
   username = 'Anonymous';
 
-  constructor(public authService: AuthService, private renderer: Renderer2, public settingsService: SettingsService) {}
+  constructor(public authService: AuthService, private renderer: Renderer2) {}
 
   ngOnInit() {
-    this.settingsService.userSettingsInfo$.subscribe(userSettings => {
-      if (userSettings) {
-        this.selected_colorId = userSettings.user_color;
+    this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
+      if (userInfo) {
+        this.selected_colorId = userInfo.info.color;
         this.user_color = this.selected_colorId;
-        this.username = userSettings.username;
+        this.username = userInfo.info.username;
       }
     })
   }
@@ -44,7 +43,7 @@ export class SettingsPColorComponent {
 
   async saveColor() {
     try {
-      await this.settingsService.setUserConfig('user_color', this.selected_colorId);
+      await this.authService.setUserConfig('user_color', this.selected_colorId);
       this.user_color = this.selected_colorId;
     } catch (error) {
       console.error('❌ An error ocurred:', error);

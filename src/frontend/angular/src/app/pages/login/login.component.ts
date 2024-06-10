@@ -1,6 +1,6 @@
 import { Component} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-
+import { Router } from '@angular/router';
 import { easeOut } from '../../../assets/animations/easeOut';
 
 @Component({
@@ -23,7 +23,7 @@ export class LoginComponent {
   userInactive: boolean = false;
   userWrongCredentials: boolean = false;
 
-  constructor(private authService : AuthService) {}
+  constructor(private authService : AuthService, private router: Router) {}
 
   login42Api() {
     window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2Flocalhost%3A4200&response_type=code&state=login';
@@ -36,7 +36,7 @@ export class LoginComponent {
       await this.authService.login(this.user.username, this.user.password);
 
       this.formSent = false;
-      window.location.href="/";
+      this.router.navigate(['/']);
     } catch (error: any) {
       console.error('❌ Ha ocurrido un error al intentar iniciar sesión');
 
@@ -53,6 +53,7 @@ export class LoginComponent {
       this.error = true;
       this.formSent = false;
       return;
+
     }
 
   }

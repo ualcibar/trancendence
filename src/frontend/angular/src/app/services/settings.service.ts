@@ -1,3 +1,4 @@
+/*
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService, UserInfo } from './auth.service';
@@ -96,3 +97,4 @@ export class SettingsService {
     console.log('✔️ ', response.message);
   }
 }
+*/

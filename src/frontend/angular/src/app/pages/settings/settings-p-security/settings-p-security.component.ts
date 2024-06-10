@@ -2,8 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { SettingsService } from '../../../services/settings.service';
-import { AuthService } from '../../../services/auth.service';
+import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 
 import {easeOut} from "../../../../assets/animations/easeOut";
 
@@ -36,12 +35,12 @@ export class SettingsPSecurityComponent {
 
   @Input() loaded: boolean = false;
 
-  constructor(private settingsService: SettingsService, private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    this.settingsService.userSettingsInfo$.subscribe(data => {
-      if (data) {
-        this.email = data.user_email;
+    this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
+      if (userInfo) {
+        this.email = userInfo.email;
         this.currentEmail = this.email;
       }
     })
@@ -52,7 +51,7 @@ export class SettingsPSecurityComponent {
     this.alreadyUsed = false;
 
     try {
-      await this.settingsService.setUserConfig('email', this.email);
+      await this.authService.setUserConfig('email', this.email);
       this.currentEmail = this.email;
     } catch (error: any) {
       console.error('❌ Oops!', error.status);
@@ -80,8 +79,8 @@ export class SettingsPSecurityComponent {
     }
 
     try {
-      await this.settingsService.verifyPassword(this.oldPassword);
-      await this.settingsService.setUserConfig('password', this.newPassword);
+      await this.authService.verifyPassword(this.oldPassword);
+      await this.authService.setUserConfig('password', this.newPassword);
     } catch (error: any) {
       this.error = true;
       const errorMsg = error.error.message;

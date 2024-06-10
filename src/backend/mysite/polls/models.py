@@ -53,19 +53,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=20, unique=True, blank=False,
                                 null=False)
 
-    # avatar = models.ImageField(upload_to='avatars/', blank=True, null=False)
+    avatar = models.ImageField(default='avatars/default.jpg', upload_to='avatars/', blank=True, null=False)
     # install pyllow to make it work
 
     email = models.EmailField(max_length=254, unique=True, blank=False, null=True)
     is_anonymized = models.BooleanField(default=False, null=False)
     anonymized_at = models.DateTimeField(null=True, blank=True)
 
-    game_room_name = models.CharField(max_length=255, default=None, null=True) 
-    game = models.ForeignKey('matchmaking.MatchPreview', default=None, null=True, on_delete=models.SET_NULL) 
+    game_room_name = models.CharField(max_length=255, default=None, blank=True, null=True) 
+    game = models.ForeignKey('matchmaking.MatchPreview', default=None,blank=True, null=True, on_delete=models.SET_NULL) 
     is_42_user = models.BooleanField(default=False, null=False)
-    id42 = models.UUIDField(None, null=True, editable=True, unique=True)
-    token42 = models.CharField(max_length=255, default=None, null=True)
-    refresh_token42 = models.CharField(default=None, max_length=255, null=True)
+    id42 = models.UUIDField(None, default=None, blank=True, null=True, editable=True, unique=True)
+    token42 = models.CharField(max_length=255, default=None, blank=True, null=True)
+    refresh_token42 = models.CharField(default=None, max_length=255, blank=True, null=True)
 
     is_active = models.BooleanField(default=True, null=False)
 
@@ -85,20 +85,35 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
 
-    STATUS_CHOICES = (
-        ('connected', 'Connected'),
-        ('disconnected', 'Disconnected'),
-        ('joining_game', 'Joining Game'),
-        ('in_game', 'In Game'),
+    CONNECTED = "Connected"
+    DISCONNECTED = "Disconnected"
+    JOINING_GAME = "JoiningGame"
+    IN_GAME = "InGame"
+    STAND_BY = "Standby"
+    STATUS_CHOICES = {
+        CONNECTED: 'Connected',
+        DISCONNECTED: 'Disconnected',
+        JOINING_GAME: 'JoiningGame',
+        IN_GAME: 'InGame',
+    }
+
+    PREVIOUS_STATUS_CHOICES = (
+        (IN_GAME, 'InGame'),
+        (STAND_BY, 'Standby'),
     )
 
     status = models.CharField(
             max_length=20,
             choices=STATUS_CHOICES,
-            default='disconnected',
+            default=DISCONNECTED,
+            )
+    previous_status = models.CharField(
+            max_length=20,
+            choices=PREVIOUS_STATUS_CHOICES,
+            default=STAND_BY,
             )
     
-    USER_COLOR_CHOICES = (
+    COLOR_CHOICES = (
         ('default','Default'),
         ('rojo', 'Rojo'),
         ('naranja', 'Naranja'),
@@ -108,21 +123,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('purpura', 'Purpura'),
     )
 
-    user_color = models.CharField(
+    color = models.CharField(
         max_length=10,
-        choices=USER_COLOR_CHOICES,
+        choices=COLOR_CHOICES,
         default='default',
     )
 
-    USER_LANGUAGE_CHOICES = (
+    LANGUAGE_CHOICES = (
         ('eu', 'Euskera'),
         ('en', 'English'),
         ('es', 'Spanish'),
     )
 
-    user_language = models.CharField(
+    language = models.CharField(
         max_length=8,
-        choices=USER_LANGUAGE_CHOICES,
+        choices=LANGUAGE_CHOICES,
         default='en',
     )
 
@@ -163,32 +178,6 @@ class Match(models.Model):
     state = models.ForeignKey(MatchState, on_delete=models.CASCADE)
 
     '''
-
-
-class Game(models.Model):
-    player1 = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='player1_game',
-    )
-    player2 = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='player2_game',
-    )
-    goalsPlayer1 = models.IntegerField(default=0)
-    goalsPlayer2 = models.IntegerField(default=0)
-    winner = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='winner_game',
-    )
-    tournamentGame = models.BooleanField(default=False)
-    date = models.DateField()
-
-    def __str__(self):
-        return self.winner
-
 '''
 class Friend(models.Model):
     user1 = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='friend_user1',)
@@ -201,63 +190,3 @@ class Friend(models.Model):
         return f"{self.user1.nickname} and {self.user2.nickname}'s friendship"
 '''
 
-
-class Tournament(models.Model):
-    title = models.CharField(max_length=60)
-    playerNum = models.IntegerField(default=0)
-    quarterfinal1 = models.OneToOneField(
-            Game,
-            on_delete = models.CASCADE,
-            related_name = 'q1_game',
-            )
-    quarterfinal2 = models.OneToOneField(
-            Game,
-            on_delete = models.CASCADE,
-            related_name='q2_game',
-            )
-    quarterfinal3 = models.OneToOneField(
-            Game,
-            on_delete = models.CASCADE,
-            related_name='q3_game',
-            )
-    quarterfinal4 = models.OneToOneField(
-            Game,
-            on_delete = models.CASCADE,
-            related_name='q4_game',
-            )
-    semifinal1 = models.OneToOneField(
-            Game,
-            on_delete = models.CASCADE,
-            related_name='s1_game',
-            )
-    semifinal2 = models.OneToOneField(
-            Game,
-            on_delete = models.CASCADE,
-            related_name='s2_game',
-            )
-    final = models.OneToOneField(
-            Game,
-            on_delete = models.CASCADE,
-            related_name='f_game',
-            )
-    date = models.DateField()
-    tournamentPlayers = models.ManyToManyField(CustomUser, symmetrical=False)
-
-    def __str__(self):
-        return f"{self.title} winner: {self.final.winner}"
-
-'''
-class TournamentPlayers(models.Model):
-    tournament = models.ForeignKey(
-            Tournament,
-            on_delete=models.CASCADE,
-            )
-    player = models.ForeignKey(
-            CustomUser,
-            on_delete=models.CASCADE,
-            )
-
-    def __str__(self):
-        return f"{self.tournament.title} and {self.player.nickname}"
-
-'''

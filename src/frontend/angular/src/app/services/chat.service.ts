@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { NgZone } from '@angular/core';
-import { AuthService } from './auth.service';
-import { BehaviorSubject } from 'rxjs';
+import {AuthService} from './auth.service';
+import {BehaviorSubject, interval, Subscription} from 'rxjs';
 import { LogFilter, Logger } from '../utils/debug';
 import { ChatState, StateService } from './stateService';
+import {HttpClient} from "@angular/common/http";
 
 export class Message {
   message : string = '';
@@ -29,30 +30,35 @@ export class Message {
 export class ChatService {
   //backend connection
   webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
-  webSocket : WebSocket | undefined;
-
-  private connectedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  webSocket: WebSocket | undefined;
+  connectionInterval: Subscription | undefined;
 
   //chat
-  chatMessages : Map<string, Message[]> = new Map<string, Message[]>();
-  current_chat_name : string= '#global';
+  private connectedSubject: BehaviorSubject<boolean> =  new BehaviorSubject<boolean>(false);
+  chatMessages: Map<string, Message[]> = new Map<string, Message[]>();
+  current_chat_name: string = '#global';
   users: Set<string> = new Set<string>();
 
   //logger
-  logger : Logger = new Logger(LogFilter.ChatServiceLogger, 'chatService :');
+  private  logger: Logger = new Logger(LogFilter.ChatServiceLogger, 'chatService :');
 
-  constructor(private ngZone: NgZone, private authService: AuthService, private state: StateService) {
+  constructor(private http: HttpClient, private ngZone: NgZone, private authService: AuthService, private state: StateService) {
     this.chatMessages.set('#global', []);
-    this.authService.isLoggedIn$.subscribe(loggedIn => {
+/*    this.authService.isLoggedIn$.subscribe(loggedIn => {
       if (loggedIn && !this.isConnected()) {
         this.connectToWebsocket();
       } else if (!loggedIn && this.isConnected()) {
         this.disconectFromWebsocket();
       }
-    })
+    });*/
+    this.connectionInterval = interval(1000).subscribe(() => {
+        if (this.authService.amIloggedIn && this.isClosed()) {
+            this.connectToWebsocket();
+        }
+    });
   }
   
-  connectToWebsocket(){
+/*  connectToWebsocket(){
     if (this.isConnected()) {
       return;
     }
@@ -80,7 +86,26 @@ export class ChatService {
 
     this.webSocket.onerror = (error) => {
       console.error('Chat websocket error:', error);
+    };*/
+
+  connectToWebsocket() {
+    const jwtToken = this.authService.getCookie('access_token');
+    if (jwtToken == null) {
+      console.log('failed to get cookie access token, log in');
     }
+    this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
+    this.webSocket.onopen = () => {
+      //this.never_connected = false;
+      this.logger.info('WebSocket connection opened');
+      this.state.changeChatState(ChatState.Connected)
+    };
+    this.webSocket.onclose = () => {
+      this.logger.info('WebSocket connection closed');
+      this.state.changeChatState(ChatState.Disconnected)
+    };
+    this.webSocket.onerror = (error) => {
+      this.logger.error('WebSocket error:', error);
+    };
 
     this.webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -90,6 +115,7 @@ export class ChatService {
       let message: string;
 
       this.ngZone.run(() => {
+        this.logger.info("Channel type: " + data.type);
         switch (data.type) {
           case 'private_message':
             if (!this.chatMessages.has(data.user)) {
@@ -117,6 +143,7 @@ export class ChatService {
             return;
           default:
             console.log(data);
+            this.logger.error(data);
             return;
         }
 
@@ -138,7 +165,12 @@ export class ChatService {
   }
 
   isConnected(): boolean{
-    return this.connectedSubject.value;
+    /*return this.connectedSubject.value;*/
+    return this.webSocket?.readyState === WebSocket.OPEN;
+  }
+
+  isClosed(): boolean{
+    return this.webSocket === undefined || this.webSocket.readyState === WebSocket.CLOSED;
   }
 
   getKeys() : string[]{
