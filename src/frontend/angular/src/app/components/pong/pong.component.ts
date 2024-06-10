@@ -654,24 +654,30 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   //   }
   // }
 
-  pause() {
-    this.paused = !this.paused;
+  flipPause() {
     if (this.paused) {
-      console.log('pausing');
-      // this.manager.setMatchState(MatchState.Paused);
+      this.resume()
     }
     else {
-      console.log('resuming');
-      // this.manager.setMatchState(MatchState.Running);
-      // this.run();
+      this.pause()
     }
+  }
+
+  pause() {
+    console.log('pausing');
+    this.paused = true;
+  }
+
+  resume() {
+    console.log('resuming');
+    this.paused = false;
   }
 
   initScene(){
     //for pause
     window.addEventListener('keydown', (event) => {
       if (event.key === 'p') {
-        this.pause();
+        this.flipPause();
       }
     });
     // INIT SCENE
