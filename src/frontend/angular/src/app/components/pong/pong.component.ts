@@ -647,10 +647,23 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  // pause() {
+  //   this.paused = false;
+  //   if (this.renderer) {
+  //     this.renderer.setAnimationLoop(null);//!todo
+  //   }
+  // }
+
   pause() {
-    this.paused = false;
-    if (this.renderer) {
-      this.renderer.setAnimationLoop(null);//!todo
+    this.paused = !this.paused;
+    if (this.paused) {
+      console.log('pausing');
+      // this.manager.setMatchState(MatchState.Paused);
+    }
+    else {
+      console.log('resuming');
+      // this.manager.setMatchState(MatchState.Running);
+      // this.run();
     }
   }
 
@@ -658,8 +671,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     //for pause
     window.addEventListener('keydown', (event) => {
       if (event.key === 'p') {
-        console.log('.-.pausing');
-        this.paused = !this.paused;
+        this.pause();
       }
     });
     // INIT SCENE
