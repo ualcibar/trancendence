@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 
 import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData, TickObject } from '../../utils/behaviour';
 import { MapSettings } from '../../services/map.service';
+import { CommonModule } from '@angular/common';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -544,6 +545,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   selector: 'app-pong',
   standalone: true,
   templateUrl: './pong.component.html',
+  imports : [ CommonModule],
   styleUrls: ['./pong.component.css']
 })
 export class PongComponent implements AfterViewInit, OnDestroy {
@@ -588,6 +590,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       console.error('pong, no game has been started');
       this.router.navigate(['/']);
     }
+
     this.initValues()
     this.configStateSubscription = this.manager.subscribeMatchState(//it was done befor it was set??
       (state: MatchState) => {
@@ -645,13 +648,20 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   pause() {
+    this.paused = false;
     if (this.renderer) {
       this.renderer.setAnimationLoop(null);//!todo
-      
     }
   }
 
   initScene(){
+    //for pause
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'p') {
+        console.log('.-.pausing');
+        this.paused = !this.paused;
+      }
+    });
     // INIT SCENE
     this.scene = new THREE.Scene();
 
@@ -732,18 +742,25 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   render(time: number) {
     time *= 0.001; // convert time to seconds
-    let pastIATime = 0;
-    let predictedBallY = 0;
 
     if (this.pastTime === 0)
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
 
-    if (key.isPressed('p')) {
-      console.log('pausing');
-      this.paused = !this.paused;
+
+    // DISPLAY TIME
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+
+    const timeElement = document.getElementById('time');
+    if (timeElement) {
+        timeElement.innerText = `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s `;
     }
+    // if (key.isPressed('p')) {
+    //   console.log('pausing');
+    //   this.paused = !this.paused;
+    // }
 
     let before = Date.now()
     this.logic(timeDifference);

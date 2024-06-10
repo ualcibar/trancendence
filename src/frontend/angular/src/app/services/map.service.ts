@@ -40,6 +40,7 @@ class MapSettingsCreateInfo{
   public ballInitDir: Vector2 = new Vector2(-1,0);//undefined === random
 
   // Ball light settings
+  public ballLightIsOn : boolean = false;
   public ballLightColor : number = this.ballColor;
   public ballLightIntensity : number = 1;
 
@@ -285,7 +286,7 @@ export class MapSettings{
       ball.pos.set(0,0);
       ball.speed = this.ballInitSpeed;
       ball.dir.copy(this.ballInitDir);
-      ball.lightOn = true;
+      ball.lightOn = this.ballLightIsOn;
     }
 
 
@@ -312,18 +313,23 @@ export class MapsService {
         const defaultInfo = new MapSettingsCreateInfo();
         defaultInfo.ballInitSpeed = 1;
         defaultInfo.additionalLights = defaultInfo.createDefaultAdditionalLights();
-        const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
-        this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
+        {
+          const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
+          this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
+        }
         const infernoInfo = new MapSettingsCreateInfo();
-        infernoInfo.ballInitSpeed = defaultInfo.ballInitSpeed * 2;
+        infernoInfo.ballInitSpeed = defaultInfo.ballInitSpeed * 3;
         infernoInfo.ballColor = colorPalette.roseGarden;
         infernoInfo.ballLightColor = colorPalette.roseGarden;
         infernoInfo.ballLightIntensity = 2;
-        infernoInfo.paddleSpeed = defaultInfo.paddleSpeed * 2;
+        infernoInfo.paddleSpeed = defaultInfo.paddleSpeed * 3;
+        infernoInfo.ballLightIsOn = true;
         // infernoInfo.ballInitDir = new Vector2(Math.random() * Math.PI / 16,0);
         infernoInfo.additionalLights = infernoInfo.createInfernoAdditionalLights();
-
-        this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, defaultInfo.createDefaultWalls(this.manager)));
+        {
+          const blocks = [...infernoInfo.createDefaultScoreBlocks(this.manager),  ...infernoInfo.createDefaultWalls(this.manager)];
+          this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, blocks));
+        }
     }
     getMapSettings(map: MapsName): MapSettings | undefined {
       return this.maps.get(map);
