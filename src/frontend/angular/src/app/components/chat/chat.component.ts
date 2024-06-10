@@ -6,7 +6,7 @@ import { Component, OnInit, NgZone, ElementRef, ViewChild, ChangeDetectorRef } f
 import { SearchBarComponent } from './search-bar/search-bar.component';
 import { ChatService, Message } from '../../services/chat.service';
 
-import { fadeInOut } from '../../../assets/animations/fadeInOut';
+import { easeOut } from '../../../assets/animations/easeOut';
 
 function getCookie(name: string): string|null {
 	const nameLenPlus = (name.length + 1);
@@ -27,7 +27,7 @@ function getCookie(name: string): string|null {
   imports: [CommonModule, FormsModule, SearchBarComponent],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
-  animations: [fadeInOut]
+  animations: [easeOut]
 })
 export class ChatComponent implements OnInit{
 	newMessage: string = '';
@@ -47,6 +47,10 @@ export class ChatComponent implements OnInit{
 		this.fetchChatMessages();
 		this.scrollToBottom();
 	}
+
+/*	ngOnDestroy(): void {
+		this.chatService.webSocket?.close();
+	}*/
 
 	fetchChatMessages(): void {
 		const chat = this.current_chat_name;

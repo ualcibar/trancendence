@@ -22,7 +22,7 @@ import { TranslateModule } from '@ngx-translate/core';
 export class SettingsComponent {
   loading: boolean = true;
 
-  activeTab: string | null =  'security';
+  activeTab: string | null =  'color';
 
   constructor (public authService: AuthService) { }
 

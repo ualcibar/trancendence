@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, UnaryFunction, firstValueFrom, of, shareReplay} from 'rxjs';
+import {Observable, Subscription, firstValueFrom, shareReplay} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -109,7 +109,7 @@ export class PrivateUserInfo{
 export class AuthService {
   private _userInfo : State<PrivateUserInfo | undefined>;
 
-  //logger
+  //logger*
   private logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
 
   constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
@@ -146,6 +146,8 @@ export class AuthService {
         console.log('auth log2', PrivateUserInfo.fromI(response.privateUserInfo))
         console.log('status type', typeof PrivateUserInfo.fromI(response.privateUserInfo)?.info.status)
         console.log('status should be', typeof UserStatus.Connected)
+        this.translateService.setDefaultLang(response.privateUserInfo.language);
+        this.translateService.use(response.privateUserInfo.language);
         this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
       },
       error: () => {
@@ -153,6 +155,7 @@ export class AuthService {
       }
     });
   }
+
   updateFriendList(){
     if (!this.amIloggedIn){
       this.logger.error('update user info: userinfo is undefined')
@@ -169,6 +172,7 @@ export class AuthService {
       }
     });
   }
+
   addFriend(){
     if (!this.amIloggedIn){
       this.logger.error('update user info: userinfo is undefined')
@@ -193,6 +197,7 @@ export class AuthService {
       }
     });
   }
+
   registerAcc(username : string, password : string, email : string) : Observable<any> {
     this.logger.info('registering', username)
     const backendURL = '/api/polls/register/';
@@ -239,40 +244,25 @@ export class AuthService {
       }
     })*/
 
-  login(username : string, password : string) : Promise<boolean>{
-    console.log('start info', this._userInfo)
-    return new Promise<boolean>((value) => {
-      try { 
-        const backendURL = 'api/polls/login/';
-        const jsonToSend = {
-          username: username,
-          password: password
-        };
-        const httpOptions = {
-          headers: new HttpHeaders({
-            'Content-Type': 'application/json'
-          })
-        };
+  async login(username : string, password : string): Promise<void> {
+    const backendURL = 'api/polls/login/';
+    const jsonToSend = {
+      username: username,
+      password: password
+    };
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
 
-        this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
-          next: (response) => {
-            console.log('login info:', response)
-            const privateUserInfo : PrivateUserInfo = response.privateUserInfo;
-            if (privateUserInfo === undefined)
-              console.error('private user info: ', privateUserInfo)
-            console.log('info',this._userInfo, 'type', typeof this._userInfo)
-            this._userInfo.setValue(privateUserInfo);
-            value(true);
-          },
-          error: () => {
-            value(false);
-          }
-        });
-      } catch (error) {
-        console.error('An error occurred while contacting the registration server:');
-        value(false);
-      }
-    });
+    const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
+    const privateUserInfo : PrivateUserInfo = response.privateUserInfo;
+    if (privateUserInfo === undefined)
+      console.error('private user info: ', privateUserInfo)
+    console.log('info',this._userInfo, 'type', typeof this._userInfo)
+    this._userInfo.setValue(privateUserInfo);
+    console.log("✔️ You've successfully logged in. Welcome!");
   }
 
   logout() {
@@ -289,8 +279,14 @@ export class AuthService {
     this._userInfo.setValue(undefined);
     setTimeout(() => {
       this.router.navigate(['/']);
-//      window.location.href="/";
     }, 500)
+  }
+
+  async delete(): Promise<void> {
+    const backendURL = '/api/polls/delete';
+
+    await firstValueFrom(this.http.delete<any>(backendURL));
+    console.log("✔️ Account deletion processed. Thank you for playing SpacePong!");
   }
 
   refreshToken(){
@@ -328,6 +324,10 @@ export class AuthService {
         return decodeURIComponent(cookie.substring(nameLenPlus));
       })[0] || null;
   }
+
+  //
+  // User Config Management functions
+  //
   async setUserConfig(type: string, value: string): Promise<void> {
     if (this.userInfo) {
       const backendURL = '/api/polls/setConfig/' + this.userInfo.info.id;
@@ -346,5 +346,18 @@ export class AuthService {
       this.logger.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
     }
+  }
+
+  async verifyPassword(value: string): Promise<void> {
+    const backendURL = '/api/polls/checkInfo/';
+    const httpReqBody = `currentPass=${value}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
   }
 }

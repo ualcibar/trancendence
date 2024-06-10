@@ -6,7 +6,7 @@ import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.co
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 
 import { AuthService } from '../../services/auth.service';
-import { MatchmakingService, MatchMakingState, OnlineMatchSettings2, OnlineMatchState} from '../../services/matchmaking.service';
+import { MatchmakingService, OnlineMatchSettings2, OnlineMatchState} from '../../services/matchmaking.service';
 import { CommonModule } from '@angular/common';
 
 import { fadeInOut, fadeInOuttimeout } from '../../../assets/animations/fadeInOut';
@@ -92,7 +92,7 @@ class LocalGameHandler{
   animations: [fadeInOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = true;
+  debug : boolean = true; //Al activar el modo debug, aparecerá un recuadro en la página
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;
@@ -120,8 +120,11 @@ export class HomeComponent implements OnInit{
   }
 
   ngOnInit(): void {
-
   }
+
+/*  ngOnDestroy(): void {
+    this.matchmakingService.webSocket.close();
+  }*/
 
   changeState(newState: HomeState): void {
     this.state.changeHomeState(newState)

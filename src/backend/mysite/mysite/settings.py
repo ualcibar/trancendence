@@ -93,7 +93,6 @@ CHANNEL_LAYERS = {
     }
 }
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -103,13 +102,12 @@ DATABASES = {
         'NAME': os.environ.get('POSTGRES_DB'),
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'postgre',  # Or your database server IP address
-        'PORT': '5432',       # PostgreSQL default port}
-    }
+        'HOST': 'postgre',
+        'PORT': '5432',
+    },
 }
 
 # CORS
-
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = ['http://localhost:4200', 'http://0.0.0.0:4200', 'https://localhost:1501']
 CSRF_TRUSTED_ORIGINS = ['http://localhost:4200', 'http://0.0.0.0:4200', 'https://localhost:1501']
@@ -200,6 +198,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "OPTIONS": {
+            "min_length": 6,
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
