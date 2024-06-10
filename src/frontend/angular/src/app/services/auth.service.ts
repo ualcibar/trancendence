@@ -146,6 +146,8 @@ export class AuthService {
         console.log('auth log2', PrivateUserInfo.fromI(response.privateUserInfo))
         console.log('status type', typeof PrivateUserInfo.fromI(response.privateUserInfo)?.info.status)
         console.log('status should be', typeof UserStatus.Connected)
+        this.translateService.setDefaultLang(response.privateUserInfo.language);
+        this.translateService.use(response.privateUserInfo.language);
         this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
       },
       error: () => {
@@ -195,6 +197,7 @@ export class AuthService {
       }
     });
   }
+
   registerAcc(username : string, password : string, email : string) : Observable<any> {
     this.logger.info('registering', username)
     const backendURL = '/api/polls/register/';

@@ -174,7 +174,7 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-    valid_keys = ['user_color', 'user_language', 'username', 'password', 'email', 'anonymise']
+    valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise']
 
     for key, value in data.items():
         if key in valid_keys:
@@ -184,6 +184,7 @@ def setUserConfig(request, user_id=None):
                 if user.check_password(value):
                     return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
                 user.set_password(value)
+                updated_fields.append(key)
                 logger.debug(f"Actualizada la key {key}")
             if key == 'anonymise':
                 if not user.is_anonymized:

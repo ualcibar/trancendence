@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from "@ngx-translate/core";
 
-import { SettingsService } from "../../../services/settings.service";
 import { AuthService } from "../../../services/auth.service";
 
 @Component({
@@ -16,12 +15,12 @@ import { AuthService } from "../../../services/auth.service";
 export class SettingsPPrivacyComponent {
   @Input() loaded: boolean = false;
 
-  constructor(private settingsService: SettingsService, private authService: AuthService) {
+  constructor(private authService: AuthService) {
   }
 
   async anonymizeData() {
     try {
-      await this.settingsService.setUserConfig('anonymise', "");
+      await this.authService.setUserConfig('anonymise', "");
     } catch (error: any) {
       console.error('❌ Oops!', error.message);
     }

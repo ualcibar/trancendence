@@ -36,7 +36,8 @@ export class LoginComponent {
       await this.authService.login(this.user.username, this.user.password);
 
       this.formSent = false;
-      this.router.navigate(['/']);
+      /*this.router.navigate(['/']);*/
+      window.location.href = "/"; //Hay que mirar esto; si por ejemplo el usuario tiene el idioma "Inglés" puesto, al iniciar sesión, no lo cambia al inglés.
     } catch (error: any) {
       console.error('❌ Ha ocurrido un error al intentar iniciar sesión');
 
@@ -53,8 +54,6 @@ export class LoginComponent {
       this.error = true;
       this.formSent = false;
       return;
-
     }
-
   }
 }
