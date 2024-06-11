@@ -80,7 +80,7 @@ export class SettingsPSecurityComponent {
 
     try {
       await this.authService.verifyPassword(this.oldPassword);
-      await this.authService.setUserConfig('password', this.newPassword);
+      await this.authService.setUserConfig({password :  this.newPassword});
     } catch (error: any) {
       this.error = true;
       const errorMsg = error.error.message;

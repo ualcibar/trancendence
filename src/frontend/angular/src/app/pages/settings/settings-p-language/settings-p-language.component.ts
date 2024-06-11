@@ -38,11 +38,7 @@ export class SettingsPLanguageComponent {
 
   async saveLanguage() {
     try {
-<<<<<<< HEAD
       await this.authService.setUserConfig({user_language : this.selected_lang});
-=======
-      await this.authService.setUserConfig('language', this.selected_lang);
->>>>>>> a16afc054244c6306261bb16f302d771a881725b
       localStorage.setItem('lang', this.selected_lang);
       this.translateService.use(this.selected_lang);
       this.user_lang = this.selected_lang;
