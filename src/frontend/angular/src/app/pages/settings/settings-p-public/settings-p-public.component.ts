@@ -43,8 +43,14 @@ export class SettingsPPublicComponent {
   }
 
   async savePublic() {
-    try { 
-      await this.authService.setUserConfig({username: this.username, avatarUrl : this.avatarUrl});
+    try {
+      const data = {}
+      if (this.username !== this.currentUsername && this.currentAvatarUrl !== this.avatarUrl)
+        await this.authService.setUserConfig({username: this.username, avatarUrl : this.avatarUrl});
+      else if (this.username !== this.currentUsername)
+        await this.authService.setUserConfig({username: this.username});
+      else if (this.avatarUrl !== this.currentAvatarUrl)
+        await this.authService.setUserConfig({avatarUrl: this.avatarUrl});
       this.alreadyUsed = false;
       this.nameChanged = true;
       this.currentUsername = this.username;

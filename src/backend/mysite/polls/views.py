@@ -210,6 +210,8 @@ def setUserConfig(request, user_id=None):
                     logger.debug(f"El usuario ya está anonimizado")
             elif key == 'avatarUrl':
                 image_data = value
+                if not image_data:
+                    return JsonResponse({'message': 'No image provided'}, status=400)
                 format, imgstr = image_data.split(';base64,') 
                 ext = format.split('/')[-1]  # Extract the image format
                 if not ext:
@@ -243,7 +245,6 @@ def setUserConfig(request, user_id=None):
                 logger.debug(f"Actualizada la key {key} a {value}")
         else:
             return JsonResponse({'message': 'No valid user settings provided'}, status=400)
-
     try:
         user.save()
     except IntegrityError as e:
