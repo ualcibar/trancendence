@@ -1,6 +1,8 @@
 import { Vector2, Vector3 } from "three";
-import { Manager} from "../services/gameManager.service";
-import { Ball, Block, GameObject, PaddleState} from "../components/pong/pong.component";
+
+import { Manager, MatchState, MatchUpdate} from "../services/gameManager.service";
+import { Ball, Block, GameObject, Paddle, PaddleState} from "../components/pong/pong.component";
+
 import { MapSettings } from "../services/map.service";
 import * as key from 'keymaster'; // Si estás utilizando TypeScript
 import { Key } from "../services/gameManager.service";
@@ -49,6 +51,8 @@ export class TickBehaviour<T>  implements TickObject{
 	}
 
 	runTick(delta: number): void {
+		// console.log('running tick');
+		// console.log('delta', delta);
 		for(let i = 0; i < this.functions.length; i++)
 			this.functions[i](delta, this.value)
 //		this.functions.forEach(fn => fn(delta, this.value))
@@ -70,6 +74,7 @@ export enum PongEventType {
 	LocalHit = 'local hit',
 	Colision = 'colision',
 	Score = 'score',
+	IAPrediction = 'ia prediction',
 }
 
 export class EventBehaviour<T extends GameObject> implements EventObject{
@@ -165,7 +170,7 @@ export function createEventPaddleColision<T extends EventObject & Dimmensions & 
 		const ball: Ball = data.custom.gameObjects.ball;
 		const intersection: { pos: Vector2, normal: Vector2 } = data.custom.others.intersection;
 
-		if (intersection.normal.x < 0 && ball.dir.x < 0)
+		if (intersection.normal.x < 0 && ball.dir.x < 0)// not reaally a colision then???
 			return;
 		if (intersection.normal.x > 0 && ball.dir.x > 0)
 			return;
@@ -180,6 +185,20 @@ export function createEventPaddleColision<T extends EventObject & Dimmensions & 
 	}
 }
 
+export interface updateAIprediction {
+	updateAIprediction(delta: number): void;
+}
+
+export function createEventIAprediction<T extends updateAIprediction>(object : T){
+	return function eventIAprediction(type: PongEventType, data: EventData) {
+		console.log('event called', type);
+		if (type !== PongEventType.IAPrediction)
+			return;
+		console.log('updating prediction (event)');
+		object.updateAIprediction(data.custom?.others?.prediction);
+	}
+}
+
 export function createTickMove<T extends Pos & Speed & Dir>(object : T){
 	return function move(delta: number) {
       object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
@@ -191,24 +210,87 @@ export function createTickMovePaddle<T extends Pos & Speed & Dir>(object : T){
     	object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
 	}
 }
-export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir & PaddleI>(paddle : T, keys : Key ){
-	let lastAiUpdateSec : number = 0;
-	return function keyboardInputPaddle(delta: number) {
+// <<<<<<< HEAD
+export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
+	let lastUpdateSec: number = 0;
+	let prediction : number = 0;
+	let update : MatchUpdate | undefined = undefined;
+	return function paddleUpdate(delta: number) {
+		// if (!update){
+			update = manager.getMatchUpdate()
+		// }
 		if (paddle.state === PaddleState.Binded) {
 			paddle.dir.y = 0;
-			if (key.isPressed(keys.up)) {
+			if (key.isPressed(paddle.upKey)) {
 				paddle.dir.y = 1;
 			}
-			if (key.isPressed(keys.down)) {
+			if (key.isPressed(paddle.downKey)) {
 				paddle.dir.y = -1;
 			}
+		}else if(paddle.state === PaddleState.Bot){
+			lastUpdateSec += delta;
+			if (lastUpdateSec >= 1){
+				lastUpdateSec = 0;
+				console.log('updating prediction', lastUpdateSec);
+				console.log('padddle', paddle);
+				console.log('paddle pos', paddle.pos);
+				prediction = update.getAiPrediction(paddle);
+			}
+			paddle.handleIA(prediction);
+// =======
+// export function createTickKeyboardInputPaddle<T extends Pos & Speed & Dir & PaddleI>(paddle : T, keys : Key ){
+// 	let lastAiUpdateSec : number = 0;
+// 	return function keyboardInputPaddle(delta: number) {
+// 		if (paddle.state === PaddleState.Binded) {
+// 			paddle.dir.y = 0;
+// 			if (key.isPressed(keys.up)) {
+// 				paddle.dir.y = 1;
+// 			}
+// 			if (key.isPressed(keys.down)) {
+// 				paddle.dir.y = -1;
+// 			}
 
-		}else if (paddle.state === PaddleState.Bot){
-			if (lastAiUpdateSec >= 1){
-				paddle.updateAIprediction(delta)
-				lastAiUpdateSec = 0;
-			}else
-				lastAiUpdateSec += delta
+// 		}else if (paddle.state === PaddleState.Bot){
+// 			if (lastAiUpdateSec >= 1){
+// 				paddle.updateAIprediction(delta)
+// 				lastAiUpdateSec = 0;
+// 			}else
+// 				lastAiUpdateSec += delta
+// >>>>>>> origin/main
 		}
+	}
+}
+
+export interface HandleKeys {
+	handleKeys(): void;
+}
+
+/*export function createTickKeyboardInputPaddle<T extends HandleKeys>(paddle : T, keys : Key ){
+	return function keyboardInputPaddle(delta: number) {
+		paddle.handleKeys();
+	}
+}*/
+
+export interface update {
+	update(delta: number): void;
+}
+
+export function createTickUpdate<T extends update>(object : T, getState: () => MatchState){
+	return function update(delta: number) {
+		if (getState() === MatchState.Paused)
+			return;
+		// console.log('updating object', object);
+		// console.log('delta', delta);
+		object.update(delta);
+	}
+}
+
+export interface pause {
+	pause(): void;
+}
+
+export function createTickPause<T extends pause>(object : T){
+	return function pause() {
+		object.pause();
 	}
 }

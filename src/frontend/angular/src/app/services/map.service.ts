@@ -2,8 +2,9 @@ import { Vector2, Vector3 } from "three";
 import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../components/pong/pong.component";
 import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./gameManager.service";
 import { Injectable } from "@angular/core";
-import { createEventScoreColision, createTickKeyboardInputPaddle, createTickMove, createEventPaddleColision, eventEventWallColision } from "../utils/behaviour";
+import { createEventScoreColision, createTickMove, createEventPaddleColision, eventEventWallColision, createTickUpdate, createEventIAprediction, createPaddleUpdate } from "../utils/behaviour";
 import { Score } from "./matchmaking.service";
+import * as THREE from 'three';
 
 export const colorPalette = {
     darkestPurple: 0x1C0658,
@@ -22,7 +23,7 @@ class MapSettingsCreateInfo{
   public topLimit : number = this.dimmensions.height / 2;
   public bottomLimit : number = - this.dimmensions.height / 2;
 
-  public defaultLightingIsOn  : boolean = true;
+  public defaultLightingIsOn  : boolean = false;
   public defaultlightColor : number = colorPalette.white;
   // Light position
   public defaultLightIntensity : number = 3;
@@ -30,6 +31,7 @@ class MapSettingsCreateInfo{
   public defaultLightPositionY : number = 2;
   public defaultLightPositionZ : number = 4;
 
+  public additionalLights : THREE.Light[] = [];
   // Ball settings
   // Constructor settings
   public ballRadius : number = 0.05;
@@ -38,6 +40,7 @@ class MapSettingsCreateInfo{
   public ballInitDir: Vector2 = new Vector2(-1,0);//undefined === random
 
   // Ball light settings
+  public ballLightIsOn : boolean = false;
   public ballLightColor : number = this.ballColor;
   public ballLightIntensity : number = 1;
 
@@ -109,10 +112,66 @@ class MapSettingsCreateInfo{
 
     return blocks;
   }
-}
 
-export class Walls{
-  
+  createDefaultAdditionalLights(): THREE.Light[] {  
+    // <        // Additional lights
+//         {
+//           const light = new THREE.PointLight(colorPalette.white , this.defaultLightIntensity / 10);
+//           light.position.set(-1, -1, -1);
+//           this.additionalLights.push(light);
+//         }
+      const settings = this;
+      // Additional lights
+      const additionalLights : THREE.Light[] = [];
+      {
+        const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity /10);
+        settings.additionalLights.push(light);
+      }
+      // Additional lights
+      {
+        const red = 0xFF0000;
+        const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity);
+        light.position.set(1, 0.1, 0);
+        settings.additionalLights.push(light);
+      }
+      // Additional lights
+      {
+        const blue = 0x0000FF;
+        const light = new THREE.DirectionalLight(blue , settings.defaultLightIntensity);
+        light.position.set(-1, -0.1, 0);
+        settings.additionalLights.push(light);
+      }
+      console.log("additional lights", this.additionalLights)
+
+      return settings.additionalLights;
+  }
+
+  createInfernoAdditionalLights(): THREE.Light[] {  
+    const settings = this;
+    //ambient light
+    {
+      const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity /15);
+      settings.additionalLights.push(light);
+    }
+    // Infernal lights
+    const additionalLights : THREE.Light[] = [];
+    {
+      const red = 0xFF0000;
+      const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity * 50);
+      light.position.set(1, 0.1, 0);
+      settings.additionalLights.push(light);
+    }
+    // fire lights
+    {
+      const fire = 0xFFA500;
+      const light = new THREE.PointLight(fire , settings.defaultLightIntensity * 50);
+      const light2 = new THREE.PointLight(fire , settings.defaultLightIntensity * 50);
+      light.position.set(-1.5, 0, 0.1);
+      light2.position.set(-1.5, 0, -0.1);
+      settings.additionalLights.push(light);
+    }
+    return settings.additionalLights;
+  }
 }
 
 export class MapSettings{
@@ -125,22 +184,31 @@ export class MapSettings{
 
   public readonly defaultLightingIsOn!  : boolean;
   public readonly defaultlightColor! : number;
+ 
   // Light position
   public readonly defaultLightIntensity! : number;
   public readonly defaultLightPositionX! : number;
   public readonly defaultLightPositionY! : number;
   public readonly defaultLightPositionZ! : number;
 
+  // Additional lights
+  public readonly additionalLights : THREE.Light[] = [];
+
   // Ball settings
   // Constructor settings
   public readonly ballRadius! : number;
   public readonly ballColor! : number;
   public readonly ballInitSpeed! : number;
+  public readonly ballInitAcceleration! : number;
   public readonly ballInitDir!: Vector2;
   public readonly ballWidthSegments = 32;
   public readonly ballHeightSegments = 16;
 
+  //Ball position
+  public readonly ballInitPos = new Vector2(0,0);
+
   // Ball light settings
+  public readonly ballLightIsOn! : boolean;
   public readonly ballLightColor! : number;
   public readonly ballLightIntensity! : number;
 
@@ -149,10 +217,17 @@ export class MapSettings{
   public readonly paddleHeight! : number;
   public readonly paddleDepth! : number;
   public readonly paddleColor! : number;
+  public readonly paddleType! : BlockType;
+  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
+
+  public readonly paddleUpKey : string[] = ['w','o'];
+  public readonly paddleDownKey : string[] = ['s','l'];
 
   // Paddle position
-  public readonly leftPaddlePos!: Vector3;
-  public readonly rightPaddlePos!: Vector3;
+  public readonly leftPaddlePos: Vector2 = new Vector2(-1,0);
+  public readonly rightPaddlePos: Vector2 = new Vector2(1,0);
+  public readonly paddleInitPos: Vector2[] = [this.leftPaddlePos, this.rightPaddlePos];
+  public readonly paddleDimmensions = new Vector3(this.paddleWidth, this.paddleHeight, this.paddleDepth);
 
   // Paddle movement settings
   public readonly paddleSpeed! : number;
@@ -165,40 +240,38 @@ export class MapSettings{
   public readonly friction! : number;
 
   public readonly deltaFactor! : number;
-
   public  readonly blocks : Block[];
 
   constructor(info : MapSettingsCreateInfo, blocks : Block[]){
     Object.assign(this, info);
-    this.blocks = blocks
+    this.blocks = blocks;
+
   }
+
   createMatchInitUpdate(info : MatchSettings, manager : Manager) : MatchUpdate{
     const paddles : Paddle[] = new Array<Paddle>(info.teamSize * 2);
     for (let i = 0; i < paddles.length; i++){
-      const pos : Vector3 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
-      paddles[i] = new Paddle(new Vector2(pos.x,pos.y),
-                          new Vector3(this.paddleWidth, this.paddleHeight, this.paddleDepth),
-                          BlockType.Collision,
-                          this.paddleColor,
-                          new Vector2(0,0),
-                          this.paddleSpeed,
-                          PaddleState.Binded,
-                          manager);
-      paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]));
-      paddles[i].bindTick(createTickMove(paddles[i]))
+      const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
+      paddles[i] = new Paddle(this, i, manager);
+      paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]))
+      // paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key(paddles[i].upKey ,paddles[i].downKey)))
+      //           .bindTick(createTickMove(paddles[i]));
+  
+  //    paddles[i].bindTick(createTickUpdate(paddles[i], () => manager.getMatchState()));
+      paddles[i].bindTick(createPaddleUpdate(paddles[i], manager))
+        .bindTick(createTickMove(paddles[i]))
+      // if (paddles[i].state === PaddleState.Bot){
+      //   paddles[i].bindTick(createTickMove(paddles[i]));
+      // }
+      // emmm
+      paddles[i].bindEvent(createEventIAprediction(paddles[i]));
     }
     const balls : Ball[] = new Array<Ball>(1);
-    balls[0] = new Ball(this.ballInitDir,
-                        this.ballInitSpeed,
-                        true,
-                        new Vector2(0,0),
-                        this.ballLightColor,
-                        this.ballLightIntensity,
-                        manager
-    );
+    balls[0] = new Ball(this, manager);
     balls[0].bindTick(createTickMove(balls[0]));
     return new MatchUpdate(paddles, balls,this.blocks!, new Score([0,0]),0);  
   }
+
   setMatchInitUpdate(update : MatchUpdate, info : MatchSettings){
     for (const [index, paddle] of update.paddles.entries()){
       paddle.pos.copy(index < info.teamSize ? this.leftPaddlePos : this.rightPaddlePos);
@@ -212,10 +285,10 @@ export class MapSettings{
       ball.pos.set(0,0);
       ball.speed = this.ballInitSpeed;
       ball.dir.copy(this.ballInitDir);
-      ball.lightOn = true;
-      ball.lightIntensity = this.ballLightIntensity;
-      ball.lightColor = this.ballColor;
+      ball.lightOn = this.ballLightIsOn;
     }
+
+
   }
 }
 
@@ -238,12 +311,28 @@ export class MapsService {
     initMaps() {
         const defaultInfo = new MapSettingsCreateInfo();
         defaultInfo.ballInitSpeed = 1;
-        const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
-        this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
+        defaultInfo.additionalLights = defaultInfo.createDefaultAdditionalLights();
+        {
+          const blocks = [...defaultInfo.createDefaultScoreBlocks(this.manager),  ...defaultInfo.createDefaultWalls(this.manager)];
+          this.maps.set(MapsName.Default, new MapSettings(defaultInfo, blocks));
+        }
         const infernoInfo = new MapSettingsCreateInfo();
-        //this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, defaultInfo.createDefaultWalls(this.manager)));
+        infernoInfo.ballInitSpeed = defaultInfo.ballInitSpeed * 3;
+        infernoInfo.ballColor = colorPalette.roseGarden;
+        infernoInfo.ballLightColor = colorPalette.roseGarden;
+        infernoInfo.ballLightIntensity = 2;
+        infernoInfo.paddleSpeed = defaultInfo.paddleSpeed * 3;
+        infernoInfo.ballLightIsOn = true;
+        // infernoInfo.ballInitDir = new Vector2(Math.random() * Math.PI / 16,0);
+        infernoInfo.additionalLights = infernoInfo.createInfernoAdditionalLights();
+        {
+          const blocks = [...infernoInfo.createDefaultScoreBlocks(this.manager),  ...infernoInfo.createDefaultWalls(this.manager)];
+          this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, blocks));
+        }
     }
     getMapSettings(map: MapsName): MapSettings | undefined {
       return this.maps.get(map);
     }
+
+    
 }

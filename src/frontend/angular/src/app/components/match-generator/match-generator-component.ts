@@ -16,10 +16,16 @@ import { getEnumStrings, getNextEnumValue} from '../../utils/help_enum';
   styleUrl: './match-generator-component.css'
 })
 export class MatchGeneratorComponent {
+
   default : boolean = true;
   @Output() escapeKeyPressed: EventEmitter<void> = new EventEmitter<void>();
   @Input() settings! : MatchSettings;
   
+  maps: string[] = [];
+
+  ngOnInit() {
+    this.maps = this.getMaps();
+  }
 
   constructor(){
     
@@ -51,8 +57,11 @@ export class MatchGeneratorComponent {
     }
   }
 
-  getMaps() : string[]{ 
+  getMaps() : string[]{
+    console.log('this.settings.mapName', this.settings.mapName)
+    console.log('maps', getEnumStrings(MapsName)
+    .filter(val => val != this.settings.mapName) );
     return getEnumStrings(MapsName)
-      .filter(val => val != this.settings.mapName)  
+      .filter(val => val != this.settings.mapName) 
   }
 }

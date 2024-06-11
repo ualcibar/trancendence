@@ -99,6 +99,7 @@ export class MatchSettings{//no matter what map this settings are always applica
       this.maxTimeRoundSec = maxTimeRoundSec;
       this.roundsToWin = roundsToWin;
       this.teamSize = teamSize;
+      console.log('mapname', mapName);
       this.mapName = mapName;
   }
 }
@@ -146,7 +147,10 @@ export class MatchUpdate{
     this.paddles.forEach(paddle => paddle.subscribeToManager(manager));
     this.blocks.forEach(block => block.subscribeToManager(manager));
   }
+
   runTickBehaviour(delta : number){
+    // console.log('running tick behaviour')
+    // console.log('delta', delta)
     for (let i = 0; i < this.paddles.length; i++){
       this.paddles[i].tickBehaviour.runTick(delta);
     }
@@ -172,8 +176,6 @@ export class MatchUpdate{
       ball.pos.copy(update.balls[index].pos);
       ball.dir.copy(update.balls[index].dir);
       ball.speed = update.balls[index].speed;
-      ball.lightColor = update.balls[index].lightColor;
-      ball.lightIntensity = update.balls[index].lightIntensity;
       ball.lightOn = update.balls[index].lightOn;
     }
     for (const [index, block] of this.blocks.entries()){
@@ -184,6 +186,54 @@ export class MatchUpdate{
       block.speed = update.blocks[index].speed;
     }
     this.score.changeScore(update.score.score);
+  }
+  getAiPrediction(paddle: Paddle): number {
+    console.log('paddle position', paddle.pos);
+    // this.update(this); // update the current state???
+    const ball = this.balls[0];
+    console.log('getAiPrediction ball', ball);
+    console.log('getAiPrediction paddle', paddle);
+    console.log('getAiPrediction this.paddle', this.paddles[1]);
+    let predictedBallY = 0;
+
+    // IA PREDICTION
+
+    console.log('MAKING PREDICTION');
+
+    predictedBallY = ball.position.y +(Math.tan(ball.angle - Math.PI) * (paddle.position.x - ball.position.x)); //trigonometria
+    console.log('getAiPrediction predictedBallY', predictedBallY, '=', ball.position.y, '+', 'tan(', ball.angle, ') * (', paddle.position.x, '-', ball.position.x);
+    console.log('padddle position x', paddle.position.x);
+    console.log('ball position', ball.position);
+    // predict collision with walls
+    const topWallPos = this.blocks[2].pos;
+    const topWallDimmensions = this.blocks[2].dimmensions;
+    const bottomWallPos = this.blocks[3].pos;
+    const bottomWallDimmensions = this.blocks[3].dimmensions;
+    const pseudoLimitMax = topWallPos.y - topWallDimmensions.y / 2 - ball.radius;
+    const pseudoLimitMin = bottomWallPos.y + bottomWallDimmensions.y / 2 + ball.radius;
+    let i = 0;
+    while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
+      if (predictedBallY > pseudoLimitMax) {
+        predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
+      }
+      if (predictedBallY < pseudoLimitMin) {
+        predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
+      }
+      i++;
+      if (i > 10) {
+        console.error('infinite loop');
+        break;
+      }
+    }
+
+    // randomize a bit the prediction (makes it more human like)
+    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius)/2 ;
+
+    // if the ball is going to the left, make the prediction less extreme
+    if (!(ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2)) {
+      predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
+    }
+    return predictedBallY
   }
 }
 
@@ -547,6 +597,7 @@ export class MatchManager implements Manager{
     }
   }
   sendEvent(type: PongEventType, data : EventData): void {
+    console.log('send event', type, data);
     if (data.targetIds === undefined){
       console.error('send event needs targetsid')
       return;

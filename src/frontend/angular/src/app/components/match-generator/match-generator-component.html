@@ -6,7 +6,7 @@
 <input [(ngModel)]="settings.roundsToWin" type="number">
 <h1 class="text-white">team size</h1>
 <input [(ngModel)]="settings.teamSize" type="number">
-<select class="form-select" aria-label="Default select example">
-  <option selected>{{settings.mapName}}</option>
-  <option *ngFor="let item of getMaps()">{{item}}</option>
+<select class="form-select" aria-label="Default select example" [(ngModel)]="settings.mapName">
+  <option value="Default" selected>Default</option>
+  <option *ngFor="let item of maps" [value]="item">{{item}}</option>
 </select>
