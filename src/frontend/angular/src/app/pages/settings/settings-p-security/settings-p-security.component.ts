@@ -51,7 +51,7 @@ export class SettingsPSecurityComponent {
     this.alreadyUsed = false;
 
     try {
-      await this.authService.setUserConfig('email', this.email);
+      await this.authService.setUserConfig({email : this.email});
       this.currentEmail = this.email;
     } catch (error: any) {
       console.error('❌ Oops!', error.status);

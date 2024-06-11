@@ -22,25 +22,29 @@ export class SettingsPPublicComponent {
   currentUsername = '';
   alreadyUsed = false;
   nameChanged = false;
+  avatarUrl = '';
+  currentAvatarUrl = '';
 
   @Input() loaded: boolean = false;
 
 
   constructor(private authService : AuthService) {
-  }
-
-  ngOnInit() {
     this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
       if (userInfo) {
         this.username = userInfo.info.username;
         this.currentUsername = this.username;
+        this.currentAvatarUrl = userInfo.info.avatarUrl;
+        this.avatarUrl = userInfo.info.avatarUrl;
       }
     })
   }
 
+  ngOnInit() {
+  }
+
   async savePublic() {
-    try {
-      await this.authService.setUserConfig('username', this.username);
+    try { 
+      await this.authService.setUserConfig({username: this.username, avatarUrl : this.avatarUrl});
       this.alreadyUsed = false;
       this.nameChanged = true;
       this.currentUsername = this.username;
@@ -49,6 +53,22 @@ export class SettingsPPublicComponent {
       if (error.status === 400) {
         this.nameChanged = false;
         this.alreadyUsed = true;
+      }
+    }
+  }
+  onSelectFile(event : any) {
+    if (event.target.files && event.target.files[0]) {
+      var reader = new FileReader();
+
+      reader.readAsDataURL(event.target.files[0]); // read file as data url
+
+      reader.onload = (event) => { // called once readAsDataURL is completed
+        if (!event.target || typeof event.target.result !== 'string'){
+          console.error('failed to load image')
+          return
+        }
+        this.avatarUrl = event.target.result;
+        console.log('url', this.avatarUrl)
       }
     }
   }

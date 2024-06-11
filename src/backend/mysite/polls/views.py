@@ -9,7 +9,14 @@ from django.db import IntegrityError
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 
-from django.middleware import csrf
+import base64
+from django.core.files.base import ContentFile
+from rest_framework.parsers import JSONParser
+from PIL import Image
+from io import BytesIO
+import os
+import uuid
+
 
 from django.utils import timezone
 
@@ -175,6 +182,16 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
+<<<<<<< HEAD
+    valid_keys = ['user_color', 'user_language', 'username', 'email', 'avatarUrl']
+
+    for key, value in data.items():
+        if key in valid_keys:
+            if key == 'avatarUrl':
+                image_data = value
+                if not image_data:
+                    return JsonResponse({'message': 'No image provided'}, status=400)
+=======
     valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise']
 
     for key, value in data.items():
@@ -205,9 +222,42 @@ def setUserConfig(request, user_id=None):
                 setattr(user, key, value)
                 updated_fields.append(key)
                 logger.debug(f"Actualizada la key {key} a {value}")
+>>>>>>> a16afc054244c6306261bb16f302d771a881725b
 
-    if not valid_keys:
-        return JsonResponse({'message': 'No valid user settings provided'}, status=400)
+                # Decode the base64 string
+                format, imgstr = image_data.split(';base64,') 
+                ext = format.split('/')[-1]  # Extract the image format
+                if not ext:
+                    return JsonResponse({'message': 'No image extension provided'}, status=400)
+
+                supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
+                if ext not in supported_formats:
+                    return JsonResponse({'error': 'Unsupported image format'}, status=400)
+                logger.debug(f"ext '{ext}', format '{format}'")
+
+                # Convert base64 string to image
+                img_data = base64.b64decode(imgstr)
+                img = Image.open(BytesIO(img_data))
+
+                # Generate a unique file name
+                file_name = f"{uuid.uuid4()}.{ext}"
+                avatars_dir = os.path.join('avatars', file_name)
+                file_path = os.path.join(settings.MEDIA_ROOT, avatars_dir)
+                try:
+                    os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
+                    with open(file_path, 'wb') as f:
+                        img.save(f, format=supported_formats[ext])
+                        #return JsonResponse({'message': 'Image uploaded successfully', 'file_name': avatars_dir})
+                        setattr(user,'avatar',avatars_dir)
+                except Exception as e:
+                    logger.error(f"Error saving image: {e}")
+                    return JsonResponse({'error': 'Failed to save image'}, status=500)
+            else:
+                setattr(user, key, value)
+                updated_fields.append(key)
+                logger.debug(f"Actualizada la key {key} a {value}")
+        else:
+            return JsonResponse({'message': 'No valid user settings provided'}, status=400)
 
     try:
         user.save()

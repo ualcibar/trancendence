@@ -6,9 +6,12 @@ class LightUserInfoSerializer(serializers.ModelSerializer):
         fields = ('id','username','status')
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    avatarUrl = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ('id','username', 'status','color', 'wins', 'loses')
+        fields = ('id','username', 'status','color', 'wins', 'loses', 'avatarUrl')
+    def get_avatarUrl(self, instance):
+        return f'https://localhost:1501/api/media/{instance.avatar}'
 
 class PrivateUserInfoSerializer(serializers.ModelSerializer):
     info = UserInfoSerializer(source='*')
