@@ -20,7 +20,7 @@ export class SettingsPPrivacyComponent {
 
   async anonymizeData() {
     try {
-      await this.authService.setUserConfig('anonymise', "");
+      await this.authService.setUserConfig({anonymise: ""});
     } catch (error: any) {
       console.error('❌ Oops!', error.message);
     }
