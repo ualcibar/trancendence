@@ -190,7 +190,6 @@ export class MatchmakingService implements MatchSync{
 
   //match manager
   private onlineManager? : OnlineMatchManager | undefined;
-  private connectedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
 /*  connectionInterval : Subscription;*/
   //logger
@@ -205,7 +204,7 @@ export class MatchmakingService implements MatchSync{
    // this.entries.set(GameType.Tournament,[]);
     //this.connectToServer();
     this.authService.subscribe((loggedIn: any) => {
-      if (loggedIn && !this.isConnected()) {
+      if (loggedIn && this.isClosed()) {
         this.connectToServer();
       } else if (!loggedIn && this.isConnected()) {
         this.disconectFromWebsocket();
@@ -222,8 +221,7 @@ export class MatchmakingService implements MatchSync{
 
   //GENERAL
   isConnected() : boolean{
-    return this.connectedSubject.value;
-    //return this.webSocket?.readyState === WebSocket.OPEN;
+    return this.webSocket !== undefined && this.webSocket.readyState === WebSocket.OPEN
   }
   isClosed() : boolean{
     return this.webSocket === undefined || this.webSocket.readyState === WebSocket.CLOSED;
@@ -233,8 +231,9 @@ export class MatchmakingService implements MatchSync{
     if (this.webSocket) {
       this.webSocket.close();
       this.webSocket = undefined;
+      this.stateService.changeMultiplayerState(MatchmakingState.Disconnected)
     }
-    this.connectedSubject.next(false);
+    
   }
 
   getMatches() : OnlineMatchSettings2[]{
@@ -307,25 +306,27 @@ export class MatchmakingService implements MatchSync{
   }
 
   connectToServer() {
+    if (this.isConnected()) {
+      return;
+    }
     const jwtToken = this.authService.getCookie('access_token');
     if (jwtToken == null) {
       this.logger.info('failed to get cookie access token, log in');
+      return;
     }
     this.webSocketUrl = `${this.webSocketUrl}?token=${jwtToken}`;
     this.webSocket = new WebSocket(this.webSocketUrl);
     this.webSocket.onopen = () => {
-      this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-      this.connectedSubject.next(true);
+      this.stateService.changeMultiplayerState(MatchmakingState.StandBy); 
       this.logger.info('WebSocket connection opened');
-      this.reloadMatches();
-      this.sendMessage(JSON.stringify({type : '/getStatus'}));
+      //this.reloadMatches();
+     // this.sendMessage(JSON.stringify({type : '/getStatus'}));
     };
     this.webSocket.onerror = () => {
       this.logger.error('error on websocket')
     }
     this.webSocket.onclose = () => {
-      this.stateService.changeMultiplayerState(MatchmakingState.Disconnected);
-      this.connectedSubject.next(false);
+      this.stateService.changeMultiplayerState(MatchmakingState.Disconnected); 
       this.logger.info('websocket closed')
     };
     this.webSocket.onmessage = (event) => {

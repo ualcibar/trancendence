@@ -38,6 +38,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_add)(self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.global_room_name, self.channel_name)
         self.accept()
+        logger.debug('Accepted matchmaking connection')
         if self.user.previous_status == CustomUser.IN_GAME:
             if self.user.game == None or self.user.game_room_name == None:
                 self.user.game = None

@@ -182,17 +182,7 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-<<<<<<< HEAD
-    valid_keys = ['user_color', 'user_language', 'username', 'email', 'avatarUrl']
-
-    for key, value in data.items():
-        if key in valid_keys:
-            if key == 'avatarUrl':
-                image_data = value
-                if not image_data:
-                    return JsonResponse({'message': 'No image provided'}, status=400)
-=======
-    valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise']
+    valid_keys = ['user_color', 'user_language', 'username', 'email', 'avatarUrl','anonymise']
 
     for key, value in data.items():
         if key in valid_keys:
@@ -204,7 +194,7 @@ def setUserConfig(request, user_id=None):
                 user.set_password(value)
                 updated_fields.append(key)
                 logger.debug(f"Actualizada la key {key}")
-            if key == 'anonymise':
+            elif key == 'anonymise':
                 if not user.is_anonymized:
                     random_str = str(uuid.uuid4())
                     hashed_username = hashlib.md5(random_str.encode()).hexdigest()[:8]
@@ -218,13 +208,8 @@ def setUserConfig(request, user_id=None):
                     updated_fields.append(key)
                 else:
                     logger.debug(f"El usuario ya está anonimizado")
-            else:
-                setattr(user, key, value)
-                updated_fields.append(key)
-                logger.debug(f"Actualizada la key {key} a {value}")
->>>>>>> a16afc054244c6306261bb16f302d771a881725b
-
-                # Decode the base64 string
+            elif key == 'avatarUrl':
+                image_data = value
                 format, imgstr = image_data.split(';base64,') 
                 ext = format.split('/')[-1]  # Extract the image format
                 if not ext:

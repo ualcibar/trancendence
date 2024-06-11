@@ -3,7 +3,7 @@ import { NgZone } from '@angular/core';
 import {AuthService} from './auth.service';
 import { BehaviorSubject } from 'rxjs';
 import { LogFilter, Logger } from '../utils/debug';
-import { ChatState, StateService } from './stateService';
+import { ChatState, MatchmakingState, StateService } from './stateService';
 
 export class Message {
   message : string = '';
@@ -31,8 +31,7 @@ export class ChatService {
   webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
   webSocket: WebSocket | undefined;
 
-  //chat
-  private connectedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  //chat 
   chatMessages: Map<string, Message[]> = new Map<string, Message[]>();
   current_chat_name: string = '#global';
   users: Set<string> = new Set<string>();
@@ -43,7 +42,7 @@ export class ChatService {
   constructor(private ngZone: NgZone, private authService: AuthService, private state: StateService) {
     this.chatMessages.set('#global', []);
     this.authService.subscribe((loggedIn: any) => {
-      if (loggedIn && !this.isConnected()) {
+      if (loggedIn && this.isClosed()) {
         this.connectToWebsocket();
       } else if (!loggedIn && this.isConnected()) {
         this.disconectFromWebsocket();
@@ -68,13 +67,13 @@ export class ChatService {
     this.webSocket.onopen = () => {
       console.log('Chat websocket connection opened');
       this.state.changeChatState(ChatState.Connected);
-      this.connectedSubject.next(true);
+      //this.connectedSubject.next(true);
     }
 
     this.webSocket.onclose = () => {
       console.log('Chat websocket connection closed');
       this.state.changeChatState(ChatState.Disconnected);
-      this.connectedSubject.next(false);
+      //this.connectedSubject.next(false);
     }
 
     this.webSocket.onerror = (error) => {
@@ -134,12 +133,18 @@ export class ChatService {
     if (this.webSocket) {
       this.webSocket.close();
       this.webSocket = undefined;
+      this.state.changeChatState(ChatState.Disconnected)
     }
-    this.connectedSubject.next(false);
+    //this.connectedSubject.next(false);
   }
 
   isConnected(): boolean{
-    return this.connectedSubject.value;
+    return this.webSocket !== undefined && this.webSocket.readyState === this.webSocket.OPEN
+    //return this.connectedSubject.value;
+  }
+
+  isClosed() : boolean{
+    return this.webSocket === undefined || this.webSocket.readyState === this.webSocket.CLOSED
   }
 
   getKeys() : string[]{
