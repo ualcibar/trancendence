@@ -35,6 +35,7 @@ export interface UserInfoI extends LighUserInfoI{
   color : string;
   wins : number;
   loses : number;
+  avatarUrl : string;
 }
 
 enum UserStatus{
@@ -51,13 +52,15 @@ export class UserInfo{
   color : string;
   wins : number;
   loses : number;
-  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number){
+  avatarUrl : string;
+  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number, avatarUrl : string){
     this.username = username;
     this.id = user_id;
     this.status = status;
     this.color = color;
     this.wins = wins;
     this.loses = loses;
+    this.avatarUrl = avatarUrl;
   }
   static fromI(values : UserInfoI) : UserInfo | undefined{
     console.log('status', values.status)
@@ -66,7 +69,7 @@ export class UserInfo{
       console.error('user info: fromI: failed to parse status enum:', values.status)
       return undefined
     }
-    return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses)
+    return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses, values.avatarUrl)
   }
 }
 export interface PrivateUserInfoI{ 
@@ -328,10 +331,10 @@ export class AuthService {
         return decodeURIComponent(cookie.substring(nameLenPlus));
       })[0] || null;
   }
-  async setUserConfig(type: string, value: string): Promise<void> {
+  async setUserConfig(content : any): Promise<void> {
     if (this.userInfo) {
       const backendURL = '/api/polls/setConfig/' + this.userInfo.info.id;
-      const httpReqBody = { [type]: value };
+      const httpReqBody = content;
       const httpHeader = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json'

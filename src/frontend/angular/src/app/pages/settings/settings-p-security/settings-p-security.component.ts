@@ -33,7 +33,7 @@ export class SettingsPSecurityComponent {
 
   async saveSecurity() {
     try {
-      await this.authService.setUserConfig('email', this.email);
+      await this.authService.setUserConfig({email : this.email});
       this.currentEmail = this.email;
       this.alreadyUsed = false;
       this.mailChanged = true;
