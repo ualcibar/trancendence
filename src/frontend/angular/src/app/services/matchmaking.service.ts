@@ -9,7 +9,7 @@ import { toEnum } from '../utils/help_enum';
 import { EventData, PongEventType } from '../utils/behaviour';
 import { LogFilter, Logger } from '../utils/debug';
 import { MatchmakingState, StateService } from './stateService';
-import { Observable, Subscription, interval } from 'rxjs';
+import {Observable, Subscription, interval, BehaviorSubject} from 'rxjs';
 
 export enum MatchMakingState{
   Standby = 'standby',
@@ -171,7 +171,7 @@ export interface MatchSync{
 export class MatchmakingService implements MatchSync{
   //backend connection
   webSocketUrl = 'wss://localhost:1501/ws/matchmaking/global/';
-  webSocket! : WebSocket;
+  webSocket: WebSocket | undefined;
 
   //state of the service
   //state : State<MatchMakingState> = new State<MatchMakingState>(MatchMakingState.Standby);
@@ -190,8 +190,9 @@ export class MatchmakingService implements MatchSync{
 
   //match manager
   private onlineManager? : OnlineMatchManager | undefined;
+  private connectedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-  connectionInterval : Subscription;
+/*  connectionInterval : Subscription;*/
   //logger
   logger : Logger = new Logger(LogFilter.MatchmakingServiceLogger, 'matchmaking :')
 
@@ -203,21 +204,37 @@ export class MatchmakingService implements MatchSync{
    // this.entries.set(GameType.Match, []);
    // this.entries.set(GameType.Tournament,[]);
     //this.connectToServer();
-    this.connectionInterval = interval(1000)
+    this.authService.subscribe((loggedIn: any) => {
+      if (loggedIn && !this.isConnected()) {
+        this.connectToServer();
+      } else if (!loggedIn && this.isConnected()) {
+        this.disconectFromWebsocket();
+      }
+    })
+
+/*    this.connectionInterval = interval(1000)
       .subscribe(() => {
         if (this.authService.amIloggedIn && this.isClosed()) {
           this.connectToServer();
         }
-      });
-
+      });*/
   }
 
   //GENERAL
   isConnected() : boolean{
-    return this.webSocket?.readyState === WebSocket.OPEN;
+    return this.connectedSubject.value;
+    //return this.webSocket?.readyState === WebSocket.OPEN;
   }
   isClosed() : boolean{
     return this.webSocket === undefined || this.webSocket.readyState === WebSocket.CLOSED;
+  }
+
+  disconectFromWebsocket() {
+    if (this.webSocket) {
+      this.webSocket.close();
+      this.webSocket = undefined;
+    }
+    this.connectedSubject.next(false);
   }
 
   getMatches() : OnlineMatchSettings2[]{
@@ -298,6 +315,7 @@ export class MatchmakingService implements MatchSync{
     this.webSocket = new WebSocket(this.webSocketUrl);
     this.webSocket.onopen = () => {
       this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
+      this.connectedSubject.next(true);
       this.logger.info('WebSocket connection opened');
       this.reloadMatches();
       this.sendMessage(JSON.stringify({type : '/getStatus'}));
@@ -307,6 +325,7 @@ export class MatchmakingService implements MatchSync{
     }
     this.webSocket.onclose = () => {
       this.stateService.changeMultiplayerState(MatchmakingState.Disconnected);
+      this.connectedSubject.next(false);
       this.logger.info('websocket closed')
     };
     this.webSocket.onmessage = (event) => {

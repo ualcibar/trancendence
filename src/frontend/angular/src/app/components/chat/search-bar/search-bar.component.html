@@ -1,4 +1,4 @@
-<div id="sp-div" class="alert alert-dark alert-dismissible flex flex-col justify-start items-start" (keydown)="onKeyPress($event)">
+<div class="sp-div alert alert-dark alert-dismissible flex flex-col justify-start items-start" (keydown)="onKeyPress($event)">
 	<h1 class="text-xl"><i class="bi bi-person-raised-hand"></i> Who do you want to chat with?</h1>
 	<button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close" (click)="onBlur()"></button>
 	<form autofocus class="w-full" (keydown)="onKeyPress($event)" (submit)="onFormSubmit()">
@@ -18,9 +18,9 @@
 			</ng-container>
 		</ng-container>
 	</form>
-	<div *ngIf="errorMessage" class="alert alert-warning alert-dismissible fade show" style="margin-bottom: -10px;" role="alert">
+	<div *ngIf="errorMessage" class="alert alert-warning alert-dismissible fade show" style="margin-bottom: -10px;" role="alert" [@easeOut]>
 		<i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
-		<button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close" [@fadeInOut]></button>
+		<button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div>
 </div>
 

@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   frontend:
     container_name: frontend
@@ -20,7 +20,6 @@ services:
     networks:
       - bridge
     env_file:
-      - ./database/.env
       - ./.env
     expose:
       - "5432"

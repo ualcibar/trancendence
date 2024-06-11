@@ -4,29 +4,27 @@ import { ActivatedRoute } from '@angular/router';
 
 import { AuthService, PrivateUserInfo, UserInfo } from '../../../services/auth.service';
 
+import { easeOut } from "../../../../assets/animations/easeOut";
+
 @Component({
   selector: 'app-user-profile',
+  animations: [easeOut],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css'
 })
 export class UserProfileComponent {
   info? : UserInfo | undefined;
-  /*username = 'Loading...';
-  user_id: number = 0;
-  total: number = 0;
-  wins: number = 0;
-  defeats: number = 0;*/
-  user_not_found = false;
-  unauthorizedAccess = false;
-  loading = true;
-  editProfile = false;
-  logged_username: any;
-  //user_color: string = "default";
+  user_not_found: boolean = false;
+  unauthorizedAccess: boolean = false;
+
+  loading: boolean = true;
+  tooLong: boolean = false;
+
+  editProfile: boolean = false;
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Aquí obtenemos la última información del perfil del usuario
     this.authService.subscribe({
       next: (userInfo : PrivateUserInfo) => {
         if (userInfo) {
@@ -38,6 +36,11 @@ export class UserProfileComponent {
         }
       }
     })
+    if (this.loading) {
+      setTimeout(() => {
+        this.tooLong = true;
+      }, 7000);
+    }
   }
 
   getUserInfo(userId: number): void {
@@ -50,13 +53,6 @@ export class UserProfileComponent {
           console.error('failed to parse user info') 
         }
         this.info = info;
-        console.log('url:', this.info?.avatarUrl)
-        /*this.username = response['username'];
-        this.user_id = response['userid'];
-        this.total = response['total'];
-        this.wins = response['wins'];
-        this.defeats = response['defeats'];
-        this.user_color = response['color'];*/
 
         this.loading = false;
         if (this.authService.userInfo!.info.username === this.info?.username) {

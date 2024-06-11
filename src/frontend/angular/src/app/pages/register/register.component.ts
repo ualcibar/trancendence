@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { fadeInOut } from '../../../assets/animations/fadeInOut';
-import { AuthService } from '../../services/auth.service';
+import { easeOut } from '../../../assets/animations/easeOut';
+import {AuthService, PrivateUserInfo} from '../../services/auth.service';
 
 @Component({
     selector: 'app-register',
-    animations: [fadeInOut],
+    animations: [easeOut],
     templateUrl: './register.component.html',
     styleUrl: './register.component.css'
 })
@@ -17,12 +16,23 @@ export class RegisterComponent {
         password: '',
         email: ''
     };
-    errorMessage: string = '';
-    successMessage: string = '';
+    usernameUsed: boolean = false;
+    formSent: boolean = false;
+    internalError: boolean = false;
 
-    constructor(private authService : AuthService) {}
+    success: boolean = false;
+    error: boolean = false;
 
-    ngOnInit(): void {
+    constructor(private authService : AuthService, private router: Router) {}
+
+    ngOnInit() {
+        this.authService.subscribe({
+            next: (userInfo : PrivateUserInfo) => {
+                if (userInfo) {
+                    this.router.navigate(['/']);
+                }
+            }
+        })
     }
 
     register42Api() {
@@ -30,15 +40,24 @@ export class RegisterComponent {
     }
 
     registerAcc() {
-        this.authService.registerAcc(this.user.username, this.user.password, this.user.email).subscribe(
-            {
-                next: (response) => {
-                    this.successMessage = response.message;
+        this.formSent = true;
+        this.authService.registerAcc(this.user.username, this.user.password, this.user.email).subscribe({
+            next: () => {
+                this.error = false;
+                this.success = true;
+                this.formSent = false;
                 },
-                error: (error) => {
-                    console.error('An error ocurred registering this account component:', error.status);
-                    this.errorMessage = error.error.reason;
+            error: (error) => {
+                this.success = false;
+                const errorMsg = error.error.message;
+                if (errorMsg.includes("already exists")) { //El nombre de usuario ya está en uso
+                    this.usernameUsed = true;
+                } else if (errorMsg.includes("Internal Server Error")) { // Error interno
+                    this.internalError = true;
                 }
-            })
+                this.error = true;
+                this.formSent = false;
+            }
+        })
     }
 }

@@ -93,7 +93,6 @@ CHANNEL_LAYERS = {
     }
 }
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -103,13 +102,12 @@ DATABASES = {
         'NAME': os.environ.get('POSTGRES_DB'),
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'postgre',  # Or your database server IP address
-        'PORT': '5432',       # PostgreSQL default port}
-    }
+        'HOST': 'postgre',
+        'PORT': '5432',
+    },
 }
 
 # CORS
-
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = ['http://localhost:4200', 'http://0.0.0.0:4200', 'https://localhost:1501']
 CSRF_TRUSTED_ORIGINS = ['http://localhost:4200', 'http://0.0.0.0:4200', 'https://localhost:1501']
@@ -146,7 +144,7 @@ SIMPLE_JWT = {
   # custom
   'AUTH_COOKIE': 'access_token',  # Cookie name. Enables cookies if value is set.
   'AUTH_COOKIE_DOMAIN': None,     # A string like "example.com", or None for standard domain cookie.
-  'AUTH_COOKIE_SECURE': False,    # Whether the auth cookies should be secure (https:// only).
+  'AUTH_COOKIE_SECURE': True,    # Whether the auth cookies should be secure (https:// only).
   'AUTH_COOKIE_HTTP_ONLY' : False, # Http only cookie flag.It's not fetch by javascript.
   'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
   'AUTH_COOKIE_SAMESITE': 'Lax',  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
@@ -200,6 +198,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "OPTIONS": {
+            "min_length": 6,
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -214,11 +215,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'Europe/Madrid'
 USE_I18N = True
-
 USE_TZ = True
 
 

@@ -1,13 +1,13 @@
-<div class="h-full"><!--h-full da problemas con scroll-->
+<div class="h-50real"><!--h-full da problemas con scroll-->
+	<!--<button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button>-->
 	<div *ngIf="debug">
+        <p class="text-gray-500">Modo debug activado</p>
 		<p class="text-white">chat websocket state: {{chatService.isConnected()}}</p>
 		<p class="text-white">matchmaking websocket state: {{matchmakingService.isConnected()}}</p>
 		<p class="text-white">matchmaking state : {{MatchmakingState[state.matchmakingState]}}</p>
 		<p class="text-white">current online match state: {{matchmakingService.getCurrentMatchState()}}</p>
-		<p class="text-gray-500">to take this messages away set debug in home.component to false(unai ponlo abajo que
-			este mensaje desaparece)</p>
 	</div>
-	<div class="flex h-full"><!--h-full da problemas con scroll-->
+	<div class="flex h-full">
 		<!--button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button-->
 		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="flex chat" [@fadeInOut]></app-chat>
 		<div class="flex flex-col justify-center items-center h-auto w-full">

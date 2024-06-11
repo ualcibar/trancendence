@@ -43,7 +43,11 @@ export class SettingsPColorComponent {
 
   async saveColor() {
     try {
+<<<<<<< HEAD
       await this.authService.setUserConfig({user_color : this.selected_colorId});
+=======
+      await this.authService.setUserConfig('color', this.selected_colorId);
+>>>>>>> a16afc054244c6306261bb16f302d771a881725b
       this.user_color = this.selected_colorId;
     } catch (error) {
       console.error('❌ An error ocurred:', error);

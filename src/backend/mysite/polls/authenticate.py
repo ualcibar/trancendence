@@ -12,24 +12,19 @@ logger = logging.getLogger('std')
 
 class CustomAuthentication(JWTAuthentication):
     def authenticate(self, request):
-        logger.debug('custom authentication class is being used')
         if request is None:
             return None
-        #logger.debug('custom authentication class request exists')
+
         header = self.get_header(request)
         if header is None:
-            #logger.debug('custom authentication class  header doesn\'t exists')
             raw_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE']) or None
-            #logger.debug(f'custom authentication class token doesn\'t exist after value: {raw_token}')
         else:
-            #logger.debug('custom authentication class header exists')
             raw_token = self.get_raw_token(header)
+
         if raw_token is None:
-            #logger.debug('custom authentication class token doesn\'t exist')
             return None
-        #logger.debug('custom authentication class token exist')
         validated_token = self.get_validated_token(raw_token)
-        #logger.debug('success')
+
         return self.get_user(validated_token), validated_token
 
 from channels.middleware import BaseMiddleware

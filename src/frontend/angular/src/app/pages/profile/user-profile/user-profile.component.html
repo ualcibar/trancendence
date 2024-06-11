@@ -5,13 +5,14 @@
 	<p class="text-center pt-8 text-slate-400">You don't have any friends :(</p>
 </div> -->
 
-<div id="sp-div" *ngIf="loading; else content" class="flex flex-col items-center justify-center rounded" style="width: 20rem;">
-	<h1 class="m-4 text-white">Loading data... </h1>
+<div *ngIf="loading; else content" class="sp-div flex flex-col items-center justify-center rounded text-white" style="width: 20rem;">
+	<h1 class="m-4">Loading user profile... </h1>
 	<div class="spinner-border text-warning mb-4" role="status"></div>
+    <p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>If it is taking too long, please check that you are logged in</p>
 </div>
 
 <ng-template #content>
-	<div *ngIf="!user_not_found && !unauthorizedAccess && info" id="sp-div" class="items-center p-2 max-w-xl md:max-w-4xl md:flex-row mx-auto h-fixed rounded-xl">
+	<div *ngIf="!user_not_found && !unauthorizedAccess && info" class="sp-div items-center p-2 max-w-xl md:max-w-4xl md:flex-row mx-auto h-fixed rounded-xl">
 		<div class="md:shrink-0 flex items-center">
 			<div class="w-full shadow-md rounded">
 				<div [ngClass]="'gradient-id-' + info.color" class="md:flex rounded">
@@ -25,7 +26,7 @@
 					</div>
 					<div *ngIf="editProfile" class="ml-auto m-8">
 						<div class="lg:tooltip" data-tip="User Settings">
-							<a routerLink="/settings"><button class="btn btn-active btn-neutral ml-2"><i class="bi bi-gear-fill text-2xl"></i></button></a>
+							<a routerLink="/settings"><button class="btn btn-active btn-warning ml-2"><i class="bi bi-gear-fill text-2xl"></i></button></a>
 						</div>
 					</div>
 				</div>

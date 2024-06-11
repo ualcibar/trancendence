@@ -1,19 +1,20 @@
-<div id="sp-div" *ngIf="loading; else content" class="loading-tab flex flex-col items-center justify-center rounded" style="width: 20rem;">
-	<h1 class="m-4">Loading data... </h1>
+<div *ngIf="loading; else content" class="sp-div loading-tab flex flex-col items-center justify-center rounded text-white" style="width: 20rem;">
+	<h1 class="m-4">Loading user settings... </h1>
 	<div class="spinner-border text-warning mb-4" role="status"></div>
+    <p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>If it is taking too long, please check that you are logged in</p>
 </div>
 
 <ng-template #content>
 	<div class="settings-tab container-fluid d-flex justify-content-center align-items-center">
 		<div class="static mx-auto col-12 col-md-6">
 			<div class="flex items-center mb-2">
-				<a routerLink="/profile/{{authService.userInfo!.info.id}}">
+				<a routerLink="/profile/{{ userId }}">
 					<button type="button" class="mr-2 btn btn-warning rounded-full"><i class="text-xl bi bi-arrow-left"></i> {{'return'|translate}}</button>
 				</a>
 				<h2 class="text-2xl text-sp-text font-bold">{{'settings_title'|translate}}</h2>
 			</div>
 			<div class="flex flex-col md:flex-row">
-				<div id="sp-div" class="settings-tab-margin pb-4 md:flex-row h-fit rounded">
+				<div class="sp-div settings-tab-margin pb-4 md:flex-row h-fit rounded">
 					<ul class="pl-4 mr-4 mt-4 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
 						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_pro'|translate}}</h2>
 						<li (click)="activeTab = 'color'" [ngClass]="{'selected': activeTab === 'color'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-palette-fill"></i> {{'settings_tab_content_color'|translate}}</a></li>

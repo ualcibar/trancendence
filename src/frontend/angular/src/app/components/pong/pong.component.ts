@@ -2,13 +2,14 @@ import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Input } fro
 import * as THREE from 'three';
 import { Vector2, Vector3} from 'three';
 import { Subscription } from 'rxjs';
-
+import * as key from 'keymaster';
 
 import {GameManagerService, GameManagerState, Manager, MatchSettings, MatchState, MatchUpdate } from '../../services/gameManager.service';
 import { Router } from '@angular/router';
 
 import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, PongEventType, EventData, TickObject } from '../../utils/behaviour';
 import { MapSettings } from '../../services/map.service';
+import { CommonModule } from '@angular/common';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -19,20 +20,6 @@ export const colorPalette = {
   white: 0xFFFFFF,
   black: 0x000000,
 };
-
-/*class Light{
-  const color = this.map.defaultlightColor;
-  const intensity = this.map.defaultLightIntensity;
-  const light = new THREE.DirectionalLight(color, intensity);
-  const X = this.map.defaultLightPositionX;
-  const Y = this.map.defaultLightPositionY;
-  const Z = this.map.defaultLightPositionZ;
-  light.position.set(X, Y, Z);
-
-  constructor(color, intensity, ){
-
-  }
-}*/
 
 export enum PaddleState{
   Binded = 'binded', //must be keybinded moved by ourselfs
@@ -55,32 +42,98 @@ export interface GameObject{
 }
 
 export class Ball implements GameObject, EventObject,  TickObject, toJson{
+  mesh : THREE.Mesh;
+  light! : THREE.PointLight;
+
+  radius : number;
+  speed : number;
+  aceleration : number;//after a collision
+  colorChange : boolean;
+
   eventBehaviour : EventBehaviour<Ball>;
   tickBehaviour : TickBehaviour<Ball>;
   private id! : number;
   _dir: Vector2 = new Vector2(0,0);
-  speed: number;
   pos : Vector2;
   lightOn : boolean;
-  lightColor : number;
-  lightIntensity : number;
 
-  constructor(dir: Vector2, speed: number, lightOn : boolean, pos : Vector2,
-    lightColor : number, lightIntensity : number, manager : Manager) {
+  constructor(settings : MapSettings, manager : Manager) {
+    this.radius = settings.ballRadius;
+    const widthSegments = settings.ballWidthSegments;
+    const heightSegments = settings.ballHeightSegments;
+    const ballGeometry = new THREE.SphereGeometry(this.radius, widthSegments, heightSegments);
+    const ballColor = settings.ballColor;
+    const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
+    this.mesh = new THREE.Mesh(ballGeometry, ballMaterial);
+
+    this.pos = settings.ballInitPos;
+    this.dir = settings.ballInitDir;
+    this.speed = settings.ballInitSpeed;
+    this.aceleration = settings.ballInitAcceleration;
+
+    this.lightOn = settings.ballLightIsOn;
+    if (this.lightOn) {
+      const color = ballColor;
+      const intensity = settings.ballLightIntensity;
+      this.light = new THREE.PointLight( color, intensity );
+    }
+
+    this.colorChange = settings.collisionChangeBallColor;
+
     //this.id = manager.subscribeGameObject(this);
-    this.dir = dir;
-    this.speed = speed;
     this.eventBehaviour = new EventBehaviour<Ball>(this, manager);
     this.tickBehaviour = new TickBehaviour<Ball>(this);
-    this.pos = pos;
-    this.lightOn = lightOn;
-    this.lightColor = lightColor;
-    this.lightIntensity = lightIntensity; 
+  }
+
+
+  addToScene(scene: THREE.Scene) {
+    console.log('adding ball to scene');
+    scene.add(this.mesh);
+    if (this.lightOn)
+      scene.add(this.light);
+  }
+
+  sincronize(ball : Ball){
+    this.position.set(ball.pos.x, ball.pos.y, 0);
+    this.dir = ball.dir;
+    this.speed = ball.speed;
+  }
+
+  update(timeDelta : number) {
+    const ballDiferentialDisplacement = timeDelta * this.speed;
+    this.mesh.position.x -= ballDiferentialDisplacement * Math.cos(this.angle);
+    this.mesh.position.y -= ballDiferentialDisplacement * Math.sin(this.angle);
+    this.light.position.x = this.mesh.position.x;
+    this.light.position.y = this.mesh.position.y;
+    this.pos.x = this.mesh.position.x;
+    this.pos.y = this.mesh.position.y;
+  }
+
+  changeColor(color: number) {
+    this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+    if (this.lightOn)
+      this.light.color = new THREE.Color(color);
+  }
+
+  yCollision(y: number) {// y is the ideal position of the ball when it collides
+    this.dir.y = -this.dir.y;
+    this.pos.y = y;
+    this.speed += this.aceleration * this.speed;
+    if (this.colorChange)
+      this.changeColor(Math.random() * 0xFFFFFF);
+  }
+
+  xCollision(x: number) {// x is the ideal position of the ball when it collides
+    this.dir.x = -this.dir.x;
+    this.pos.x = x;
+    this.speed += this.aceleration * this.speed;
+    if (this.colorChange)
+      this.changeColor(Math.random() * 0xFFFFFF);
   }
 
   toJSON(): any {
-    const {pos, speed, dir, lightColor, lightIntensity, lightOn} = this;
-    return {pos, speed, dir, lightColor, lightIntensity, lightOn}; 
+    const {pos, speed, dir} = this;
+    return {pos, speed, dir}; 
     
   }
   runEvent(type: PongEventType, data : EventData): void {
@@ -114,6 +167,11 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     return Math.atan2(this.dir.y, this.dir.x);
   }
 
+  get position() : Vector3{
+    this.mesh.position.set(this.pos.x, this.pos.y, 0);
+    return this.mesh.position;
+  }
+
   set dirX(value : number){
     this.dir.x = value;
   }
@@ -124,6 +182,13 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
 
   set dir(value : Vector2){
     this._dir = value;
+  }
+
+  set position(value : Vector3){
+    this.mesh.position.copy(value);
+    this.light.position.copy(value);
+    this.pos.x = value.x;
+    this.pos.y = value.y;
   }
 
   subscribeToManager(manager : Manager): void {
@@ -178,6 +243,7 @@ export class Block implements GameObject, EventObject, TickObject, toJson{
     this.material = material;
     this.speed = 0;
   }
+  
   toJSON(): any {
     const { pos, dimmensions, type, speed, material } = this;
     return { pos, dimmensions, type, speed, material };  
@@ -209,37 +275,247 @@ export class Block implements GameObject, EventObject, TickObject, toJson{
 }
 
 
+// if (rightPaddle.isAI()) {
+//   if (time - pastIATime > 1) { // IA only sees the ball every second
+//     console.log('IA');
+//     pastIATime = time;
+//     let predictedBallY = 0;
+
+//     // IA PREDICTION
+//     predictedBallY = ball.getPosition().y +(Math.tan(ball.getAngle() - Math.PI) * (rightPaddle.getPosition().x - ball.getPosition().x)); //trigonometria
+//     const pseudoLimitMax = topWall.getPosition().y - topWall.height / 2 - ball.getRadius();
+//     const pseudoLimitMin = bottomWall.getPosition().y + bottomWall.height / 2 + ball.getRadius();
+//     while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
+//       if (predictedBallY > pseudoLimitMax) {
+//         predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
+//       }
+//       if (predictedBallY < pseudoLimitMin) {
+//         predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
+//       }
+//     }
+//     predictedBallY  += (Math.random() - Math.random()) * (rightPaddle.getWidth() - ball.getRadius())/2 ;
+//     if (ball.getAngle() < Math.PI / 2 || ball.getAngle() > 3 * Math.PI / 2) {
+//       predictedBallY = (predictedBallY + leftPaddle.getPosition().y) / 2;
+//     }
+//     rightPaddle.setAIprediction(predictedBallY);
+//   }
+// }
+
 export class Paddle implements GameObject, EventObject, TickObject, toJson{
+  mesh : THREE.Mesh;
+  speed : number;
+  friction : number;
+  deltaFactor : number;
+  height : number;
+  width : number;
+  upKey! : string;
+  downKey! : string;
+  goinUp : boolean = false;
+  goinDown : boolean = false;
+  localPlayer : boolean = false;
+  AIplayer : boolean = false;
+  AIprediction : number = 0;
+
   tickBehaviour : TickBehaviour<Paddle>;
   eventBehaviour : EventBehaviour<Paddle>;
   id! : number;
   pos : Vector2;
-  dir : Vector2;
+  dir : Vector2 = new Vector2(0,0);
   dimmensions : Vector3;
   type : BlockType;
   color : number;
-  speed : number;
   state : PaddleState;
 
-  constructor(pos : Vector2, dimmensions : Vector3, type : BlockType, color : number, dir : Vector2, speed : number, state : PaddleState, manager : Manager){
-    //this.id = manager.subscribeGameObject(this);
+  paused : boolean = false;
+
+  lastIAupdate : number = 0;
+
+  constructor(settings : MapSettings, number : number,manager: Manager){
+    this.width = settings.paddleWidth;
+    this.height = settings.paddleHeight;
+    const paddleDepth = settings.paddleDepth;
+    const paddleGeometry = new THREE.BoxGeometry(this.width, this.height, paddleDepth);
+    const paddleColor = settings.paddleColor;
+    const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
+    this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
+
+    this.speed = settings.paddleSpeed;
+    this.friction = settings.friction;
+    this.deltaFactor = settings.deltaFactor;
+
+
+    // this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
-    this.pos = pos;
-    this.dimmensions = dimmensions;
-    this.type = type;
-    this.color = color;
-    this.speed = speed;
-    this.state = state;
-    this.dir = dir;
+    this.pos = settings.paddleInitPos[number];
+    this.dimmensions = settings.paddleDimmensions;
+    this.type = settings.paddleType;
+    this.color = settings.paddleColor;
+    this.speed = settings.paddleSpeed;
+    this.state = settings.paddleState[number];
+
+    if (this.state === PaddleState.Binded) {
+      this.madeLocalPlayer();
+      this.upKey = settings.paddleUpKey[number];
+      this.downKey = settings.paddleDownKey[number];
+    }
   }
+
+  addToScene(scene: THREE.Scene) {
+    scene.add(this.mesh);
+  }
+
+  sincronize(paddle : Paddle){
+    this.position.set(paddle.pos.x, paddle.pos.y, 0);
+    this.dir = paddle.dir;
+  }
+
+  goUp() {
+    this.goinUp = true;
+    this.goinDown = false;
+    this.dir.y = +1;
+  }
+
+  goDown() {
+    this.goinDown = true;
+    this.goinUp = false;
+    this.dir.y = -1;
+  }
+
+  stop() {
+    this.goinDown = false;
+    this.goinUp = false;
+    this.dir.y = 0;
+  }
+
+  handleKeys() {
+    if (this.paused) {
+      this.stop();
+      return;
+    }
+    // console.log('handling keys');
+    if (key.isPressed(this.upKey) && !key.isPressed(this.downKey)) {
+      // console.log('going up');
+      this.goUp();
+    }
+    else if (key.isPressed(this.downKey) && !key.isPressed(this.upKey)) {
+      // console.log('going down');
+      this.goDown();
+    }
+    else {
+      this.stop();
+    }
+  }
+
+  isIAupdateable() : boolean{
+    return (Date.now() - this.lastIAupdate > 1000) // IA only sees the ball every second (1000ms)
+  }
+
+  updateAIprediction(prediction : number){
+    this.AIprediction = prediction;
+    this.lastIAupdate = Date.now();
+  }
+
+  handleIA(aiPrediction : number) {
+    if (this.paused) {
+      this.stop();
+      return;
+    }
+    const antiVibrationFactor = this.width / 4.2; // 42 is the answer to everything (yes, it's a magic number)
+    console.log('AI handling');
+    console.log('AI prediction', aiPrediction, '> paddle pos', this.pos.y);
+    if (this.pos.y < aiPrediction - antiVibrationFactor) {
+      this.goUp();
+      console.log('going up');
+    }
+    else if (this.pos.y > aiPrediction + antiVibrationFactor) {
+      this.goDown();
+      console.log('going down');
+    }
+    else {
+      this.stop();
+    }
+  }
+
+  update(timeDelta : number) {
+    console.error('dont use this with the new ai ')
+    // console.log('updating paddle!!!');
+    if (this.localPlayer) {
+      // console.log('local player');
+      this.handleKeys();
+    }
+    if (this.isAI()) {
+      // console.log('AI player');
+      //this.handleIA();
+    }
+
+    const paddleDiferentialDisplacement = timeDelta * this.speed;
+    // console.log('timeDelta AAAAAAAAAAAAAAAAAAAAAAA', timeDelta);
+    if (this.goinUp) {
+      // console.log('going up', paddleDiferentialDisplacement);
+      this.pos.y += paddleDiferentialDisplacement;
+    }
+    if (this.goinDown) {
+      this.pos.y -= paddleDiferentialDisplacement;
+    }
+  }
+
+  changeColor(color: number) {
+    this.mesh.material = new THREE.MeshPhongMaterial({color: color});
+  }
+
+  limitYmax(maxY: number) {
+    if (this.pos.y > maxY) {
+      this.pos.y = maxY;
+    }
+  }
+
+  limitYmin(minY: number) {
+    if (this.pos.y < minY) {
+      this.pos.y = minY;
+    }
+  }
+
+  madeLocalPlayer() {
+    this.localPlayer = true;
+    this.AIplayer = false;
+    this.state = PaddleState.Binded;
+  }
+
+  madeAIPlayer() {
+    this.localPlayer = false;
+    this.AIplayer = true;
+    this.state = PaddleState.Bot;
+  }
+
+  madeUnbinded() {
+    this.localPlayer = false;
+    this.AIplayer = false;
+    this.state = PaddleState.Unbinded;
+  }
+
   toJSON() : any{
-    const {pos, dimmensions,type, color, speed, dir} = this;
-    return {pos, dimmensions,type, color, speed, dir}; 
+    const {pos, dimmensions,type, color, speed, dir, AIprediction} = this;
+    return {pos, dimmensions,type, color, speed, dir, AIprediction}; 
+  }
+
+  isAI() : boolean{
+    if (this.state === PaddleState.Bot)
+      this.madeAIPlayer();
+    return this.AIplayer;
   }
 
   getId(): number {
     return this.id;
+  }
+
+  getState() : PaddleState{
+    return this.state;
+  }
+
+  get position() : Vector3{
+    this.mesh.position.set(this.pos.x, this.pos.y, 0);
+    return this.mesh.position;
   }
 
   runEvent(type: PongEventType, data: EventData): void {
@@ -269,6 +545,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   selector: 'app-pong',
   standalone: true,
   templateUrl: './pong.component.html',
+  imports : [ CommonModule],
   styleUrls: ['./pong.component.css']
 })
 export class PongComponent implements AfterViewInit, OnDestroy {
@@ -287,16 +564,18 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
   light!: THREE.Light;
-  balls: THREE.Mesh[] = [];
+  balls: Ball[] = [];
   ballsLight: THREE.Light[] = [];
   blocks: THREE.Mesh[] = [];//0 is top 1 is bottom
-  paddles: THREE.Mesh[] = [];
+  paddles: Paddle[] = [];
   pastTime: number = 0;
   lastUpdate: number = 0;
   currentMatchStateId = 0;
   @Input() map!: MapSettings;
   @Input() matchSettings!: MatchSettings;
   @Input() update!: MatchUpdate;
+
+  paused : boolean = false;
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
@@ -311,6 +590,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       console.error('pong, no game has been started');
       this.router.navigate(['/']);
     }
+
     this.initValues()
     this.configStateSubscription = this.manager.subscribeMatchState(//it was done befor it was set??
       (state: MatchState) => {
@@ -367,14 +647,39 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  pause() {
-    if (this.renderer) {
-      this.renderer.setAnimationLoop(null);//!todo
-      
+  // pause() {
+  //   this.paused = false;
+  //   if (this.renderer) {
+  //     this.renderer.setAnimationLoop(null);//!todo
+  //   }
+  // }
+
+  flipPause() {
+    if (this.paused) {
+      this.resume()
+    }
+    else {
+      this.pause()
     }
   }
 
+  pause() {
+    console.log('pausing');
+    this.paused = true;
+  }
+
+  resume() {
+    console.log('resuming');
+    this.paused = false;
+  }
+
   initScene(){
+    //for pause
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'p') {
+        this.flipPause();
+      }
+    });
     // INIT SCENE
     this.scene = new THREE.Scene();
 
@@ -388,23 +693,22 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.scene.add(this.light);
     }
 
-    // INIT BALL !TODO more than one ball
-    const ballGeometry = new THREE.SphereGeometry(this.map.ballRadius,
-      this.map.ballWidthSegments,
-      this.map.ballHeightSegments);
-    const ballMaterial = new THREE.MeshPhongMaterial({ color: this.map.ballColor });
-    const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-    this.balls.push(ball);
-    this.scene.add(ball);
+    // ADD ADDITIONAL LIGHTS
+    for (const light of this.map.additionalLights) {
+      this.scene.add(light);
+    }
 
-    // INIT BALL LIGHT
-    const ballLight = new THREE.PointLight(this.map.ballLightColor,
-      this.map.ballLightIntensity);
-    this.ballsLight.push(ballLight);
-    this.scene.add(ballLight);
+    // INIT BALL !TODO more than one ball
+    // const numberOfBalls = this.map.numberOfBalls;
+    const numberOfBalls = 1;
+    for (let i = 0; i < numberOfBalls ; i++) {
+      const ball = new Ball(this.map, this.manager);
+      ball.addToScene(this.scene);
+      this.balls.push(ball);
+    }
 
     // INIT PADDLES
-    this.paddles = new Array<THREE.Mesh>(this.update.paddles.length);
+    this.paddles = new Array<Paddle>(this.update.paddles.length);
     for (const [index, paddle] of this.update.paddles.entries()){
       const paddleGeometry = new THREE.BoxGeometry(
         paddle.dimmensions.x,
@@ -412,8 +716,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
         paddle.dimmensions.z
       );
       const paddleMaterial = new THREE.MeshPhongMaterial({ color: paddle.color });
-      this.paddles[index] = new THREE.Mesh(paddleGeometry, paddleMaterial);
-      this.scene.add(this.paddles[index]);
+      this.paddles[index] = new Paddle(this.map, index, this.manager);
+      this.paddles[index].addToScene(this.scene);
     }
     // INIT BLOCKS
     this.blocks = new Array<THREE.Mesh>(this.update.blocks.length);
@@ -433,7 +737,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
     this.updateScene();
     this.manager.setMatchState(MatchState.Initialized);
-
   }
 
   initValues() {
@@ -457,13 +760,25 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   render(time: number) {
     time *= 0.001; // convert time to seconds
-    let pastIATime = 0;
-    let predictedBallY = 0;
 
     if (this.pastTime === 0)
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
+
+
+    // DISPLAY TIME
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+
+    const timeElement = document.getElementById('time');
+    if (timeElement) {
+        timeElement.innerText = `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s `;
+    }
+    // if (key.isPressed('p')) {
+    //   console.log('pausing');
+    //   this.paused = !this.paused;
+    // }
 
     let before = Date.now()
     this.logic(timeDifference);
@@ -480,10 +795,90 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       requestAnimationFrame(this.render.bind(this));
   }
 
-  logic(timeDifference : number){ 
-    this.update.runTickBehaviour(timeDifference);
+  logic(timeDifference : number){
+    console.log('pausing', this.paused); 
+    if (!this.paused)
+      this.update.runTickBehaviour(timeDifference);
     this.allColisions();
+    //this.checkAI();
     this.updateScene();
+  }
+
+  makePrediction(paddle : Paddle){ // slightly hardcoded for default map
+    const ball = this.balls[0];
+    let predictedBallY = 0;
+
+    // IA PREDICTION
+
+    console.log('MAKING PREDICTION');
+
+    predictedBallY = ball.position.y +(Math.tan(ball.angle - Math.PI) * (paddle.position.x - ball.position.x)); //trigonometria
+    
+    // predict collision with walls
+    const topWallPos = this.map.blocks[2].pos;
+    const topWallDimmensions = this.map.blocks[2].dimmensions;
+    const bottomWallPos = this.map.blocks[3].pos;
+    const bottomWallDimmensions = this.map.blocks[3].dimmensions;
+    const pseudoLimitMax = topWallPos.y - topWallDimmensions.y / 2 - ball.radius;
+    const pseudoLimitMin = bottomWallPos.y + bottomWallDimmensions.y / 2 + ball.radius;
+    let i = 0;
+    while (predictedBallY > pseudoLimitMax || predictedBallY < pseudoLimitMin) {
+      if (predictedBallY > pseudoLimitMax) {
+        predictedBallY = pseudoLimitMax - (predictedBallY - pseudoLimitMax);
+      }
+      if (predictedBallY < pseudoLimitMin) {
+        predictedBallY = pseudoLimitMin - (predictedBallY - pseudoLimitMin);
+      }
+      i++;
+      if (i > 10) {
+        console.error('infinite loop');
+        break;
+      }
+    }
+
+    // randomize a bit the prediction (makes it more human like)
+    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius)/2 ;
+
+    // if the ball is going to the left, make the prediction less extreme
+    if (ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2) {
+      predictedBallY = (predictedBallY + this.paddles[0].position.y) / 2;
+    }
+
+    // update the prediction
+    // console.log('predictedBallY', predictedBallY);
+    // console.log('paddle', paddle);
+    // paddle.updateAIprediction(predictedBallY);
+    // console.log('prediction made');
+    // console.log('paddle', paddle);
+    // console.log('AI prediction', paddle.AIprediction);
+    this.sendIAprediction(paddle, predictedBallY);
+  }
+
+  sendIAprediction(paddle : Paddle, prediction : number){
+    console.log(paddle);
+    console.log(paddle.getId());
+    const eventData : EventData = {
+      senderId : paddle.getId(),// not sure about what is what
+      targetIds : paddle.getId(),
+      custom : {
+        others : {
+          prediction : prediction,
+        },
+      }
+    };
+    console.log('sending event IA prediction', eventData);
+    this.manager.sendEvent(PongEventType.IAPrediction, eventData);
+  }
+
+  checkAI(){
+    for (const paddle of this.paddles){
+      console.log('checking AI');
+      console.log('paddle', paddle);
+      if (paddle.isAI() && paddle.isIAupdateable()) {
+        console.log('IA¡!');
+        this.makePrediction(paddle);
+      }
+    }
   }
 
   allColisions(){
@@ -588,13 +983,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   updateScene(){//there should be a variable telling if it was changed
     for (const [index, ball] of this.update.balls.entries()){
-      this.balls[index].position.set(ball.pos.x, ball.pos.y, 0);
-      if (ball.lightOn)
-        this.ballsLight[index].position.set(ball.pos.x, ball.pos.y, 0);
+      this.balls[index].sincronize(ball);
     }
     for (const [index, paddle] of this.update.paddles.entries()){
-      this.paddles[index].position.set(paddle.pos.x, paddle.pos.y,0);
-      //this.paddles[index].material = new THREE.MeshPhongMaterial({ color: paddle.color });
+      this.paddles[index].sincronize(paddle);
     }
     for (const [index, block] of this.update.blocks.entries()){
       this.blocks[index].position.set(block.pos.x, block.pos.y, 0);
