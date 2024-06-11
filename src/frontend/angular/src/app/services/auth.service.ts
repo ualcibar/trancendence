@@ -266,7 +266,6 @@ export class AuthService {
     this._userInfo.setValue(undefined);
     setTimeout(() => {
       this.router.navigate(['/']);
-      //window.location.href = "/"; //Hay que mirar esto; si se cierra la sesión, no te cierra las sesiones de matchmaking ni chat ni nada
     }, 500)
   }
 
@@ -281,7 +280,7 @@ export class AuthService {
     console.info('Refresh token called');
     const refresh = this.getCookie('refresh_token');
     if (refresh === null){
-      console.error('Cant find refresh token. Are you logged in?')
+      console.warn("Couldn't find the refresh token. Are you logged in?")
       this._userInfo.setValue(undefined);
       return;
     }

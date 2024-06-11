@@ -28,6 +28,8 @@ export class SettingsComponent {
 
   activeTab: string | null =  'color';
 
+  userId: number = 0;
+
   constructor (public authService: AuthService) { }
 
   ngOnInit() {
@@ -36,6 +38,7 @@ export class SettingsComponent {
         if (userInfo) {
           this.tooLong = false;
           this.loading = false;
+          this.userId = userInfo!.info.id;
         }
       },
     })
