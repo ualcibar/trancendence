@@ -22,7 +22,7 @@
 							<h1 class="text-5xl font-bold">{{ info.username }}</h1>
 							<div class="w-4 h-4 rounded-full bg-green-400 ml-2 mt-2"></div>
 						</div>
-						<h1 class="text-gray-600" style="color: #a7bec4;">{{'profile_lastonline'|translate}}: 4/04/2084</h1>
+						<h1 class="text-gray-600" style="color: #a7bec4;">{{'profile_lastonline'|translate}}: {{ last_login }}</h1>
 					</div>
 					<div *ngIf="editProfile" class="ml-auto m-8">
 						<div class="lg:tooltip" data-tip="User Settings">

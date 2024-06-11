@@ -16,6 +16,7 @@ export class UserProfileComponent {
   info? : UserInfo | undefined;
   user_not_found: boolean = false;
   unauthorizedAccess: boolean = false;
+  last_login: string = "none";
 
   loading: boolean = true;
   tooLong: boolean = false;
@@ -28,8 +29,7 @@ export class UserProfileComponent {
     this.authService.subscribe({
       next: (userInfo : PrivateUserInfo) => {
         if (userInfo) {
-          this.route.params.subscribe(params => { // Esto hay que mirarlo, porquqe si lo del getUserInfo() falla por no estar con la sesión
-            // iniciada, entonces se queda "cargando" infinitamente
+          this.route.params.subscribe(params => {
             const userId = params['userId'];
             this.getUserInfo(userId);
           });
@@ -53,15 +53,12 @@ export class UserProfileComponent {
           console.error('failed to parse user info')
         }
         this.info = info;
+        this.last_login = response.last_login;
 
         this.loading = false;
-        if (this.authService.userInfo!.info.username === this.info?.username) {
+        if (this.authService.userInfo!.info.username === this.info?.username)
           this.editProfile = true;
-        } else if (this.info?.username === "admin") {
-          this.user_not_found = true;
-        } else {
-          this.user_not_found = false;
-        }
+        else this.user_not_found = this.info?.username === "admin";
       },
       error: (error) => {
         console.error('An error ocurred fetching this user: ', error.status);

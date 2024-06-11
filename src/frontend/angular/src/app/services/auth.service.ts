@@ -31,7 +31,7 @@ export class LightUserInfo{
   }
 }
 
-export interface UserInfoI extends LighUserInfoI{  
+export interface UserInfoI extends LighUserInfoI{
   color : string;
   wins : number;
   loses : number;
@@ -45,13 +45,14 @@ enum UserStatus{
 }
 
 export class UserInfo{
-  id : number;
-  username : string;
-  status : string;
-  color : string;
-  wins : number;
-  loses : number;
-  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number){
+  id: number;
+  username: string;
+  status: string;
+  color: string;
+  wins: number;
+  loses: number;
+  
+  constructor (username: string, user_id: number, status: UserStatus, color: string,wins:number, loses: number){
     this.username = username;
     this.id = user_id;
     this.status = status;
@@ -74,6 +75,7 @@ export interface PrivateUserInfoI{
   friends : UserInfoI[];
   language : string;
   email : string;
+  last_login : string;
 }
 
 export class PrivateUserInfo{
@@ -81,11 +83,14 @@ export class PrivateUserInfo{
   friends : UserInfo[];
   language : string;
   email : string;
-  constructor (info : UserInfo, friends : UserInfo[], language : string, email : string){
+  last_login : string;
+
+  constructor (info: UserInfo, friends: UserInfo[], language: string, email: string, last_login: string){
     this.info = info;
     this.friends = friends;
     this.email = email;
     this.language = language;
+    this.last_login = last_login;
   }
   static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
     
@@ -99,7 +104,7 @@ export class PrivateUserInfo{
     const userInfo = UserInfo.fromI(values.info)
     if (!userInfo)
       return undefined
-    return new PrivateUserInfo(userInfo, friends, values.language, values.email )
+    return new PrivateUserInfo(userInfo, friends, values.language, values.email, values.last_login)
   }
 }
 
