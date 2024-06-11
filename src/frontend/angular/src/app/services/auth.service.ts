@@ -224,25 +224,11 @@ export class AuthService {
         }, 1000);
       },
       error: (error) => {
-        this.logger.error('An error ocurred registering this account:', error.status);
+        this.logger.error('An error ocurred registering this account:', error.message);
       }
     })
     return register$;
   }
-  /*amILoggedIn(){
-    let backendURL = 'api/polls/imLoggedIn';
-    this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
-      next: () => {
-        this.logger.info("|!| You are logged in!")
-        this.updateUserInfo();
-      },
-      error: () => {
-        this.client_locale = navigator.language.substring(0,2);
-        this.translateService.setDefaultLang(this.client_locale);
-        this.translateService.use(this.client_locale);
-        this.refreshToken();
-      }
-    })*/
 
   async login(username : string, password : string): Promise<void> {
     const backendURL = 'api/polls/login/';
@@ -262,7 +248,7 @@ export class AuthService {
       console.error('private user info: ', privateUserInfo)
     console.log('info',this._userInfo, 'type', typeof this._userInfo)
     this._userInfo.setValue(privateUserInfo);
-    console.log("✔️ You've successfully logged in. Welcome!");
+    console.info("✔️ You've successfully logged in. Welcome!");
   }
 
   logout() {
@@ -275,6 +261,7 @@ export class AuthService {
         console.error('An error ocurred trying to contact the registration server: ', error);
       }
     });
+
     var accessToken = localStorage.getItem('access_token');
     this._userInfo.setValue(undefined);
     setTimeout(() => {
@@ -286,30 +273,28 @@ export class AuthService {
     const backendURL = '/api/polls/delete';
 
     await firstValueFrom(this.http.delete<any>(backendURL));
-    console.log("✔️ Account deletion processed. Thank you for playing SpacePong!");
+    console.info("✔️ Account deletion processed. Thank you for playing SpacePong!");
   }
 
   refreshToken(){
-    console.log('refresh token has been called in auth');
+    console.info('Refresh token called');
     const refresh = this.getCookie('refresh_token');
     if (refresh === null){
-      console.error('cant find refresh token')
+      console.warn("Couldn't find the refresh token. Are you logged in?")
       this._userInfo.setValue(undefined);
+      return;
     }
     const backendURL = 'api/polls/token/refresh/';
     this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
       next: (response) => {
         this.logger.info('success refresh?', response);
-        this.updateUserInfo(); 
-        //this.amILoggedIn();
+        this.updateUserInfo();
       },
       error: () => {
-       // return false;
        this.logger.error('failed refresh token')
        this._userInfo.setValue(undefined);
       }
     });
-    //return new Promise<boolean>(() => false);
   }
 
   getCookie(name: string): string | null {

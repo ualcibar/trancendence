@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { NgZone } from '@angular/core';
 import {AuthService} from './auth.service';
-import {BehaviorSubject, interval, Subscription} from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { LogFilter, Logger } from '../utils/debug';
 import { ChatState, StateService } from './stateService';
-import {HttpClient} from "@angular/common/http";
 
 export class Message {
   message : string = '';
@@ -31,10 +30,9 @@ export class ChatService {
   //backend connection
   webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
   webSocket: WebSocket | undefined;
-  connectionInterval: Subscription | undefined;
 
   //chat
-  private connectedSubject: BehaviorSubject<boolean> =  new BehaviorSubject<boolean>(false);
+  private connectedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   chatMessages: Map<string, Message[]> = new Map<string, Message[]>();
   current_chat_name: string = '#global';
   users: Set<string> = new Set<string>();
@@ -42,23 +40,18 @@ export class ChatService {
   //logger
   private  logger: Logger = new Logger(LogFilter.ChatServiceLogger, 'chatService :');
 
-  constructor(private http: HttpClient, private ngZone: NgZone, private authService: AuthService, private state: StateService) {
+  constructor(private ngZone: NgZone, private authService: AuthService, private state: StateService) {
     this.chatMessages.set('#global', []);
-/*    this.authService.isLoggedIn$.subscribe(loggedIn => {
+    this.authService.subscribe((loggedIn: any) => {
       if (loggedIn && !this.isConnected()) {
         this.connectToWebsocket();
       } else if (!loggedIn && this.isConnected()) {
         this.disconectFromWebsocket();
       }
-    });*/
-    this.connectionInterval = interval(1000).subscribe(() => {
-        if (this.authService.amIloggedIn && this.isClosed()) {
-            this.connectToWebsocket();
-        }
     });
   }
   
-/*  connectToWebsocket(){
+  connectToWebsocket() {
     if (this.isConnected()) {
       return;
     }
@@ -86,25 +79,6 @@ export class ChatService {
 
     this.webSocket.onerror = (error) => {
       console.error('Chat websocket error:', error);
-    };*/
-
-  connectToWebsocket() {
-    const jwtToken = this.authService.getCookie('access_token');
-    if (jwtToken == null) {
-      console.log('failed to get cookie access token, log in');
-    }
-    this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
-    this.webSocket.onopen = () => {
-      //this.never_connected = false;
-      this.logger.info('WebSocket connection opened');
-      this.state.changeChatState(ChatState.Connected)
-    };
-    this.webSocket.onclose = () => {
-      this.logger.info('WebSocket connection closed');
-      this.state.changeChatState(ChatState.Disconnected)
-    };
-    this.webSocket.onerror = (error) => {
-      this.logger.error('WebSocket error:', error);
     };
 
     this.webSocket.onmessage = (event) => {
@@ -165,12 +139,7 @@ export class ChatService {
   }
 
   isConnected(): boolean{
-    /*return this.connectedSubject.value;*/
-    return this.webSocket?.readyState === WebSocket.OPEN;
-  }
-
-  isClosed(): boolean{
-    return this.webSocket === undefined || this.webSocket.readyState === WebSocket.CLOSED;
+    return this.connectedSubject.value;
   }
 
   getKeys() : string[]{

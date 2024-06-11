@@ -11,7 +11,7 @@
     "username":"Usuario",
     "password":"Contraseña",
     "email":"Correo",
-    "register_title":"Regístrate a SpacePong!",
+    "register_title":"¡Regístrate a SpacePong!",
     "register_subtitle":"¿Ya eres usuario?",
     "register_subtitle_link":"Inicia sesión aquí",
     "register_username_tip":"Elige un nombre de usuario atractivo que se mostrará al resto de jugadores",

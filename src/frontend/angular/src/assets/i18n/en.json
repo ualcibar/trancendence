@@ -10,6 +10,7 @@
 
     "username":"Username",
     "password":"Password",
+    "email":"Email",
     "register_title":"Register to SpacePong!",
     "register_subtitle":"Already a user?",
     "register_subtitle_link":"Login here",

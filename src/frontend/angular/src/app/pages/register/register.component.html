@@ -1,4 +1,4 @@
-<div id="sp-div" class="mx-auto shadow-md rounded-xl overflow-hidden max-w-full md:max-w-2xl p-4 sm:p-6 md:p-8 items-center col-12 col-md-6">
+<div class="sp-div mx-auto shadow-md rounded-xl overflow-hidden max-w-full md:max-w-2xl p-4 sm:p-6 md:p-8 items-center col-12 col-md-6">
     <div class="p-4 sm:p-6 md:p-8">
 		<p class="text-center text-3xl font-semibold">{{'register_title'|translate}}</p>
 		<p class="text-center">{{'register_subtitle'|translate}}  <a routerLink="/login" class="text-amber-300">{{'register_subtitle_link'|translate}}</a></p>
@@ -10,17 +10,17 @@
 				<div id="usernameHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> {{'register_username_tip'|translate}}</div>
 			</div>
             <div class="form-floating mb-3">
-                <input type="text" name="email" [(ngModel)]="user.email" class="form-control shadow-none" id="emailInput" placeholder="amazingmail@spacepong.me" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" #email="ngModel">
+                <input type="email" name="email" [(ngModel)]="user.email" class="form-control shadow-none" id="emailInput" placeholder="amazingmail@spacepong.me" required pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" #email="ngModel">
                 <label for="emailInput" class="form-label"><i class="bi bi-at"></i> {{'email'|translate}}</label>
                 <div id="emailHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> Choose an email account as personal identification</div>
             </div>
 			<div class="form-floating mb-3">
-				<input name="password" [(ngModel)]="user.password" type="password" class="form-control shadow-none" id="passwordInput" placeholder="Password" required>
+				<input type="password" name="password" [(ngModel)]="user.password" class="form-control shadow-none" id="passwordInput" placeholder="Password" required pattern=".{6,}" #password="ngModel">
 				<label for="passwordInput" class="form-label"><i class="bi bi-incognito"></i> {{'password'|translate}}</label>
 				<div id="passwordHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> {{'register_password_tip'|translate}}</div>
 			</div>
             <div class="flex flex-col sm:flex-row items-center">
-                <button *ngIf="!formSent" [ngClass]="{'grayscale-0': !email.invalid,'grayscale disabled opacity-50': email.invalid}" type="submit" class="btn btn-warning">
+                <button *ngIf="!formSent" [ngClass]="{'grayscale-0': !email.invalid && !password.invalid,'grayscale disabled opacity-50': email.invalid || password.invalid}" type="submit" class="btn btn-warning">
                     <p class="mx-6 text-xs font-medium uppercase text-black">{{'profile_register'|translate}}</p>
 				</button>
                 <button *ngIf="formSent" type="submit" class="btn btn-warning grayscale disabled opacity-50">
@@ -39,16 +39,17 @@
 	</div>
 </div>
 
-<div *ngIf="error || (email.invalid && email.touched)" class="pt-6 flex items-center justify-center" [@easeOut]>
+<div *ngIf="error || (email.invalid && email.touched) || (password.invalid && password.touched)" class="pt-6 flex items-center justify-center" [@easeOut]>
 	<div class="alert alert-error alert-dismissible fade show max-auto max-w-xl">
 		<i class="bi bi-x-circle text-black"></i>
 		<div>
 			<h4 class="font-bold text-black">{{'error'|translate}}</h4>
             <p *ngIf="usernameUsed">Este nombre de usuario ya está en uso, elige otro.</p>
             <p *ngIf="email.invalid && email.touched">Este correo no es válido. Comprueba que lo hayas escrito bien.</p>
+            <p *ngIf="password.invalid && password.touched">Comprueba que la contraseña tenga más de 6 caracteres.</p>
             <p *ngIf="internalError">¡Ha ocurrido un error inesperado! Prueba otra vez.</p>
 		</div>
-        <button (click)="error = false; usernameUsed = false; internalError = false;" type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button *ngIf="error" (click)="error = false; usernameUsed = false; internalError = false;" type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div>
 </div>
 

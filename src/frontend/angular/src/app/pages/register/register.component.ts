@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { easeOut } from '../../../assets/animations/easeOut';
-import { AuthService } from '../../services/auth.service';
+import {AuthService, PrivateUserInfo} from '../../services/auth.service';
 
 @Component({
     selector: 'app-register',
@@ -24,7 +23,17 @@ export class RegisterComponent {
     success: boolean = false;
     error: boolean = false;
 
-    constructor(private authService : AuthService) {}
+    constructor(private authService : AuthService, private router: Router) {}
+
+    ngOnInit() {
+        this.authService.subscribe({
+            next: (userInfo : PrivateUserInfo) => {
+                if (userInfo) {
+                    this.router.navigate(['/']);
+                }
+            }
+        })
+    }
 
     register42Api() {
         window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2Flocalhost%3A4200&response_type=code&state=register';
@@ -40,11 +49,10 @@ export class RegisterComponent {
                 },
             error: (error) => {
                 this.success = false;
-                console.error('An error ocurred registering this account:', error.message);
-                const errorMsg = error.message;
+                const errorMsg = error.error.message;
                 if (errorMsg.includes("already exists")) { //El nombre de usuario ya está en uso
                     this.usernameUsed = true;
-                } else if (errorMsg.includes("Internal Server Error")) { //Error interno
+                } else if (errorMsg.includes("Internal Server Error")) { // Error interno
                     this.internalError = true;
                 }
                 this.error = true;

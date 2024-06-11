@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import update_last_login
 
 from django.middleware import csrf
 
@@ -261,6 +262,7 @@ def register(request):
                 return JsonResponse({'message': 'This username already exists!'}, status=400)
             else:
                 return JsonResponse({'message': 'An error occurred while registering the user.'}, status=500)
+        update_last_login(None, user)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
@@ -300,6 +302,7 @@ def login(request):
                 # csrf.get_token(request)
 
                 logger.debug('Login request succeed')
+                update_last_login(None, user)
                 response.data = {"Success": "Login successfully", "data": data}
                 token_TwoFA = mail.generate_random_verification_code(6)
                 mail.send_TwoFA_mail(token_TwoFA, user.email)

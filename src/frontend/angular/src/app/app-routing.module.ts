@@ -19,6 +19,7 @@ const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'settings', component: SettingsComponent },
   { path: 'profile', component: ProfileComponent, children: [
+    { path: '', component: NotFoundComponent },
     { path: ':userId', component: UserProfileComponent }
   ]},
   { path: 'test', component: TestComponent},
