@@ -12,15 +12,19 @@ import { SettingsPPrivacyComponent } from './settings-p-privacy/settings-p-priva
 import { UnauthorizedComponent } from '../../components/errors/unauthorized/unauthorized.component';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { easeOut } from "../../../assets/animations/easeOut";
+
 @Component({
   selector: 'app-settings',
   standalone: true,
+  animations: [easeOut],
   imports: [CommonModule, SettingsPColorComponent, SettingsPLanguageComponent, SettingsPPublicComponent, SettingsPSecurityComponent, SettingsPPrivacyComponent, UnauthorizedComponent, RouterModule, TranslateModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
 export class SettingsComponent {
   loading: boolean = true;
+  tooLong: boolean = false;
 
   activeTab: string | null =  'color';
 
@@ -30,9 +34,15 @@ export class SettingsComponent {
     this.authService.subscribe({
       next: (userInfo : PrivateUserInfo | undefined) => {
         if (userInfo) {
+          this.tooLong = false;
           this.loading = false;
         }
       },
     })
+    if (this.loading) {
+      setTimeout(() => {
+        this.tooLong = true;
+      }, 7000);
+    }
   }
 }

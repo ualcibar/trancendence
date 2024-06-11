@@ -2,9 +2,8 @@
 	color: #cfe1e6;
 }
 
-#sp-div {
+.sp-div {
 	position: absolute;
-	top: 20%;
 	left: 50%;
 	transform: translateX(-50%);
 	width: 60rem;

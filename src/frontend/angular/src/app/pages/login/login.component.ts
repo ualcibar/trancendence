@@ -1,5 +1,5 @@
 import { Component} from '@angular/core';
-import { AuthService } from '../../services/auth.service';
+import {AuthService, PrivateUserInfo, UserInfo} from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { easeOut } from '../../../assets/animations/easeOut';
 
@@ -10,6 +10,8 @@ import { easeOut } from '../../../assets/animations/easeOut';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
+  info? : UserInfo | undefined;
+
   user = {
     username: '',
     password: ''
@@ -24,6 +26,16 @@ export class LoginComponent {
   userWrongCredentials: boolean = false;
 
   constructor(private authService : AuthService, private router: Router) {}
+
+  ngOnInit() {
+    this.authService.subscribe({
+      next: (userInfo : PrivateUserInfo) => {
+        if (userInfo) {
+          this.router.navigate(['/']);
+        }
+      }
+    })
+  }
 
   login42Api() {
     window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2Flocalhost%3A4200&response_type=code&state=login';
