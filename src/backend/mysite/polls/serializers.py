@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser
+
 class LightUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -19,3 +20,8 @@ class PrivateUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('info', 'friends', 'language', 'email')
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        if password:
+            instance.set_password(password)
+        return super().update(instance, validated_data)

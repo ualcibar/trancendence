@@ -26,7 +26,7 @@ export class SettingsComponent {
   loading: boolean = true;
   tooLong: boolean = false;
 
-  activeTab: string | null =  'color';
+  activeTab: string | null = 'color';
 
   userId: number = 0;
 

@@ -31,7 +31,7 @@ export class LightUserInfo{
   }
 }
 
-export interface UserInfoI extends LighUserInfoI{  
+export interface UserInfoI extends LighUserInfoI{
   color : string;
   wins : number;
   loses : number;
@@ -53,6 +53,7 @@ export class UserInfo{
   wins : number;
   loses : number;
   avatarUrl : string;
+
   constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number, avatarUrl : string){
     this.username = username;
     this.id = user_id;
@@ -62,6 +63,7 @@ export class UserInfo{
     this.loses = loses;
     this.avatarUrl = avatarUrl;
   }
+
   static fromI(values : UserInfoI) : UserInfo | undefined{
     console.log('status', values.status)
     const status = toEnum(UserStatus, values.status);
@@ -72,11 +74,13 @@ export class UserInfo{
     return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses, values.avatarUrl)
   }
 }
+
 export interface PrivateUserInfoI{ 
   info : UserInfo;
   friends : UserInfoI[];
   language : string;
   email : string;
+  last_login : string;
 }
 
 export class PrivateUserInfo{
@@ -84,11 +88,14 @@ export class PrivateUserInfo{
   friends : UserInfo[];
   language : string;
   email : string;
-  constructor (info : UserInfo, friends : UserInfo[], language : string, email : string){
+  last_login : string;
+
+  constructor (info: UserInfo, friends: UserInfo[], language: string, email: string, last_login: string){
     this.info = info;
     this.friends = friends;
     this.email = email;
     this.language = language;
+    this.last_login = last_login;
   }
   static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
     
@@ -102,7 +109,7 @@ export class PrivateUserInfo{
     const userInfo = UserInfo.fromI(values.info)
     if (!userInfo)
       return undefined
-    return new PrivateUserInfo(userInfo, friends, values.language, values.email )
+    return new PrivateUserInfo(userInfo, friends, values.language, values.email, values.last_login)
   }
 }
 
@@ -312,6 +319,10 @@ export class AuthService {
         return decodeURIComponent(cookie.substring(nameLenPlus));
       })[0] || null;
   }
+
+  //
+  // User Config Management functions
+  //
   async setUserConfig(content : any): Promise<void> {
     if (this.userInfo) {
       const backendURL = '/api/polls/setConfig/' + this.userInfo.info.id;
@@ -323,9 +334,7 @@ export class AuthService {
       };
 
       const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
-      this._userInfo.setValue(response.privateUserInfo)
-      this.logger.info('✔️ ', response.message);
-      this.logger.info(this.userInfo.info.username);
+      this._userInfo.setValue(response.privateUserInfo);
     } else {
       this.logger.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;
