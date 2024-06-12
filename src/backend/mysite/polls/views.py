@@ -182,17 +182,7 @@ def setUserConfig(request, user_id=None):
             return JsonResponse({'message': 'This user does not exist!'}, status=404)
 
     updated_fields = []
-<<<<<<< HEAD
-    valid_keys = ['user_color', 'user_language', 'username', 'email', 'avatarUrl']
-
-    for key, value in data.items():
-        if key in valid_keys:
-            if key == 'avatarUrl':
-                image_data = value
-                if not image_data:
-                    return JsonResponse({'message': 'No image provided'}, status=400)
-=======
-    valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise']
+    valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise', 'avatarUrl']
 
     for key, value in data.items():
         if key in valid_keys:
@@ -218,12 +208,11 @@ def setUserConfig(request, user_id=None):
                     updated_fields.append(key)
                 else:
                     logger.debug(f"El usuario ya está anonimizado")
-            else:
-                setattr(user, key, value)
-                updated_fields.append(key)
-                logger.debug(f"Actualizada la key {key} a {value}")
->>>>>>> a16afc054244c6306261bb16f302d771a881725b
-
+            if key == 'avatarUrl':
+                image_data = value
+                if not image_data:
+                    return JsonResponse({'message': 'No image provided'}, status=400)
+                
                 # Decode the base64 string
                 format, imgstr = image_data.split(';base64,') 
                 ext = format.split('/')[-1]  # Extract the image format
@@ -364,31 +353,6 @@ def login(request):
         else:
             logger.debug('Login request failed: Invalid username or password')
             return Response({"message": "Invalid username or password!"}, status=400)
-
-# @csrf_exempt
-# @api_view(['POST'])
-# def user_login(request):
-#    if request.method == 'POST':
-#        data = json.loads(request.body)
-#        username = data.get('username')
-#        password = data.get('password')
-#        if username and password:
-#            user = authenticate(request, username=username, password=password)
-#            if user is not None:
-#                login(request, user)
-#                refresh = RefreshToken.for_user(user)
-#                data = {
-#                    'refresh': str(refresh),
-#                    'access': str(refresh.access_token),
-#                }
-#                return JsonResponse({'message': 'Login successful', 'data': data}, status=200)
-        # request.session["username"] = user.username
-        # return JsonResponse({'message': 'Login successful', 'sessionid': request.session.session_key}, status=200)
-#            else:
-#                return JsonResponse({'error': 'Invalid credentials'}, status=401)
-#        else:
-#            return JsonResponse({'error': 'Username and password are required'}, status=400)
-
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
