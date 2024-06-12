@@ -50,7 +50,7 @@ export class UserProfileComponent {
         const info = UserInfo.fromI(response.userInfo)
         if (!info){
           this.user_not_found = true;
-          console.error('failed to parse user info')
+          console.error('failed to parse user info') 
         }
         this.info = info;
         this.last_login = response.last_login;

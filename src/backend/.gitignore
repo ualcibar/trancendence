@@ -15,3 +15,6 @@ mysite/mysite/migrations/*
 mysite/polls/migrations/*
 !mysite/polls/migrations/__init__.py
 mysite/polls/__pycache__/*
+
+mysite/media/avatars/*
+!mysite/media/avatars/default.jpg

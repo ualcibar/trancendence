@@ -9,8 +9,7 @@ import { AuthService } from "../../../services/auth.service";
     imports: [
         TranslateModule
     ],
-  templateUrl: './settings-p-privacy.component.html',
-  styleUrl: './settings-p-privacy.component.css'
+  templateUrl: './settings-p-privacy.component.html'
 })
 export class SettingsPPrivacyComponent {
   @Input() loaded: boolean = false;
@@ -20,7 +19,7 @@ export class SettingsPPrivacyComponent {
 
   async anonymizeData() {
     try {
-      await this.authService.setUserConfig('anonymise', "");
+      await this.authService.setUserConfig({anonymise: ""});
     } catch (error: any) {
       console.error('❌ Oops!', error.message);
     }
