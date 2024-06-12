@@ -132,6 +132,7 @@ export class MatchUpdate{
   paddles : Paddle[];
   balls : Ball[];
   blocks : Block[];
+  paused : boolean = false;
   score : Score;
   id : number;
   constructor(paddles : Paddle[], balls : Ball[], blocks : Block[], score : Score, id : number){
@@ -186,6 +187,7 @@ export class MatchUpdate{
       block.speed = update.blocks[index].speed;
     }
     this.score.changeScore(update.score.score);
+    this.paused = update.paused;
   }
   getAiPrediction(paddle: Paddle): number {
     console.log('paddle position', paddle.pos);

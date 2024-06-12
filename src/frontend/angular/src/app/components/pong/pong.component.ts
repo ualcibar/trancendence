@@ -575,7 +575,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   @Input() matchSettings!: MatchSettings;
   @Input() update!: MatchUpdate;
 
-  paused : boolean = false;
+  // paused : boolean = false;
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
@@ -655,7 +655,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   // }
 
   flipPause() {
-    if (this.paused) {
+    // if (this.update.matchState === MatchState.Paused) {
+    if (this.update.paused) {
       this.resume()
     }
     else {
@@ -665,12 +666,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   pause() {
     console.log('pausing');
-    this.paused = true;
+    this.update.paused = true;
   }
 
   resume() {
     console.log('resuming');
-    this.paused = false;
+    this.update.paused = false;
   }
 
   initScene(){
@@ -796,8 +797,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   logic(timeDifference : number){
-    console.log('pausing', this.paused); 
-    if (!this.paused)
+    console.log('pausing', this.update.paused); 
+    if (!this.update.paused)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();
     //this.checkAI();
