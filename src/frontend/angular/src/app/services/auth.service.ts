@@ -21,6 +21,7 @@ export class UserInfo{
 @Injectable({
   providedIn: 'root'
 })
+
 export class AuthService {
   twofa_bool : boolean = false;
   private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -149,7 +150,7 @@ export class AuthService {
     if (this.twofa_bool == true){
       //this.router.navigate(['/twofa-login']);
       //window.location.href="/twofa-login";
-      await this.twofaLoginComponent.check_2FA(username);
+      //await this.twofaLoginComponent.check_2FA(username);
     }
     this.isLoggedInSubject.next(true);
     console.log("✔️ You've successfully logged in. Welcome!");
