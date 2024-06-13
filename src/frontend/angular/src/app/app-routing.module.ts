@@ -10,6 +10,7 @@ import { NotFoundComponent } from './components/errors/not-found/not-found.compo
 import { TestComponent } from './pages/test/test.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { VerifyComponent } from './pages/verify/verify.component';
+import { TwofaLoginComponent } from './pages/twofa-login/twofa-login.component';
 import { PlayComponent } from './pages/play/play.component';
 
 
@@ -24,6 +25,7 @@ const routes: Routes = [
   ]},
   { path: 'test', component: TestComponent},
   { path: 'verify', component: VerifyComponent},
+  { path: 'twofa-login', component: TwofaLoginComponent},
   { path: '**', component: NotFoundComponent },
 ];
 

@@ -56,5 +56,7 @@
     "settings_enter2_2FA": "Kodea sartu:",
     "settings_yes_2FA": "Bai",
     "settings_no_2FA": "Ez",
-    "settings_cancel_2FA": "Utzi"
+    "settings_cancel_2FA": "Utzi",
+    "settings_buttom_deactivate_2FA":"Desaktibatu berifikazioa",
+    "settings_sure2_2FA": "Seguru zaude 2UB-a desaktibatu nahi duzula?"
 }

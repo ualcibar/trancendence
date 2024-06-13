@@ -59,5 +59,7 @@
     "settings_enter2_2FA": "Ingresa el código:",
     "settings_yes_2FA": "Si",
     "settings_no_2FA": "No",
-    "settings_cancel_2FA": "Cancelar"
+    "settings_cancel_2FA": "Cancelar",
+    "settings_buttom_deactivate_2FA":"Desactivar Verificación",
+    "settings_sure2_2FA": "¿Estas seguro de querer desactivar la V2P?"
 }

@@ -4,7 +4,7 @@ import { NgClass, CommonModule } from '@angular/common';
 import { SettingsService } from '../../../services/settings.service';
 import { AuthService } from '../../../services/auth.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient} from '@angular/common/http';
 import {easeOut} from "../../../../assets/animations/easeOut";
 
 @Component({
@@ -24,6 +24,8 @@ export class SettingsPSecurityComponent {
   entered_token = '';
   token_2FA = '';
   confirmNewPassword = '';
+  username= '';
+  newToken= '';
 
   mailChanged = false;
   alreadyUsed = false;
@@ -54,6 +56,8 @@ export class SettingsPSecurityComponent {
         this.currentEmail = this.email;
         this.is_2FA_active = data.user_twofa;
         this.token_2FA = data.user_tokentwofa;
+        this.username = data.user_username;
+        this.newToken = '';
       }
     })
   }
@@ -110,16 +114,6 @@ export class SettingsPSecurityComponent {
     this.formSent = false;
   }
 
-  async saveTwoFAStatus() {
-    try {
-      const new2FAStatus = !this.is_2FA_active;
-      await this.settingsService.setUserConfigBool('user_twofa', new2FAStatus);
-      this.is_2FA_active = new2FAStatus;
-    } catch (error: any) {
-      console.error('❌ Error updating 2FA status:', error);
-    }
-  }
-
   async onButtonClick1True() {
       this.buttonClicked1 = true;
   }
@@ -129,28 +123,22 @@ export class SettingsPSecurityComponent {
     this.buttonClicked2 = false;
   }
 
-  async send_mail(): Promise<void> {
+  async sendmail() {
     console.log('sending a mail here: ', this.email);
-    const backendURL = 'api/polls/send_mail/';
-    const httpReqBody = `currentMail=${this.email}`;
-    const httpOptions = {
-      headers: new HttpHeaders({
-          'Content-Type': 'application/json'
-      })
-    };
-    this.http.post<any>(backendURL, httpReqBody, httpOptions);
+    await this.settingsService.send_mail(this.email, this.username);
     this.buttonClicked2 = true;
   }
 
   async compareTwoFAToken() {
-    console.log('comparing entered token: ', this.entered_token);
-    console.log('to actual token: ', this.token_2FA);
-    if (this.entered_token == this.token_2FA){
-    //this.saveTwoFAStatus();
+    console.log('comparing')
+    await this.settingsService.check_token(this.entered_token, this.username);
     this.buttonClicked1 = false;
+    this.buttonClicked2 = false;
+    if (this.is_2FA_active == true){
+      this.is_2FA_active = false;
     }
-    else{
-      console.log('try again ig idk');
+    else {
+      this.is_2FA_active = true;
     }
   }
 }

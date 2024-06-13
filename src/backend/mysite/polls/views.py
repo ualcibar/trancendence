@@ -83,6 +83,7 @@ def getInfo(request, user_id=None):
         'language': user.user_language,
         'twofa': user.is_2FA_active,
         'is_active': user.is_active,
+        'tokentwofa': user.token_2FA,
         }, status=200)
 
 @api_view(['POST'])
@@ -260,11 +261,11 @@ def register(request):
     email = data.get('email', '')
     if username and password and email:
         try:
+            token_verification = mail.generate_token()
             user = CustomUser.objects.create_user(
-                username=username, email=email, password=password)
-            fernet_obj = mail.generateFernetObj()
-            token_url = mail.generate_token()
-            mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
+            username=username, email=email, password=password, token_verification=token_verification)
+            token_fernet = mail.generateFernetObj()
+            mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(username, token_fernet)), email)
         except IntegrityError as e:
             if 'duplicate key' in str(e):
                 return JsonResponse({'message': 'This username already exists!'}, status=400)
@@ -311,11 +312,17 @@ def login(request):
                     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
                 # csrf.get_token(request)
-
-                logger.debug('Login request succeed')
+                try:
+                    customUser = CustomUser.objects.get(username=username)
+                except CustomUser.DoesNotExist:
+                    return JsonResponse({'message': 'This user does not exist!'}, status=404)
+                
                 response.data = {"Success": "Login successfully", "data": data}
-                token_TwoFA = mail.generate_random_verification_code(6)
-                mail.send_TwoFA_mail(token_TwoFA, customUser.email)
+                if customUser.is_2FA_active:
+                    token_TwoFA = mail.generate_random_verification_code(6)
+                    mail.send_TwoFA_mail(token_TwoFA, customUser.email)
+                    customUser.token_2FA = token_TwoFA
+                    customUser.save()
                 return response
             else:
                 logger.debug('Login request failed: The account is not active')
@@ -355,55 +362,6 @@ def get_tokens_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
-
-
-@api_view(['POST'])
-@authentication_classes([])
-def login(request):
-        logger.debug('login request received')
-        data = request.data
-        response = Response()
-        username = data.get('username', None)
-        password = data.get('password', None)
-        user = authenticate(username=username, password=password)
-
-        if user is not None:
-            if user.is_active:
-                refresh = RefreshToken.for_user(user)
-                response.set_cookie(
-                    key=settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value=refresh.access_token,
-                    expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-                )
-                response.set_cookie(
-                    key='refresh_token',
-                    value=refresh,
-                    expires=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
-                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-                )
-                # csrf.get_token(request)
-
-                try:
-                    customUser = CustomUser.objects.get(username=username)
-                except CustomUser.DoesNotExist:
-                    return JsonResponse({'message': 'This user does not exist!'}, status=404)
-                
-                response.data = {"Success": "Login successfully", "data": data}
-                if customUser.is_2FA_active:
-                    token_TwoFA = mail.generate_random_verification_code(6)
-                    mail.send_TwoFA_mail(token_TwoFA, customUser.email)
-                    customUser.token_2FA = token_TwoFA
-                    customUser.save()
-                return response
-            else:
-                return Response({"message": "This account is not active!"}, status=500)
-        else:
-            return Response({"message": "Invalid username or password!"}, status=500)
 
 class CustomUserView(APIView):
     def get(self, request, user_id):
@@ -469,4 +427,47 @@ def upload_file(request):
 
 @api_view(['POST'])
 def send_mail(request):
-    logger.debug("SENDING MAIL FROM VIEWS")
+    current_Mail = request.POST.get('currentMail')
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_TwoFA = mail.generate_random_verification_code(6)
+    mail.send_TwoFA_mail(token_TwoFA, current_Mail)
+    customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
+@api_view(['POST'])
+def check_token(request):
+    current_Token = request.POST.get('currentToken')
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.token_2FA == current_Token:
+        customUser.token_2FA = ''
+        if customUser.is_2FA_active == True :
+            customUser.is_2FA_active = False
+        else :
+            customUser.is_2FA_active = True
+        customUser.save()
+        return JsonResponse({'message': 'The Token is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
+    
+@api_view(['POST'])
+def check_token_login(request):
+    current_Token = request.POST.get('currentToken')
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.token_2FA == current_Token:
+        customUser.token_2FA = ''
+        return JsonResponse({'message': 'The Token is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
+
+@api_view(['POST'])
+def get_2FA_bool(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.is_2FA_active == True :
+        return JsonResponse({'message': 'true'}, status=201)
+    if customUser.is_2FA_active == False :
+        return JsonResponse({'message': 'false'}, status=201)

@@ -58,5 +58,7 @@
     "settings_enter2_2FA": "Enter the code:",
     "settings_yes_2FA": "Yes",
     "settings_no_2FA": "No",
-    "settings_cancel_2FA": "Cancel"
+    "settings_cancel_2FA": "Cancel",
+    "settings_buttom_deactivate_2FA":"Deactivate verification",
+    "settings_sure2_2FA": "Are you sure you want to deactivate the 2FA?"
 }

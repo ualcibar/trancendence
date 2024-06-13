@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
 import { LogFilter, Logger } from '../utils/debug';
+import { TwofaLoginComponent } from '../pages/twofa-login/twofa-login.component';
 
 export class UserInfo{
   user_id : number;
@@ -21,6 +22,7 @@ export class UserInfo{
   providedIn: 'root'
 })
 export class AuthService {
+  twofa_bool : boolean = false;
   private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   user_info? : UserInfo;
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
@@ -30,9 +32,10 @@ export class AuthService {
   logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
   client_locale: string = 'en';
 
-  constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
+  constructor(private http: HttpClient, private router: Router, private translateService: TranslateService, private twofaLoginComponent: TwofaLoginComponent) {
     this.amILoggedIn();
   }
+
 
   // Función para obtener los datos del usuario en el momento en el que sea llamada
   // - Debajo, el Getter para poder ser utilizado por el servicio de 'Settings'
@@ -117,6 +120,19 @@ export class AuthService {
    return this.isLoggedInSubject.value; 
   }
 
+  async get_2FA_bool(user:string) {
+    const backendURL = 'api/polls/get_2FA_bool/';
+    const httpReqBody = `currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+    return Boolean(response);
+  }
+
   async login(username : string, password : string): Promise<void> {
     const backendURL = 'api/polls/login/';
     const jsonToSend = {
@@ -128,11 +144,18 @@ export class AuthService {
         'Content-Type': 'application/json'
       })
     };
-
     const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
+    this.twofa_bool = await this.get_2FA_bool(username);
+    if (this.twofa_bool == true){
+      //this.router.navigate(['/twofa-login']);
+      //window.location.href="/twofa-login";
+      await this.twofaLoginComponent.check_2FA(username);
+    }
     this.isLoggedInSubject.next(true);
     console.log("✔️ You've successfully logged in. Welcome!");
   }
+
+
 
   logout() {
     const backendURL = 'api/polls/logout/';

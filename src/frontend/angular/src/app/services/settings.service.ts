@@ -12,10 +12,11 @@ export class UserSettingsInfo extends UserInfo {
   user_language: string;
   user_email: string;
   user_tokentwofa:string;
+  user_username:string;
   user_twofa: boolean;
   user_active: boolean;
 
-  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_twofa: boolean, user_tokentwofa: string, user_active: boolean) {
+  constructor (userInfo: UserInfo, user_color: string, user_language: string, user_email: string, user_twofa: boolean, user_tokentwofa: string, user_active: boolean, user_username: string) {
     super(userInfo.username, userInfo.user_id, userInfo.online);
     this.user_color = user_color;
     this.user_language = user_language;
@@ -23,6 +24,7 @@ export class UserSettingsInfo extends UserInfo {
     this.user_twofa = user_twofa;
     this.user_tokentwofa = user_tokentwofa;
     this.user_active = user_active;
+    this.user_username = user_username;
   }
 }
 
@@ -45,7 +47,7 @@ export class SettingsService {
       const backendURL = 'api/polls/getInfo';
       this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
         next: (response) => {
-          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['twofa'], response['tokentwofa'], response['is_active']);
+          const userSettingsInfo = new UserSettingsInfo(currentUserInfo, response['color'], response['language'], response['email'], response['twofa'], response['tokentwofa'], response['is_active'], response['username']);
           this.userSettingsInfoSubject.next(userSettingsInfo);
         },
         error: () => {
@@ -79,6 +81,8 @@ export class SettingsService {
         userSettingsInfoVal.username = value;
       } else if (type === 'anonymize') {
         userSettingsInfoVal.user_active = false;
+      } else if (type == 'tokentwofa') {
+        userSettingsInfoVal.user_tokentwofa = value;
       }
       console.log('✔️ ', response);
     } else {
@@ -123,5 +127,40 @@ export class SettingsService {
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
     console.log('✔️ ', response.message);
   }
-}
 
+  async send_mail(mail: string, user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail/';
+    const httpReqBody = `currentMail=${mail}&currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
+  async check_token(token: string, user:string): Promise<void> {
+    const backendURL = 'api/polls/check_token/';
+    const httpReqBody = `currentToken=${token}&currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
+  async get_2FA_bool(user:string): Promise<void> {
+    const backendURL = 'api/polls/get_2FA_bool/';
+    const httpReqBody = `currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+}
