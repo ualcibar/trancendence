@@ -7,11 +7,6 @@
 				<img src="../../assets/img/spacepong-blanco.svg" class="w-36 h-8" loading="SpacePong Logo">
 			</a>
 		</div>
-		<a routerLink="/play">
-			<button type="button"
-				class="mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
-				{{'play'|translate}}
-			</button></a>
 		<div class="flex items-center">
 			<div *ngIf="!(authService.userInfo$ | async)">
 				<a routerLink="/login">
