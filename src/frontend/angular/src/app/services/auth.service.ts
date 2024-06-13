@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, Observable, UnaryFunction, of, firstValueFrom} from 'rxjs';
+import {BehaviorSubject, Observable, UnaryFunction, of, firstValueFrom, Subject} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
 import { LogFilter, Logger } from '../utils/debug';
-import { TwofaLoginComponent } from '../pages/twofa-login/twofa-login.component';
 
 export class UserInfo{
   user_id : number;
@@ -29,11 +28,14 @@ export class AuthService {
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
   friends? : UserInfo[];
 
+  private twofaCompleteSubject = new Subject<boolean>();
+  twofaComplete$ = this.twofaCompleteSubject.asObservable();
+
   //logger
   logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
   client_locale: string = 'en';
 
-  constructor(private http: HttpClient, private router: Router, private translateService: TranslateService, private twofaLoginComponent: TwofaLoginComponent) {
+  constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
     this.amILoggedIn();
   }
 
@@ -121,7 +123,7 @@ export class AuthService {
    return this.isLoggedInSubject.value; 
   }
 
-  async get_2FA_bool(user:string) {
+  async get_2FA_bool(user: string): Promise<boolean> {
     const backendURL = 'api/polls/get_2FA_bool/';
     const httpReqBody = `currentUsername=${user}`;
     const httpHeader = {
@@ -129,9 +131,14 @@ export class AuthService {
         'Content-Type': 'application/x-www-form-urlencoded'
       })
     };
-    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
-    console.log('✔️ ', response.message);
-    return Boolean(response);
+    try {
+      const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+      console.log('✔️ ', response.message);
+      return true;      
+    } catch (error) {
+      console.error('❌ Error fetching 2FA status', error);
+      return false;
+    }
   }
 
   async login(username : string, password : string): Promise<void> {
@@ -147,13 +154,19 @@ export class AuthService {
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
     this.twofa_bool = await this.get_2FA_bool(username);
+    console.log('twofa_bool = ', this.twofa_bool);
     if (this.twofa_bool == true){
-      //this.router.navigate(['/twofa-login']);
-      //window.location.href="/twofa-login";
-      //await this.twofaLoginComponent.check_2FA(username);
+      console.log('in twofa_bool');
+      this.router.navigate(['/twofa-login']);
+      console.log('redirected to twofa-login');
+      await firstValueFrom(this.twofaComplete$);
     }
     this.isLoggedInSubject.next(true);
     console.log("✔️ You've successfully logged in. Welcome!");
+  }
+
+  completeTwofa() {
+    this.twofaCompleteSubject.next(true);
   }
 
 

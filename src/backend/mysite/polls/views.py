@@ -470,4 +470,4 @@ def get_2FA_bool(request):
     if customUser.is_2FA_active == True :
         return JsonResponse({'message': 'true'}, status=201)
     if customUser.is_2FA_active == False :
-        return JsonResponse({'message': 'false'}, status=201)
+        return JsonResponse({'message': 'false'}, status=404)

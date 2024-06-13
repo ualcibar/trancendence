@@ -23,6 +23,8 @@
     "login_subtitle":"¿Nuevo a SpacePong?",
     "login_subtitle_link":"Regístrate aquí",
     "login_finish_tip":"o inicia sesión con",
+    "login_2FA_title":"Introduce tu código de verificación",
+    "login_2FA_subtitle":"Echale un ojo a tu correo electrónico, ¡Te hemos enviado un código!",
 
     "profile_logout":"Cerrar sesión",
     "profile_login":"Iniciar sesión",

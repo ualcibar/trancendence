@@ -20,6 +20,8 @@
     "login_subtitle":"¿Nuevo a SpacePong?",
     "login_subtitle_link":"Regístrate aquí",
     "login_finish_tip":"o inicia sesión con",
+    "login_2FA_title":"Sartu zure egiaztapen-kodea",
+    "login_2FA_subtitle":"Bota begi bat zure posta elektronikora, kode bat bidali dizugu!",
 
     "profile_logout":"Saioa itxi",
     "profile_login":"Saioa hasi",

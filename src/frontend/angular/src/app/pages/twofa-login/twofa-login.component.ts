@@ -17,8 +17,9 @@ import { easeOut } from '../../../assets/animations/easeOut';
 })
 
 export class TwofaLoginComponent {
-
-  entered_token = '';
+  user = {
+    entered_token: ''
+  };
 
   @Input() loaded: boolean = false;
 
@@ -37,8 +38,8 @@ export class TwofaLoginComponent {
   }
 
   async check_2FA(username: string){
-    window.location.href="/twofa-login";
-    await this.check_token_login(this.entered_token, username);
+    await this.check_token_login(this.user.entered_token, username);
+    this.authService.completeTwofa();
   }
 }
 

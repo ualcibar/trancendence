@@ -22,6 +22,9 @@
     "login_subtitle":"New to SpacePong?",
     "login_subtitle_link":"Register here",
     "login_finish_tip":"or login using",
+    "login_2FA_title":"Introduce you verification code",
+    "login_2FA_subtitle":"Checkout your email, We've sent you a code!",
+
 
     "profile_logout":"Logout",
     "profile_login":"Login",
