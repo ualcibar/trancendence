@@ -326,8 +326,6 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   color : number;
   state : PaddleState;
 
-  paused : boolean = false;
-
   lastIAupdate : number = 0;
 
   constructor(settings : MapSettings, number : number,manager: Manager){
@@ -389,10 +387,6 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   handleKeys() {
-    if (this.paused) {
-      this.stop();
-      return;
-    }
     // console.log('handling keys');
     if (key.isPressed(this.upKey) && !key.isPressed(this.downKey)) {
       // console.log('going up');
@@ -417,10 +411,6 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   handleIA(aiPrediction : number) {
-    if (this.paused) {
-      this.stop();
-      return;
-    }
     const antiVibrationFactor = this.width / 4.2; // 42 is the answer to everything (yes, it's a magic number)
     console.log('AI handling');
     console.log('AI prediction', aiPrediction, '> paddle pos', this.pos.y);
