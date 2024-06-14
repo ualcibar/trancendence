@@ -217,7 +217,7 @@ def setUserConfig(request, user_id=None):
                 if not ext:
                     return JsonResponse({'message': 'No image extension provided'}, status=400)
 
-                supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
+                supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG"}
                 if ext not in supported_formats:
                     return JsonResponse({'error': 'Unsupported image format'}, status=400)
                 logger.debug(f"ext '{ext}', format '{format}'")
