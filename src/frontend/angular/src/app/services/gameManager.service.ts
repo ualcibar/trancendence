@@ -132,7 +132,6 @@ export class MatchUpdate{
   paddles : Paddle[];
   balls : Ball[];
   blocks : Block[];
-  paused : boolean = false;
   score : Score;
   id : number;
   constructor(paddles : Paddle[], balls : Ball[], blocks : Block[], score : Score, id : number){
@@ -187,7 +186,6 @@ export class MatchUpdate{
       block.speed = update.blocks[index].speed;
     }
     this.score.changeScore(update.score.score);
-    this.paused = update.paused;
   }
   getAiPrediction(paddle: Paddle): number {
     console.log('paddle position', paddle.pos);
@@ -329,6 +327,8 @@ export interface Manager{
   bindEvent(id : number, type : PongEventType) : boolean;
   getState() : GameManagerState;
   start() : void;
+  pause() : void;
+  resume() : void;
 }
 
 export interface OnlineManager{
@@ -502,6 +502,15 @@ export class TournamentManager implements Manager{
     this.currentMatchState.setValue(MatchState.Starting);
   }
 
+  pause(): void {
+    this.currentMatchState.setValue(MatchState.Paused);
+    this.broadcastEvent(PongEventType.Pause, {});
+  }
+
+  resume(): void {
+    this.currentMatchState.setValue(MatchState.Running);
+    this.broadcastEvent(PongEventType.Continue, {});
+  }
 
 }
 export class MatchManager implements Manager{
@@ -640,6 +649,17 @@ export class MatchManager implements Manager{
   start(): void {
     this.matchState.setValue(MatchState.Starting);
   }
+
+  pause(): void {
+    this.matchState.setValue(MatchState.Paused);
+    this.broadcastEvent(PongEventType.Pause, {});
+  }
+
+  resume(): void {
+    this.matchState.setValue(MatchState.Running);
+    this.broadcastEvent(PongEventType.Continue, {});
+  }
+
   runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
       for (let i = 0; i < eventObjects.length; i++)
         eventObjects[i].runEvent(type, data); 
@@ -851,6 +871,20 @@ export class OnlineMatchManager implements Manager, OnlineManager{
           this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings); 
         }
         break;
+      case PongEventType.Pause:
+        if (!this.amIHost) {
+          console.log("PAUSE")
+          this.matchState.setValue(MatchState.Paused);
+        }
+        this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
+        break;
+      case PongEventType.Continue:
+        if (!this.amIHost) {
+          console.log("CONTINUE");
+          this.matchState.setValue(MatchState.Running);
+        }
+        this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
+        break;
       default:
         this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));//!todo must turn syncdata to local data
     }
@@ -947,6 +981,22 @@ export class OnlineMatchManager implements Manager, OnlineManager{
     this.matchState.setValue(MatchState.Starting);
     this.onlineMatchState.setValue(OnlineMatchState.Running)
   }
+
+  pause(): void {
+    this.matchState.setValue(MatchState.Paused);
+    this.onlineMatchState.setValue(OnlineMatchState.Paused);
+    if (this.amIHost)
+      this.broadcastEvent(PongEventType.Pause, {});
+  }
+
+  resume(): void {
+    this.matchState.setValue(MatchState.Running);
+    this.onlineMatchState.setValue(OnlineMatchState.Running);
+    if (this.amIHost)
+      this.broadcastEvent(PongEventType.Continue, {});
+  }
+
+
   runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
       for (let i = 0; i < eventObjects.length; i++)
         eventObjects[i].runEvent(type, data); 
@@ -978,9 +1028,16 @@ export class GameManagerService implements Manager{
   }
    
   start(): void {
-    this.currentManager?.start();
+    this.currentManager!.start();
   }
 
+  pause(): void {
+    this.currentManager!.pause();
+  }
+
+  resume(): void {
+    this.currentManager!.resume();
+  }
 
   createTournament(config : TournamentSettings, mapSettings : MapSettings) : TournamentManager | undefined{
     if (this.state.getCurrentValue() !== GameManagerState.Standby){

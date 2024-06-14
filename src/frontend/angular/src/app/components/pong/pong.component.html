@@ -4,7 +4,7 @@
   <p id="time"></p>
   <div class="text-white">{{getScore()}}</div>
 <!-- <div *ngIf="paused == true" class="paused-container flex align-items-center max-w-80 mb-4"> -->
-<div *ngIf="this.update.paused == true" class="paused-container flex align-items-center max-w-80 mb-4">
+<div *ngIf="this.paused == true" class="paused-container flex align-items-center max-w-80 mb-4">
   <h1 class="paused-text"> PAUSED </h1>
 </div>
 <canvas #pongCanvas id="c" width="2000" height="1000"></canvas>
