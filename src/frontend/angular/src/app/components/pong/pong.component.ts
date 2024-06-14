@@ -589,6 +589,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   controlsText : string = '';
   controlsTextSafe: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(this.controlsText);
 
+  pausedTime : number = 0; //time passed paused in ms
+  pausingTime : number = 0; //time when pausing started in ms
+
 
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
@@ -598,6 +601,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   constructor(private manager: GameManagerService,
     private router: Router,
     private sanitizer: DomSanitizer) {
+      this.pausingTime = Date.now();
   }
 
   ngAfterViewInit(): void {
@@ -615,11 +619,13 @@ export class PongComponent implements AfterViewInit, OnDestroy {
           case MatchState.Running:
             console.log('MATCH STARTING')
             this.paused = false;
+            this.pausedTime += Date.now() - this.pausingTime;
             this.run();
             break;
           case MatchState.Paused:
             console.log('MATCH PAUSED')
             this.paused = true;
+            this.pausingTime = Date.now();
             break;
           case MatchState.FinishedSuccess:
             break;
@@ -737,7 +743,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       const paddleMaterial = new THREE.MeshPhongMaterial({ color: paddle.color });
       this.paddles[index] = new Paddle(this.map, index, this.manager);
       this.paddles[index].addToScene(this.scene);
-      // this.controlsText += `P${index + 1}: 👆${this.paddles[index].upKey} 👇${this.paddles[index].downKey}\n`;
+
       if (this.paddles[index].localPlayer){
         this.controlsText += `P${index + 1}: 👆${keyToEmoji(this.paddles[index].upKey)} 👇${keyToEmoji(this.paddles[index].downKey)}\n`;
       }
@@ -785,11 +791,18 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   render(time: number) {
     time *= 0.001; // convert time to seconds
-
+    time -= this.pausedTime *  0.001;
     if (this.pastTime === 0)
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
+
+    if (this.paused) {
+      // this.pausedTime += timeDifference;
+      // console.log('paused', this.pausedTime);
+      this.pastTime = time;
+      return;
+    }
 
 
     // DISPLAY TIME
