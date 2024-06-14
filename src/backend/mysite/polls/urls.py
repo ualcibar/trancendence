@@ -48,6 +48,7 @@ urlpatterns = [
     path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'), 
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('send_mail/', views.send_mail, name='send_mail'),
+    path('send_mail_login/', views.send_mail_login, name='send_mail_login'),
     path('check_token/', views.check_token, name='check_token'),
     path('check_token_login/', views.check_token_login, name='check_token_login'),
     path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool'),

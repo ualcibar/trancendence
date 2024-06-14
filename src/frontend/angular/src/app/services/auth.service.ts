@@ -155,7 +155,7 @@ export class AuthService {
     this.twofa_bool = await this.get_2FA_bool(username);
     console.log('twofa_bool = ', this.twofa_bool);
     if (this.twofa_bool == true){
-      await this.send_mail(username,);
+      await this.send_mail_login(username);
       console.log('in twofa_bool');
       this.router.navigate(['/twofa-login']);
       console.log('redirected to twofa-login');
@@ -250,9 +250,9 @@ export class AuthService {
     console.log('✔️ ', response.message);
   }
 
-  async send_mail(mail: string, user:string): Promise<void> {
-    const backendURL = 'api/polls/send_mail/';
-    const httpReqBody = `currentMail=${mail}&currentUsername=${user}`;
+  async send_mail_login(user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail_login/';
+    const httpReqBody = `currentUsername=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'

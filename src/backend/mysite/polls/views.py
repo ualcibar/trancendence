@@ -320,12 +320,6 @@ def login(request):
                 if customUser.verification_bool == False :
                     return Response({"message": "Email hasn't been verificated, unsuccesful login"}, status=400)
                 response.data = {"Success": "Login successfully", "data": data}
-                if customUser.is_2FA_active:
-                    token_TwoFA = mail.generate_random_verification_code(6)
-                    mail.send_TwoFA_mail(token_TwoFA, customUser.email)
-                    customUser.token_2FA = token_TwoFA
-                    customUser.save()
-                return response
             else:
                 logger.debug('Login request failed: The account is not active')
                 return Response({"message": "This account is not active!"}, status=400)
@@ -439,6 +433,18 @@ def send_mail(request):
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
 @api_view(['POST'])
+def send_mail_login(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_TwoFA = mail.generate_random_verification_code(6)
+    email = customUser.email
+    mail.send_TwoFA_mail(token_TwoFA, email)
+    customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
+
+@api_view(['POST'])
 def check_token(request):
     current_Token = request.POST.get('currentToken')
     current_Username = request.POST.get('currentUsername')
@@ -461,6 +467,7 @@ def check_token_login(request):
     customUser = CustomUser.objects.get(username=current_Username)
     if customUser.token_2FA == current_Token:
         customUser.token_2FA = ''
+        customUser.save()
         return JsonResponse({'message': 'The Token is correct'}, status=201)
     else:
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
