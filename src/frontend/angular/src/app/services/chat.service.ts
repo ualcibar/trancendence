@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgZone } from '@angular/core';
-import {AuthService} from './auth.service';
+import {AuthService, PrivateUserInfo} from './auth.service';
 import { BehaviorSubject } from 'rxjs';
 import { LogFilter, Logger } from '../utils/debug';
 import { ChatState, MatchmakingState, StateService } from './stateService';
@@ -41,7 +41,7 @@ export class ChatService {
 
   constructor(private ngZone: NgZone, private authService: AuthService, private state: StateService) {
     this.chatMessages.set('#global', []);
-    this.authService.subscribe((loggedIn: any) => {
+    this.authService.subscribe((loggedIn: PrivateUserInfo | undefined) => {
       if (loggedIn && this.isClosed()) {
         this.connectToWebsocket();
       } else if (!loggedIn && this.isConnected()) {

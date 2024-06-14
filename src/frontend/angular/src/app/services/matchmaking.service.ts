@@ -11,11 +11,6 @@ import { LogFilter, Logger } from '../utils/debug';
 import { MatchmakingState, StateService } from './stateService';
 import {Observable, Subscription, interval, BehaviorSubject} from 'rxjs';
 
-export enum MatchMakingState{
-  Standby = 'standby',
-  OnGame = 'on game',
-}
-
 export enum OnlineMatchState{
   Joining = 'joining', 
   Connecting = 'connecting',
@@ -203,7 +198,7 @@ export class MatchmakingService implements MatchSync{
    // this.entries.set(GameType.Match, []);
    // this.entries.set(GameType.Tournament,[]);
     //this.connectToServer();
-    this.authService.subscribe((loggedIn: any) => {
+    this.authService.subscribe((loggedIn: PrivateUserInfo | undefined) => {
       if (loggedIn && this.isClosed()) {
         this.connectToServer();
       } else if (!loggedIn && this.isConnected()) {
@@ -310,12 +305,11 @@ export class MatchmakingService implements MatchSync{
       return;
     }
     const jwtToken = this.authService.getCookie('access_token');
-    if (jwtToken == null) {
+    if (!jwtToken) {
       this.logger.info('failed to get cookie access token, log in');
       return;
     }
-    this.webSocketUrl = `${this.webSocketUrl}?token=${jwtToken}`;
-    this.webSocket = new WebSocket(this.webSocketUrl);
+    this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
     this.webSocket.onopen = () => {
       this.stateService.changeMultiplayerState(MatchmakingState.StandBy); 
       this.logger.info('WebSocket connection opened');

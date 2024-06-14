@@ -11,8 +11,7 @@ import {easeOut} from "../../../../assets/animations/easeOut";
   standalone: true,
   imports: [CommonModule, FormsModule, NgClass],
   animations:  [easeOut],
-  templateUrl: './settings-p-security.component.html',
-  styleUrl: './settings-p-security.component.scss'
+  templateUrl: './settings-p-security.component.html'
 })
 export class SettingsPSecurityComponent {
   email = '';
@@ -75,12 +74,14 @@ export class SettingsPSecurityComponent {
     this.passwordsMatch = this.newPassword === this.confirmNewPassword;
 
     if (!this.passwordsMatch) {
+      this.formSent = false;
+      this.error = true;
       return;
     }
 
     try {
       await this.authService.verifyPassword(this.oldPassword);
-      await this.authService.setUserConfig({password :  this.newPassword});
+      await this.authService.setUserConfig({password : this.newPassword});
     } catch (error: any) {
       this.error = true;
       const errorMsg = error.error.message;

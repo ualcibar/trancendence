@@ -1,7 +1,9 @@
 <h1 class="text-white">this is where you set tournament settings</h1>
 <app-match-generator-component [settings]="settings.matchSettings"></app-match-generator-component>
 <h1 class="text-white">number of players</h1>
-<input [value]="settings.numberOfPlayers" (input)="onNumberOfPlayersChange($event)" type="number" inputmode="none">
+<button class="btn" (click)="changeTeamSize(4)">4</button>
+<button class="btn" (click)="changeTeamSize(8)">8</button>
+<button class="btn" (click)="changeTeamSize(16)">16</button>
 <div class="nameList">
     <div *ngFor="let team of settings.teamNames; let i = index">
         <input [(ngModel)]="settings.teamNames[i]" type="text">

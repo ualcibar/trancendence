@@ -55,13 +55,13 @@
 }
 
 .backgroundButton {
-	background-color: rgba(53, 131, 131, 0);
+	background-color: rgba(53, 131, 131, 0.394);
 	width: 100%;
 	height: 100%;
 
 }
 
 .backgroundButton:hover {
-	background-color: rgba(124, 199, 83, 0);
+	background-color: rgba(124, 199, 83, 0.452);
 	cursor: default;
 }

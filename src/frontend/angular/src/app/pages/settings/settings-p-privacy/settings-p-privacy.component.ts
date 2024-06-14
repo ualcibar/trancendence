@@ -9,8 +9,7 @@ import { AuthService } from "../../../services/auth.service";
     imports: [
         TranslateModule
     ],
-  templateUrl: './settings-p-privacy.component.html',
-  styleUrl: './settings-p-privacy.component.css'
+  templateUrl: './settings-p-privacy.component.html'
 })
 export class SettingsPPrivacyComponent {
   @Input() loaded: boolean = false;

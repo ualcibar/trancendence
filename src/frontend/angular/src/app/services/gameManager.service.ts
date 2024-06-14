@@ -353,7 +353,7 @@ export class TournamentManager implements Manager{
     this.mapSettings = mapSettings;
     this.settings = settings;
     this.update = new TournamentUpdate(
-      ['a','b','c','d'],
+      settings.teamNames,
       this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this))
     //this.currentMatchUpdate = ;
     this.state = state;

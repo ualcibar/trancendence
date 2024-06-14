@@ -26,6 +26,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.auth = JWTAuthentication()
         self.isInit = False
     def connect(self):
+        logger.debug('Request to connect to matchmaking')
         jwt_token = self.scope['query_string'].decode().split('=')[1]
         try:
             token = self.auth.get_validated_token(jwt_token)

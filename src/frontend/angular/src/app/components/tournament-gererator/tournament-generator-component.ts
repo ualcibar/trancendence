@@ -27,27 +27,16 @@ export class TournamentGeneratorComponent {
     this.default = !this.default;
   }
 
-  onNumberOfPlayersChange(event : Event){
-    console.log('event', event)
-    const input = event.target as HTMLInputElement;
-    const newValue = parseInt(input.value, 10);
-    console.log('number', newValue)
-
-    // Perform any validation or logic here before updating the value
-    if (isNaN(newValue)){
-      input.value = this.settings.numberOfPlayers.toString(); 
+  changeTeamSize(size : number){
+    console.log('new team size', size)
+    if (this.settings.teamNames.length === size)
       return;
+    else if (this.settings.teamNames.length >= size)
+      this.settings.teamNames = this.settings.teamNames.splice(0,size)
+    else{
+      for (let i = this.settings.teamNames.length; i < size; i += 1)
+        this.settings.teamNames.push(`team${i + 1}`)
     }
-    if (newValue < 2 || newValue > 12){
-      input.value = this.settings.numberOfPlayers.toString(); 
-      return;
-    }
-    if (newValue > this.settings.numberOfPlayers)
-      for (let i = this.settings.numberOfPlayers; i < newValue; i++)
-        this.settings.teamNames.push(`Team${i + 1}`)
-    else if (newValue < this.settings.numberOfPlayers)
-      this.settings.teamNames = this.settings.teamNames.slice(0,newValue)
-    this.settings.numberOfPlayers = newValue;
   } 
   onBlur() { 
     this.escapeKeyPressed.emit();

@@ -2,7 +2,12 @@ from django.urls import path
 from django.conf import settings
 from . import views
 
+from polls.serializers import PrivateUserInfoSerializer
+from polls.models import CustomUser
+from rest_framework.response import Response
+
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
 import logging
 
 logger = logging.getLogger('polls')
@@ -12,6 +17,17 @@ class CustomTokenRefreshView(TokenRefreshView):
         # Add custom logic before refreshing the token (if needed)
         response = super().post(request, *args, **kwargs)
         if 'access' in response.data:
+            refresh_token = request.data.get('refresh')
+            if not refresh_token:
+                return Response({"message": "Refresh token is missing"}, status=400)
+            try:
+                decoded_refresh_token = RefreshToken(refresh_token)
+                user_id = decoded_refresh_token['user_id']
+                user = PrivateUserInfoSerializer(CustomUser.objects.get(id=user_id)).data
+            except Exception as e:
+                logger.error(f"Error decoding token or retrieving user: {e}")
+                return Response({"message": "Invalid refresh token"}, status=400)
+
             access_token = response.data['access']
             response.set_cookie(
                 key=settings.SIMPLE_JWT['AUTH_COOKIE'],
@@ -21,10 +37,12 @@ class CustomTokenRefreshView(TokenRefreshView):
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
             )
+            logger.debug(f'request: {request}')
+            response.data['privateUserInfo'] = user
             return response
         else:
             logger.debug('ACCESS doesn\'t exist')
-            return Response({message: "access doesn't exist"}, status=400)
+            return Response({'message': "access doesn't exist"}, status=400)
 
 from .views import CustomUserView, GameHistoryView, FriendsListView
 

@@ -7,8 +7,8 @@
 		<p class="text-white">matchmaking state : {{MatchmakingState[state.matchmakingState]}}</p>
 		<p class="text-white">current online match state: {{matchmakingService.getCurrentMatchState()}}</p>
 	</div>
+	<button (click)="backgroundClicked()" class="absolute -z-2 backgroundButton"></button>
 	<div class="flex h-full">
-		<!--button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button-->
 		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="flex chat" [@fadeInOut]></app-chat>
 		<div class="flex flex-col justify-center items-center h-auto w-full">
 			<button *ngIf="(state.homeRenderState.local$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.MatchTournament)"
@@ -46,8 +46,8 @@
 			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" [@fadeInOut]>
 				<app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>
 			</div>
-			<app-lobby-match *ngIf="(state.homeRenderState.joiningOnlineMatch$ | async) && (state.homeRenderState.render$)"></app-lobby-match>
-			<app-lobby-search *ngIf="(state.homeRenderState.onlineMatchSearch$ | async) && (state.homeRenderState.render$)"></app-lobby-search>
+			<app-lobby-match class="z-1" *ngIf="(state.homeRenderState.joiningOnlineMatch$ | async) && (state.homeRenderState.render$)"></app-lobby-match>
+			<app-lobby-search class="z-1" *ngIf="(state.homeRenderState.onlineMatchSearch$ | async) && (state.homeRenderState.render$)"></app-lobby-search>
 		</div>
 	</div>
 </div>
