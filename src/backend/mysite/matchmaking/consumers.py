@@ -1,4 +1,5 @@
 import json
+from django.utils import timezone
 from django.db import IntegrityError
 from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
@@ -12,7 +13,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from asgiref.sync import async_to_sync
 from chat.models import Room
-from matchmaking.models import MatchPreview, Player
+from matchmaking.models import MatchPreview, Player, Match
 from matchmaking.serializers import MatchPreviewSerializer
 import logging
 logger = logging.getLogger('std')
@@ -306,6 +307,29 @@ class MatchMakingConsumer(WebsocketConsumer):
                 #leave match chat
                 #do not save match in history
                 #send client to leave match
+            case '/match/end':
+                match(data['state']):
+                    case 'FinishedSuccess':
+                        score = data['score']
+                        if (score[0] >= score[1]):
+                            winner = 0
+                        else:
+                            winner = 1
+                        async_to_sync(self.channel_layer.group_send)(
+                            self.user.game_room_name,
+                            {
+                                'type': 'match_finished',
+                                'status' : 'success',
+                                'winner' : winner,
+                            }
+                        )
+                        team_a = self.user.match.getTeamA()
+                        team_b = self.user.match.getTeamB()
+                        now = timezone.now()
+                        match = Match.objects.create(score_a = score[0], score_b = score[1], date = now)
+                        match.team_a.add(*team_a)
+                        match.team_b.add(*team_b)
+
             case '/confirm_join/match':
                 try:
                     user = CustomUser.objects.get(id=data['playerId']) 

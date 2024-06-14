@@ -12,16 +12,16 @@ import { MatchmakingState, StateService } from './stateService';
 import {Observable, Subscription, interval, BehaviorSubject} from 'rxjs';
 
 export enum OnlineMatchState{
-  Joining = 'joining', 
-  Connecting = 'connecting',
-  WaitingForPlayers = ' waiting for players',
-  Starting = 'starting',
-  Running = 'running',
-  FinishedSuccess = 'finished success',
-  HostDisconected = 'host disconnected',
-  GameCrash = 'game crash',
-  FailedToJoin = 'failed to join',
-  Error = 'error',
+  Joining = 'Joining', 
+  Connecting = 'Connecting',
+  WaitingForPlayers = 'WaitingForPlayers',
+  Starting = 'Starting',
+  Running = 'Running',
+  FinishedSuccess = 'FinishedSuccess',
+  HostDisconected = 'HostDisconnected',
+  GameCrash = 'GameCrash',
+  FailedToJoin = 'FailedToJoin',
+  FinishedError = 'FinishedError',
 }
 /*
 export class MatchUpdate{
@@ -158,6 +158,7 @@ export interface MatchSync{
   sendMatchUpdate(update : MatchUpdate) : void;
   sendEvent(type : PongEventType, data : EventData): void;
   broadcastEvent(type : PongEventType, data : EventData): void;
+  changeOnlineMatchState(state : OnlineMatchState) : void;
 }
 
 @Injectable({
@@ -1045,4 +1046,10 @@ export class MatchmakingService implements MatchSync{
     return this.onlineManager?.info;
   }
 
+  changeOnlineMatchState(state: OnlineMatchState): void {
+    if (state === OnlineMatchState.FinishedSuccess){
+      const message = {type : '/match/end', state : state, score : this.onlineManager!.matchUpdate.score.score};
+      this.sendMessage(JSON.stringify(message));
+    }
+  }
 }

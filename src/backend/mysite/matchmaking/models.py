@@ -72,7 +72,10 @@ class MatchPreview(models.Model):
     def getPlayerIndex(self, user):
         return self.players.get(user=user).index
 
-
+    def getTeamA(self):
+        return [player.user for player in self.players if player.index + 1 < self.teamSize] + self.host
+    def getTeamB(self):
+        return [player.user for player in self.players if player.index + 1 >= self.teamSize]
     def isHost(self, host):
         return  self.host == host
 
@@ -81,4 +84,15 @@ class MatchPreview(models.Model):
 
     def __str__(self):
         return f'match name={self.name} host={self.host}'
+
+class Match(models.Model):
+    #online settings
+    score_a = models.IntegerField(default=0, null=False, blank=False)
+    score_b = models.IntegerField(default=0, null=False, blank=False)
+    team_a = models.ManyToManyField(CustomUser, related_name='team_a_matches')
+    team_b = models.ManyToManyField(CustomUser, related_name='team_b_matches')
+    date = models.DateTimeField(null=False, blank=False)
+
+    def __str__(self):
+        return f'todo'
 

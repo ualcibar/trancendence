@@ -36,6 +36,7 @@ export interface UserInfoI extends LighUserInfoI{
   wins : number;
   loses : number;
   avatarUrl : string;
+  matchHistory : number[];
 }
 
 enum UserStatus{
@@ -53,8 +54,9 @@ export class UserInfo{
   wins : number;
   loses : number;
   avatarUrl : string;
+  matchHistory : number[];
 
-  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number, avatarUrl : string){
+  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number, avatarUrl : string, matchHistory : number[]){
     this.username = username;
     this.id = user_id;
     this.status = status;
@@ -62,6 +64,7 @@ export class UserInfo{
     this.wins = wins;
     this.loses = loses;
     this.avatarUrl = avatarUrl;
+    this.matchHistory = matchHistory;
   }
 
   static fromI(values : UserInfoI) : UserInfo | undefined{
@@ -71,7 +74,7 @@ export class UserInfo{
       console.error('user info: fromI: failed to parse status enum:', values.status)
       return undefined
     }
-    return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses, values.avatarUrl)
+    return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses, values.avatarUrl, values.matchHistory)
   }
 }
 
@@ -127,7 +130,7 @@ export class AuthService {
     this._userInfo.subscribe((loggedIn : PrivateUserInfo | undefined) => {
       if (!loggedIn)
         this.reconnecting = setInterval(() => {
-          this.refreshToken();
+          this.updateUserInfo();
         },1000)
     })
     //this.refreshToken() 
@@ -310,6 +313,7 @@ export class AuthService {
         this.logger.error('failed refresh token', error)
         if (error.status === 400)
           clearInterval(this.reconnecting)
+        //this.reconnecting = setInterval(()=>this.refreshToken(),1000)
         this._userInfo.setValue(undefined);
       }
     });

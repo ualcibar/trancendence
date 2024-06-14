@@ -8,11 +8,14 @@ class LightUserInfoSerializer(serializers.ModelSerializer):
 
 class UserInfoSerializer(serializers.ModelSerializer):
     avatarUrl = serializers.SerializerMethodField()
+    matchHistory = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ('id','username', 'status','color', 'wins', 'loses', 'avatarUrl')
+        fields = ('id','username', 'status','color', 'wins', 'loses', 'avatarUrl', 'matchHistory')
     def get_avatarUrl(self, instance):
         return f'https://localhost:1501/api/media/{instance.avatar}'
+    def get_matchHistory(self, instance):
+        return [match.id for match in instance.team_a_matches.all()] + [match.id for match in instance.team_b_matches.all()]
 
 class PrivateUserInfoSerializer(serializers.ModelSerializer):
     info = UserInfoSerializer(source='*')

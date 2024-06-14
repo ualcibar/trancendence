@@ -13,6 +13,20 @@ import { Ball, GameObject, Paddle, PaddleState, Block } from '../components/pong
 import { Router } from '@angular/router';
 import { LogFilter, Logger } from '../utils/debug';
 import { TournamentTree } from '../utils/tournamentTree';
+import { TemplateBindingParseResult } from '@angular/compiler';
+
+export class HistoryMatch{
+  date : number;
+  team_a : number[];
+  team_b : number[];
+  score : Score;
+  constructor(date : number, team_a : number[], team_b : number[], score : Score){
+    this.date = date;
+    this.team_a = team_a;
+    this.team_b = team_b;
+    this.score = score;
+  }
+}
 
 export enum GameConfigState{
   Standby = 'standby',
@@ -745,10 +759,18 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         {
           if (this.amIHost){
             this.matchSync.broadcastEvent(type, data);
-            this.matchUpdate.score.score[data.custom?.others.team] += 1;
+            this.matchUpdate.score.score[data.custom!.others.team] += 1;
             this.logger.info('score increated host', this.matchUpdate.score.score)
             this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
             this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings);
+            if (this.matchUpdate.score.score[data.custom!.others.team] >= this.info.onlineSettings.matchSettings.roundsToWin){
+              this.matchSync.sendEvent(PongEventType.Pause,{})
+              this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Pause),PongEventType.Pause, {})
+              this.matchState.setValue(MatchState.FinishedSuccess)
+              this.onlineMatchState.setValue(OnlineMatchState.FinishedSuccess)
+              this.matchSync.changeOnlineMatchState(OnlineMatchState.FinishedSuccess)
+              //this.endMatch();
+            }
 //            this.matchSync.broadcastEvent(type, data);
           }
           //change score
