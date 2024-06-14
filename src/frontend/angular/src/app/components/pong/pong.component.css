@@ -14,10 +14,17 @@ html, body {
    margin: 0;
    height: 100%;
 }
+.canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ajusta esto según tus necesidades */
+}
+
 #c {
-   width: 90%;
-   height: 90%;
-   display: block;
+    width: 50%;
+    height: 50%;
+    display: block;
 }
 
 .paused-container {
@@ -31,4 +38,12 @@ html, body {
 .paused-text {
     font-size: 80px;
     color: ivory;
+}
+
+.controls-text {
+    font-size: 2em;
+    color: #ff0000;
+    text-shadow: 2px 2px #000000;
+    text-align: center;
+    margin-top: 20px;
 }

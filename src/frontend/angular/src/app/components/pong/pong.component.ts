@@ -11,6 +11,8 @@ import { TickBehaviour, EventBehaviour, tickBehaviourAccelerate, EventObject, Po
 import { MapSettings } from '../../services/map.service';
 import { CommonModule } from '@angular/common';
 
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
 export const colorPalette = {
   darkestPurple: 0x1C0658,
   swingPurple: 0x5C2686,
@@ -30,7 +32,8 @@ export enum PaddleState{
 export enum BlockType{
   Score = 'score',
   Collision = 'collision',
-  Death = 'death'
+  Death = 'death',
+  Visual = 'visual'
 }
 
 export interface toJson{
@@ -231,6 +234,7 @@ export class Block implements GameObject, EventObject, TickObject, toJson{
   dimmensions : Vector3;
   material : RenderMaterial;
 
+
   constructor(pos : Vector2, dimmensions : Vector3, type : BlockType, material : RenderMaterial, manager : Manager){
     //this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Block>(this);
@@ -326,8 +330,6 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   color : number;
   state : PaddleState;
 
-  paused : boolean = false;
-
   lastIAupdate : number = 0;
 
   constructor(settings : MapSettings, number : number,manager: Manager){
@@ -388,24 +390,20 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.dir.y = 0;
   }
 
-  handleKeys() {
-    if (this.paused) {
-      this.stop();
-      return;
-    }
-    // console.log('handling keys');
-    if (key.isPressed(this.upKey) && !key.isPressed(this.downKey)) {
-      // console.log('going up');
-      this.goUp();
-    }
-    else if (key.isPressed(this.downKey) && !key.isPressed(this.upKey)) {
-      // console.log('going down');
-      this.goDown();
-    }
-    else {
-      this.stop();
-    }
-  }
+  // handleKeys() {
+  //   console.log('handling keys');
+  //   if (key.isPressed(this.upKey) && !key.isPressed(this.downKey)) {
+  //     // console.log('going up');
+  //     this.goUp();
+  //   }
+  //   else if (key.isPressed(this.downKey) && !key.isPressed(this.upKey)) {
+  //     // console.log('going down');
+  //     this.goDown();
+  //   }
+  //   else {
+  //     this.stop();
+  //   }
+  // }
 
   isIAupdateable() : boolean{
     return (Date.now() - this.lastIAupdate > 1000) // IA only sees the ball every second (1000ms)
@@ -417,10 +415,6 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   handleIA(aiPrediction : number) {
-    if (this.paused) {
-      this.stop();
-      return;
-    }
     const antiVibrationFactor = this.width / 4.2; // 42 is the answer to everything (yes, it's a magic number)
     console.log('AI handling');
     console.log('AI prediction', aiPrediction, '> paddle pos', this.pos.y);
@@ -437,28 +431,28 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     }
   }
 
-  update(timeDelta : number) {
-    console.error('dont use this with the new ai ')
-    // console.log('updating paddle!!!');
-    if (this.localPlayer) {
-      // console.log('local player');
-      this.handleKeys();
-    }
-    if (this.isAI()) {
-      // console.log('AI player');
-      //this.handleIA();
-    }
+  // update(timeDelta : number) {
+  //   console.error('dont use this with the new ai ')
+  //   // console.log('updating paddle!!!');
+  //   if (this.localPlayer) {
+  //     // console.log('local player');
+  //     this.handleKeys();
+  //   }
+  //   if (this.isAI()) {
+  //     // console.log('AI player');
+  //     //this.handleIA();
+  //   }
 
-    const paddleDiferentialDisplacement = timeDelta * this.speed;
-    // console.log('timeDelta AAAAAAAAAAAAAAAAAAAAAAA', timeDelta);
-    if (this.goinUp) {
-      // console.log('going up', paddleDiferentialDisplacement);
-      this.pos.y += paddleDiferentialDisplacement;
-    }
-    if (this.goinDown) {
-      this.pos.y -= paddleDiferentialDisplacement;
-    }
-  }
+  //   const paddleDiferentialDisplacement = timeDelta * this.speed;
+  //   // console.log('timeDelta AAAAAAAAAAAAAAAAAAAAAAA', timeDelta);
+  //   if (this.goinUp) {
+  //     // console.log('going up', paddleDiferentialDisplacement);
+  //     this.pos.y += paddleDiferentialDisplacement;
+  //   }
+  //   if (this.goinDown) {
+  //     this.pos.y -= paddleDiferentialDisplacement;
+  //   }
+  // }
 
   changeColor(color: number) {
     this.mesh.material = new THREE.MeshPhongMaterial({color: color});
@@ -541,6 +535,21 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
 
 }
 
+function keyToEmoji(key : string) : string{
+  switch(key){
+    case 'up':
+      return '↑';
+    case 'down':
+      return '↓';
+    case 'left':
+      return '←';
+    case 'right':
+      return '→';
+    default:
+      return key;
+  }
+}
+
 @Component({
   selector: 'app-pong',
   standalone: true,
@@ -577,12 +586,22 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   paused : boolean = false;
 
+  controlsText : string = '';
+  controlsTextSafe: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(this.controlsText);
+
+  pausedTime : number = 0; //time passed paused in ms
+  pausingTime : number = 0; //time when pausing started in ms
+
+
+
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
   configStateSubscription!: Subscription;
 
   constructor(private manager: GameManagerService,
-    private router: Router) {
+    private router: Router,
+    private sanitizer: DomSanitizer) {
+      this.pausingTime = Date.now();
   }
 
   ngAfterViewInit(): void {
@@ -599,10 +618,14 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             break;
           case MatchState.Running:
             console.log('MATCH STARTING')
+            this.paused = false;
+            this.pausedTime += Date.now() - this.pausingTime;
             this.run();
             break;
           case MatchState.Paused:
-            this.pause();
+            console.log('MATCH PAUSED')
+            this.paused = true;
+            this.pausingTime = Date.now();
             break;
           case MatchState.FinishedSuccess:
             break;
@@ -655,6 +678,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   // }
 
   flipPause() {
+    // if (this.update.matchState === MatchState.Paused) {
     if (this.paused) {
       this.resume()
     }
@@ -665,12 +689,13 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   pause() {
     console.log('pausing');
-    this.paused = true;
+    // this.paused = true;
+    this.manager.pause();
   }
 
   resume() {
     console.log('resuming');
-    this.paused = false;
+    this.manager.resume();
   }
 
   initScene(){
@@ -718,7 +743,13 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       const paddleMaterial = new THREE.MeshPhongMaterial({ color: paddle.color });
       this.paddles[index] = new Paddle(this.map, index, this.manager);
       this.paddles[index].addToScene(this.scene);
+
+      if (this.paddles[index].localPlayer){
+        this.controlsText += `P${index + 1}: 👆${keyToEmoji(this.paddles[index].upKey)} 👇${keyToEmoji(this.paddles[index].downKey)}\n`;
+      }
     }
+    this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(this.controlsText.replace(/\n/g, '<br>'));
+
     // INIT BLOCKS
     this.blocks = new Array<THREE.Mesh>(this.update.blocks.length);
     for (const [index, block] of this.update.blocks.entries()){
@@ -760,11 +791,18 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   render(time: number) {
     time *= 0.001; // convert time to seconds
-
+    time -= this.pausedTime *  0.001;
     if (this.pastTime === 0)
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
+
+    if (this.paused) {
+      // this.pausedTime += timeDifference;
+      // console.log('paused', this.pausedTime);
+      this.pastTime = time;
+      return;
+    }
 
 
     // DISPLAY TIME

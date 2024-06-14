@@ -27,6 +27,7 @@ export enum OnlineMatchState{
   GameCrash = 'game crash',
   FailedToJoin = 'failed to join',
   Error = 'error',
+  Paused = 'paused',
 }
 /*
 export class MatchUpdate{
