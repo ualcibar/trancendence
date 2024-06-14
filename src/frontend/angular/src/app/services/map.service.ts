@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "three";
 import { Ball, Paddle, Block, BlockType, RenderMaterial, RenderMaterialType, PaddleState} from "../components/pong/pong.component";
-import { GameManagerService, Key, Manager, MatchSettings, MatchUpdate } from "./gameManager.service";
+import { GameManagerService, GameManagerState, Key, Manager, MatchSettings, MatchState, MatchUpdate } from "./gameManager.service";
 import { Injectable } from "@angular/core";
 import { createEventScoreColision, createTickMove, createEventPaddleColision, eventEventWallColision, createTickUpdate, createEventIAprediction, createPaddleUpdate } from "../utils/behaviour";
 import { Score } from "./matchmaking.service";
@@ -88,19 +88,20 @@ class MapSettingsCreateInfo{
     return  blocks;
   }
   createDefaultScoreBlocks(manager: Manager): Block[] {
+    const width = 42;
     const blocks = [
       new Block(
-        new Vector2(this.leftLimit, 0),
-        new Vector3(0.01, this.dimmensions.height, 0.02),
+        new Vector2(this.leftLimit - this.ballRadius * 4  - width/2, 0),
+        new Vector3(width, this.dimmensions.height * 2, 0.02),
         BlockType.Score,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.leadCyan),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
         manager
       ),
       new Block(
-        new Vector2(this.rightLimit, 0),
-        new Vector3(0.001, this.dimmensions.height, 0.02),
+        new Vector2(this.rightLimit + this.ballRadius +  width/2, 0),
+        new Vector3(width, this.dimmensions.height, width),
         BlockType.Score,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
         manager
       ),
     ];
@@ -220,8 +221,8 @@ export class MapSettings{
   public readonly paddleType! : BlockType;
   public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
 
-  public readonly paddleUpKey : string[] = ['w','o'];
-  public readonly paddleDownKey : string[] = ['s','l'];
+  public readonly paddleUpKey : string[] = ['w','up'];
+  public readonly paddleDownKey : string[] = ['s','down'];
 
   // Paddle position
   public readonly leftPaddlePos: Vector2 = new Vector2(-1,0);
