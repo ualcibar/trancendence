@@ -603,6 +603,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             this.run();
             break;
           case MatchState.Paused:
+            console.log('MATCH PAUSED')
             this.paused = true;
             break;
           case MatchState.FinishedSuccess:

@@ -783,7 +783,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         }
       default:
         if (this.amIHost){
-          //this.matchSync.broadcastEvent(type, this.eventDataToSyncData(data));
+          this.matchSync.broadcastEvent(type, this.eventDataToSyncData(data));
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
         }
     }
