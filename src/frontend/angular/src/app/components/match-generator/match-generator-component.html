@@ -1,12 +1,20 @@
-<h1 class="text-white">max time for each round seconds</h1>
-<input [ngModel]="settings.maxTimeRoundSec" (change)="changeMaxTime($event)" type="number">
-<h1 class="text-white">max rounds</h1>
-<input [(ngModel)]="settings.maxRounds" type="number">
-<h1 class="text-white">best of</h1>
-<input [(ngModel)]="settings.roundsToWin" type="number">
-<h1 class="text-white">team size</h1>
-<input [(ngModel)]="settings.teamSize" type="number">
-<select class="form-select" aria-label="Default select example" [(ngModel)]="settings.mapName">
-  <option value="Default" selected>Default</option>
-  <option *ngFor="let item of maps" [value]="item">{{item}}</option>
-</select>
+<div class="mt-2 text-white">
+    <h1 class="mb-1"><i class="bi bi-stopwatch-fill"></i> Tiempo máximo por ronda: {{ settings.maxTimeRoundSec }}s</h1>
+    <input [ngModel]="settings.maxTimeRoundSec" (change)="changeMaxTime($event)" (input)="changeMaxTime($event)" min="20" max="120" type="range" class="form-range">
+
+    <h1 class="my-1"><i class="bi bi-joystick"></i> Cantidad de Rondas: {{ settings.maxRounds }}</h1>
+    <input [(ngModel)]="settings.maxRounds" (change)="changeRounds($event)" (input)="changeRounds($event)" min="3" max="15" type="range" class="form-range">
+
+    <h1 class="my-1"><i class="bi bi-trophy-fill"></i> Rondas para ganar: {{ settings.roundsToWin }}</h1>
+    <input [(ngModel)]="settings.roundsToWin" (change)="changeRoundsToWin($event)" (input)="changeRoundsToWin($event)" min="2" max="15" type="range" class="form-range">
+    <h1 *ngIf="winPointsNotPossible" class="text-red-500">No puede haber menos rondas que las necesarias para ganar</h1>
+
+    <h1 class="my-1"><i class="bi bi-person-raised-hand"></i> Tamaño del equipo: {{ settings.teamSize }} jugadores</h1>
+    <input [(ngModel)]="settings.teamSize" (change)="changeTeamSize($event)" (input)="changeTeamSize($event)" min="1" max="2" type="range" class="form-range">
+
+    <h1 class="my-1"><i class="bi bi-map-fill"></i> Elige el mapa</h1>
+    <select class="form-select shadow-none" aria-label="Default select example" [(ngModel)]="settings.mapName">
+      <option value="Default" selected>Default</option>
+      <option *ngFor="let item of maps" [value]="item">{{item}}</option>
+    </select>
+</div>
