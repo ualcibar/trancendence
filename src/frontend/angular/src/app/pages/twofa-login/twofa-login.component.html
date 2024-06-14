@@ -1,15 +1,8 @@
 <div id="sp-div" class="mx-auto shadow-md rounded-xl overflow-hidden max-w-full md:max-w-2xl p-4 sm:p-6 md:p-8 items-center col-12 col-md-6">
 	<div class="p-4 sm:p-6 md:p-8">
 		<p class="text-center text-3xl font-semibold">{{'login_2FA_title'|translate}}</p>
-		<p class="text-center">{{'login_2FA_title'|translate}}</p>
-		<br/>
-		<form #registerForm="ngForm" (ngSubmit)="check_2FA()" ngNativeValidate class="mx-4">
-			<div class="form-floating mb-3">
-				<input type="text" name="entered_token" maxlength="6" pattern="\d" [(ngModel)]="user.entered_token" class="form-control shadow-none" id="floatingInput" placeholder="entered_token" required>
-			</div>
-			<div class="flex flex-col sm:flex-row items-center">
-				<button type="submit" class="btn btn-warning btn-sm ml-3>"><i class="bi bi-floppy-fill"></i></button>
-			</div>
-		</form>
+		<p class="text-center">{{'login_2FA_subtitle'|translate}}</p>
+		<input [(ngModel)]="entered_token" type="text" name="entered_token" maxlength="6" pattern="\d" class="form-control shadow-none btn-sm mb-3 mr-3" style="max-width: 7rem" id="floatingInput" required>
+		<button (click)="check_2FA()" class="btn btn-warning btn-sm ml-3>"><i class="bi bi-floppy-fill"></i></button>
 	</div>
 </div>

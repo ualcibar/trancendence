@@ -17,28 +17,15 @@ import { easeOut } from '../../../assets/animations/easeOut';
 })
 
 export class TwofaLoginComponent {
-  user = {
-    entered_token: ''
-  };
+
+  entered_token = ''
 
   @Input() loaded: boolean = false;
 
   constructor(private http: HttpClient, private authService : AuthService) {}
-  
-  async check_token_login(token: string, user:string): Promise<void> {
-    const backendURL = 'api/polls/check_token_login/';
-    const httpReqBody = `currentToken=${token}&currentUsername=${user}`;
-    const httpHeader = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
-      })
-    };
-    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
-    console.log('✔️ ', response.message);
-  }
 
-  async check_2FA(username: string){
-    await this.check_token_login(this.user.entered_token, username);
+  async check_2FA(){
+    await this.authService.check_token_login(this.entered_token);
     this.authService.completeTwofa();
   }
 }

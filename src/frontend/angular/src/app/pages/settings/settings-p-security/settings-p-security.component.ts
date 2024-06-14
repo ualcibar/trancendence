@@ -124,13 +124,11 @@ export class SettingsPSecurityComponent {
   }
 
   async sendmail() {
-    console.log('sending a mail here: ', this.email);
     await this.settingsService.send_mail(this.email, this.username);
     this.buttonClicked2 = true;
   }
 
   async compareTwoFAToken() {
-    console.log('comparing')
     await this.settingsService.check_token(this.entered_token, this.username);
     this.buttonClicked1 = false;
     this.buttonClicked2 = false;

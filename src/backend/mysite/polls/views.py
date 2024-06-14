@@ -31,6 +31,7 @@ import hashlib
 from . import mail
 
 logger = logging.getLogger('std')
+token_fernet = mail.generateFernetObj()
 
 def getOauth2Token(code):
     sendJson = {'code': code}
@@ -250,7 +251,7 @@ def delete(request):
     except CustomUser.DoesNotExist:
         logger.debug('Account deletion request failed: The user does not exist')
         return JsonResponse({'message': 'This user does not exist!'}, status=404)
-
+    
 @api_view(['POST'])
 @authentication_classes([])
 def register(request):
@@ -264,7 +265,7 @@ def register(request):
             token_verification = mail.generate_token()
             user = CustomUser.objects.create_user(
             username=username, email=email, password=password, token_verification=token_verification)
-            token_fernet = mail.generateFernetObj()
+            """ token_fernet = mail.generateFernetObj() """
             mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(username, token_fernet)), email)
         except IntegrityError as e:
             if 'duplicate key' in str(e):
@@ -316,7 +317,8 @@ def login(request):
                     customUser = CustomUser.objects.get(username=username)
                 except CustomUser.DoesNotExist:
                     return JsonResponse({'message': 'This user does not exist!'}, status=404)
-                
+                if customUser.verification_bool == False :
+                    return Response({"message": "Email hasn't been verificated, unsuccesful login"}, status=400)
                 response.data = {"Success": "Login successfully", "data": data}
                 if customUser.is_2FA_active:
                     token_TwoFA = mail.generate_random_verification_code(6)
@@ -471,3 +473,15 @@ def get_2FA_bool(request):
         return JsonResponse({'message': 'true'}, status=201)
     if customUser.is_2FA_active == False :
         return JsonResponse({'message': 'false'}, status=404)
+
+@api_view(['POST'])
+def verify_mail(request):
+    current_Token = mail.desencript(request.POST.get('currentToken'), token_fernet)
+    current_Username = mail.desencript(request.POST.get('currentUsername'), token_fernet)
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.token_verification == current_Token:
+        customUser.verification_bool = True
+        customUser.save()
+        return JsonResponse({'message': 'The Token is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)

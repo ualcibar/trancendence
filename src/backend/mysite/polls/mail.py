@@ -16,7 +16,7 @@ def encript(text, f):
     return encripted_text
 
 def desencript(encripted_text, f):
-    desencripted_text = f.decrypt(encripted_text.decode())
+    desencripted_text = f.decrypt(encripted_text).decode('utf-8')
     return desencripted_text
 
 def generateFernetObj():

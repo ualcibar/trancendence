@@ -152,15 +152,16 @@ export class AuthService {
         'Content-Type': 'application/json'
       })
     };
-    const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
     this.twofa_bool = await this.get_2FA_bool(username);
     console.log('twofa_bool = ', this.twofa_bool);
     if (this.twofa_bool == true){
+      await this.send_mail(username,);
       console.log('in twofa_bool');
       this.router.navigate(['/twofa-login']);
       console.log('redirected to twofa-login');
       await firstValueFrom(this.twofaComplete$);
     }
+    const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
     this.isLoggedInSubject.next(true);
     console.log("✔️ You've successfully logged in. Welcome!");
   }
@@ -232,4 +233,33 @@ export class AuthService {
         return decodeURIComponent(cookie.substring(nameLenPlus));
       })[0] || null;
   }
+
+  async check_token_login(token: string): Promise<void> {
+    const backendURL = 'api/polls/check_token_login/';
+    if (!this.user_info){
+      this.logger.error('update user info: userinfo is undefined')
+      return
+    }
+    const httpReqBody = `currentToken=${token}&currentUsername=${this.user_info.username}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
+  async send_mail(mail: string, user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail/';
+    const httpReqBody = `currentMail=${mail}&currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
 }

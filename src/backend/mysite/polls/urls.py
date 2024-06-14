@@ -50,6 +50,7 @@ urlpatterns = [
     path('send_mail/', views.send_mail, name='send_mail'),
     path('check_token/', views.check_token, name='check_token'),
     path('check_token_login/', views.check_token_login, name='check_token_login'),
-    path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool')
+    path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool'),
+    path('verify_mail/', views.verify_mail, name='verify_mail')
 ]
 
