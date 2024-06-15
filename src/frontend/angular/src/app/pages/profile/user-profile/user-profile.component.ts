@@ -12,6 +12,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatchHistoryComponent } from '../matchHistory/match-history.component';
+import { ChatComponent } from '../../../components/chat/chat.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -19,12 +20,19 @@ import { MatchHistoryComponent } from '../matchHistory/match-history.component';
   animations: [easeOut],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
-  imports: [UnauthorizedComponent, NotFoundComponent, CommonModule, TranslateModule, MatchHistoryComponent]
+  imports: [
+    UnauthorizedComponent,
+    NotFoundComponent,
+    CommonModule,
+    TranslateModule,
+    MatchHistoryComponent,
+    ChatComponent]
 })
 export class UserProfileComponent implements OnInit{
-  @Input() userId! : number;
+  selfInfo : PrivateUserInfo | undefined;
   info? : UserInfo | undefined; 
   showMatchHistory: boolean = false;
+  showChat : boolean = false;
   user_not_found: boolean = false;
   unauthorizedAccess: boolean = false;
   last_login: string = "none";
@@ -41,9 +49,12 @@ export class UserProfileComponent implements OnInit{
     this.authService.subscribe({
       next: (userInfo : PrivateUserInfo) => {
         if (userInfo) {
+          this.selfInfo = userInfo;
           this.route.params.subscribe(params => {
+            console.log(params)
             const userId = params['userId'];
             this.getUserInfo(userId);
+            this.editProfile = userId === userInfo.info.id
           });
         }
       }
@@ -65,7 +76,7 @@ export class UserProfileComponent implements OnInit{
 
   private applyStyles(viewportWidth: number) {
     const containerElement = this.elRef.nativeElement.querySelector('.container');
-    if (viewportWidth < 1300 && this.showMatchHistory) {
+    if (viewportWidth < 1300 && (this.showMatchHistory || this.showChat)) {
       this.renderer.addClass(containerElement, 'small-width');
     } else {
       this.renderer.removeClass(containerElement, 'small-width');
@@ -102,6 +113,14 @@ export class UserProfileComponent implements OnInit{
   }
   onMatchHistoryButton(){
     this.showMatchHistory = !this.showMatchHistory
+    if (this.showMatchHistory)
+      this.showChat = false
+    this.applyStyles(window.innerWidth)
+  }
+  onChatButton(){
+    this.showChat = !this.showChat
+    if (this.showChat)
+      this.showMatchHistory = false
     this.applyStyles(window.innerWidth)
   }
 }

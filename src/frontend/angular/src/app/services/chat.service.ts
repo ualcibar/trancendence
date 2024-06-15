@@ -166,7 +166,8 @@ export class ChatService {
   }
   
   addChat(username : string){
-    this.chatMessages.set(username, []);
+    if (!this.chatMessages.get(username))
+      this.chatMessages.set(username, []);
   }
 
   getChatMessages(chat : string): Message[]{

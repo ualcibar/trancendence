@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit, NgZone, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, NgZone, ElementRef, ViewChild, ChangeDetectorRef, Input } from '@angular/core';
 
 import { SearchBarComponent } from './search-bar/search-bar.component';
 import { ChatService, Message } from '../../services/chat.service';
@@ -34,6 +34,7 @@ export class ChatComponent implements OnInit{
 	current_chat_name : string= '#global';
 	showSearchBar : boolean = false;
 	chatMessages: Message[] = [];
+	@Input() defaultChat : string | undefined;
 
 	@ViewChild('messageBox') messageBox!: ElementRef;
 
@@ -46,6 +47,10 @@ export class ChatComponent implements OnInit{
 	ngOnInit(): void {
 		this.fetchChatMessages();
 		this.scrollToBottom();
+		if (this.defaultChat){
+			this.current_chat_name = this.defaultChat
+			this.chatService.addChat(this.defaultChat)
+		}
 	}
 
 /*	ngOnDestroy(): void {

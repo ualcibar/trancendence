@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CustomUser
+from .models import CustomUser, Statistics
 
 
 
@@ -17,5 +17,13 @@ class CustomUserAdmin(admin.ModelAdmin):
         return ", ".join([match.__str__() for match in obj.team_b_matches.all()])
 
     get_team_b_matches.short_description = 'Team B Matches'
+
+@admin.register(Statistics)
+class StatisticsAdmin(admin.ModelAdmin):
+    list_display = ['get_username']
+    def get_username(self, statistics):
+        return statistics.user.username
+    get_username.short_description = 'Username'
+
 
 # Register your models here.

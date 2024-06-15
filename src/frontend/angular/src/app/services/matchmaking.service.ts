@@ -9,7 +9,7 @@ import { toEnum } from '../utils/help_enum';
 import { EventData, PongEventType } from '../utils/behaviour';
 import { LogFilter, Logger } from '../utils/debug';
 import { MatchmakingState, StateService } from './stateService';
-import {Observable, Subscription, interval, BehaviorSubject} from 'rxjs';
+import {Observable, Subscription, interval, BehaviorSubject, Subject} from 'rxjs';
 
 export enum OnlineMatchState{
   Joining = 'Joining', 
@@ -183,7 +183,8 @@ export class MatchmakingService implements MatchSync{
   availableMatches : OnlineMatchSettings2[] = [];
   //private dataChangedSubject: Subject<void> = new Subject<void>();
   //dataChanged$: Observable<void> = this.dataChangedSubject.asObservable();
-  dataChanged : State<void> = new State<void>(undefined);
+  private dataChangedSubject : Subject<void> = new Subject();
+  dataChanged : Observable<void> = this.dataChangedSubject.asObservable()
 
   //match manager
   private onlineManager? : OnlineMatchManager | undefined;
@@ -346,11 +347,13 @@ export class MatchmakingService implements MatchSync{
           break;
         case 'new_match':
           this.availableMatches.push(new OnlineMatchSettings2(data.match.name, data.match.tags, true, data.match.settings));
+          this.dataChangedSubject.next()
           break;
         case 'del_match':
           for (const [index, match] of this.availableMatches.entries()) {
             if (match.name === data.del_match_name) {
               this.availableMatches.splice(index);
+              this.dataChangedSubject.next()
               return;
             }
           }
@@ -754,7 +757,12 @@ export class MatchmakingService implements MatchSync{
           console.log('available matches', this.availableMatches)
           break; 
         case 'match_finished':
-          this.onlineManager!.finishMatch(data.status, data.result, data.winner);
+          this.logger.info('match finished received')
+          if (data.score)
+            this.onlineManager!.finishMatch(data.status, data.result, new Score([data.score[0], data.score[1]]));
+          else
+            this.onlineManager!.finishMatch(data.status, data.result, undefined);
+          this.stateService.changeMultiplayerState(MatchmakingState.StandBy)
           break;
         default :
           this.logger.error(`unknown case received: ${data.type}`);

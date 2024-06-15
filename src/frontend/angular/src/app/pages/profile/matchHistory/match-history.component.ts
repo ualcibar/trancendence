@@ -1,5 +1,5 @@
 import { Component, Input, OnInit} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService, PrivateUserInfo, UserInfo, UserInfoI } from '../../../services/auth.service';
 
@@ -82,7 +82,7 @@ export class MatchHistoryComponent implements OnInit{
   expanded : boolean[] | undefined;
   @Input() userId : number | undefined;
   
-  constructor(private http : HttpClient) {
+  constructor(private http : HttpClient, private router : Router) {
   }
 
   ngOnInit(): void {
@@ -105,21 +105,6 @@ export class MatchHistoryComponent implements OnInit{
           }
           return hold
         })
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
-        this.matches?.push(this.matches[0])
         if (this.matches)
           this.expanded = Array<boolean>(this.matches.length).fill(false)
       },
@@ -130,5 +115,9 @@ export class MatchHistoryComponent implements OnInit{
   }
   toggleExpand(index : number){
     this.expanded![index] = !this.expanded![index];
+  }
+  goToProfile(userId : number){
+    this.router.navigate([`/profile/${userId}`])
+    //!todo
   }
 }
