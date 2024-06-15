@@ -29,6 +29,8 @@ from rest_framework import status
 from .authenticate import CustomAuthentication
 from .serializers import UserInfoSerializer, LightUserInfoSerializer, PrivateUserInfoSerializer
 from .models import CustomUser, CustomUserManager
+from matchmaking.models import Match
+from matchmaking.serializers import MatchSerializer
 
 import requests
 import json
@@ -217,6 +219,30 @@ def register(request):
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def matches(request):
+    match_ids = request.query_params.get('ids')
+    if match_ids:
+        match_ids_list = match_ids.split(',')  # Split the comma-separated string into a list
+        matches = Match.objects.filter(id__in=match_ids_list)
+    else:
+        matches = Match.objects.none()
+
+    serializer = MatchSerializer(matches, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def userHistory(request, user_id):
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except Exception as e:
+        return Response({'message': 'cant find user'}, status=500)
+    matches = user.team_a_matches.all() + user.team_b_matches.all()
+    serializer = MatchSerializer(matches, True)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -281,23 +307,7 @@ class CustomUserView(APIView):
         serializer = UserInfoSerializer(usuario)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class GameHistoryView(APIView):
-    def get(self, request, user_id):
-        player1_games = Game.objects.filter(player1_id=user_id)
-        player2_games = Game.objects.filter(player2_id=user_id)
-
-        all_games = player1_games | player2_games
-        #serialized_games = GameSerializer(all_games, many = True)
-        return Response(None, status=status.HTTP_200_OK)
-    
-    def post(self, request):
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
-        serializer = GameSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
-    
+ 
 class FriendsListView(APIView):
     def get(self, request, user_id):
         user = CustomUser.objects.get(id=user_id)

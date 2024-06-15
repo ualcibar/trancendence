@@ -1,0 +1,7 @@
+.winEntry{
+    background: linear-gradient(to right, rgba(0, 255, 0, 0.749) 0%, rgba(0, 255, 0, 0.169) 2%, rgba(0, 0, 255, 0));
+}
+
+.loseEntry{
+    background: linear-gradient(to right, rgba(255, 0, 0, 0.665) 0%, rgba(255, 0, 0, 0.209) 2%, rgba(0, 0, 255, 0));
+}

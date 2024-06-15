@@ -341,6 +341,8 @@ export interface Manager{
   bindEvent(id : number, type : PongEventType) : boolean;
   getState() : GameManagerState;
   start() : void;
+  pause() : void;
+  resume() : void;
 }
 
 export interface OnlineManager{
@@ -514,6 +516,15 @@ export class TournamentManager implements Manager{
     this.currentMatchState.setValue(MatchState.Starting);
   }
 
+  pause(): void {
+    this.currentMatchState.setValue(MatchState.Paused);
+    this.broadcastEvent(PongEventType.Pause, {});
+  }
+
+  resume(): void {
+    this.currentMatchState.setValue(MatchState.Running);
+    this.broadcastEvent(PongEventType.Continue, {});
+  }
 
 }
 export class MatchManager implements Manager{
@@ -652,6 +663,17 @@ export class MatchManager implements Manager{
   start(): void {
     this.matchState.setValue(MatchState.Starting);
   }
+
+  pause(): void {
+    this.matchState.setValue(MatchState.Paused);
+    this.broadcastEvent(PongEventType.Pause, {});
+  }
+
+  resume(): void {
+    this.matchState.setValue(MatchState.Running);
+    this.broadcastEvent(PongEventType.Continue, {});
+  }
+
   runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
       for (let i = 0; i < eventObjects.length; i++)
         eventObjects[i].runEvent(type, data); 
@@ -764,12 +786,12 @@ export class OnlineMatchManager implements Manager, OnlineManager{
             this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
             this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings);
             if (this.matchUpdate.score.score[data.custom!.others.team] >= this.info.onlineSettings.matchSettings.roundsToWin){
-              this.matchSync.sendEvent(PongEventType.Pause,{})
-              this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Pause),PongEventType.Pause, {})
+              //this.matchSync.sendEvent(PongEventType.Finish,{})
+              this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Finish),PongEventType.Finish, {})
               this.matchState.setValue(MatchState.FinishedSuccess)
-              this.onlineMatchState.setValue(OnlineMatchState.FinishedSuccess)
-              this.matchSync.changeOnlineMatchState(OnlineMatchState.FinishedSuccess)
-              //this.endMatch();
+              //this.onlineMatchState.setValue(OnlineMatchState.FinishedSuccess)
+              this.matchSync.syncOnlineMatchState(OnlineMatchState.FinishedSuccess)
+              //this.matchSync.endMatch();
             }
 //            this.matchSync.broadcastEvent(type, data);
           }
@@ -783,7 +805,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         }
       default:
         if (this.amIHost){
-          //this.matchSync.broadcastEvent(type, this.eventDataToSyncData(data));
+          this.matchSync.broadcastEvent(type, this.eventDataToSyncData(data));
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
         }
     }
@@ -870,6 +892,20 @@ export class OnlineMatchManager implements Manager, OnlineManager{
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
           this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings); 
         }
+        break;
+      case PongEventType.Pause:
+        if (!this.amIHost) {
+          console.log("PAUSE")
+          this.matchState.setValue(MatchState.Paused);
+        }
+        this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
+        break;
+      case PongEventType.Continue:
+        if (!this.amIHost) {
+          console.log("CONTINUE");
+          this.matchState.setValue(MatchState.Running);
+        }
+        this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
         break;
       default:
         this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));//!todo must turn syncdata to local data
@@ -967,9 +1003,32 @@ export class OnlineMatchManager implements Manager, OnlineManager{
     this.matchState.setValue(MatchState.Starting);
     this.onlineMatchState.setValue(OnlineMatchState.Running)
   }
+
+  pause(): void {
+    this.matchState.setValue(MatchState.Paused);
+    this.onlineMatchState.setValue(OnlineMatchState.Paused);
+    if (this.amIHost)
+      this.broadcastEvent(PongEventType.Pause, {});
+  }
+
+  resume(): void {
+    this.matchState.setValue(MatchState.Running);
+    this.onlineMatchState.setValue(OnlineMatchState.Running);
+    if (this.amIHost)
+      this.broadcastEvent(PongEventType.Continue, {});
+  }
+
+
   runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
       for (let i = 0; i < eventObjects.length; i++)
         eventObjects[i].runEvent(type, data); 
+  }
+
+  finishMatch(status : OnlineMatchState, result : string, score : Score | undefined){
+    this.onlineMatchState.setValue(status)
+    this.matchState.setValue(MatchState.FinishedSuccess)
+    if (score)
+      this.matchUpdate.score.score = score.score;
   }
 }
 
@@ -998,9 +1057,16 @@ export class GameManagerService implements Manager{
   }
    
   start(): void {
-    this.currentManager?.start();
+    this.currentManager!.start();
   }
 
+  pause(): void {
+    this.currentManager!.pause();
+  }
+
+  resume(): void {
+    this.currentManager!.resume();
+  }
 
   createTournament(config : TournamentSettings, mapSettings : MapSettings) : TournamentManager | undefined{
     if (this.state.getCurrentValue() !== GameManagerState.Standby){

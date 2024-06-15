@@ -20,10 +20,19 @@ html {
 
 /* All pages div background styles */
 .sp-div {
-  background-color: rgba(47, 50, 98, 0.806);
-  border: 1px solid rgba(73, 67, 113, 0.5);
-  backdrop-filter: blur(2px);
-  color: #cfe1e6; }
+	background-color: #0065d82b;
+	backdrop-filter: blur(5px) brightness(0.4) saturate(0.5);
+	border: 1px solid rgba(73, 67, 113, 0.5);
+	color: #cfe1e6;
+	/*background-color: #0071c237;*/
+}
+/*
+.sp-div {
+	background-color: #0071c237;
+	backdrop-filter: blur(3px) brightness(0.25) saturate(0.7);
+	border: 1px solid rgba(73, 67, 113, 0.5);
+	color: #cfe1e6;
+}*/
 
 /* Forms main style */
 .form-control:valid {

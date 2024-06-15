@@ -7,6 +7,7 @@ import { Observable } from "rxjs";
 import { TournamentTreeComponent } from "../../components/tournament-tree/tournament-tree.component";
 import { CommonModule } from "@angular/common";
 import { MapsName, MapsService } from "../../services/map.service";
+import { OnlineMatchState } from "../../services/matchmaking.service";
 
 class PlayRender{
     renderTree : State<boolean> = new State<boolean>(false);
@@ -102,18 +103,41 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 if (realManager instanceof OnlineMatchManager)
                     this.onlineMatchManager = realManager;
                 this.renderState.renderGame.setValue(true);
+                this.onlineMatchManager?.matchState.subscribe((state : MatchState)=>{
+                    switch (state){
+                        case MatchState.FinishedError:
+                            console.log('there was an error during the match')
+                            setTimeout(() => {
+                                this.router.navigate(['/'])
+                            }, 2000);
+                            break;
+                        case MatchState.FinishedSuccess:
+                            console.log('there was an error during the match')
+                            setTimeout(() => {
+                                this.router.navigate(['/'])
+                            }, 2000);
+                    }
+                })
                 break;
         } 
     }
     ngAfterViewInit(): void {
+
     }
     ngOnDestroy(): void {
         if (this.manager.getState() === GameManagerState.InGame){
-            this.manager.setMatchState(MatchState.FinishedSuccess)
+            if (this.currentManagerType == RealManagerType.OnlineMatch){
+                const state = this.onlineMatchManager!.getOnlineState()
+                if (state !== OnlineMatchState.FinishedError && state !== OnlineMatchState.FinishedSuccess){
+                    //host disconnected
+                    this.onlineMatchManager!.matchSync.syncOnlineMatchState(OnlineMatchState.HostDisconected)
+                }
+            }
+            else
+                this.manager.setMatchState(MatchState.FinishedSuccess)
         }
     }
     startNextTournamentround(){
-
         console.log('PLAY HIT')
         console.log('score', this.tournamentManager!.update.currentMatchUpdate.score)
         this.tournamentManager!.nextRound();

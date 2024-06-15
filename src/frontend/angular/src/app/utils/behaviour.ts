@@ -75,6 +75,7 @@ export enum PongEventType {
 	Colision = 'colision',
 	Score = 'score',
 	IAPrediction = 'ia prediction',
+	Finish = 'Finish'
 }
 
 export class EventBehaviour<T extends GameObject> implements EventObject{
@@ -220,6 +221,7 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 			update = manager.getMatchUpdate()
 		// }
 		if (paddle.state === PaddleState.Binded) {
+			// console.log('paddle binded, handling keys', paddle);
 			paddle.dir.y = 0;
 			if (key.isPressed(paddle.upKey)) {
 				paddle.dir.y = 1;

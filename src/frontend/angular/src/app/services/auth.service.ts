@@ -8,6 +8,26 @@ import { LogFilter, Logger } from '../utils/debug';
 import { State } from '../utils/state';
 import { toEnum } from '../utils/help_enum';
 
+export interface StatisticsI{
+  wins : number;
+  loses : number;
+  total : number;
+}
+
+export class Statistics{
+  wins : number;
+  loses : number;
+  total : number;
+  constructor(wins : number, loses : number, total : number){
+    this.wins = wins;
+    this.total = total;
+    this.loses = loses;
+  }
+  static fromI(values : StatisticsI){
+    return new Statistics(values.wins, values.loses, values.total)
+  }
+}
+
 export interface LighUserInfoI{
   id : number;
   username : string;
@@ -33,8 +53,7 @@ export class LightUserInfo{
 
 export interface UserInfoI extends LighUserInfoI{
   color : string;
-  wins : number;
-  loses : number;
+  statistics : StatisticsI;
   avatarUrl : string;
   matchHistory : number[];
 }
@@ -51,18 +70,16 @@ export class UserInfo{
   username : string;
   status : string;
   color : string;
-  wins : number;
-  loses : number;
+  statistics : Statistics;
   avatarUrl : string;
   matchHistory : number[];
 
-  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number, avatarUrl : string, matchHistory : number[]){
+  constructor (username : string, user_id : number, status : UserStatus, color : string, statistics : Statistics, avatarUrl : string, matchHistory : number[]){
     this.username = username;
     this.id = user_id;
     this.status = status;
     this.color = color;
-    this.wins = wins;
-    this.loses = loses;
+    this.statistics = statistics;
     this.avatarUrl = avatarUrl;
     this.matchHistory = matchHistory;
   }
@@ -74,7 +91,8 @@ export class UserInfo{
       console.error('user info: fromI: failed to parse status enum:', values.status)
       return undefined
     }
-    return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses, values.avatarUrl, values.matchHistory)
+    const statistics = Statistics.fromI(values.statistics)
+    return new UserInfo(values.username, values.id, status, values.color, statistics, values.avatarUrl, values.matchHistory)
   }
 }
 
@@ -122,17 +140,23 @@ export class PrivateUserInfo{
 export class AuthService {
   private _userInfo : State<PrivateUserInfo | undefined>;
   private reconnecting : number | undefined;
+  private loggedInOnce : boolean = false;
   //logger*
   private logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
 
   constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
     this._userInfo = new State<PrivateUserInfo | undefined>(undefined);
     this._userInfo.subscribe((loggedIn : PrivateUserInfo | undefined) => {
-      if (!loggedIn)
+      if (!loggedIn && this.loggedInOnce)
         this.reconnecting = setInterval(() => {
           this.updateUserInfo();
         },1000)
+      if (loggedIn)
+        this.loggedInOnce = true;
     })
+    this.reconnecting = setInterval(() => {
+      this.updateUserInfo();
+    }, 1000)
     //this.refreshToken() 
   }
 
@@ -311,7 +335,7 @@ export class AuthService {
       },
       error: (error) => {
         this.logger.error('failed refresh token', error)
-        if (error.status === 400)
+        if (error.status === 400 || error.status === 401)
           clearInterval(this.reconnecting)
         //this.reconnecting = setInterval(()=>this.refreshToken(),1000)
         this._userInfo.setValue(undefined);

@@ -7,12 +7,12 @@ import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobb
 
 import { AuthService } from '../../services/auth.service';
 import { MatchmakingService, OnlineMatchSettings2, OnlineMatchState} from '../../services/matchmaking.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { fadeInOut, fadeInOuttimeout } from '../../../assets/animations/fadeInOut';
 import { GameManagerService, MatchConfig, MatchSettings, TournamentManager, TournamentSettings} from '../../services/gameManager.service';
 import { MapsName, MapsService } from '../../services/map.service';
-import { Router } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 
 import { ChatService } from '../../services/chat.service';
 import { TournamentGeneratorComponent } from '../../components/tournament-gererator/tournament-generator-component';
@@ -21,6 +21,8 @@ import { LogFilter, Logger } from '../../utils/debug';
 import { ChatState, HomeState, MatchmakingState, StateService } from '../../services/stateService';
 import { TournamentTreeComponent } from '../../components/tournament-tree/tournament-tree.component';
 import { OnlineMatchGeneratorComponent } from '../../components/online-match-generator/online-match-generator-component';
+import {TranslateModule} from "@ngx-translate/core";
+import { easeOut } from '../../../assets/animations/easeOut';
 /*
 enum HomeState {
   Home,
@@ -36,31 +38,32 @@ class LocalGameHandler{
   private tournamentSettings? : TournamentSettings | undefined;
   private onlineMatchSettings? : OnlineMatchSettings2 | undefined;
 
-  defulatMatch() : MatchSettings{//this should be somewhere else
+  defaultMatch() : MatchSettings{//this should be somewhere else
     return new MatchSettings(60,3,2,1,MapsName.Default);//!todo should be in settings
   }
-  defulatTournament() : TournamentSettings{//this should be somewhere else
-    return new TournamentSettings(this.defulatMatch(),10);//!todo should be in settings
+  defaultTournament() : TournamentSettings{//this should be somewhere else
+    return new TournamentSettings(this.defaultMatch(),10);//!todo should be in settings
   }
-  defulatOnlineMatch() : OnlineMatchSettings2{//this should be somewhere else
-    return new OnlineMatchSettings2('default', 'esp', true,this.defulatMatch());//!todo should be in settings
+  defaultOnlineMatch() : OnlineMatchSettings2{//this should be somewhere else
+    return new OnlineMatchSettings2('default', 'esp', true,this.defaultMatch());//!todo should be in settings
   }
 
   getMatchSettings() : MatchSettings{
     if (!this.matchSettings){
       console.log('reseted match')
-      this.matchSettings = this.defulatMatch();
+      this.matchSettings = this.defaultMatch();
     }
     return this.matchSettings;
   }
+
   getTournamentSettings() : TournamentSettings{
     if (!this.tournamentSettings)
-      this.tournamentSettings = this.defulatTournament();//!todo should be in settings
+      this.tournamentSettings = this.defaultTournament();//!todo should be in settings
     return this.tournamentSettings;
   }
   getOnlineMatchSettings() : OnlineMatchSettings2{
     if (!this.onlineMatchSettings)
-      this.onlineMatchSettings = this.defulatOnlineMatch();//!todo should be in settings
+      this.onlineMatchSettings = this.defaultOnlineMatch();//!todo should be in settings
     return this.onlineMatchSettings;
   }
   resetMatchSettings(){
@@ -77,7 +80,8 @@ class LocalGameHandler{
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ChatComponent,
+  imports: [NgOptimizedImage,
+    ChatComponent,
     LobbySearchComponent,
     CommonModule,
     LobbyMatchComponent,
@@ -85,14 +89,14 @@ class LocalGameHandler{
     TournamentGeneratorComponent,
     MatchGeneratorComponent,
     TournamentTreeComponent,
-    OnlineMatchGeneratorComponent
+    OnlineMatchGeneratorComponent, RouterLink, TranslateModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
-  animations: [fadeInOut]
+  animations: [fadeInOut, easeOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = true; //Al activar el modo debug, aparecerá un recuadro en la página
+  debug : boolean = false; //Al activar el modo debug, aparecerá un recuadro en la página
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;

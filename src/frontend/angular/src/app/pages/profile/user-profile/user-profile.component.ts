@@ -1,19 +1,30 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, HostListener, NgZone, Renderer2 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthService, PrivateUserInfo, UserInfo } from '../../../services/auth.service';
 
 import { easeOut } from "../../../../assets/animations/easeOut";
+import { UnauthorizedComponent } from '../../../components/errors/unauthorized/unauthorized.component';
+import { NotFoundComponent } from '../../../components/errors/not-found/not-found.component';
+import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserModule } from '@angular/platform-browser';
+import { MatchHistoryComponent } from '../matchHistory/match-history.component';
 
 @Component({
   selector: 'app-user-profile',
+  standalone: true,
   animations: [easeOut],
   templateUrl: './user-profile.component.html',
-  styleUrl: './user-profile.component.css'
+  styleUrl: './user-profile.component.css',
+  imports: [UnauthorizedComponent, NotFoundComponent, CommonModule, TranslateModule, MatchHistoryComponent]
 })
-export class UserProfileComponent {
-  info? : UserInfo | undefined;
+export class UserProfileComponent implements OnInit{
+  @Input() userId! : number;
+  info? : UserInfo | undefined; 
+  showMatchHistory: boolean = false;
   user_not_found: boolean = false;
   unauthorizedAccess: boolean = false;
   last_login: string = "none";
@@ -23,7 +34,8 @@ export class UserProfileComponent {
 
   editProfile: boolean = false;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
+  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService, private elRef: ElementRef, private ngZone: NgZone,  private renderer: Renderer2) {
+  }
 
   ngOnInit(): void {
     this.authService.subscribe({
@@ -40,6 +52,23 @@ export class UserProfileComponent {
       setTimeout(() => {
         this.tooLong = true;
       }, 7000);
+    }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+     this.ngZone.run(() => {
+      console.log('resize')
+      this.applyStyles(window.innerWidth);
+    });
+  }
+
+  private applyStyles(viewportWidth: number) {
+    const containerElement = this.elRef.nativeElement.querySelector('.container');
+    if (viewportWidth < 1300 && this.showMatchHistory) {
+      this.renderer.addClass(containerElement, 'small-width');
+    } else {
+      this.renderer.removeClass(containerElement, 'small-width');
     }
   }
 
@@ -70,5 +99,9 @@ export class UserProfileComponent {
         }
       }
     })
+  }
+  onMatchHistoryButton(){
+    this.showMatchHistory = !this.showMatchHistory
+    this.applyStyles(window.innerWidth)
   }
 }

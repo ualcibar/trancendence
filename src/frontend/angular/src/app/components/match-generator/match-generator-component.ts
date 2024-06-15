@@ -16,8 +16,9 @@ import { getEnumStrings, getNextEnumValue} from '../../utils/help_enum';
   styleUrl: './match-generator-component.css'
 })
 export class MatchGeneratorComponent {
-
   default : boolean = true;
+  winPointsNotPossible: boolean = false;
+
   @Output() escapeKeyPressed: EventEmitter<void> = new EventEmitter<void>();
   @Input() settings! : MatchSettings;
   
@@ -38,13 +39,39 @@ export class MatchGeneratorComponent {
   toggleMap(){
     this.settings.mapName = getNextEnumValue(MapsName ,this.settings.mapName)!;
   }
+
   changeMaxTime(event : any){
-    console.log('changing')
-    if (event.target.value){
-      console.log('actually changed something')
+    if (event.target.value)
       this.settings.maxTimeRoundSec = event.target.value;
+  }
+
+  changeRounds(event: any) {
+    if (event.target.value) {
+      if (event.target.value >= this.settings.roundsToWin) {
+        this.winPointsNotPossible = false;
+      } else {
+        this.winPointsNotPossible = true;
+      }
+      this.settings.maxRounds = event.target.value;
     }
-    console.log('after', this.settings)
+  }
+
+  changeRoundsToWin(event: any) {
+    if (event.target.value) {
+      if (event.target.value > this.settings.maxRounds) {
+        this.winPointsNotPossible = true;
+        return;
+      } else {
+        this.winPointsNotPossible = false;
+        this.settings.roundsToWin = event.target.value;
+      }
+    }
+  }
+
+  changeTeamSize(event: any) {
+    if (event.target.value) {
+      this.settings.teamSize = event.target.value;
+    }
   }
 
   onBlur() { 

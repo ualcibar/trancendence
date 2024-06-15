@@ -22,6 +22,7 @@ export enum OnlineMatchState{
   GameCrash = 'GameCrash',
   FailedToJoin = 'FailedToJoin',
   FinishedError = 'FinishedError',
+  Paused = 'Paused'
 }
 /*
 export class MatchUpdate{
@@ -158,7 +159,7 @@ export interface MatchSync{
   sendMatchUpdate(update : MatchUpdate) : void;
   sendEvent(type : PongEventType, data : EventData): void;
   broadcastEvent(type : PongEventType, data : EventData): void;
-  changeOnlineMatchState(state : OnlineMatchState) : void;
+  syncOnlineMatchState(state : OnlineMatchState) : void;
 }
 
 @Injectable({
@@ -752,6 +753,9 @@ export class MatchmakingService implements MatchSync{
           this.availableMatches = data.matches;
           console.log('available matches', this.availableMatches)
           break; 
+        case 'match_finished':
+          this.onlineManager!.finishMatch(data.status, data.result, data.winner);
+          break;
         default :
           this.logger.error(`unknown case received: ${data.type}`);
         }
@@ -1046,10 +1050,21 @@ export class MatchmakingService implements MatchSync{
     return this.onlineManager?.info;
   }
 
-  changeOnlineMatchState(state: OnlineMatchState): void {
-    if (state === OnlineMatchState.FinishedSuccess){
-      const message = {type : '/match/end', state : state, score : this.onlineManager!.matchUpdate.score.score};
-      this.sendMessage(JSON.stringify(message));
+  syncOnlineMatchState(state: OnlineMatchState): void {
+    if (this.onlineManager!.amIHost){
+      this.onlineManager!.onlineMatchState.setValue(state);
+      if (state === OnlineMatchState.FinishedSuccess ){
+        const message = {type : '/match/end', state : state, score : this.onlineManager!.matchUpdate.score.score};
+        this.sendMessage(JSON.stringify(message));
+      }else if (state === OnlineMatchState.HostDisconected){
+        const message = {type : '/match/host_left'};
+        this.sendMessage(JSON.stringify(message));
+      }
+    }else{
+      this.logger.error('only host can change online match state')
     }
+  }
+  endMatch(state: OnlineMatchState): void {
+    
   }
 }

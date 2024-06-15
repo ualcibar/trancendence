@@ -35,8 +35,6 @@ export function HttpLoaderFactory(http:HttpClient){
     FooterComponent,
     RegisterComponent,
     LoginComponent,
-    ProfileComponent,
-    UserProfileComponent, 
     NotificationComponent
   ],
   imports: [

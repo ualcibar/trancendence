@@ -1,7 +1,50 @@
-.chat {
-	width: -moz-available;
+.container{
+	display: flex;
+	position: relative;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	min-width: 500px;
 }
 
+.leftContainer{
+	flex: 1;
+	height: 100%;
+}
+
+.rightContainer{
+	flex : 1;	
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-items: center;
+	justify-content: center;
+	height: 100%;
+}
+
+@media (max-width: 1200px) {
+	.container{
+		flex-direction: column;
+		height: 200%;
+		overflow-y:visible;
+	}	
+	.leftContainer{
+		width: 100%;
+		height: 50%;
+		order: 2;
+	}
+	.rightContainer{
+		width: 100%;
+		height: 50%;
+		order: 1;
+	}
+}
+.chat {	
+	flex: 1;
+	margin: 20px auto;
+	top: 20px; /* Adjust the top margin as needed */
+    left: 20px; /* Adjust the left margin as needed */
+}
 .menu {
 	display: flex;
 	flex-direction: column;
@@ -27,10 +70,10 @@
 	justify-content: center;
 	align-items: center;
 	text-align: center;
-	width: 55%;
-	height: 8%;
+	height: 70px;
+	width: 70%;
 	min-width: fit-content;
-	min-height: 100px;
+	min-height: fit-content;
 	letter-spacing: 0.12em;
 	color: #cfe1e6;
 	background-color: #0071c237;
@@ -55,13 +98,21 @@
 }
 
 .backgroundButton {
-	background-color: rgba(53, 131, 131, 0.394);
+	background-color: rgba(53, 131, 131, 0);
 	width: 100%;
 	height: 100%;
 
 }
 
 .backgroundButton:hover {
-	background-color: rgba(124, 199, 83, 0.452);
+	background-color: rgba(124, 199, 83, 0);
 	cursor: default;
+}
+
+.sp-div {
+	background-color: #0065d82b;
+	backdrop-filter: blur(5px) brightness(0.4) saturate(0.5);
+	border: 1px solid rgba(73, 67, 113, 0.5);
+	color: #cfe1e6;
+	/*background-color: #0071c237;*/
 }
