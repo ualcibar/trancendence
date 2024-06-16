@@ -749,10 +749,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.paddles[index].addToScene(this.scene);
 
       if (this.paddles[index].localPlayer){
-        this.controlsText += `P${index + 1}: 👆${keyToEmoji(this.paddles[index].upKey)} 👇${keyToEmoji(this.paddles[index].downKey)}\n`;
+        this.controlsText += `P${index + 1}:\n\t-👆${keyToEmoji(this.paddles[index].upKey)}\n\t-👇${keyToEmoji(this.paddles[index].downKey)}\n`;
       }
     }
-    this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(this.controlsText.replace(/\n/g, '<br>'));
+    this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(
+      this.controlsText.replace(/\n/g, '<br>').replace(/\t/g, '&emsp;')
+    );
 
     // INIT BLOCKS
     this.blocks = new Array<THREE.Mesh>(this.update.blocks.length);
