@@ -35,12 +35,12 @@ export class UserProfileComponent implements OnInit{
   showChat : boolean = false;
   user_not_found: boolean = false;
   unauthorizedAccess: boolean = false;
-  last_login: string = "none";
 
   loading: boolean = true;
   tooLong: boolean = false;
 
   editProfile: boolean = false;
+  last_login = 'todo'
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService, private elRef: ElementRef, private ngZone: NgZone,  private renderer: Renderer2) {
   }
@@ -93,12 +93,15 @@ export class UserProfileComponent implements OnInit{
           console.error('failed to parse user info') 
         }
         this.info = info;
-        this.last_login = response.last_login;
 
         this.loading = false;
-        if (this.authService.userInfo!.info.username === this.info?.username)
+        if (this.authService.userInfo!.info.username === this.info?.username) {
           this.editProfile = true;
-        else this.user_not_found = this.info?.username === "admin";
+        } else if (this.info?.username === "admin") {
+          this.user_not_found = true;
+        } else {
+          this.user_not_found = false;
+        }
       },
       error: (error) => {
         console.error('An error ocurred fetching this user: ', error.status);

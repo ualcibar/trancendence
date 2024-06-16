@@ -114,6 +114,115 @@ class MapSettingsCreateInfo{
     return blocks;
   }
 
+  // createFancyScoreBlocks(manager: Manager): Block[] {
+  //   const width = 42;
+  //   const blocks = [
+  //     new Block(
+  //       new Vector2(this.leftLimit - this.ballRadius * 4  - width/2, 0),
+  //       new Vector3(width, this.dimmensions.height * 2, width),
+  //       BlockType.Score,
+  //       new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+  //       manager
+  //     ),
+  //     new Block(
+  //       new Vector2(this.rightLimit + this.ballRadius * 4 +  width/2, 0),
+  //       new Vector3(width, this.dimmensions.height, width),
+  //       BlockType.Score,
+  //       new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+  //       manager
+  //     ),
+  //     new Block(
+  //       new Vector2(0, this.topLimit + width/2),
+  //       new Vector3(this.dimmensions.width * 2, width, width),
+  //       BlockType.Score,
+  //       new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+  //       manager
+  //     ),
+  //     new Block(
+  //       new Vector2(0, this.bottomLimit - this.ballRadius - width/2),
+  //       new Vector3(this.dimmensions.width * 2, width, width),
+  //       BlockType.Score,
+  //       new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+  //       manager
+  //     ),
+  //   ];
+
+  //   //blocks.forEach(block => {
+  //   blocks[0].bindEvent(createEventScoreColision(manager, blocks[0], 1));
+  //   blocks[1].bindEvent(createEventScoreColision(manager, blocks[1], 0));
+  //   blocks[2].bindEvent(createEventScoreColision(manager, blocks[2], 1));
+  //   blocks[3].bindEvent(createEventScoreColision(manager, blocks[3], 0));
+  //   //})
+
+  //   return blocks;
+  // }
+
+  createFancyWalls(manager: Manager): Block[] {
+    const blocks = [
+      new Block(new Vector2(0, this.topLimit),
+        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+        BlockType.Collision,
+        new RenderMaterial(RenderMaterialType.colored,colorPalette.white),
+        manager
+      ),
+      new Block(new Vector2(0, this.bottomLimit),
+        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+        BlockType.Collision,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.white),
+        manager
+      ),
+    ];
+    blocks.forEach(block => {
+      block.bindEvent(eventEventWallColision);
+      // block.bindEvent();
+    })
+ 
+    return  blocks;
+  }
+
+  createFancyScoreBlocks(manager: Manager): Block[] {
+    const width = 0.42;
+    const blocks = [
+      new Block(
+        new Vector2(this.leftLimit - this.ballRadius * 4  - width/2, 0),
+        new Vector3(width, this.dimmensions.height * 2, width),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        manager
+      ),
+      new Block(
+        new Vector2(this.rightLimit + this.ballRadius * 4 +  width/2, 0),
+        new Vector3(width, this.dimmensions.height, width),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        manager
+      ),
+      new Block(
+        new Vector2(0, this.topLimit + width/2),
+        new Vector3(this.dimmensions.width * 2, width, width),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        manager
+      ),
+      new Block(
+        new Vector2(0, this.bottomLimit - this.ballRadius - width/2),
+        new Vector3(this.dimmensions.width * 2, width, width),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        manager
+      ),
+    ];
+
+    //blocks.forEach(block => {
+    blocks[0].bindEvent(createEventScoreColision(manager, blocks[0], 1));
+    blocks[1].bindEvent(createEventScoreColision(manager, blocks[1], 0));
+    blocks[2].bindEvent(createEventScoreColision(manager, blocks[2], 1));
+    blocks[3].bindEvent(createEventScoreColision(manager, blocks[3], 0));
+    //})
+
+    return blocks;
+  }
+
   createDefaultAdditionalLights(): THREE.Light[] {  
     // <        // Additional lights
 //         {
@@ -145,6 +254,31 @@ class MapSettingsCreateInfo{
       console.log("additional lights", this.additionalLights)
 
       return settings.additionalLights;
+  }
+
+  createFancyAdditionalLights(): THREE.Light[] {
+    const settings = this;
+    //ambient light
+    {
+      const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity /15);
+      settings.additionalLights.push(light);
+    }
+    // // Additional lights
+    // const additionalLights : THREE.Light[] = [];
+    // {
+    //   const red = 0xFF0000;
+    //   const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity * 50);
+    //   light.position.set(1, 0.1, 0);
+    //   settings.additionalLights.push(light);
+    // }
+    // // Additional lights
+    // {
+    //   const blue = 0x0000FF;
+    //   const light = new THREE.DirectionalLight(blue , settings.defaultLightIntensity * 50);
+    //   light.position.set(-1, -0.1, 0);
+    //   settings.additionalLights.push(light);
+    // }
+    return settings.additionalLights;
   }
 
   createInfernoAdditionalLights(): THREE.Light[] {  
@@ -330,10 +464,26 @@ export class MapsService {
           const blocks = [...infernoInfo.createDefaultScoreBlocks(this.manager),  ...infernoInfo.createDefaultWalls(this.manager)];
           this.maps.set(MapsName.Inferno, new MapSettings(infernoInfo, blocks));
         }
+
+        // Create fancy map
+        const fancyInfo = new MapSettingsCreateInfo();
+        fancyInfo.ballInitSpeed = defaultInfo.ballInitSpeed * 1.4;
+        fancyInfo.ballColor = colorPalette.josefYellow;
+        fancyInfo.ballLightColor = colorPalette.josefYellow;
+        fancyInfo.ballLightIntensity = 2;
+        fancyInfo.paddleSpeed = defaultInfo.paddleSpeed * 1.5;
+        fancyInfo.ballLightIsOn = false;
+        fancyInfo.collisionChangeBallColor = true;
+        fancyInfo.collisionChangeWallColor = true;
+        fancyInfo.collisionChangePaddleColor = true;
+        fancyInfo.additionalLights = fancyInfo.createFancyAdditionalLights();
+        {
+          const blocks = [...fancyInfo.createFancyScoreBlocks(this.manager),  ...fancyInfo.createFancyWalls(this.manager)];
+          this.maps.set(MapsName.Fancy, new MapSettings(fancyInfo, blocks));
+        }
+
     }
     getMapSettings(map: MapsName): MapSettings | undefined {
       return this.maps.get(map);
     }
-
-    
 }
