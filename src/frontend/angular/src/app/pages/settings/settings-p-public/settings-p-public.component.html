@@ -4,7 +4,8 @@
         <img src="{{ avatarUrl }}" class="mt-2 mr-2 my-2 w-24 h-24 bg-slate-400 rounded-full" alt="User Avatar">
         <input type='file' id="avatar-upload" (change)="onSelectFile($event)" hidden>
 
-        <label *ngIf="!fileUploaded" for="avatar-upload" class="btn btn-warning btn-sm"><i class="bi bi-upload"></i> Subir imagen</label>
+        <label *ngIf="!fileUploaded" for="avatar-upload" class="btn btn-warning btn-sm mr-2"><i class="bi bi-upload"></i> Subir imagen</label>
+        <button *ngIf="!fileUploaded" (click)="defaultAvatar()" class="btn btn-warning btn-sm">{{'default'|translate}}</button>
         <button *ngIf="fileUploaded" (click)="saveAvatar()" class="btn btn-success btn-sm"><i class="bi bi-floppy-fill"></i> {{'save_changes'|translate}}</button>
 
         <label *ngIf="fileUploaded" id="file-chosen" (click)="removeSelectedFile()" class="btn btn-warning btn-sm ml-2">

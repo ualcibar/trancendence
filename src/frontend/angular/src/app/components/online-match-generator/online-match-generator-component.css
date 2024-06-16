@@ -2,18 +2,30 @@ i {
 	transition-duration: 90ms;
 }
 
-.btn {
-	background-color: rgb(147, 51, 234);
-	color: white;
-	--bs-btn-border-color: rgb(147, 51, 234);
-	--bs-btn-hover-border-color: rgb(125, 31, 214);
-	--bs-btn-active-border-color: rgb(120, 29, 206);
+.textInput{
+	border-radius: 5px;
+	background-color: rgba(74, 141, 170, 0.144);
+	backdrop-filter: brightness(0.9);
+	width: 100%;
 }
 
-.btn:hover {
-	background-color: rgb(125, 31, 214);
+.privacyChoice{
+	flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    cursor: pointer;
 }
 
-.btn:active {
-	background-color: rgb(120, 29, 206);
+.privacy-bubble {
+    position: absolute;
+    width: 150px;
+    height: 20px;
+    background-color: rgba(58, 35, 171, 0.262);
+	border: 2px solid rgba(0, 157, 255, 0.262);
+	border-radius: 8px; /* Adjust the radius as needed */
+    padding: 10px; /* Adjust padding as needed */
+    transition: transform 0.3s ease;
+    z-index: 0;
 }

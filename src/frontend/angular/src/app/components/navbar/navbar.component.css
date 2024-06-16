@@ -3,7 +3,13 @@ button {
 }
 
 nav {
-	background-color: rgba(47, 50, 98, 0.5);
+	/*background-color: rgba(47, 50, 98, 0.5);*/
 	border-bottom: 1px solid rgba(73, 67, 113, 0.5);
-	backdrop-filter: blur(2px);
+	/*backdrop-filter: blur(2px);*/
+}
+.sp-div{
+	background-color: #1a6ac51b;
+	backdrop-filter: blur(3px) brightness(0.5) saturate(0.7);
+	border: 1px solid rgba(73, 67, 113, 0.5);
+	color: #cfe1e6;
 }

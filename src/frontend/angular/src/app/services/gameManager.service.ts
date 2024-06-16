@@ -13,6 +13,21 @@ import { Ball, GameObject, Paddle, PaddleState, Block } from '../components/pong
 import { Router } from '@angular/router';
 import { LogFilter, Logger } from '../utils/debug';
 import { TournamentTree } from '../utils/tournamentTree';
+import { TemplateBindingParseResult } from '@angular/compiler';
+import { toEnum } from '../utils/help_enum';
+
+export class HistoryMatch{
+  date : number;
+  team_a : number[];
+  team_b : number[];
+  score : Score;
+  constructor(date : number, team_a : number[], team_b : number[], score : Score){
+    this.date = date;
+    this.team_a = team_a;
+    this.team_b = team_b;
+    this.score = score;
+  }
+}
 
 export enum GameConfigState{
   Standby = 'standby',
@@ -86,6 +101,14 @@ export class Key{
   }
 }
 
+export interface MatchSettingsI{
+  maxTimeRoundSec : number;//seconds
+  maxRounds : number;
+  roundsToWin : number;
+  teamSize : number;
+  mapName : string;
+}
+
 export class MatchSettings{//no matter what map this settings are always applicable
   maxTimeRoundSec : number;//seconds
   maxRounds : number;
@@ -101,6 +124,18 @@ export class MatchSettings{//no matter what map this settings are always applica
       this.teamSize = teamSize;
       console.log('mapname', mapName);
       this.mapName = mapName;
+  }
+  static fromI(values : MatchSettingsI) : MatchSettings | undefined{
+    const mapName = toEnum(MapsName, values.mapName);
+    if (!mapName)
+      return undefined
+    return new MatchSettings(
+        values.maxTimeRoundSec,
+        values.maxRounds,
+        values.roundsToWin,
+        values.teamSize,
+        mapName
+    )
   }
 }
 
@@ -355,7 +390,7 @@ export class TournamentManager implements Manager{
     this.mapSettings = mapSettings;
     this.settings = settings;
     this.update = new TournamentUpdate(
-      ['a','b','c','d'],
+      settings.teamNames,
       this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this))
     //this.currentMatchUpdate = ;
     this.state = state;
@@ -767,10 +802,18 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         {
           if (this.amIHost){
             this.matchSync.broadcastEvent(type, data);
-            this.matchUpdate.score.score[data.custom?.others.team] += 1;
+            this.matchUpdate.score.score[data.custom!.others.team] += 1;
             this.logger.info('score increated host', this.matchUpdate.score.score)
             this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
             this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings);
+            if (this.matchUpdate.score.score[data.custom!.others.team] >= this.info.onlineSettings.matchSettings.roundsToWin){
+              //this.matchSync.sendEvent(PongEventType.Finish,{})
+              this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Finish),PongEventType.Finish, {})
+              this.matchState.setValue(MatchState.FinishedSuccess)
+              //this.onlineMatchState.setValue(OnlineMatchState.FinishedSuccess)
+              this.matchSync.syncOnlineMatchState(OnlineMatchState.FinishedSuccess)
+              //this.matchSync.endMatch();
+            }
 //            this.matchSync.broadcastEvent(type, data);
           }
           //change score
@@ -1000,6 +1043,13 @@ export class OnlineMatchManager implements Manager, OnlineManager{
   runEvents(eventObjects : EventObject[], type : PongEventType, data : EventData) {
       for (let i = 0; i < eventObjects.length; i++)
         eventObjects[i].runEvent(type, data); 
+  }
+
+  finishMatch(status : OnlineMatchState, result : string, score : Score | undefined){
+    this.onlineMatchState.setValue(status)
+    this.matchState.setValue(MatchState.FinishedSuccess)
+    if (score)
+      this.matchUpdate.score.score = score.score;
   }
 }
 

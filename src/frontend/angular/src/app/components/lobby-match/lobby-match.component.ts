@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatchMakingState, MatchmakingService } from '../../services/matchmaking.service';
+import { MatchmakingService } from '../../services/matchmaking.service';
 import { AuthService, UserInfo } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { MatchmakingState, StateService } from '../../services/stateService';
@@ -19,8 +19,6 @@ enum LobbyMatchState {
   styleUrl: './lobby-match.component.css'
 })
 export class LobbyMatchComponent {
-  //team_a: (UserInfo| undefined)[] = [];
-  //team_b: (UserInfo| undefined)[] = [];
   lobby! : OnlineMatchInfo;
   state: LobbyMatchState;
 

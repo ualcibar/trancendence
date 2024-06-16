@@ -22,6 +22,7 @@ import { ChatState, HomeState, MatchmakingState, StateService } from '../../serv
 import { TournamentTreeComponent } from '../../components/tournament-tree/tournament-tree.component';
 import { OnlineMatchGeneratorComponent } from '../../components/online-match-generator/online-match-generator-component';
 import {TranslateModule} from "@ngx-translate/core";
+import { easeOut } from '../../../assets/animations/easeOut';
 /*
 enum HomeState {
   Home,
@@ -92,7 +93,7 @@ class LocalGameHandler{
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
-  animations: [fadeInOut]
+  animations: [fadeInOut, easeOut]
 })
 export class HomeComponent implements OnInit{
   debug : boolean = false; //Al activar el modo debug, aparecerá un recuadro en la página
@@ -153,6 +154,8 @@ export class HomeComponent implements OnInit{
       this.changeState(HomeState.Home)
     else if (state === HomeState.MatchGenerator || state === HomeState.TournamentGenerator)
       this.changeState(HomeState.MatchTournament)
+    else if (state === HomeState.OnlineMatchGenerator)
+      this.changeState(HomeState.SearchingOnlineGame)
   }
 
   getMatch() {

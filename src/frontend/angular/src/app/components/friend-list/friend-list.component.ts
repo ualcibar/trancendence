@@ -31,7 +31,7 @@ export class FriendListComponent implements OnInit {
           this.route.params.subscribe(params => { // Esto hay que mirarlo, porquqe si lo del getUserInfo() falla por no estar con la sesión
             // iniciada, entonces se queda "cargando" infinitamente
             this.userId = params['userId'];
-            this.authService.updateUserInfo();
+            //this.authService.updateUserInfo();
             this.friend_list = this.authService.userInfo?.friends;
           });
         }
