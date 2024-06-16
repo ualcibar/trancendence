@@ -61,7 +61,7 @@
 				<div class="stat"> 
 					<button *ngIf="!friendService.friendExist(userId) && !friendADD" (click)="toggleAddFriend()" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
 					<button (click)="onFriendListButton()" *ngIf="(this.authService.userInfo!.info.id == userId)" class="btn btn-primary btn-sm"><i
-						class="bi bi-person-fill-add"></i></button>
+						class="bi bi-people-fill"></i></button>
 					<!--<button [ngClass]="{'': !editProfile,'grayscale disabled opacity-25': editProfile}" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button> -->
 					<!-- <button class="btn btn-primary btn-sm"><i class="bi bi-chat-dots-fill"></i></button>-->
 				</div>
