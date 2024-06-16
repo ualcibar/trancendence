@@ -4,7 +4,7 @@
 	</div>
 	<p class="text-center pt-8 text-slate-400">You don't have any friends :(</p>
 </div> -->
-<div class="h-50real container" #containerRef>
+<div class="h-50real profileMain" #containerRef>
 	<div *ngIf="loading; else content" class="sp-div flex flex-col items-center justify-center rounded text-white"
 		style="width: 20rem;">
 		<h1 class="m-4">Loading user profile... </h1>
@@ -15,7 +15,7 @@
 
 	<ng-template #content>
 		<div *ngIf="!user_not_found && !unauthorizedAccess && info"
-				class="sp-div leftContainer items-center p-2 max-w-xl md:max-w-4xl md:flex-row mx-auto rounded-xl">
+				class="sp-div profileLeft items-center p-2 rounded-xl">
 		<!--div *ngIf="!user_not_found && !unauthorizedAccess && info" class="sp-div leftContainer"-->
 			<div class="md:shrink-0 items-center">
 				<div class="w-full shadow-md rounded">
@@ -76,8 +76,8 @@
 				</div>
 			</div>
 		</div>
-		<app-match-history *ngIf="info && showMatchHistory" [userId]="info.id" [inputMatches]="info.matchHistory" class="rightContainer"></app-match-history>
-		<app-chat *ngIf="info && showChat" [defaultChat]="info.username" class="rightContainer"></app-chat>
+		<app-match-history *ngIf="info && showMatchHistory" [userId]="info.id" [inputMatches]="info.matchHistory" class="profileRight"></app-match-history>
+		<app-chat *ngIf="info && showChat" [defaultChat]="info.username" class="profileRight"></app-chat>
 		<app-not-found *ngIf="user_not_found"></app-not-found>
 		<app-unauthorized *ngIf="unauthorizedAccess && !loading"></app-unauthorized>
 	</ng-template>

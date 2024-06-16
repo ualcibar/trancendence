@@ -75,7 +75,7 @@ export class UserProfileComponent implements OnInit{
   }
 
   private applyStyles(viewportWidth: number) {
-    const containerElement = this.elRef.nativeElement.querySelector('.container');
+    const containerElement = this.elRef.nativeElement.querySelector('.profileMain');
     if (viewportWidth < 1300 && (this.showMatchHistory || this.showChat)) {
       this.renderer.addClass(containerElement, 'small-width');
     } else {

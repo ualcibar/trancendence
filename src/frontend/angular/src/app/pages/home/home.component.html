@@ -7,12 +7,12 @@
 		<p class="text-white">matchmaking state : {{MatchmakingState[state.matchmakingState]}}</p>
 		<p class="text-white">current online match state: {{matchmakingService.getCurrentMatchState()}}</p>
 	</div>
-	<div class="container">
-		<button (click)="backgroundClicked()" class="absolute -z-1 h-max backgroundButton"></button>
+	<!--button (click)="backgroundClicked()" class="absolute -z-1 w-max backgroundButton"></button-->
+	<div class="homeMain">
+		<button (click)="backgroundClicked()" class="absolute -z-1 h-full backgroundButton"></button>
 <!--        <app-chat class="flex chat" [@fadeInOut]></app-chat>-->
-
-		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="leftContainer" [@fadeInOut]></app-chat>
-		<div class="rightContainer flex-col justify-center items-center h-auto w-full">
+		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="homeLeft" [@fadeInOut]></app-chat>
+		<div class="homeRight flex-col justify-center items-center h-auto w-full">
             <!--img class="floating mb-12" ngSrc="assets/img/spacepong-blanco.svg" width="500" height="500" alt="SpacePong Logo" priority-->
 			<button *ngIf="(state.homeRenderState.local$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.MatchTournament)"
 				class="card mb-16" [@easeOut]>
@@ -77,8 +77,8 @@
 			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded p-4 w-96">
 				<app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>
 			</div>
-			<app-lobby-match class="z-1" *ngIf="(state.homeRenderState.joiningOnlineMatch$ | async) && (state.homeRenderState.render$)"></app-lobby-match>
-			<app-lobby-search class="z-1" *ngIf="(state.homeRenderState.onlineMatchSearch$ | async) && (state.homeRenderState.render$)"></app-lobby-search>
+			<app-lobby-match class="z-1 w-full" *ngIf="(state.homeRenderState.joiningOnlineMatch$ | async) && (state.homeRenderState.render$)"></app-lobby-match>
+			<app-lobby-search class="z-1 w-full" *ngIf="(state.homeRenderState.onlineMatchSearch$ | async) && (state.homeRenderState.render$)"></app-lobby-search>
 		</div>
 	</div>
 </div>

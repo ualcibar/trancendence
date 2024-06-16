@@ -154,6 +154,8 @@ export class HomeComponent implements OnInit{
       this.changeState(HomeState.Home)
     else if (state === HomeState.MatchGenerator || state === HomeState.TournamentGenerator)
       this.changeState(HomeState.MatchTournament)
+    else if (state === HomeState.OnlineMatchGenerator)
+      this.changeState(HomeState.SearchingOnlineGame)
   }
 
   getMatch() {

@@ -4,22 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Component, OnInit, NgZone, ElementRef, ViewChild, ChangeDetectorRef, Input } from '@angular/core';
 
 import { SearchBarComponent } from './search-bar/search-bar.component';
-import { ChatService, Message } from '../../services/chat.service';
+import { ChatService, Message, MessageType } from '../../services/chat.service';
 
 import { easeOut } from '../../../assets/animations/easeOut';
-
-function getCookie(name: string): string|null {
-	const nameLenPlus = (name.length + 1);
-	return document.cookie
-		.split(';')
-		.map(c => c.trim())
-		.filter(cookie => {
-			return cookie.substring(0, nameLenPlus) === `${name}=`;
-		})
-		.map(cookie => {
-			return decodeURIComponent(cookie.substring(nameLenPlus));
-		})[0] || null;
-}
+import { AuthService } from '../../services/auth.service';
+import { MatchmakingService } from '../../services/matchmaking.service';
+import { StateService } from '../../services/stateService';
 
 @Component({
   selector: 'app-chat',
@@ -34,11 +24,19 @@ export class ChatComponent implements OnInit{
 	current_chat_name : string= '#global';
 	showSearchBar : boolean = false;
 	chatMessages: Message[] = [];
+	MessageType = MessageType;
 	@Input() defaultChat : string | undefined;
 
 	@ViewChild('messageBox') messageBox!: ElementRef;
 
-	constructor(private http: HttpClient, private ngZone: NgZone, private chatService : ChatService, private cdr: ChangeDetectorRef) { }
+	constructor(private http: HttpClient,
+		private ngZone: NgZone,
+		private chatService : ChatService,
+		private cdr: ChangeDetectorRef,
+		private auth : AuthService,
+		public matchmaking : MatchmakingService,
+	) {
+	}
 
 	getKeys() : string[]{
 		return this.chatService.getKeys();
@@ -64,14 +62,31 @@ export class ChatComponent implements OnInit{
 		this.cdr.detectChanges();
 	}
 
-	sendMessage(event: any | undefined = undefined) {
+	sendMessageText(event: any | undefined = undefined) {
 		event?.preventDefault();
 		
 		console.log(this.newMessage + " : " + this.current_chat_name);
 		if (this.newMessage.trim() !== '') {
-			this.chatService.sendMessage(this.newMessage, this.current_chat_name);
+      		const actualHourDate = new Date();
+      		const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
+			const message = new Message(this.newMessage, -1, this.auth.userInfo!.info, actualHour, MessageType.Text, undefined, this.current_chat_name)
+			this.chatService.sendMessage(message);
 			this.newMessage = '';
 		}
+	}
+	sendMessageInvitation(event: any | undefined = undefined) {
+		event?.preventDefault();
+		console.log(this.newMessage + " : " + this.current_chat_name);
+		const actualHourDate = new Date();
+		const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
+		const matchSettings = this.matchmaking.getOnlineMatchSettings();
+		if (!matchSettings) {
+			console.error('chat component: failed to get current match settings in invitation')
+			return;
+		}
+		const message = new Message(this.newMessage, -1, this.auth.userInfo!.info, actualHour, MessageType.Invitation, matchSettings, this.current_chat_name)
+		this.chatService.sendMessage(message);
+		this.newMessage = '';
 	}
 
 	changeChannel(channel: string): void {
@@ -103,6 +118,14 @@ export class ChatComponent implements OnInit{
 			this.scrollToBottom();
 		}, 0);
 		return this.chatService.getChatMessages(chat);
+	}
+
+	canJoin(message : Message){
+		console.log('can join', message.sender.id !== this.auth.userInfo!.info.id)
+		return message.sender.id !== this.auth.userInfo!.info.id			
+	}
+	joinMatch(message : Message){
+		this.matchmaking.joinMatch(message.invitation!.name)
 	}
 		
 	private scrollToBottom(): void {

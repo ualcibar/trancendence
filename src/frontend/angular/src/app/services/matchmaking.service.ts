@@ -3,13 +3,14 @@ import {AuthService, PrivateUserInfo, UserInfo, UserInfoI} from './auth.service'
 import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
-import { GameManagerService, MatchSettings, MatchState, MatchUpdate, OnlineMatchInfo, OnlineMatchManager } from './gameManager.service';
+import { GameManagerService, MatchSettings, MatchSettingsI, MatchState, MatchUpdate, OnlineMatchInfo, OnlineMatchManager } from './gameManager.service';
 import { MapsName, MapsService } from './map.service';
 import { toEnum } from '../utils/help_enum';
 import { EventData, PongEventType } from '../utils/behaviour';
 import { LogFilter, Logger } from '../utils/debug';
 import { MatchmakingState, StateService } from './stateService';
 import {Observable, Subscription, interval, BehaviorSubject, Subject} from 'rxjs';
+import { USE_DEFAULT_LANG } from '@ngx-translate/core';
 
 export enum OnlineMatchState{
   Joining = 'Joining', 
@@ -140,6 +141,13 @@ export class OnlinePlayer{
   } 
 }
 
+export interface OnlineMatchSettings2I{
+  name : string;
+  tags : string;
+  publicMatch : boolean;
+  matchSettings : MatchSettingsI;
+}
+
 export class OnlineMatchSettings2{
   name : string;
   tags : string;
@@ -152,6 +160,12 @@ export class OnlineMatchSettings2{
     this.tags = tags;
     this.publicMatch = publicMatch;
     this.matchSettings = matchSettings;
+  }
+  static fromI(values : OnlineMatchSettings2I) : OnlineMatchSettings2 | undefined{
+    const matchSettings = MatchSettings.fromI(values.matchSettings)
+    if (!matchSettings)
+      return undefined
+    return new OnlineMatchSettings2(values.name, values.tags, values.publicMatch, matchSettings)
   }
 }
 
@@ -188,6 +202,8 @@ export class MatchmakingService implements MatchSync{
 
   //match manager
   private onlineManager? : OnlineMatchManager | undefined;
+
+  canInvite : State<boolean> = new State<boolean>(true);
 
 /*  connectionInterval : Subscription;*/
   //logger

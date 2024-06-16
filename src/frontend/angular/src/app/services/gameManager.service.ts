@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { LogFilter, Logger } from '../utils/debug';
 import { TournamentTree } from '../utils/tournamentTree';
 import { TemplateBindingParseResult } from '@angular/compiler';
+import { toEnum } from '../utils/help_enum';
 
 export class HistoryMatch{
   date : number;
@@ -100,6 +101,14 @@ export class Key{
   }
 }
 
+export interface MatchSettingsI{
+  maxTimeRoundSec : number;//seconds
+  maxRounds : number;
+  roundsToWin : number;
+  teamSize : number;
+  mapName : string;
+}
+
 export class MatchSettings{//no matter what map this settings are always applicable
   maxTimeRoundSec : number;//seconds
   maxRounds : number;
@@ -115,6 +124,18 @@ export class MatchSettings{//no matter what map this settings are always applica
       this.teamSize = teamSize;
       console.log('mapname', mapName);
       this.mapName = mapName;
+  }
+  static fromI(values : MatchSettingsI) : MatchSettings | undefined{
+    const mapName = toEnum(MapsName, values.mapName);
+    if (!mapName)
+      return undefined
+    return new MatchSettings(
+        values.maxTimeRoundSec,
+        values.maxRounds,
+        values.roundsToWin,
+        values.teamSize,
+        mapName
+    )
   }
 }
 
