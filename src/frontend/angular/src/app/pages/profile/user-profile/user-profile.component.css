@@ -5,18 +5,3 @@
 	transform: translateX(-50%);
 	width: 60rem;
 }
-
-.leftContainer{
-	flex: 1;
-	
-	height: fit-content;
-  min-height: 50%;
-}
-
-.rightContainer{
-	top: 300px;
-	transform: translateY(-50%);
-	flex : 1;	
-  max-height : 75%;
-  min-height: fit-content;
-}

@@ -22,10 +22,8 @@ import { FriendListComponent } from '../../../components/friend-list/friend-list
 })
 export class UserProfileComponent {
   info? : UserInfo | undefined;
-  loading = true;
   friendADD: boolean = false;
   showFriendList: boolean = false;
-  editProfile = false;
   logged_username: any;
   userId : number = -1;
   //user_color: string = "default";
@@ -52,21 +50,6 @@ export class UserProfileComponent {
       }
     })
 
-  }
-
-  toggleAddFriend() {;
-    this.authService.addFriend(this.userId);
-    this.friendADD = true;
-  }
-
-  onFriendListButton() {
-    if (this.showFriendList == false)
-    {
-      this.showFriendList = true;
-    } else 
-    {
-      this.showFriendList = false;
-    }
   }
 
   toggleAddFriend() {;

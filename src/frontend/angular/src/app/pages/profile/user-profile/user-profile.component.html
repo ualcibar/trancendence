@@ -68,7 +68,7 @@
 			</div>
 		</div>
 	</div>
-	<app-friend-list *ngIf="(this.authService.userInfo!.info.id == userId) && info && showFriendList" class="rightContainer"></app-friend-list>
+	<app-friend-list *ngIf="(this.authService.userInfo!.info.id == userId) && info && showFriendList"></app-friend-list>
 	<app-not-found *ngIf="user_not_found"></app-not-found>
 	<app-unauthorized *ngIf="unauthorizedAccess && !loading"></app-unauthorized>
 </ng-template>
