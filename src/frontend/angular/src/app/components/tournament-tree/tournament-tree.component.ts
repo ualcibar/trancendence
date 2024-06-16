@@ -1,7 +1,7 @@
 import { Component, Input,OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TournamentManager} from '../../services/gameManager.service';
+import { TournamentManager, TournamentSettings} from '../../services/gameManager.service';
 import { State } from '../../utils/state';
 import { Observable } from 'rxjs';
 
@@ -24,6 +24,7 @@ class TreeRender{
 })
 export class TournamentTreeComponent implements OnInit{
   @Input() manager! : TournamentManager;
+  @Input() update! : TournamentSettings;
   preview? : [string, string];
   winner? : string;
 
@@ -31,7 +32,8 @@ export class TournamentTreeComponent implements OnInit{
 
   ngOnInit(){
     const preview = this.manager.update.getNextMatchPreview();
-    console.log('current', preview)
+    console.log('current', preview);
+    console.log('allTeams', this.update.teamNames);
     if (typeof preview === 'string')
       this.winner = preview;
     else
