@@ -26,7 +26,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             logger.debug('ACCESS doesn\'t exist')
             return Response({message: "access doesn't exist"}, status=400)
 
-from .views import CustomUserView, GameHistoryView, FriendsListView
+from .views import CustomUserView, GameHistoryView, FriendsListView, FriendsView
 
 urlpatterns = [
     path("register/", views.register, name="register"),
@@ -45,7 +45,8 @@ urlpatterns = [
     path('user/<int:user_id>/', CustomUserView.as_view(), name='user_info'),
     path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),
     path('player_games/', GameHistoryView.as_view(), name='game_history'), 
-    path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'), 
+    path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'),
+    path('friendsID/<int:user_id>/<int:friend_id>/', FriendsView.as_view(), name='friends'),
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh') 
 ]
 

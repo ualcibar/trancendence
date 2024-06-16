@@ -58,13 +58,17 @@
 					<div class="stat-value text-error">{{ info.loses }}</div>
 				</div>
 
-				<div class="stat">
-					<button [ngClass]="{'': !editProfile,'grayscale disabled opacity-25': editProfile}" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
-					<button class="btn btn-primary btn-sm"><i class="bi bi-chat-dots-fill"></i></button>
+				<div class="stat"> 
+					<button *ngIf="!friendService.friendExist(userId) && !friendADD" (click)="toggleAddFriend()" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
+					<button (click)="onFriendListButton()" *ngIf="(this.authService.userInfo!.info.id == userId)" class="btn btn-primary btn-sm"><i
+						class="bi bi-people-fill"></i></button>
+					<!--<button [ngClass]="{'': !editProfile,'grayscale disabled opacity-25': editProfile}" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button> -->
+					<!-- <button class="btn btn-primary btn-sm"><i class="bi bi-chat-dots-fill"></i></button>-->
 				</div>
 			</div>
 		</div>
 	</div>
+	<app-friend-list *ngIf="(this.authService.userInfo!.info.id == userId) && info && showFriendList" class="rightContainer"></app-friend-list>
 	<app-not-found *ngIf="user_not_found"></app-not-found>
 	<app-unauthorized *ngIf="unauthorizedAccess && !loading"></app-unauthorized>
 </ng-template>
