@@ -4,16 +4,31 @@ import { ActivatedRoute } from '@angular/router';
 
 import { AuthService, PrivateUserInfo, UserInfo } from '../../../services/auth.service';
 
+import { FriendsService } from '../../../services/friends.service';
 import { easeOut } from "../../../../assets/animations/easeOut";
+import { UnauthorizedComponent } from '../../../components/errors/unauthorized/unauthorized.component';
+import { NotFoundComponent } from '../../../components/errors/not-found/not-found.component';
+import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { FriendListComponent } from '../../../components/friend-list/friend-list.component';
 
 @Component({
   selector: 'app-user-profile',
   animations: [easeOut],
+  standalone: true,
   templateUrl: './user-profile.component.html',
-  styleUrl: './user-profile.component.css'
+  styleUrl: './user-profile.component.css',
+  imports: [UnauthorizedComponent, NotFoundComponent, CommonModule, TranslateModule, FriendListComponent]
 })
 export class UserProfileComponent {
   info? : UserInfo | undefined;
+  loading = true;
+  friendADD: boolean = false;
+  showFriendList: boolean = false;
+  editProfile = false;
+  logged_username: any;
+  userId : number = -1;
+  //user_color: string = "default";
   user_not_found: boolean = false;
   unauthorizedAccess: boolean = false;
   last_login: string = "none";
@@ -23,7 +38,7 @@ export class UserProfileComponent {
 
   editProfile: boolean = false;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService) {}
+  constructor(private http: HttpClient, private route: ActivatedRoute, public authService: AuthService, public friendService: FriendsService) {}
 
   ngOnInit(): void {
     this.authService.subscribe({
@@ -36,10 +51,36 @@ export class UserProfileComponent {
         }
       }
     })
-    if (this.loading) {
-      setTimeout(() => {
-        this.tooLong = true;
-      }, 7000);
+
+  }
+
+  toggleAddFriend() {;
+    this.authService.addFriend(this.userId);
+    this.friendADD = true;
+  }
+
+  onFriendListButton() {
+    if (this.showFriendList == false)
+    {
+      this.showFriendList = true;
+    } else 
+    {
+      this.showFriendList = false;
+    }
+  }
+
+  toggleAddFriend() {;
+    this.authService.addFriend(this.userId);
+    this.friendADD = true;
+  }
+
+  onFriendListButton() {
+    if (this.showFriendList == false)
+    {
+      this.showFriendList = true;
+    } else 
+    {
+      this.showFriendList = false;
     }
   }
 

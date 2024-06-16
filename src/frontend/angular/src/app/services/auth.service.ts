@@ -65,7 +65,7 @@ export class UserInfo{
   }
 
   static fromI(values : UserInfoI) : UserInfo | undefined{
-    console.log('status', values.status)
+    //console.log('status', values.status)
     const status = toEnum(UserStatus, values.status);
     if (!status){
       console.error('user info: fromI: failed to parse status enum:', values.status)
@@ -152,10 +152,10 @@ export class AuthService {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
-        console.log('auth log1', response.privateUserInfo)
-        console.log('auth log2', PrivateUserInfo.fromI(response.privateUserInfo))
-        console.log('status type', typeof PrivateUserInfo.fromI(response.privateUserInfo)?.info.status)
-        console.log('status should be', typeof UserStatus.Connected)
+        //console.log('auth log1', response.privateUserInfo)
+        //console.log('auth log2', PrivateUserInfo.fromI(response.privateUserInfo))
+        //console.log('status type', typeof PrivateUserInfo.fromI(response.privateUserInfo)?.info.status)
+        //console.log('status should be', typeof UserStatus.Connected)
         this.translateService.setDefaultLang(response.privateUserInfo.language);
         this.translateService.use(response.privateUserInfo.language);
         this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
@@ -166,7 +166,7 @@ export class AuthService {
     });
   }
 
-  updateFriendList(){
+  updateFriendList(friendID: number){
     if (!this.amIloggedIn){
       this.logger.error('update user info: userinfo is undefined')
       return
@@ -177,20 +177,19 @@ export class AuthService {
         this.logger.info('response friend list', response);
       },
       error: () => {
-        this.logger.error('update friend list: error fetching data')
+        this.logger.error('update update friend list: error fetching data')
         this.updateUserInfo()
       }
     });
   }
 
-  addFriend(){
+  addFriend(friendID: number){
     if (!this.amIloggedIn){
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const backendURL = `api/polls/friends/${this.userInfo!.info.id}/`;
+    const backendURL = `api/polls/friendsID/${this.userInfo!.info.id}/${friendID}/`;
     const jsonToSend = {
-      usernames : ['nice']
     };
     const httpOptions = {
       headers: new HttpHeaders({
@@ -199,12 +198,11 @@ export class AuthService {
     };
     this.http.post<any>(backendURL, jsonToSend).subscribe({
       next: (response) => {
-        this.logger.info('response friend list', response);
+        this.logger.info('friend added', response.friends);
       },
-      error: () => {
-        this.logger.error('update friend list: error fetching data')
-        this.updateUserInfo()
-      }
+      error: (error) => {
+        console.error('cant add a friend:', error.status);
+    }
     });
   }
 
