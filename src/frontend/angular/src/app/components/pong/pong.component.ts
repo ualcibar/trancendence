@@ -252,6 +252,7 @@ export class Block implements GameObject, EventObject, TickObject, toJson{
     const { pos, dimmensions, type, speed, material } = this;
     return { pos, dimmensions, type, speed, material };  
   }
+
   getId() : number{
     return this.id;
   }
@@ -585,14 +586,14 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   @Input() update!: MatchUpdate;
 
   paused : boolean = false;
+  pauseKey : string = 'p';
+  resetKey : string = 'r';
 
-  controlsText : string = '';
+  controlsText : string = `⏸️: ${this.pauseKey}\n🔁: ${this.resetKey}\n`;
   controlsTextSafe: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(this.controlsText);
 
   pausedTime : number = 0; //time passed paused in ms
   pausingTime : number = 0; //time when pausing started in ms
-
-
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
@@ -701,8 +702,11 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   initScene(){
     //for pause
     window.addEventListener('keydown', (event) => {
-      if (event.key === 'p') {
+      if (event.key === this.pauseKey) {
         this.flipPause();
+      }
+      if (event.key === this.resetKey) {
+        this.map.setMatchInitUpdate(this.update, this.matchSettings);
       }
     });
     // INIT SCENE
@@ -910,10 +914,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   checkAI(){
     for (const paddle of this.paddles){
-      console.log('checking AI');
-      console.log('paddle', paddle);
+      // console.log('checking AI');
+      // console.log('paddle', paddle);
       if (paddle.isAI() && paddle.isIAupdateable()) {
-        console.log('IA¡!');
+        // console.log('IA¡!');
         this.makePrediction(paddle);
       }
     }
