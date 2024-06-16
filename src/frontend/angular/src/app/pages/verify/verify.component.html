@@ -3,11 +3,11 @@
 		<i class="animate-spin bi bi-patch-question-fill text-yellow-900 md:text-9xl" style="animation-duration: 8s;"></i>
 	</div>
 	<div *ngIf="ver_bool == true" class="md:flex flex-col text-left p-8">
-		<h1 class="text-6xl font-bold">Verification</h1>
-		<p class="mt-2 text-2xl">Verification has been completed succesfully</p>
+		<h1 class="text-6xl font-bold">{{'verify_verification'|translate}}</h1>
+		<p class="mt-2 text-2xl">{{'verify_verification_success'|translate}}</p>
 	</div>
 	<div *ngIf="ver_bool == false" class="md:flex flex-col text-left p-8">
-		<h1 class="text-6xl font-bold">Verification</h1>
-		<p class="mt-2 text-2xl">Verification error, something has gone wrong, try using the URL that has been sent to you without modifications</p>
+		<h1 class="text-6xl font-bold">{{'verify_verification'|translate}}</h1>
+		<p class="mt-2 text-2xl">{{'verify_verification_error'|translate}}</p>
 	</div>
 </div>

@@ -10,6 +10,8 @@ import { MatchmakingService, OnlineMatchSettings2 } from '../../services/matchma
 import { LogFilter, Logger } from '../../utils/debug';
 import { OnlineMatchGeneratorComponent } from '../online-match-generator/online-match-generator-component';
 
+import { TranslateModule } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-lobby-search',
   standalone: true,
@@ -17,7 +19,7 @@ import { OnlineMatchGeneratorComponent } from '../online-match-generator/online-
     FormsModule,
     ReactiveFormsModule,
     AsyncPipe,
-    OnlineMatchGeneratorComponent
+    OnlineMatchGeneratorComponent, TranslateModule
   ],
   templateUrl: './lobby-search.component.html',
   styleUrl: './lobby-search.component.css'

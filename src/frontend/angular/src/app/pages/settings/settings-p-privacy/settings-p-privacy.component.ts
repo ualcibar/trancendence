@@ -7,9 +7,7 @@ import { AuthService } from "../../../services/auth.service";
 @Component({
   selector: 'app-settings-p-privacy',
   standalone: true,
-    imports: [
-        TranslateModule
-    ],
+  imports: [TranslateModule],
   templateUrl: './settings-p-privacy.component.html',
   styleUrl: './settings-p-privacy.component.css'
 })

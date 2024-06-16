@@ -2,10 +2,12 @@ import { Component} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import { easeOut } from '../../../assets/animations/easeOut';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',
   animations: [easeOut],
+  imports: [TranslateModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

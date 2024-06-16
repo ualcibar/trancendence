@@ -1,10 +1,10 @@
-<h1 class="text-white">max time for each round seconds</h1>
+<h1 class="text-white">{{'match_gen_max_time'|translate}}</h1>
 <input [ngModel]="settings.maxTimeRoundSec" (change)="changeMaxTime($event)" type="number">
-<h1 class="text-white">max rounds</h1>
+<h1 class="text-white">{{'match_gen_max_rounds'|translate}}</h1>
 <input [(ngModel)]="settings.maxRounds" type="number">
-<h1 class="text-white">best of</h1>
+<h1 class="text-white">{{'match_gen_best_of'|translate}}</h1>
 <input [(ngModel)]="settings.roundsToWin" type="number">
-<h1 class="text-white">team size</h1>
+<h1 class="text-white">{{'match_gen_team_size'|translate}}</h1>
 <input [(ngModel)]="settings.teamSize" type="number">
 <select class="form-select" aria-label="Default select example">
   <option selected>{{settings.mapName}}</option>

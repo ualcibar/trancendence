@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { TournamentSettings } from '../../services/gameManager.service';
 import { MatchGeneratorComponent } from '../match-generator/match-generator-component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-tournament-generator-component',
@@ -11,7 +12,7 @@ import { MatchGeneratorComponent } from '../match-generator/match-generator-comp
   imports: [
     CommonModule,
     FormsModule,
-    MatchGeneratorComponent
+    MatchGeneratorComponent, TranslateModule
   ],
   templateUrl: './tournament-generator-component.html',
   styleUrl: './tournament-generator-component.css'

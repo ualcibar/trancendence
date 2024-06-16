@@ -20,6 +20,7 @@ import { MatchGeneratorComponent } from '../../components/match-generator/match-
 import { LogFilter, Logger } from '../../utils/debug';
 import { ChatState, HomeState, MatchmakingState, StateService } from '../../services/stateService';
 import { TournamentTreeComponent } from '../../components/tournament-tree/tournament-tree.component';
+import { TranslateModule } from '@ngx-translate/core';
 /*
 enum HomeState {
   Home,
@@ -71,7 +72,7 @@ class LocalGameHandler{
     LobbyTournamentComponent,
     TournamentGeneratorComponent,
     MatchGeneratorComponent,
-    TournamentTreeComponent
+    TournamentTreeComponent, TranslateModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',

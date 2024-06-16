@@ -1,11 +1,11 @@
 <div class="h-50real"><!--h-full da problemas con scroll-->
 	<button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button>
 	<div *ngIf="debug">
-		<p class="text-white">chat websocket state: {{chatService.isConnected()}}</p>
-		<p class="text-white">matchmaking websocket state: {{matchmakingService.isConnected()}}</p>
-		<p class="text-white">matchmaking state : {{matchmakingService.state.getCurrentValue()}}</p>
-		<p class="text-white">current online match state: {{matchmakingService.getCurrentMatchState()}}</p>
-		<p class="text-gray-500">to take this messages away set debug in home.component to false(unai ponlo abajo que
+		<p class="text-white">{{'home_websocket_chat_state'|translate}}{{chatService.isConnected()}}</p>
+		<p class="text-white">{{'home_websocket_matchmaking_state'|translate}}{{matchmakingService.isConnected()}}</p>
+		<p class="text-white">{{'home_matchmaking_state'|translate}}{{matchmakingService.state.getCurrentValue()}}</p>
+		<p class="text-white">{{'home_match_state'|translate}}{{matchmakingService.getCurrentMatchState()}}</p>
+		<p class="text-gray-500">{{'home_message'|translate}}(unai ponlo abajo que
 			este mensaje desaparece)</p>
 	</div>
 	<div class="flex h-full"><!--h-full da problemas con scroll-->
@@ -13,31 +13,31 @@
 		<div class="flex flex-col justify-center items-center h-full w-full">
 			<button *ngIf="(state.homeRenderState.local$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.MatchTournament)"
 				class="card mb-16" [@fadeInOut]>
-				<h2>LOCAL</h2>
+				<h2>{{'home_local'|translate}}</h2>
 			</button>
 			<button *ngIf="(state.homeRenderState.multiplayer$ | async) && (state.homeRenderState.render$)"
 				(click)="changeState(HomeState.SearchingOnlineGame)" class="card mb-16" [@fadeInOut]>
-				<h2>MULTIPLAYER</h2>
+				<h2>{{'home_multiplayer'|translate}}</h2>
 			</button>
 			<button *ngIf="(state.homeRenderState.community$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.Community)"
 				class="card mb-16" [@fadeInOut]>
-				<h2>COMMUNITY</h2>
+				<h2>{{'home_community'|translate}}</h2>
 			</button>
 			<div *ngIf="(state.homeRenderState.match_tournament$ | async) && (state.homeRenderState.render$)" class="flex flex-col w-full justify-center items-center">
 				<button (click)="changeState(HomeState.MatchGenerator)" class="card mb-16" [@fadeInOut]>
-					<h2>MATCH</h2>
+					<h2>{{'home_match'|translate}}</h2>
 				</button>
 				<button (click)="changeState(HomeState.TournamentGenerator)" class="card mb-16" [@fadeInOut]>
-					<h2>TOURNAMENT</h2>
+					<h2>{{'home_tournament'|translate}}</h2>
 				</button>
 			</div>
 			<div *ngIf="(state.homeRenderState.tournamentGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut]>
 				<app-tournament-generator-component [settings]="getTournament()"></app-tournament-generator-component>
-				<button (click)="createTournament()" class="btn text-white">START</button>
+				<button (click)="createTournament()" class="btn text-white">{{'home_start'|translate}}</button>
 			</div>
 			<div *ngIf="(state.homeRenderState.matchGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut]>
 				<app-match-generator-component [settings]="getMatch()"></app-match-generator-component>
-				<button (click)="createMatch()" class="btn text-white">START</button>
+				<button (click)="createMatch()" class="btn text-white">{{'home_start'|translate}}</button>
 			</div>
 			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" [@fadeInOut]>
 				<app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatchMakingState, MatchmakingService } from '../../services/matchmaking.service';
 import { AuthService, UserInfo } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 enum LobbyMatchState {
   Error,
@@ -12,7 +13,7 @@ enum LobbyMatchState {
 @Component({
   selector: 'app-lobby-match',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './lobby-match.component.html',
   styleUrl: './lobby-match.component.css'
 })

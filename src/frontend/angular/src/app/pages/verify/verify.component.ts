@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { ApiService } from './api.service'
 import { NgClass, CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-verify',
@@ -19,7 +19,7 @@ export class VerifyComponent {
   requestData: any;
   ver_bool: boolean = false;
 
-  constructor(private http: HttpClient, private apiService: ApiService, private route: ActivatedRoute) {}
+  constructor(private http: HttpClient, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -30,9 +30,6 @@ export class VerifyComponent {
   }
 
   async verify_mail(token: string, user:string): Promise<void> {
-    console.log('Verifying mail...');
-    console.log('Token:', token);
-    console.log('User:', user);
     const backendURL = 'api/polls/verify_mail/';
     const httpReqBody = `currentToken=${token}&currentUsername=${user}`;
     const httpHeader = {
