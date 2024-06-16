@@ -433,6 +433,7 @@ def send_mail(request):
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
 @api_view(['POST'])
+@authentication_classes([])
 def send_mail_login(request):
     current_Username = request.POST.get('currentUsername')
     customUser = CustomUser.objects.get(username=current_Username)
@@ -461,6 +462,7 @@ def check_token(request):
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
     
 @api_view(['POST'])
+@authentication_classes([])
 def check_token_login(request):
     current_Token = request.POST.get('currentToken')
     current_Username = request.POST.get('currentUsername')
@@ -473,6 +475,7 @@ def check_token_login(request):
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
 
 @api_view(['POST'])
+@authentication_classes([])
 def get_2FA_bool(request):
     current_Username = request.POST.get('currentUsername')
     customUser = CustomUser.objects.get(username=current_Username)
@@ -482,6 +485,7 @@ def get_2FA_bool(request):
         return JsonResponse({'message': 'false'}, status=404)
 
 @api_view(['POST'])
+@authentication_classes([])
 def verify_mail(request):
     current_Token = mail.desencript(request.POST.get('currentToken'), token_fernet)
     current_Username = mail.desencript(request.POST.get('currentUsername'), token_fernet)
