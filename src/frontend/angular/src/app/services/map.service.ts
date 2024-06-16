@@ -205,44 +205,44 @@ class MapSettingsCreateInfo{
   }
 
   createFancyScoreBlocks(manager: Manager): Block[] {
-    // const width = 0.42;
+    const width = 0.42;
     const blocks : Block[] = [
-    //   new Block(
-    //     new Vector2(this.leftLimit - this.ballRadius * 4  - width/2, 0),
-    //     new Vector3(width, this.dimmensions.height * 2, width),
-    //     BlockType.Score,
-    //     new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
-    //     manager
-    //   ),
-    //   new Block(
-    //     new Vector2(this.rightLimit + this.ballRadius * 4 +  width/2, 0),
-    //     new Vector3(width, this.dimmensions.height, width),
-    //     BlockType.Score,
-    //     new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
-    //     manager
-    //   ),
-    //   new Block(
-    //     new Vector2(0, this.topLimit + width/2),
-    //     new Vector3(this.dimmensions.width * 2, width, width),
-    //     BlockType.Score,
-    //     new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
-    //     manager
-    //   ),
-    //   new Block(
-    //     new Vector2(0, this.bottomLimit - this.ballRadius - width/2),
-    //     new Vector3(this.dimmensions.width * 2, width, width),
-    //     BlockType.Score,
-    //     new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
-    //     manager
-    //   ),
+      new Block(
+        new Vector2(this.leftLimit - this.ballRadius * 4  - width/2, 0),
+        new Vector3(width, this.dimmensions.height * 2, 0.02),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
+        manager
+      ),
+      new Block(
+        new Vector2(this.rightLimit + this.ballRadius +  width/2, 0),
+        new Vector3(width, this.dimmensions.height, width),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
+        manager
+      ),
+      new Block(
+        new Vector2(0, this.topLimit + 0.84 + width/2),
+        new Vector3(this.dimmensions.width * 2, width, width),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
+        manager
+      ),
+      new Block(
+        new Vector2(0, this.bottomLimit - 0.84 - width/2),
+        new Vector3(this.dimmensions.width * 2, width, width),
+        BlockType.Score,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
+        manager
+      ),
     ];
 
-    // //blocks.forEach(block => {
-    // blocks[0].bindEvent(createEventScoreColision(manager, blocks[0], 1));
-    // blocks[1].bindEvent(createEventScoreColision(manager, blocks[1], 0));
-    // blocks[2].bindEvent(createEventScoreColision(manager, blocks[2], 1));
-    // blocks[3].bindEvent(createEventScoreColision(manager, blocks[3], 0));
-    //})
+    blocks.forEach(block => {
+    blocks[0].bindEvent(createEventScoreColision(manager, blocks[0], 1));
+    blocks[1].bindEvent(createEventScoreColision(manager, blocks[1], 0));
+    blocks[2].bindEvent(createEventScoreColision(manager, blocks[2], 1));
+    blocks[3].bindEvent(createEventScoreColision(manager, blocks[3], 0));
+    })
 
     return blocks;
   }
@@ -307,6 +307,31 @@ class MapSettingsCreateInfo{
     {
       const light = new THREE.PointLight(colorPalette.leadCyan , settings.defaultLightIntensity);
       light.position.set(1, -1, -1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.white , settings.defaultLightIntensity);
+      light.position.set(1, 0, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.black , settings.defaultLightIntensity);
+      light.position.set(-1, 0, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.josefYellow , settings.defaultLightIntensity);
+      light.position.set(0, 1, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.white , settings.defaultLightIntensity);
+      light.position.set(0, -1, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.darkestPurple , settings.defaultLightIntensity);
+      light.position.set(0, 0, -1);
       settings.additionalLights.push(light);
     }
     return settings.additionalLights;
