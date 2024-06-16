@@ -15,8 +15,8 @@
 
 	<ng-template #content>
 		<div *ngIf="!user_not_found && !unauthorizedAccess && info"
-				class="sp-div profileLeft items-center p-2 rounded-xl">
-		<!--div *ngIf="!user_not_found && !unauthorizedAccess && info" class="sp-div leftContainer"-->
+			class="sp-div profileLeft items-center p-2 rounded-xl">
+			<!--div *ngIf="!user_not_found && !unauthorizedAccess && info" class="sp-div leftContainer"-->
 			<div class="md:shrink-0 items-center">
 				<div class="w-full shadow-md rounded">
 					<div [ngClass]="'gradient-id-' + info.color" class="md:flex rounded">
@@ -49,7 +49,7 @@
 						<div class="stat-title text-slate-500">{{'profile_stats_gamespl'|translate}}</div>
 						<div class="stat-value text-primary">{{ info.statistics.total }}</div>
 					</div>
-	
+
 					<div class="stat">
 						<div class="stat-figure text-secondary">
 							<i class="bi bi-trophy-fill text-2xl" style="color: #35bc9d;"></i>
@@ -57,29 +57,31 @@
 						<div class="stat-title text-slate-500">{{'profile_stats_gameswin'|translate}}</div>
 						<div class="stat-value" style="color: #35bc9d;">{{ info.statistics.wins }}</div>
 					</div>
-	
+
 					<div class="stat">
 						<div class="stat-figure text-secondary">
 							<i class="bi bi-x-octagon-fill text-2xl text-error"></i>
 						</div>
 						<div class="stat-title text-slate-500">{{'profile_stats_gamesdefeats'|translate}}</div>
 						<div class="stat-value text-error">{{ info.statistics.loses }}</div>
-					</div>	
+					</div>
 					<div class="stat">
 						<button [ngClass]="{'': !editProfile,'grayscale disabled opacity-25': editProfile}"
 							class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
 						<button [ngClass]="{'grayscale disabled opacity-25': selfInfo!.info.id === info.id}"
-							(click)="onChatButton()" class="btn mb-2 btn-primary btn-sm"><i class="bi bi-chat-dots-fill"></i></button>
+							(click)="onChatButton()" class="btn mb-2 btn-primary btn-sm"><i
+								class="bi bi-chat-dots-fill"></i></button>
 						<button (click)="onMatchHistoryButton()" class="btn btn-primary btn-sm"><i
 								class="bi bi-clock-fill"></i></button>
 					</div>
 				</div>
 			</div>
 		</div>
-		<app-match-history *ngIf="info && showMatchHistory" [userId]="info.id" [inputMatches]="info.matchHistory" class="profileRight"></app-match-history>
+		<app-match-history *ngIf="info && showMatchHistory" [userId]="info.id" [inputMatches]="info.matchHistory"
+			class="profileRight"></app-match-history>
 		<app-chat *ngIf="info && showChat" [defaultChat]="info.username" class="profileRight"></app-chat>
 		<app-not-found *ngIf="user_not_found"></app-not-found>
 		<app-unauthorized *ngIf="unauthorizedAccess && !loading"></app-unauthorized>
 	</ng-template>
-	
-	</div>
+
+</div>
