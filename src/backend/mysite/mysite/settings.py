@@ -87,12 +87,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
 
+#CHANNEL_LAYERS = {
+#    'default': {
+#        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#        'CONFIG': {
+#            "hosts": [('redis', 11000)],  # Use the hostname of the Redis service defined in Docker Compose
+#        },
+#    },
+#}
+
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('redis', 6379)],  # Use the hostname of the Redis service defined in Docker Compose
-        },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
 

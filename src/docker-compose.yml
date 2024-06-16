@@ -51,9 +51,13 @@ services:
   redis:
     image: redis:latest
     ports:
-      - "6379:6379"
+      - "11000:11000"
+    volumes:
+      - ./src/redis/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - bridge
+    command: redis-server /usr/local/etc/redis/redis.conf
+
 
 
 networks:
