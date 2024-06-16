@@ -140,6 +140,35 @@ def loginWith42Token(request):
     else:
         return Response({"Invalid": "Invalid username!"}, status=status.HTTP_404_NOT_FOUND)
 
+class FriendsView(APIView):
+    def get(self, request, user_id, friend_id):
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+            friend = user.friends.get(id=friend_id)
+        except CustomUser.DoesNotExist:
+             return JsonResponse({'error': 'Friend not found (View)'}, status=404)
+        serializer = UserInfoSerializer(friend, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, user_id, friend_id):
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user2 = CustomUser.objects.get(id=friend_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.friends.add(user2)
+
+        serializer = UserInfoSerializer(user.friends.all(), many=True)
+        return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 def registerWith42Token(request):

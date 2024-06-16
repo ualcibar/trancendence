@@ -209,12 +209,12 @@ export class AuthService {
     });
   }
 
-  addFriend(){
+  addFriend(id : number){
     if (!this.amIloggedIn){
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const backendURL = `api/polls/friends/${this.userInfo!.info.id}/`;
+    const backendURL = `api/polls/friendsID/${this.userInfo!.info.id}/${id}/`;
     const jsonToSend = {
       usernames : ['nice']
     };

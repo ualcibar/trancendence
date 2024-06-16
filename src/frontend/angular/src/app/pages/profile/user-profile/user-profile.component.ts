@@ -13,6 +13,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatchHistoryComponent } from '../matchHistory/match-history.component';
 import { ChatComponent } from '../../../components/chat/chat.component';
+import { FriendsService } from '../../../services/friends.service';
+import { FriendListComponent } from '../../../components/friend-list/friend-list.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -26,6 +28,7 @@ import { ChatComponent } from '../../../components/chat/chat.component';
     CommonModule,
     TranslateModule,
     MatchHistoryComponent,
+    FriendListComponent,
     ChatComponent]
 })
 export class UserProfileComponent implements OnInit{
@@ -42,7 +45,11 @@ export class UserProfileComponent implements OnInit{
   editProfile: boolean = false;
   last_login = 'todo'
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService, private elRef: ElementRef, private ngZone: NgZone,  private renderer: Renderer2) {
+  userId : number = -1;
+  friendADD: boolean = false;
+  showFriendList: boolean =false;
+
+  constructor(private http: HttpClient, private route: ActivatedRoute, public authService: AuthService, private elRef: ElementRef, private ngZone: NgZone,  private renderer: Renderer2, public friendService: FriendsService) {
   }
 
   ngOnInit(): void {
@@ -52,9 +59,9 @@ export class UserProfileComponent implements OnInit{
           this.selfInfo = userInfo;
           this.route.params.subscribe(params => {
             console.log(params)
-            const userId = params['userId'];
-            this.getUserInfo(userId);
-            this.editProfile = userId === userInfo.info.id
+            this.userId = params['userId'];
+            this.getUserInfo(this.userId);
+            this.editProfile = this.userId === userInfo.info.id
           });
         }
       }
@@ -114,6 +121,22 @@ export class UserProfileComponent implements OnInit{
       }
     })
   }
+
+  toggleAddFriend() {;
+    this.authService.addFriend(this.userId);
+    this.friendADD = true;
+  }
+
+  onFriendListButton() {
+    if (this.showFriendList == false)
+    {
+      this.showFriendList = true;
+    } else 
+    {
+      this.showFriendList = false;
+    }
+  }
+  
   onMatchHistoryButton(){
     this.showMatchHistory = !this.showMatchHistory
     if (this.showMatchHistory)

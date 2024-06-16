@@ -66,17 +66,20 @@
 						<div class="stat-value text-error">{{ info.statistics.loses }}</div>
 					</div>
 					<div class="stat">
-						<button [ngClass]="{'': !editProfile,'grayscale disabled opacity-25': editProfile}"
-							class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
 						<button [ngClass]="{'grayscale disabled opacity-25': selfInfo!.info.id === info.id}"
 							(click)="onChatButton()" class="btn mb-2 btn-primary btn-sm"><i
 								class="bi bi-chat-dots-fill"></i></button>
 						<button (click)="onMatchHistoryButton()" class="btn btn-primary btn-sm"><i
 								class="bi bi-clock-fill"></i></button>
+
+						<button *ngIf="!friendService.friendExist(userId) && !friendADD" (click)="toggleAddFriend()" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
+						<button (click)="onFriendListButton()" *ngIf="(authService.userInfo!.info.id == userId)" class="btn btn-primary btn-sm"><i
+									class="bi bi-person-fill-add"></i></button>
 					</div>
 				</div>
 			</div>
 		</div>
+		<app-friend-list *ngIf="(this.authService.userInfo!.info.id == userId) && info && showFriendList" class="profileRight"></app-friend-list>
 		<app-match-history *ngIf="info && showMatchHistory" [userId]="info.id" [inputMatches]="info.matchHistory"
 			class="profileRight"></app-match-history>
 		<app-chat *ngIf="info && showChat" [defaultChat]="info.username" class="profileRight"></app-chat>
