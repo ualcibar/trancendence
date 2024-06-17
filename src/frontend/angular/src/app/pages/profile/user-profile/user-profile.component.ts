@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, Input, OnInit, HostListener, NgZone, Renderer2 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, ElementRef, OnInit, HostListener, NgZone, Renderer2 } from '@angular/core';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 
 import { AuthService, PrivateUserInfo, UserInfo } from '../../../services/auth.service';
 
@@ -8,9 +8,7 @@ import { easeOut } from "../../../../assets/animations/easeOut";
 import { UnauthorizedComponent } from '../../../components/errors/unauthorized/unauthorized.component';
 import { NotFoundComponent } from '../../../components/errors/not-found/not-found.component';
 import { CommonModule } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { BrowserModule } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
 import { MatchHistoryComponent } from '../matchHistory/match-history.component';
 import { ChatComponent } from '../../../components/chat/chat.component';
 import { FriendsService } from '../../../services/friends.service';
@@ -29,7 +27,9 @@ import { FriendListComponent } from '../../../components/friend-list/friend-list
     TranslateModule,
     MatchHistoryComponent,
     FriendListComponent,
-    ChatComponent]
+    ChatComponent,
+    RouterLink
+  ]
 })
 export class UserProfileComponent implements OnInit{
   selfInfo : PrivateUserInfo | undefined;
