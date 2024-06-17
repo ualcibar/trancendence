@@ -5,7 +5,7 @@
     <!--input [value]="settings.numberOfPlayers" (input)="onNumberOfPlayersChange($event)" min="4" max="12" type="range" class="form-range"-->
     <div class="nameList">
         <div *ngFor="let team of settings.teamNames; let i = index">
-            <input [(ngModel)]="settings.teamNames[i]" type="text">
+            <input class="text-black" [(ngModel)]="settings.teamNames[i]" type="text">
         </div>
     </div>
 </div>
