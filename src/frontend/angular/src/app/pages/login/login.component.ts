@@ -1,16 +1,19 @@
 import { Component} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { FormsModule } from '@angular/forms';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import { easeOut } from '../../../assets/animations/easeOut';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { NgClass, CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-login',
   animations: [easeOut],
-  imports: [TranslateModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
+
 export class LoginComponent {
   user = {
     username: '',

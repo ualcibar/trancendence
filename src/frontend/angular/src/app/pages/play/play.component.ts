@@ -6,6 +6,7 @@ import { State } from "../../utils/state";
 import { Observable } from "rxjs";
 import { TournamentTreeComponent } from "../../components/tournament-tree/tournament-tree.component";
 import { CommonModule } from "@angular/common";
+import { TranslateModule } from '@ngx-translate/core';
 
 class PlayRender{
     renderTree : State<boolean> = new State<boolean>(false);
@@ -23,7 +24,7 @@ class PlayRender{
   imports: [
     CommonModule,
     PongComponent,
-    TournamentTreeComponent
+    TournamentTreeComponent, TranslateModule
   ]
 })
 export class PlayComponent implements AfterViewInit, OnDestroy {

@@ -8,7 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 @Component({
   selector: 'app-verify',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './verify.component.html',
   styleUrl: './verify.component.css'
 })
