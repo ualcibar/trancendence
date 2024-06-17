@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TournamentManager} from '../../services/gameManager.service';
 import { State } from '../../utils/state';
 import { Observable } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 
 class TreeRender{
     renderVs : State<boolean> = new State<boolean>(false);
@@ -16,8 +17,7 @@ class TreeRender{
   selector: 'app-tournament-tree-component',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
+    CommonModule, FormsModule, TranslateModule
   ],
   templateUrl: './tournament-tree.component.html',
   styleUrl: './tournament-tree.component.css'

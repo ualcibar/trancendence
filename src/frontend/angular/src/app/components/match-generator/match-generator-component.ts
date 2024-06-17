@@ -5,12 +5,13 @@ import { FormsModule } from '@angular/forms';
 import { MapsName } from '../../services/map.service';
 import { MatchSettings } from '../../services/gameManager.service';
 import { getEnumStrings, getNextEnumValue} from '../../utils/help_enum';
+import { TranslateModule } from '@ngx-translate/core';
 @Component({
   selector: 'app-match-generator-component',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    FormsModule, TranslateModule
   ],
   templateUrl: './match-generator-component.html',
   styleUrl: './match-generator-component.css'

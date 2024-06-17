@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, importProvidersFrom } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { HomeComponent } from './pages/home/home.component';
@@ -9,7 +9,10 @@ import { UserProfileComponent } from './pages/profile/user-profile/user-profile.
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
 import { TestComponent } from './pages/test/test.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { VerifyComponent } from './pages/verify/verify.component';
+import { TwofaLoginComponent } from './pages/twofa-login/twofa-login.component';
 import { PlayComponent } from './pages/play/play.component';
+import { PostregisterComponent } from './pages/postregister/postregister.component';
 
 
 const routes: Routes = [
@@ -23,6 +26,9 @@ const routes: Routes = [
     { path: ':userId', component: UserProfileComponent }
   ]},
   { path: 'test', component: TestComponent},
+  { path: 'verify', component: VerifyComponent},
+  { path: 'twofa-login', component: TwofaLoginComponent},
+  { path: 'postregister', component: PostregisterComponent},
   { path: '**', component: NotFoundComponent },
 ];
 

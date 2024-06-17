@@ -1,29 +1,29 @@
-<div class="sp-div rounded h-full p-4">
-    <h1 class="font-bold text-2xl"><i class="bi bi-incognito"></i> Anonimizar tus datos</h1>
-    <p class="text-zinc-300">¿Dejas la plataforma pero quieres que tus estadísticas sigan aquí?</p>
+<div id="sp-div" class="rounded h-full p-4">
+    <h1 class="font-bold text-2xl"><i class="bi bi-incognito"></i> {{'settings_privacy_anon'|translate}}</h1>
+    <p class="text-zinc-300">{{'settings_privacy_leave'|translate}}</p>
 
     <div class="d-inline-flex gap-1 mt-2 mb-2">
         <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#whatIsAnonymization" aria-expanded="false" aria-controls="whatIsAnonymization">
-            <i class="bi bi-question-circle-fill"></i>¿Para qué sirve?
+            <i class="bi bi-question-circle-fill"></i>{{'settings_privacy_whatfor'|translate}}
         </button>
     </div>
     <div class="collapse" id="whatIsAnonymization">
         <div class="card card-body">
-            <p>Al pulsar el botón <b><i>"Anonimizar tus datos"</i></b>, SpacePong anonimizará los datos relacionados contigo <i>(nombre de usuario y correo electrónico)</i>.</p>
-            <p>Al hacerlo, la cuenta quedará <b>desactivada</b> y <b>no se podrá volver a iniciar sesión</b> en ella.</p>
+            <p>{{'settings_privacy_phrase0'|translate}}<b><i>"{{'settings_privacy_anon'|translate}}"</i></b>{{'settings_privacy_phrase1'|translate}}<i>{{'settings_privacy_phrase2'|translate}}</i>.</p>
+            <p>{{'settings_privacy_phrase3'|translate}}<b>{{'settings_privacy_phrase4'|translate}}</b>{{'settings_privacy_phrase5'|translate}}<b>{{'settings_privacy_phrase6'|translate}}</b>{{'settings_privacy_phrase7'|translate}}</p>
 
-            <p class="mt-4 text-red-500 uppercase"><b>Una vez que pulses el botón, no habrá vuelta atrás</b></p>
+            <p class="mt-4 text-red-500 uppercase"><b>{{'settings_privacy_noback'|translate}}</b></p>
             <button (click)="anonymizeData()" class="transition-colors text-white bg-red-700 hover:bg-red-800 rounded-lg text-sm px-2 py-2.5 me-2" type="button">
-                <i class="bi bi-shield-shaded"></i> Anonimizar tus datos
+                <i class="bi bi-shield-shaded"></i> {{'settings_privacy_anon'|translate}}
             </button>
         </div>
     </div>
 
-    <h1 class="mt-4 font-bold text-2xl"><i class="bi bi-trash-fill"></i> Eliminar tu cuenta</h1>
-    <p class="text-zinc-300">Se eliminaran todas tus estadísticas y datos de SpacePong.</p>
+    <h1 class="mt-4 font-bold text-2xl"><i class="bi bi-trash-fill"></i>{{'settings_privacy_delete'|translate}}</h1>
+    <p class="text-zinc-300">{{'settings_privacy_delete'|translate}}</p>
 
-    <p class="mt-4 text-red-500 uppercase"><b>Una vez que pulses el botón, no habrá vuelta atrás</b></p>
+    <p class="mt-4 text-red-500 uppercase"><b>{{'settings_privacy_noback'|translate}}</b></p>
     <button (click)="deleteUser()" class="transition-colors text-white bg-red-700 hover:bg-red-800 rounded-lg text-sm px-2 py-2.5 me-2 mb-2 mt-2" type="button">
-        <i class="bi bi-trash-fill"></i> Eliminar tu cuenta
+        <i class="bi bi-trash-fill"></i> {{'settings_privacy_delete'|translate}}
     </button>
 </div>

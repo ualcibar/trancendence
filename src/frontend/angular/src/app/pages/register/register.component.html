@@ -12,7 +12,7 @@
             <div class="form-floating mb-3">
                 <input type="email" name="email" [(ngModel)]="user.email" class="form-control shadow-none" id="emailInput" placeholder="amazingmail@spacepong.me" required pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" #email="ngModel">
                 <label for="emailInput" class="form-label"><i class="bi bi-at"></i> {{'email'|translate}}</label>
-                <div id="emailHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> Choose an email account as personal identification</div>
+                <div id="emailHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> {{'register_choose_email'|translate}}</div>
             </div>
 			<div class="form-floating mb-3">
 				<input type="password" name="password" [(ngModel)]="user.password" class="form-control shadow-none" id="passwordInput" placeholder="Password" required pattern=".{6,}" #password="ngModel">
@@ -25,7 +25,7 @@
 				</button>
                 <button *ngIf="formSent" type="submit" class="btn btn-warning grayscale disabled opacity-50">
                     <div class="ml-2 spinner-border spinner-border-sm"></div>
-                    <p class="mr-3 text-xs font-medium uppercase text-black">Cargando</p>
+                    <p class="mr-3 text-xs font-medium uppercase text-black">{{'login_loading'|translate}}</p>
                 </button>
 				<p class="mx-2">{{'register_finish_tip'|translate}} </p>
 				<button type="button" (click)="register42Api()" class="mr-3 bg-42 rounded px-6 shadow-md flex justify-center items-center transition duration-250 easy-in-out hover:bg-42-selected hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none">
@@ -44,10 +44,10 @@
 		<i class="bi bi-x-circle text-black"></i>
 		<div>
 			<h4 class="font-bold text-black">{{'error'|translate}}</h4>
-            <p *ngIf="usernameUsed">Este nombre de usuario ya está en uso, elige otro.</p>
-            <p *ngIf="email.invalid && email.touched">Este correo no es válido. Comprueba que lo hayas escrito bien.</p>
+            <p *ngIf="usernameUsed">{{'register_username_inuse'|translate}}</p>
+            <p *ngIf="email.invalid && email.touched">{{'register_email_notvalid'|translate}}</p>
             <p *ngIf="password.invalid && password.touched">Comprueba que la contraseña tenga más de 6 caracteres.</p>
-            <p *ngIf="internalError">¡Ha ocurrido un error inesperado! Prueba otra vez.</p>
+            <p *ngIf="internalError">{{'register_unexpected'|translate}}</p>
 		</div>
         <button *ngIf="error" (click)="error = false; usernameUsed = false; internalError = false;" type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div>

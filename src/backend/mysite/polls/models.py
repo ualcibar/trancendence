@@ -5,10 +5,10 @@ import logging
 logger = logging.getLogger('std')
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, email, password, **extra_fields):
+    def create_user(self, username, email, password, token_verification=None, **extra_fields):
         if not username or not password:
             raise ValueError('Password and username are required')
-        user = self.model(username=username, email=email, **extra_fields)
+        user = self.model(username=username, email=email, token_verification=token_verification, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -32,7 +32,7 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password, **extra_fields):
+    def create_superuser(self, username, email, password, token_verification=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -41,7 +41,7 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self.create_user(username, email, password, **extra_fields)
+        return self.create_user(username, email, password, token_verification=token_verification, **extra_fields)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -56,7 +56,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     avatar = models.ImageField(default='avatars/default.jpg', upload_to='avatars/', blank=True, null=False)
     # install pyllow to make it work
 
-    email = models.EmailField(max_length=254, unique=True, blank=False, null=True)
+    email = models.CharField(max_length=320, unique=True, blank=False, null=True)
+    token_2FA = models.CharField(max_length=6, blank=True, null=True)
+    is_2FA_active = models.BooleanField(default=False, null=False)
+    token_verification = models.CharField(max_length=64, blank=True, null=True)
+    verification_bool = models.BooleanField(default=False, null=False)
+    
     is_anonymized = models.BooleanField(default=False, null=False)
     anonymized_at = models.DateTimeField(null=True, blank=True)
 
