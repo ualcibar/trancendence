@@ -369,7 +369,8 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   sincronize(paddle : Paddle){
-    this.position.set(paddle.pos.x, paddle.pos.y, 0);
+    this.pos.set(paddle.pos.x, paddle.pos.y);
+    this.mesh.position.set(paddle.pos.x, paddle.pos.y, 0);
     this.dir = paddle.dir;
   }
 
@@ -508,10 +509,10 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     return this.state;
   }
 
-  get position() : Vector3{
-    this.mesh.position.set(this.pos.x, this.pos.y, 0);
-    return this.mesh.position;
-  }
+  // get position() : Vector3{
+  //   this.mesh.position.set(this.pos.x, this.pos.y, 0);
+  //   return this.mesh.position;
+  // }
 
   runEvent(type: PongEventType, data: EventData): void {
     this.eventBehaviour.runEvent(type, data);
@@ -702,10 +703,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   initScene(){
     //for pause
     window.addEventListener('keydown', (event) => {
-      if (event.key === this.pauseKey) {
+      // put key to minus
+      const key = event.key.toLowerCase();
+      if (key === this.pauseKey) {
         this.flipPause();
       }
-      if (event.key === this.resetKey) {
+      if (key === this.resetKey) {
         this.map.setMatchInitUpdate(this.update, this.matchSettings);
       }
     });
@@ -751,6 +754,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       if (this.paddles[index].localPlayer){
         this.controlsText += `P${index + 1}:\n\t-👆${keyToEmoji(this.paddles[index].upKey)}\n\t-👇${keyToEmoji(this.paddles[index].downKey)}\n`;
       }
+      this.paddles[index].goUp();
+      this.paddles[index].goDown();
+      this.paddles[index].stop();
     }
     this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(
       this.controlsText.replace(/\n/g, '<br>').replace(/\t/g, '&emsp;')
@@ -774,6 +780,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
     this.updateScene();
     this.manager.setMatchState(MatchState.Initialized);
+    this.map.setMatchInitUpdate(this.update, this.matchSettings);
   }
 
   initValues() {
@@ -840,7 +847,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   logic(timeDifference : number){
-    console.log('pausing', this.paused); 
+    // console.log('pausing', this.paused); 
     if (!this.paused)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();
@@ -856,7 +863,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
     console.log('MAKING PREDICTION');
 
-    predictedBallY = ball.position.y +(Math.tan(ball.angle - Math.PI) * (paddle.position.x - ball.position.x)); //trigonometria
+    predictedBallY = ball.position.y +(Math.tan(ball.angle - Math.PI) * (paddle.pos.x - ball.position.x)); //trigonometria
     
     // predict collision with walls
     const topWallPos = this.map.blocks[2].pos;
@@ -885,7 +892,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
     // if the ball is going to the left, make the prediction less extreme
     if (ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2) {
-      predictedBallY = (predictedBallY + this.paddles[0].position.y) / 2;
+      predictedBallY = (predictedBallY + this.paddles[0].pos.y) / 2;
     }
 
     // update the prediction
@@ -899,8 +906,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   sendIAprediction(paddle : Paddle, prediction : number){
-    console.log(paddle);
-    console.log(paddle.getId());
+    // console.log(paddle);
+    // console.log(paddle.getId());
     const eventData : EventData = {
       senderId : paddle.getId(),// not sure about what is what
       targetIds : paddle.getId(),
@@ -910,7 +917,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
         },
       }
     };
-    console.log('sending event IA prediction', eventData);
+    // console.log('sending event IA prediction', eventData);
     this.manager.sendEvent(PongEventType.IAPrediction, eventData);
   }
 
@@ -988,40 +995,49 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             },
           };
           this.manager.sendEvent(PongEventType.Colision, eventData);
-//          console.log('sending event COLISION');
+        //  console.log('sending event COLISION');
         }
       }
     }
   }
 
   circleRectangleIntersection(circlePos: THREE.Vector2, circleRadious: number,
-    rectPos: THREE.Vector2, rectDimmensions: THREE.Vector2): [boolean, {pos : Vector2, normal : Vector2} | undefined] {
+    rectPos: THREE.Vector2, rectDimmensions: THREE.Vector2): [boolean, {pos : THREE.Vector2, normal : THREE.Vector2} | undefined] {
 
     const pos: THREE.Vector2 = new THREE.Vector2(circlePos.x, circlePos.y);
-    const normal: Vector2 = new Vector2(0, 0);
+    const normal: THREE.Vector2 = new THREE.Vector2(0, 0);
     if (circlePos.x < rectPos.x - rectDimmensions.x / 2) {
       pos.x = rectPos.x - rectDimmensions.x / 2;
       normal.x = -1;
+      // console.log('down')
     }
     else {
       if (circlePos.x > rectPos.x + rectDimmensions.x / 2) {
-        pos.x = rectPos.x + rectDimmensions.width / 2;
+        pos.x = rectPos.x + rectDimmensions.x / 2;
         normal.x = 1;
+        // console.log('up')
       }
     }
+
     if (circlePos.y < rectPos.y - rectDimmensions.y / 2) {
       pos.y = rectPos.y - rectDimmensions.y / 2;
       normal.y = -1;
+      // console.log('left')
     }
     else {
       if (circlePos.y > rectPos.y + rectDimmensions.y / 2) {
         pos.y = rectPos.y + rectDimmensions.y / 2;
         normal.y = 1;
+        // console.log('right')
       }
     }
     const distance = pos.distanceTo(circlePos);
-    if (distance <= circleRadious)
+    // console.log('distance', distance, 'circleRadious', circleRadious);
+    if (distance <= circleRadious) {
+      // console.log('INTERSECTION at', circlePos, 'with', rectPos, 'pos', pos, 'normal', normal);
       return [true, {pos, normal}];
+    }
+    // console.log('no intersection at', circlePos, 'with', rectPos, 'pos', pos, 'normal', normal);
     return [false, undefined];
   }
 
