@@ -141,6 +141,7 @@ export function eventEventWallColision(type: PongEventType, data: EventData) {
 		console.error('need intersection data for colision event');
 		return;
 	}
+	console.log('colision event called to wall', data.custom.gameObjects.ball.getId(), data.custom.others.intersection, data.custom.gameObjects.ball.dir);
 	const ball: Ball = data.custom.gameObjects.ball;
 	const intersection: { pos: Vector2, normal: Vector2 } = data.custom.others.intersection;
 	if (intersection.normal.x < 0 && ball.dir.x < 0)
