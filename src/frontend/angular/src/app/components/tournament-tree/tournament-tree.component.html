@@ -4,31 +4,34 @@
         <div class="col-md-3 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
             <h2>Round 1</h2>
             <div class="match">
-                <p>Match 1: Team A vs Team B</p>
+                <p>Match 1: {{tree.data[0].groups[0]}} vs {{tree.data[0].groups[1]}}</p>
             </div>
             <div class="match">
-                <p>Match 2: Team C vs Team D</p>
+                <p>Match 2: {{tree.data[1].groups[0]}} vs {{tree.data[1].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-3 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
             <h2>Final</h2>
             <div class="match">
-                <p>Match 3: Winner of Match 1 vs Winner of Match 2</p>
+                <p *ngIf="!tree.data[2]">Winner Match1 vs Winner Match2</p>
+                <p *ngIf="tree.data[2]">{{tree.data[2].groups[0]}} vs {{tree.data[2].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-3 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
             <h2>Winner</h2>
-            <p id="winner">TBD</p>
+            <p *ngIf="!tree.data[3]" id="winner">TBD</p>
+            <p *ngIf="!tree.data[3]" id="winner">TBD</p>
         </div>
     </div>
 </div>
+<!--
 
-<div class="container bracket">
-    <div class="row ">
+    <div class="container bracket">
+        <div class="row ">
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
             <h2>Round 1</h2>
             <div class="match">
-                <p>Match 1: Team A vs Team B</p>
+                <p>Match 1: {{tree.data[0]}} vs Team B</p>
             </div>
             <div class="match">
                 <p>Match 2: Team C vs Team D</p>
@@ -73,7 +76,7 @@
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
             <h2>Round 1</h2>
             <div class="match">
-                <p>Match 1: Team A vs Team B</p>
+                <p>Match 1: {{tree.data[0].groups[0]}} A vs Team B</p>
             </div>
             <div class="match">
                 <p>Match 2: Team C vs Team D</p>
@@ -140,6 +143,7 @@
     </div>
 </div>
 
+-->
 <h1 class="text-white">Next Match</h1>
 <h2 *ngIf="preview !== undefined" class="text-white text-5xl">{{getVs()}}</h2>
 <h2 *ngIf="winner !== undefined" class="text-white text-5xl">{{winner}}</h2>

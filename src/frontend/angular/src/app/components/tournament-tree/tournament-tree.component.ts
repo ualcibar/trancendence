@@ -1,9 +1,10 @@
 import { Component, Input,OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { TournamentManager, TournamentSettings} from '../../services/gameManager.service';
 import { State } from '../../utils/state';
 import { Observable } from 'rxjs';
+import { TournamentTree } from '../../utils/tournamentTree';
 
 class TreeRender{
     renderVs : State<boolean> = new State<boolean>(false);
@@ -27,17 +28,19 @@ export class TournamentTreeComponent implements OnInit{
   @Input() update! : TournamentSettings;
   preview? : [string, string];
   winner? : string;
+  @Input() tree! : TournamentTree;
 
   constructor(){}
 
   ngOnInit(){
     const preview = this.manager.update.getNextMatchPreview();
     console.log('current', preview);
-    console.log('allTeams', this.update.teamNames);
     if (typeof preview === 'string')
       this.winner = preview;
     else
       this.preview = preview;
+    this.tree = this.manager.update.getTournamentTree();
+    console.log("my treee---->", this.tree);
   }
 
   getVs() : string{
