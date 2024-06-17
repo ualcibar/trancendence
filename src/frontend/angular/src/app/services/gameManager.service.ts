@@ -235,9 +235,9 @@ export class MatchUpdate{
 
     console.log('MAKING PREDICTION');
 
-    predictedBallY = ball.position.y +(Math.tan(ball.angle - Math.PI) * (paddle.position.x - ball.position.x)); //trigonometria
-    console.log('getAiPrediction predictedBallY', predictedBallY, '=', ball.position.y, '+', 'tan(', ball.angle, ') * (', paddle.position.x, '-', ball.position.x);
-    console.log('padddle position x', paddle.position.x);
+    predictedBallY = ball.position.y +(Math.tan(ball.angle - Math.PI) * (paddle.pos.x - ball.position.x)); //trigonometria
+    console.log('getAiPrediction predictedBallY', predictedBallY, '=', ball.position.y, '+', 'tan(', ball.angle, ') * (', paddle.pos.x, '-', ball.position.x);
+    console.log('padddle position x', paddle.pos.x);
     console.log('ball position', ball.position);
     // predict collision with walls
     const topWallPos = this.blocks[2].pos;

@@ -45,7 +45,7 @@ class MapSettingsCreateInfo{
   public ballLightIntensity : number = 1;
 
   // Paddle settings
-  public paddleWidth : number = 0.02;
+  public paddleWidth : number = 0.05;
   public paddleHeight : number =  0.5;
   public paddleDepth : number = 0.1;
   public paddleColor : number = colorPalette.white;
@@ -159,16 +159,40 @@ class MapSettingsCreateInfo{
 
   createFancyWalls(manager: Manager): Block[] {
     const blocks = [
-      new Block(new Vector2(0, this.topLimit),
-        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+      new Block(new Vector2(this.leftLimit * 2/3, this.topLimit + 0.42),
+        new Vector3(-(this.leftLimit - this.leftLimit * 2/3) * 2 - this.paddleWidth * 2, 0.3, 0.3),
         BlockType.Collision,
-        new RenderMaterial(RenderMaterialType.colored,colorPalette.white),
+        new RenderMaterial(RenderMaterialType.colored,colorPalette.darkestPurple),
         manager
       ),
-      new Block(new Vector2(0, this.bottomLimit),
-        new Vector3(2 - this.paddleWidth * 2, 0.02, 0.2),
+      new Block(new Vector2(this.leftLimit * 3.5/6, this.bottomLimit),
+        new Vector3(-(this.leftLimit - this.leftLimit * 3.5/6) * 2- this.paddleWidth * 2, 0.2, 0.22),
         BlockType.Collision,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.white),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.josefYellow),
+        manager
+      ),
+      new Block(new Vector2(this.rightLimit * 2/3, this.bottomLimit - 0.42),
+        new Vector3((this.rightLimit - this.rightLimit * 2/3) * 2 - this.paddleWidth * 2, 0.3, 0.3),
+        BlockType.Collision,
+        new RenderMaterial(RenderMaterialType.colored,colorPalette.darkestPurple),
+        manager
+      ),
+      new Block(new Vector2(this.rightLimit * 3.5/6, this.topLimit),
+        new Vector3((this.rightLimit - this.rightLimit * 3.5/6) * 2 - this.paddleWidth * 2, 0.2, 0.22),
+        BlockType.Collision,
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.josefYellow),
+        manager
+      ),
+      new Block(new Vector2(-0.042, this.topLimit + 0.21),
+        new Vector3(0.7, 0.11, 0.2),
+        BlockType.Collision,
+        new RenderMaterial(RenderMaterialType.colored,colorPalette.roseGarden),
+        manager
+      ),
+      new Block(new Vector2(+0.042, this.bottomLimit - 0.21),
+        new Vector3(0.7, 0.11, 0.2),
+        BlockType.Collision,
+        new RenderMaterial(RenderMaterialType.colored,colorPalette.roseGarden),
         manager
       ),
     ];
@@ -182,43 +206,43 @@ class MapSettingsCreateInfo{
 
   createFancyScoreBlocks(manager: Manager): Block[] {
     const width = 0.42;
-    const blocks = [
+    const blocks : Block[] = [
       new Block(
         new Vector2(this.leftLimit - this.ballRadius * 4  - width/2, 0),
-        new Vector3(width, this.dimmensions.height * 2, width),
+        new Vector3(width, this.dimmensions.height * 2, 0.02),
         BlockType.Score,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
         manager
       ),
       new Block(
-        new Vector2(this.rightLimit + this.ballRadius * 4 +  width/2, 0),
+        new Vector2(this.rightLimit + this.ballRadius +  width/2, 0),
         new Vector3(width, this.dimmensions.height, width),
         BlockType.Score,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
         manager
       ),
       new Block(
-        new Vector2(0, this.topLimit + width/2),
+        new Vector2(0, this.topLimit + 0.84 + width/2),
         new Vector3(this.dimmensions.width * 2, width, width),
         BlockType.Score,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
         manager
       ),
       new Block(
-        new Vector2(0, this.bottomLimit - this.ballRadius - width/2),
+        new Vector2(0, this.bottomLimit - 0.84 - width/2),
         new Vector3(this.dimmensions.width * 2, width, width),
         BlockType.Score,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
         manager
       ),
     ];
 
-    //blocks.forEach(block => {
+    blocks.forEach(block => {
     blocks[0].bindEvent(createEventScoreColision(manager, blocks[0], 1));
     blocks[1].bindEvent(createEventScoreColision(manager, blocks[1], 0));
     blocks[2].bindEvent(createEventScoreColision(manager, blocks[2], 1));
     blocks[3].bindEvent(createEventScoreColision(manager, blocks[3], 0));
-    //})
+    })
 
     return blocks;
   }
@@ -260,24 +284,56 @@ class MapSettingsCreateInfo{
     const settings = this;
     //ambient light
     {
-      const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity /15);
+      const light = new THREE.AmbientLight(colorPalette.white , settings.defaultLightIntensity / 10);
       settings.additionalLights.push(light);
     }
-    // // Additional lights
-    // const additionalLights : THREE.Light[] = [];
-    // {
-    //   const red = 0xFF0000;
-    //   const light = new THREE.DirectionalLight(red , settings.defaultLightIntensity * 50);
-    //   light.position.set(1, 0.1, 0);
-    //   settings.additionalLights.push(light);
-    // }
-    // // Additional lights
-    // {
-    //   const blue = 0x0000FF;
-    //   const light = new THREE.DirectionalLight(blue , settings.defaultLightIntensity * 50);
-    //   light.position.set(-1, -0.1, 0);
-    //   settings.additionalLights.push(light);
-    // }
+    // // Additional lights white
+    {
+      const light = new THREE.PointLight(colorPalette.white , settings.defaultLightIntensity);
+      light.position.set(-1, -1, -1);
+      settings.additionalLights.push(light);
+    }
+    // Additional lights (pallette)
+    {
+      const light = new THREE.PointLight(colorPalette.swingPurple , settings.defaultLightIntensity);
+      light.position.set(-1, 1, -1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.roseGarden , settings.defaultLightIntensity);
+      light.position.set(1, 1, -1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.leadCyan , settings.defaultLightIntensity);
+      light.position.set(1, -1, -1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.white , settings.defaultLightIntensity);
+      light.position.set(1, 0, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.black , settings.defaultLightIntensity);
+      light.position.set(-1, 0, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.josefYellow , settings.defaultLightIntensity);
+      light.position.set(0, 1, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.white , settings.defaultLightIntensity);
+      light.position.set(0, -1, 1);
+      settings.additionalLights.push(light);
+    }
+    {
+      const light = new THREE.PointLight(colorPalette.darkestPurple , settings.defaultLightIntensity);
+      light.position.set(0, 0, -1);
+      settings.additionalLights.push(light);
+    }
     return settings.additionalLights;
   }
 
