@@ -3,10 +3,6 @@
 		<h1>Name:</h1>
 		<input class="textInput" [ngModel]="settings.name" (change)="changeName($event)" type="text">
 	</div>
-	<div class="mb-1 flex gap-2 items-center w-1/2">
-		<h1>Tags:</h1>
-		<input class="textInput" [(ngModel)]="settings.tags" (change)="changeTags($event)"type="text">
-	</div>
 	<div class="flex gap-2 pt-2">
 		<div class="privacy-bubble" #privacy_bubble></div>
 		<h1 class="privacyChoice mb-1" (click)="changeToPublic(privacy_bubble)">Public</h1>

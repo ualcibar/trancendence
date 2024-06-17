@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy } from "@angular/core";
-import { PongComponent } from "../../components/pong/pong.component";
+import { PaddleState, PongComponent } from "../../components/pong/pong.component";
 import { GameManagerService, GameManagerState, MatchConfig, MatchManager, MatchSettings, MatchState, OnlineManager, OnlineMatchManager, RealManagerType, TournamentManager, TournamentState } from "../../services/gameManager.service";
 import { Router } from "@angular/router";
 import { State } from "../../utils/state";
@@ -30,7 +30,7 @@ class PlayRender{
   ]
 })
 export class PlayComponent implements AfterViewInit, OnDestroy {
-    debug = true;
+    debug = false;
     renderState : PlayRender = new PlayRender();
     currentManagerType : RealManagerType;
     tournamentManager? : TournamentManager  | undefined;
@@ -41,7 +41,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
         if (manager.getState() !== GameManagerState.InGame){
             if (this.debug) {
                 console.log('creating match');
-                const matchSettings = new MatchSettings(60,3,2,1, MapsName.Default);
+                const matchSettings = new MatchSettings(60,3,2,1, MapsName.Default, [PaddleState.Binded,PaddleState.Binded]);
                
                 const mapSettings = this.maps.getMapSettings(matchSettings.mapName);
                 if (!mapSettings){
@@ -104,19 +104,16 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 if (realManager instanceof OnlineMatchManager)
                     this.onlineMatchManager = realManager;
                 this.renderState.renderGame.setValue(true);
-                this.onlineMatchManager?.matchState.subscribe((state : MatchState)=>{
+                this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{
+                    console.log('hello from play????????', state)
                     switch (state){
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')
-                            setTimeout(() => {
-                                this.router.navigate(['/'])
-                            }, 2000);
+                            this.renderState.renderGame.setValue(false)
                             break;
                         case MatchState.FinishedSuccess:
-                            console.log('there was an error during the match')
-                            setTimeout(() => {
-                                this.router.navigate(['/'])
-                            }, 2000);
+                            console.log('match finish success')
+                            this.renderState.renderGame.setValue(false)
                     }
                 })
                 break;
@@ -134,8 +131,8 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                     this.onlineMatchManager!.matchSync.syncOnlineMatchState(OnlineMatchState.HostDisconected)
                 }
             }
-            else
-                this.manager.setMatchState(MatchState.FinishedSuccess)
+            /*else
+                this.manager.setMatchState(MatchState.FinishedSuccess)*/
         }
     }
     startNextTournamentround(){

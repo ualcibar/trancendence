@@ -1,13 +1,14 @@
 from rest_framework import serializers
 from matchmaking.models import MatchPreview, Player, Match
 from polls.serializers import UserInfoSerializer
-
+import logging
+logger = logging.getLogger('std')
 class MatchPreviewSerializer(serializers.ModelSerializer):
     host = UserInfoSerializer()
     players = serializers.SerializerMethodField()
     class Meta:
         model = MatchPreview 
-        fields = ('name','tags', 'teamSize', 'players', 'host', 'mapName')
+        fields = ('name','teamSize', 'players', 'host', 'mapName')
 
     def get_players(self, instance):
         # Assuming 'players' is a ManyToManyField related to User model
@@ -16,7 +17,37 @@ class MatchPreviewSerializer(serializers.ModelSerializer):
         for player in players_queryset:
             players[player.index] = PlayerSerializer(player).data
         return players
+
+class MatchPreviewToMatchSettingsSerializer(serializers.ModelSerializer):
+    initPaddleStates = serializers.SerializerMethodField()
+    class Meta:
+        model = MatchPreview 
+        fields = ('maxTimeRoundSec', 'maxRounds', 'roundsToWin', 'teamSize', 'mapName', 'initPaddleStates') 
+    def get_initPaddleStates(self, match : MatchPreview):
+        return match.getPaddles()
+
+class MatchPreviewToOnlineMatchSettings2Serializer(serializers.ModelSerializer):
+    matchSettings = MatchPreviewToMatchSettingsSerializer(source='*')
+    class Meta:
+        model = MatchPreview 
+        fields = ('name', 'publicMatch', 'matchSettings')
+
+class MatchPreviewToOnlineMatchInfoSerializer(serializers.ModelSerializer):
+    onlineSettings = MatchPreviewToOnlineMatchSettings2Serializer(source='*')
+    host = UserInfoSerializer()
+    players = serializers.SerializerMethodField()
+    class Meta:
+        model = MatchPreview
+        fields = ('host', 'players', 'onlineSettings')
     
+    def get_players(self, instance : MatchPreview):
+        # Assuming 'players' is a ManyToManyField related to User model
+        players_queryset = instance.players.all()  # Get all players related to the match
+        logger.debug(f'teamSize {instance.teamSize} type {type(instance.teamSize)}') 
+        players = [None for _ in range(instance.teamSize * 2 - 1)]
+        for player in players_queryset:
+            players[player.index] = PlayerSerializer(player).data
+        return players
 
 class PlayerSerializer(serializers.ModelSerializer): 
     username = serializers.SerializerMethodField()

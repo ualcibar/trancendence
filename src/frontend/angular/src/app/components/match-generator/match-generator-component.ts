@@ -6,6 +6,7 @@ import { MapsName } from '../../services/map.service';
 import { MatchSettings } from '../../services/gameManager.service';
 import { getEnumStrings, getNextEnumValue} from '../../utils/help_enum';
 import { TranslateModule } from '@ngx-translate/core';
+import { PaddleState } from '../pong/pong.component';
 @Component({
   selector: 'app-match-generator-component',
   standalone: true,
@@ -19,6 +20,8 @@ import { TranslateModule } from '@ngx-translate/core';
 export class MatchGeneratorComponent {
   default : boolean = true;
   winPointsNotPossible: boolean = false;
+  paddlesBindedA : boolean[] = [true];
+  paddlesBindedB : boolean[] = [true];
 
   @Output() escapeKeyPressed: EventEmitter<void> = new EventEmitter<void>();
   @Input() settings! : MatchSettings;
@@ -72,6 +75,26 @@ export class MatchGeneratorComponent {
   changeTeamSize(event: any) {
     if (event.target.value) {
       this.settings.teamSize = event.target.value;
+      if (this.paddlesBindedA.length < this.settings.teamSize){
+        this.paddlesBindedA.push(true)
+        this.paddlesBindedB.push(true)
+      }
+      else if (this.paddlesBindedA.length > this.settings.teamSize){
+        this.paddlesBindedA.splice(this.settings.teamSize)
+        this.paddlesBindedB.splice(this.settings.teamSize)
+      }
+      this.settings.initPaddleStates = new Array<PaddleState>(this.settings.teamSize * 2).fill(PaddleState.Binded)
+      for (let index = 0; index < this.settings.teamSize * 2; index += 1){
+        let paddles;
+        if (index < this.settings.teamSize)
+          paddles = this.paddlesBindedA
+        else
+          paddles = this.paddlesBindedB
+        if (paddles[index % this.settings.teamSize])
+          this.settings.initPaddleStates[index] = PaddleState.Binded
+        else
+          this.settings.initPaddleStates[index] = PaddleState.Bot
+      }
     }
   }
 
@@ -91,5 +114,11 @@ export class MatchGeneratorComponent {
     .filter(val => val != this.settings.mapName) );
     return getEnumStrings(MapsName)
       .filter(val => val != this.settings.mapName) 
+  }
+  togglePaddle(team : number, index : number){
+    if (team === 0)
+      this.paddlesBindedA[index] = !this.paddlesBindedA[index]
+    else
+      this.paddlesBindedB[index] = !this.paddlesBindedB[index]
   }
 }

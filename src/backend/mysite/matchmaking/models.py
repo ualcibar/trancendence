@@ -19,11 +19,14 @@ class Player(models.Model):
             )
     index = models.PositiveIntegerField(default=0, null=False)
 
+class Paddle(models.Model):
+    binded = models.CharField(default="Binded",max_length=128, blank=False, null=False)
+    index = models.PositiveIntegerField(default=0, null=False)
+
 class MatchPreview(models.Model):
     #online settings
     name = models.CharField(max_length=128, null=False, unique=True)
-    tags = models.CharField(max_length=128, null=False)
-    public = models.BooleanField(default=False, null=False)
+    publicMatch = models.BooleanField(default=False, null=False)
     #match settings
     maxTimeRoundSec = models.IntegerField(default=60, null=False)
     maxRounds = models.IntegerField(default=3,null=False)
@@ -32,6 +35,8 @@ class MatchPreview(models.Model):
     host = models.ForeignKey(CustomUser, related_name='host', on_delete=models.CASCADE)
     players = models.ManyToManyField(to=Player, related_name='players', blank=True)
     mapName = models.CharField(max_length=32, null=False, default='Default')
+    paddlesInitState = models.ManyToManyField(to=Paddle, related_name='paddlesInitState', blank=True)
+    available = models.BooleanField(default=False, blank=False, null=False) 
 
     def add_player(self,user):
         try:
@@ -45,6 +50,14 @@ class MatchPreview(models.Model):
         except Exception as e:
             logger.debug(f'add player threw exception {e}')
             return {'res' : False}
+
+    def add_paddles(self, paddles : list [str]):
+        try:
+            for i, paddle in enumerate(paddles):
+                paddleModel = Paddle.objects.create(index=i, binded=paddle)
+                self.paddlesInitState.add(paddleModel)
+        except Exception as e:
+            logger.debug(f'add paddle threw exception {e}')
 
     def playerLeft(self, userId):
         try:
@@ -73,6 +86,8 @@ class MatchPreview(models.Model):
     def getPlayerIndex(self, user):
         return self.players.get(user=user).index
 
+    def getPaddles(self)-> list [str]:
+        return [paddle.binded for paddle in self.paddlesInitState.all()]
     def getTeamA(self):
         return [player.user for player in self.players.all() if player.index + 1 < self.teamSize] + [self.host]
     def getTeamB(self):

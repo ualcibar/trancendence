@@ -1,6 +1,6 @@
 <div class="absolute z-1 top-5 right-5 w-1/2 max-w-xl h-full">
     <ul>
-        <li *ngFor="let notification of notificationQueue" class="alert flex items-center" [@slideInFromRight]
+        <li *ngFor="let notification of renderingNotifications" class="alert flex items-center" [@slideInFromRight]
             style="background-color: #4d78db;">
             <div class="flex-1">
                 <h4 class="font-bold text-black">{{notification.title}}</h4>

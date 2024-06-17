@@ -632,7 +632,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
           case MatchState.FinishedSuccess:
             break;
           case MatchState.FinishedError:
-            this.pause();
             break;
         }
       }
@@ -815,6 +814,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       // console.log('paused', this.pausedTime);
       this.pastTime = time;
       return;
+    }
+    if (this.manager.getMatchState() !== MatchState.Running){
+      return
     }
 
 

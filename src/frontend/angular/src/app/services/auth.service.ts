@@ -58,7 +58,7 @@ export interface UserInfoI extends LighUserInfoI{
   matchHistory : number[];
 }
 
-enum UserStatus{
+export enum UserStatus{
   Connected = 'Connected',
   Disconnected = 'Disconnected',
   JoiningGame = 'JoiningGame',

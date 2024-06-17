@@ -128,25 +128,28 @@ export class UserProfileComponent implements OnInit{
   }
 
   onFriendListButton() {
-    if (this.showFriendList == false)
-    {
-      this.showFriendList = true;
-    } else 
-    {
-      this.showFriendList = false;
+    this.showFriendList = !this.showFriendList
+    if (this.showFriendList){
+      this.showChat = false
+      this.showMatchHistory = false
     }
+    this.applyStyles(window.innerWidth)
   }
   
   onMatchHistoryButton(){
     this.showMatchHistory = !this.showMatchHistory
-    if (this.showMatchHistory)
+    if (this.showMatchHistory){
       this.showChat = false
+      this.showFriendList = false
+    }
     this.applyStyles(window.innerWidth)
   }
   onChatButton(){
     this.showChat = !this.showChat
-    if (this.showChat)
+    if (this.showChat){
       this.showMatchHistory = false
+      this.showFriendList = false
+    }
     this.applyStyles(window.innerWidth)
   }
 }
