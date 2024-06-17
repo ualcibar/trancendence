@@ -17,7 +17,6 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 })
 
 export class FriendListComponent implements OnInit {
-  friends: string[] = ['Alice', 'Bob', 'Charlie', 'David'];
   friend_list: UserInfo[] | undefined;
   info? : UserInfo | undefined;
   userId : number = -1;
