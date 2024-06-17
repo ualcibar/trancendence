@@ -52,9 +52,10 @@ class MatchPreviewToOnlineMatchInfoSerializer(serializers.ModelSerializer):
 class PlayerSerializer(serializers.ModelSerializer): 
     username = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
+    avatarUrl = serializers.SerializerMethodField()
     class Meta:
         model = Player
-        fields = ('username', 'id', 'state')
+        fields = ('username', 'id', 'state', 'avatarUrl')
    
     def get_username(self, obj):
         return obj.user.username
@@ -62,6 +63,9 @@ class PlayerSerializer(serializers.ModelSerializer):
     def get_id(self, obj):
         return obj.user.id
     
+    def get_avatarUrl(self, player : Player):
+        return f'https://localhost:1501/api/media/{player.user.avatar}'
+        
 
 class MatchSerializer(serializers.ModelSerializer): 
     teamA = serializers.SerializerMethodField()

@@ -588,14 +588,13 @@ export class MatchmakingService implements MatchSync{
                 }
               })
             } else {
+              this.onlineManager!.playerReconnected(data.playerId)
               if (this.authService.userInfo.info.id == data.playerId) {
                 setTimeout(() => {
                   this.stateService.changeMultiplayerState(MatchmakingState.InGame)
                   this.gameManager.start();
                 }, 1000);
                 this.router.navigate(['/play']);
-              } else {
-                this.onlineManager!.playerReconnected(data.playerId)
               }
             }
           }

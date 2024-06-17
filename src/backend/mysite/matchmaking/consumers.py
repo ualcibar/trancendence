@@ -70,6 +70,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                 )
                 self.user.status = CustomUser.IN_GAME
         else:
+            clearUserMatchRelated(self.user)
             self.user.status = CustomUser.CONNECTED
         self.send_match_list_to_self()
         self.isInit = True

@@ -823,6 +823,11 @@ export class OnlineMatchManager implements Manager, OnlineManager{
   getMatchScore(): Score {
     return this.matchUpdate.score;
   }
+
+  getPlayers() : (OnlinePlayer | undefined)[]{
+    return new Array<OnlinePlayer | undefined>(new OnlinePlayer(this.info.host.username, this.info.host.id, OnlinePlayerState.Connected, this.info.host.avatarUrl)).concat(this.info.players)
+  }
+
   setMatchScore(score: Score): void {
     this.matchUpdate.score.changeScore(score.score);
   }

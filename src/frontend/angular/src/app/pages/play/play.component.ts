@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, OnDestroy } from "@angular/core";
 import { PaddleState, PongComponent } from "../../components/pong/pong.component";
-import { GameManagerService, GameManagerState, MatchConfig, MatchManager, MatchSettings, MatchState, OnlineManager, OnlineMatchManager, RealManagerType, TournamentManager, TournamentState } from "../../services/gameManager.service";
+import { GameManagerService, GameManagerState, Manager, MatchConfig, MatchManager, MatchSettings, MatchState, MatchUpdate, OnlineManager, OnlineMatchManager, RealManagerType, TournamentManager, TournamentState } from "../../services/gameManager.service";
 import { Router } from "@angular/router";
 import { State } from "../../utils/state";
 import { Observable } from "rxjs";
 import { TournamentTreeComponent } from "../../components/tournament-tree/tournament-tree.component";
 import { CommonModule } from "@angular/common";
 import { MapsName, MapsService } from "../../services/map.service";
-import { OnlineMatchState } from "../../services/matchmaking.service";
+import { OnlineMatchState, OnlinePlayer, OnlinePlayerState } from "../../services/matchmaking.service";
 import { TranslateModule } from '@ngx-translate/core';
 
 class PlayRender{
@@ -16,6 +16,13 @@ class PlayRender{
 
     get tree$() : Observable<boolean> {return this.renderTree.observable};
     get game$() : Observable<boolean> {return this.renderGame.observable};
+}
+
+enum Point{
+    Lost,
+    Won,
+    NotPlayed,
+    Playing
 }
 
 @Component({
@@ -30,12 +37,18 @@ class PlayRender{
   ]
 })
 export class PlayComponent implements AfterViewInit, OnDestroy {
-    debug = false;
+    Point = Point;
+    OnlinePlayerState = OnlinePlayerState;
+    points! : Point[];
+    debug = true;
+    showSettings = true;
     renderState : PlayRender = new PlayRender();
     currentManagerType : RealManagerType;
     tournamentManager? : TournamentManager  | undefined;
     matchManager? : MatchManager  | undefined;
     onlineMatchManager? : OnlineMatchManager  | undefined;
+    players? : (OnlinePlayer | undefined)[]
+    matchUpdate! : MatchUpdate;
     constructor(public manager : GameManagerService, private router : Router, private maps : MapsService) {
         this.currentManagerType = manager.getRealManagerType();
         if (manager.getState() !== GameManagerState.InGame){
@@ -54,11 +67,14 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                     return
                 }
                 console.log('starting match');
+                this.matchUpdate = this.manager.getMatchUpdate()
                 this.manager.start();
                 //this.router.navigate(['/play']);
             }else
                 router.navigate(['/'])
         }
+        this.matchUpdate = this.manager.getMatchUpdate()
+        this.points = new Array<Point>(this.manager.getMatchSettings().maxRounds).fill(Point.NotPlayed)
         this.currentManagerType = manager.getRealManagerType();
         const realManager = manager.getRealManager();
         switch(this.currentManagerType){
@@ -103,6 +119,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 }
                 if (realManager instanceof OnlineMatchManager)
                     this.onlineMatchManager = realManager;
+                this.players = this.onlineMatchManager!.getPlayers(); 
                 this.renderState.renderGame.setValue(true);
                 this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{
                     console.log('hello from play????????', state)
@@ -120,7 +137,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
         } 
     }
     ngAfterViewInit(): void {
-
+        
     }
     ngOnDestroy(): void {
         if (this.manager.getState() === GameManagerState.InGame){

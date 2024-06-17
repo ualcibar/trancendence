@@ -1,0 +1,57 @@
+.point{
+    width: 10px;
+    height: 10px;
+    border-radius: 50%; 
+    
+}
+.pointsBubble {
+    position: absolute;
+    display: flex;
+    gap: 10px;
+    border: 1px solid rgba(69, 159, 164, 0.273); /* Set the border color to blue */
+    background-color: rgb(121, 125, 136);
+    border-radius: 10px; /* Make the border circular */
+    height: 25px; /* Adjust height to make the element circular */
+    width: fit-content; /* Adjust width to make the element circular */
+    box-sizing: border-box;
+    padding: 10px;
+    padding-top: 5px;
+    left: 50%
+}
+.profilesBubble {
+    position: absolute;
+    display: flex;
+    gap: 10px;
+    border: 1px solid rgba(69, 159, 164, 0.273); /* Set the border color to blue */
+    background-color: rgb(121, 125, 136);
+    border-radius: 10px; /* Make the border circular */
+    height: 25px; /* Adjust height to make the element circular */
+    width: fit-content; /* Adjust width to make the element circular */
+    box-sizing: border-box;
+    padding: 10px;
+    padding-top: 5px;
+    left: 75%
+}
+@keyframes playingPointA {
+    0% {
+        background-color: grey;
+    }
+    50% {
+        background-color: white;
+    }
+    100% {
+        background-color: grey;
+    }
+}
+
+.animate-playingPointA {
+  animation: playingPointA 2s infinite;
+}
+
+.offline{
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: rgba(7, 4, 31, 0.232);
+}

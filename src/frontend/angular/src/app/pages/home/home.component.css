@@ -107,14 +107,14 @@
 }
 
 .backgroundButton {
-	background-color: rgba(53, 131, 131, 0.326);
+	background-color: rgba(53, 131, 131, 0);
 	width: 100%;
 	height: 100%;
 
 }
 
 .backgroundButton:hover {
-	background-color: rgba(124, 199, 83, 0.246);
+	background-color: rgba(124, 199, 83, 0);
 	cursor: default;
 }
 
