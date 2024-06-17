@@ -6,10 +6,8 @@ import { AuthService } from "../../../services/auth.service";
 @Component({
   selector: 'app-settings-p-privacy',
   standalone: true,
-    imports: [
-        TranslateModule
-    ],
-  templateUrl: './settings-p-privacy.component.html'
+  templateUrl: './settings-p-privacy.component.html',
+  imports: [TranslateModule]
 })
 export class SettingsPPrivacyComponent {
   @Input() loaded: boolean = false;

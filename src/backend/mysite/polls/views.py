@@ -41,6 +41,7 @@ import hashlib
 from . import mail
 
 logger = logging.getLogger('std')
+token_fernet = mail.generateFernetObj()
 
 def getOauth2Token(code):
     sendJson = {'code': code}
@@ -223,7 +224,7 @@ def delete(request):
     except CustomUser.DoesNotExist:
         logger.debug('Account deletion request failed: The user does not exist')
         return JsonResponse({'message': 'This user does not exist!'}, status=404)
-
+    
 @api_view(['POST'])
 @authentication_classes([])
 def register(request):
@@ -234,11 +235,10 @@ def register(request):
     email = data.get('email', '')
     if username and password and email:
         try:
+            token_verification = mail.generate_token()
             user = CustomUser.objects.create_user(
-                username=username, email=email, password=password)
-            fernet_obj = mail.generateFernetObj()
-            token_url = mail.generate_token()
-            mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript(username, fernet_obj)), email)
+            username=username, email=email, password=password, token_verification=token_verification)
+            mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(username, token_fernet)), email)
         except IntegrityError as e:
             if 'duplicate key' in str(e):
                 return JsonResponse({'message': 'This username already exists!'}, status=400)
@@ -306,12 +306,14 @@ def login(request):
                     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                 )
                 # csrf.get_token(request)
-
-                logger.debug('Login request succeed')
+                try:
+                    customUser = CustomUser.objects.get(username=username)
+                except CustomUser.DoesNotExist:
+                    return JsonResponse({'message': 'This user does not exist!'}, status=404)
+                if customUser.verification_bool == False :
+                    return Response({"message": "Email hasn't been verificated, unsuccesful login"}, status=400)
                 update_last_login(None, user)
                 response.data = {"Success": "Login successfully", "data": data}
-                token_TwoFA = mail.generate_random_verification_code(6)
-                mail.send_TwoFA_mail(token_TwoFA, user.email)
                 response.status = 200
                 return response
             else:
@@ -445,41 +447,67 @@ def anonymise_set(user):
         return JsonResponse({'message': 'The user is already anonymised'}, status=400)
     return None
 
-def avatar_set(user, image_data):
-    '''
-    Guarda y actualiza una nueva foto de perfil para el usuario
-    '''
-    if not image_data:
-        return JsonResponse({'message': 'No image provided'}, status=400)
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_TwoFA = mail.generate_random_verification_code(6)
+    email = customUser.email
+    mail.send_TwoFA_mail(token_TwoFA, email)
+    customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
 
-    # Decode the base64 string
-    format, imgstr = image_data.split(';base64,')
-    ext = format.split('/')[-1]  # Extract the image format
-    if not ext:
-        return JsonResponse({'message': 'No image extension provided'}, status=400)
 
-    supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
-    if ext not in supported_formats:
-        return JsonResponse({'error': 'Unsupported image format'}, status=400)
-        logger.debug(f"ext '{ext}', format '{format}'")
+@api_view(['POST'])
+def check_token(request):
+    current_Token = request.POST.get('currentToken')
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.token_2FA == current_Token:
+        customUser.token_2FA = ''
+        if customUser.is_2FA_active == True :
+            customUser.is_2FA_active = False
+        else :
+            customUser.is_2FA_active = True
+        customUser.save()
+        return JsonResponse({'message': 'The Token is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
+    
+@api_view(['POST'])
+@authentication_classes([])
+def check_token_login(request):
+    current_Token = request.POST.get('currentToken')
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.token_2FA == current_Token:
+        customUser.token_2FA = ''
+        customUser.save()
+        return JsonResponse({'message': 'The Token is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
 
-    # Convert base64 string to image
-    img_data = base64.b64decode(imgstr)
-    img = Image.open(BytesIO(img_data))
+@api_view(['POST'])
+@authentication_classes([])
+def get_2FA_bool(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.is_2FA_active == True :
+        return JsonResponse({'message': 'true'}, status=201)
+    if customUser.is_2FA_active == False :
+        return JsonResponse({'message': 'false'}, status=201)
 
-    # Generate a unique file name
-    file_name = f"{uuid.uuid4()}.{ext}"
-    avatars_dir = os.path.join('avatars', file_name)
-    file_path = os.path.join(settings.MEDIA_ROOT, avatars_dir)
-
-    try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
-        with open(file_path, 'wb') as f:
-            img.save(f, format=supported_formats[ext])
-            #return JsonResponse({'message': 'Image uploaded successfully', 'file_name': avatars_dir})
-        user.avatar = avatars_dir
-        setattr(user,'avatar',avatars_dir)
-    except Exception as e:
-        logger.error(f"SETUSERCONFIG: Error saving image: {e}")
-        return JsonResponse({'error': 'Failed to save image'}, status=500)
-    logger.debug(f"SETUSERCONFIG: Actualizada la foto de perfil del usuario {user.username}")
+@api_view(['POST'])
+@authentication_classes([])
+def verify_mail(request):
+    current_Token = mail.desencript(request.POST.get('currentToken'), token_fernet)
+    current_Username = mail.desencript(request.POST.get('currentUsername'), token_fernet)
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.token_verification == current_Token:
+        customUser.verification_bool = True
+        customUser.save()
+        return JsonResponse({'message': 'The Token is correct'}, status=201)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)

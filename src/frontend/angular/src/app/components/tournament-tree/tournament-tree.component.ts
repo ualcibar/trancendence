@@ -4,6 +4,7 @@ import { FormsModule, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { TournamentManager, TournamentSettings} from '../../services/gameManager.service';
 import { State } from '../../utils/state';
 import { Observable } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import { TournamentTree } from '../../utils/tournamentTree';
 
 class TreeRender{
@@ -17,8 +18,7 @@ class TreeRender{
   selector: 'app-tournament-tree-component',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
+    CommonModule, FormsModule, TranslateModule
   ],
   templateUrl: './tournament-tree.component.html',
   styleUrl: './tournament-tree.component.css'

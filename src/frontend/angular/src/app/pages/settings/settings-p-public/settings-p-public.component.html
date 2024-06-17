@@ -1,10 +1,10 @@
 <div class="sp-div rounded h-full p-4">
-    <h1 class="font-bold text-2xl"><i class="bi bi-person-bounding-box"></i> Foto de perfil</h1>
+    <h1 class="font-bold text-2xl"><i class="bi bi-person-bounding-box"></i> {{'settings_public_pfp'|translate}}</h1>
     <div class="mt-2 mb-4">
         <img src="{{ avatarUrl }}" class="mt-2 mr-2 my-2 w-24 h-24 bg-slate-400 rounded-full" alt="User Avatar">
         <input type='file' id="avatar-upload" (change)="onSelectFile($event)" hidden>
 
-        <label *ngIf="!fileUploaded" for="avatar-upload" class="btn btn-warning btn-sm mr-2"><i class="bi bi-upload"></i> Subir imagen</label>
+        <label *ngIf="!fileUploaded" for="avatar-upload" class="btn btn-warning btn-sm mr-2"><i class="bi bi-upload"></i> {{'settings_public_pfp_upload'|translate}}</label>
         <button *ngIf="!fileUploaded" (click)="defaultAvatar()" class="btn btn-warning btn-sm">{{'default'|translate}}</button>
         <button *ngIf="fileUploaded" (click)="saveAvatar()" class="btn btn-success btn-sm"><i class="bi bi-floppy-fill"></i> {{'save_changes'|translate}}</button>
 
@@ -23,8 +23,8 @@
         </div>
     </div>
 
-    <h1 class="font-bold text-2xl"><i class="bi bi-person-vcard-fill"></i> Nombre de usuario</h1>
-    <p class="text-zinc-300 mb-2">Escoge un nombre de usuario único para poder identificarte</p>
+    <h1 class="font-bold text-2xl"><i class="bi bi-person-vcard-fill"></i> {{'settings_public_userusername'|translate}}</h1>
+    <p class="text-zinc-300 mb-2">{{'settings_public_choose'|translate}}</p>
     <div class="flex align-items-center max-w-80 mb-2">
         <input [(ngModel)]="username" type="text" name="username" class="form-control shadow-none" id="floatingInput" required>
         <button (click)="savePublic()" [ngClass]="{'grayscale-0': currentUsername !== username,'grayscale disabled opacity-50': currentUsername === username}" class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
@@ -32,13 +32,13 @@
 
     <!-- Error -->
     <div *ngIf="alreadyUsed" class="alert alert-error alert-dismissible fade show mt-2 max-w-96" role="alert" [@easeOut]>
-        <i class="bi bi-x-circle-fill mr-2"></i>¡Este usuario ya está en uso!
+        <i class="bi bi-x-circle-fill mr-2"></i>¡{{'settings_public_other'|translate}}
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <!-- OK -->
     <div *ngIf="nameChanged" class="alert alert-success alert-dismissible fade show mt-2 max-w-96" role="alert" [@easeOut]>
-        <i class="bi bi-check-circle-fill mr-2"></i>¡Usuario cambiado con éxito!
+        <i class="bi bi-check-circle-fill mr-2"></i>{{'settings_public_done'|translate}}
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 </div>

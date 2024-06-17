@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {Observable, Subscription, firstValueFrom, shareReplay} from 'rxjs';
+import {BehaviorSubject, Observable, UnaryFunction, of, firstValueFrom, Subject, Subscription, shareReplay} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -68,7 +68,7 @@ enum UserStatus{
 export class UserInfo{
   id : number;
   username : string;
-  status : string;
+  status : UserStatus;
   color : string;
   statistics : Statistics;
   avatarUrl : string;
@@ -99,6 +99,8 @@ export interface PrivateUserInfoI{
   friends : UserInfoI[];
   language : string;
   email : string;
+  twofa : boolean | null;
+  tokentwofa : string | null;
 }
 
 export class PrivateUserInfo{
@@ -106,11 +108,15 @@ export class PrivateUserInfo{
   friends : UserInfo[];
   language : string;
   email : string;
-  constructor (info : UserInfo, friends : UserInfo[], language : string, email : string){
+  twofa : boolean | undefined;
+  tokentwofa : string | undefined;
+  constructor (info : UserInfo, friends : UserInfo[], language : string, email : string, twofa : boolean | undefined, tokentwofa : string | undefined){
     this.info = info;
     this.friends = friends;
     this.email = email;
     this.language = language;
+    this.twofa = twofa;
+    this.tokentwofa = tokentwofa;
   }
   static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
     
@@ -124,19 +130,33 @@ export class PrivateUserInfo{
     const userInfo = UserInfo.fromI(values.info)
     if (!userInfo)
       return undefined
-    return new PrivateUserInfo(userInfo, friends, values.language, values.email )
+    if (values.twofa === null || values.tokentwofa === null)
+      return new PrivateUserInfo(userInfo, friends, values.language, values.email, undefined, undefined)
+    return new PrivateUserInfo(userInfo, friends, values.language, values.email, values.twofa, values.tokentwofa)
   }
 }
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class AuthService {
   private _userInfo : State<PrivateUserInfo | undefined>;
   private reconnecting : number | undefined;
   private loggedInOnce : boolean = false;
   //logger*
   private logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
+  twofa_bool : boolean = false;
+  private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  user_info? : UserInfo;
+  isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  friends? : UserInfo[];
+
+  private twofaCompleteSubject = new Subject<boolean>();
+  twofaComplete$ = this.twofaCompleteSubject.asObservable();
+
+  //logger
+  client_locale: string = 'en';
 
   constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
     this._userInfo = new State<PrivateUserInfo | undefined>(undefined);
@@ -171,6 +191,7 @@ export class AuthService {
   subscribe(fn : any) : Subscription{
     return this._userInfo.subscribe(fn);
   }
+
 
   // Función para obtener los datos del usuario en el momento en el que sea llamada
   // - Debajo, el Getter para poder ser utilizado por el servicio de 'Settings'
@@ -234,6 +255,10 @@ export class AuthService {
     });
   }
 
+  getUpdateUserInfo(): UserInfo | undefined {
+    return this.user_info;
+  }
+
   registerAcc(username : string, password : string, email : string) : Observable<any> {
     this.logger.info('registering', username)
     const backendURL = '/api/polls/register/';
@@ -256,7 +281,7 @@ export class AuthService {
       next: (response) => {
         this.logger.info('successful register')
         setTimeout(() => {
-          this.router.navigate(['/login']);
+          this.router.navigate(['/postregister']);
         }, 1000);
       },
       error: (error) => {
@@ -264,6 +289,25 @@ export class AuthService {
       }
     })
     return register$;
+  }
+
+  async get_2FA_bool(user: string): Promise<boolean> {
+    const backendURL = 'api/polls/get_2FA_bool/';
+    const httpReqBody = `currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    if (response.message == "true"){
+      console.log('✔️ ', response.message);
+      return true;
+    }
+    else {
+      console.log('✔️ ', response.message);
+      return false;
+    }
   }
 
   async login(username : string, password : string): Promise<void> {
@@ -277,14 +321,22 @@ export class AuthService {
         'Content-Type': 'application/json'
       })
     };
-    try{
-      const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
-      this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
-      this.logger.info("✔️ You've successfully logged in. Welcome!");
-    }catch(e){
-      this.logger.info("Failed to log in");
+    this.twofa_bool = await this.get_2FA_bool(username);
+    if (this.twofa_bool == true){
+      await this.send_mail(username);
+      this.router.navigate(['/twofa-login']);
+      await firstValueFrom(this.twofaComplete$);
     }
+    await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
+    this.isLoggedInSubject.next(true);
+    console.log("✔️ You've successfully logged in. Welcome!");
   }
+
+  completeTwofa() {
+    this.twofaCompleteSubject.next(true);
+  }
+
+
 
   logout() {
     const backendURL = 'api/polls/logout/';
@@ -381,4 +433,33 @@ export class AuthService {
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
     console.log('✔️ ', response.message);
   }
+
+  async check_token_login(token: string): Promise<void> {
+    const backendURL = 'api/polls/check_token_login/';
+    if (!this.user_info){
+      this.logger.error('update user info: userinfo is undefined')
+      return
+    }
+    const httpReqBody = `currentToken=${token}&currentUsername=${this.user_info.username}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
+  async send_mail(user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail/';
+    const httpReqBody = `currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
 }

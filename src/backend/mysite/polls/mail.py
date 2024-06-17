@@ -16,7 +16,7 @@ def encript(text, f):
     return encripted_text
 
 def desencript(encripted_text, f):
-    desencripted_text = f.decrypt(encripted_text.decode())
+    desencripted_text = f.decrypt(encripted_text).decode('utf-8')
     return desencripted_text
 
 def generateFernetObj():
@@ -25,7 +25,7 @@ def generateFernetObj():
     return f
 
 def generate_verification_url(encripted_token, encripted_mail):
-    verification_url = "https://localhost:1501/verify?token=" + encripted_token.decode('utf-8') + "&email=" + encripted_mail.decode('utf-8')
+    verification_url = "https://localhost:1501/verify?token=" + encripted_token.decode('utf-8') + "&user=" + encripted_mail.decode('utf-8')
     return verification_url
 
 def generate_token():

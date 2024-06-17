@@ -11,6 +11,8 @@ import { LogFilter, Logger } from '../../utils/debug';
 import { OnlineMatchGeneratorComponent } from '../online-match-generator/online-match-generator-component';
 import { HomeState, StateService } from '../../services/stateService';
 
+import { TranslateModule } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-lobby-search',
   standalone: true,
@@ -18,7 +20,7 @@ import { HomeState, StateService } from '../../services/stateService';
     FormsModule,
     ReactiveFormsModule,
     AsyncPipe,
-    OnlineMatchGeneratorComponent
+    OnlineMatchGeneratorComponent, TranslateModule
   ],
   templateUrl: './lobby-search.component.html',
   styleUrl: './lobby-search.component.css'

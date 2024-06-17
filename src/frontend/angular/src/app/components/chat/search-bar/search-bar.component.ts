@@ -5,6 +5,7 @@ import { map, startWith } from 'rxjs/operators';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { AfterViewInit, Renderer2 } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-search-bar',
@@ -12,7 +13,7 @@ import { AfterViewInit, Renderer2 } from '@angular/core';
   imports: [CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    AsyncPipe,],
+    AsyncPipe, TranslateModule],
   templateUrl: './search-bar.component.html',
   styleUrl: './search-bar.component.css'
 

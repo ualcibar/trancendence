@@ -42,7 +42,7 @@ class LocalGameHandler{
     return new MatchSettings(60,3,2,1,MapsName.Default);//!todo should be in settings
   }
   defaultTournament() : TournamentSettings{//this should be somewhere else
-    return new TournamentSettings(this.defaultMatch(),10);//!todo should be in settings
+    return new TournamentSettings(this.defaultMatch(),8);//!todo should be in settings
   }
   defaultOnlineMatch() : OnlineMatchSettings2{//this should be somewhere else
     return new OnlineMatchSettings2('default', 'esp', true,this.defaultMatch());//!todo should be in settings

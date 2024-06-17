@@ -9,6 +9,7 @@ import { easeOut } from '../../../assets/animations/easeOut';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
+
 export class LoginComponent {
   info? : UserInfo | undefined;
 
@@ -48,8 +49,7 @@ export class LoginComponent {
       await this.authService.login(this.user.username, this.user.password);
 
       this.formSent = false;
-      this.router.navigate(['/']);
-      //window.location.href = "/"; //Hay que mirar esto; si por ejemplo el usuario tiene el idioma "Inglés" puesto, al iniciar sesión, no lo cambia al inglés.
+      window.location.href = "/";
     } catch (error: any) {
       console.error('❌ Ha ocurrido un error al intentar iniciar sesión');
 

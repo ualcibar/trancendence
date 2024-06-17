@@ -1,27 +1,39 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from "@angular/common";
+import { Component, Input} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
 import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 
+import { NgClass, CommonModule } from '@angular/common';
+import { SettingsService } from '../../../services/settings.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { HttpClient} from '@angular/common/http';
 import {easeOut} from "../../../../assets/animations/easeOut";
 
 @Component({
   selector: 'app-settings-p-security',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass],
+  imports: [FormsModule, NgClass, TranslateModule, CommonModule],
   animations:  [easeOut],
   templateUrl: './settings-p-security.component.html'
 })
+
 export class SettingsPSecurityComponent {
   email = '';
   currentEmail = '';
   oldPassword = '';
   newPassword = '';
+  entered_token = '';
+  token_2FA = '';
   confirmNewPassword = '';
+  username= '';
+  newToken= '';
 
   mailChanged = false;
   alreadyUsed = false;
+
+  is_2FA_active = false;
+  buttonClicked1 = false;
+  buttonClicked2 = false;
+ 
 
   error = false;
   success = false;
@@ -34,13 +46,26 @@ export class SettingsPSecurityComponent {
 
   @Input() loaded: boolean = false;
 
-  constructor(private authService: AuthService) {}
+  
+  constructor(private settingsService: SettingsService, private authService: AuthService, private http: HttpClient) {}
 
   ngOnInit() {
     this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
       if (userInfo) {
-        this.email = userInfo.email;
-        this.currentEmail = this.email;
+        if (userInfo.tokentwofa && userInfo.twofa) {
+          this.email = userInfo.email;
+          this.currentEmail = this.email;
+          this.is_2FA_active = userInfo.twofa;
+          this.token_2FA = userInfo.tokentwofa;
+          this.username = userInfo.info.username;
+          this.newToken = ''
+        }
+        else{
+          this.email = userInfo.email;
+          this.currentEmail = this.email;
+          this.username = userInfo.info.username;
+          this.newToken = ''
+        }
       }
     })
   }
@@ -98,4 +123,42 @@ export class SettingsPSecurityComponent {
     this.success = true;
     this.formSent = false;
   }
+
+  async onButtonClick1True() {
+      this.buttonClicked1 = true;
+  }
+
+  async onButtonClick1False() {
+    this.buttonClicked1 = false;
+    this.buttonClicked2 = false;
+  }
+
+  async sendmail() {
+    await this.settingsService.send_mail(this.username);
+    this.buttonClicked2 = true;
+  }
+
+  async compareTwoFAToken() {
+    await this.settingsService.check_token(this.entered_token, this.username);
+    this.buttonClicked1 = false;
+    this.buttonClicked2 = false;
+    if (this.is_2FA_active == true){
+      this.is_2FA_active = false;
+    }
+    else {
+      this.is_2FA_active = true;
+    }
+  }
 }
+
+
+
+
+
+
+  
+
+
+
+
+

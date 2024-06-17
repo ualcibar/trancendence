@@ -65,7 +65,12 @@ urlpatterns = [
     path('friendsID/<int:user_id>/<int:friend_id>/', FriendsView.as_view(), name='friends'),
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('matches/', views.matches, name='match-list'),
-    path("history/<int:user_id>", views.userHistory, name="user_history")
-    
+    path("history/<int:user_id>", views.userHistory, name="user_history"),
+    #path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),
+    #path('player_games/', GameHistoryView.as_view(), name='game_history'), 
+    path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'), 
+    path('send_mail/', views.send_mail, name='send_mail'),
+    path('check_token/', views.check_token, name='check_token'),
+    path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool'),
+    path('verify_mail/', views.verify_mail, name='verify_mail')
 ]
-

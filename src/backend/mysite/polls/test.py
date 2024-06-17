@@ -1,7 +1,9 @@
 import mail
 
-fernet_obj = mail.generateFernetObj()
-token_url = mail.generate_token()
-mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_url, fernet_obj), mail.encript("jogainza.and@gmail.com", fernet_obj)), "jogainza.and@gmail.com")
-token_TwoFA = mail.generate_random_verification_code(6)
-mail.send_TwoFA_mail(token_TwoFA, "jogainza.and@gmail.com")
+fernet = mail.generateFernetObj()
+string = 'hola que tal'
+encripted_text = mail.encript(string, fernet)
+desencripted_text = mail.desencript(encripted_text, fernet).decode('utf-8')
+print(f'antes de encriptar-----> ', string)
+print(f'después de encriptar-----> ', encripted_text)
+print(f'después de desencriptar-----> ', desencripted_text)

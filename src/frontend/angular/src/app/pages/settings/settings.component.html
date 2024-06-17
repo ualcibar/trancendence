@@ -1,5 +1,5 @@
-<div *ngIf="loading; else content" class="sp-div loading-tab flex flex-col items-center justify-center rounded text-white" style="width: 20rem;">
-	<h1 class="m-4">Loading user settings... </h1>
+<div id="sp-div" *ngIf="loading; else content" class="loading-tab flex flex-col items-center justify-center rounded" style="width: 20rem;">
+	<h1 class="m-4">{{'settings_dataload'|translate}}</h1>
 	<div class="spinner-border text-warning mb-4" role="status"></div>
     <p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>If it is taking too long, please check that you are logged in</p>
 </div>
@@ -24,7 +24,7 @@
 						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_acc'|translate}}</h2>
 						<li (click)="activeTab = 'public'" [ngClass]="{'selected': activeTab === 'public'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> {{'settings_tab_content_public'|translate}}</a></li>
 						<li (click)="activeTab = 'security'" [ngClass]="{'selected': activeTab === 'security'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> {{'settings_tab_content_security'|translate}}</a></li>
-						<li (click)="activeTab = 'privacy'" [ngClass]="{'selected': activeTab === 'privacy'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-shield-shaded"></i> Privacidad</a></li>
+						<li (click)="activeTab = 'privacy'" [ngClass]="{'selected': activeTab === 'privacy'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-shield-shaded"></i> {{'settings_tab_content_security'|translate}}</a></li>
 					</ul>
 				</div>
 				<app-settings-p-color [loaded]="loading" *ngIf="activeTab === 'color'" class="w-full"></app-settings-p-color>

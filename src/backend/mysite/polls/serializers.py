@@ -23,14 +23,20 @@ class UserInfoSerializer(serializers.ModelSerializer):
 class PrivateUserInfoSerializer(serializers.ModelSerializer):
     info = UserInfoSerializer(source='*')
     friends = UserInfoSerializer(many=True, read_only=True)
+    twofa = serializers.SerializerMethodField()
+    tokentwofa = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ('info', 'friends', 'language', 'email')
+        fields = ('info', 'friends', 'language', 'email', 'twofa', 'tokentwofa')
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
         if password:
             instance.set_password(password)
         return super().update(instance, validated_data)
+    def get_twofa(self, instance: CustomUser):
+        return instance.is_2FA_active
+    def get_tokentwofa(self, instance: CustomUser):
+        return instance.token_2FA
 
 class StatisticsSerializer(serializers.ModelSerializer):
     class Meta:
