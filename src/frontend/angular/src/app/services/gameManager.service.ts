@@ -282,6 +282,11 @@ export class TournamentUpdate{
   getNextMatchPreview() : [string, string] | string{
     return this.tree.getCurrentGroups();
   }
+
+  getTournamentTree() : TournamentTree
+  {
+    return this.tree;
+  }
 }
 
 export class OnlineMatchInfo{
