@@ -1,25 +1,67 @@
 import { Injectable } from '@angular/core';
 import { NgZone } from '@angular/core';
-import {AuthService} from './auth.service';
-import { BehaviorSubject } from 'rxjs';
+import {AuthService, PrivateUserInfo, UserInfo} from './auth.service';
 import { LogFilter, Logger } from '../utils/debug';
 import { ChatState, StateService } from './stateService';
+import { MatchSettings, MatchSettingsI } from './gameManager.service';
+import { toEnum } from '../utils/help_enum';
+import { OnlineMatchSettings2 } from './matchmaking.service';
+
+export interface MessageI{
+  message : string;
+  id : number;
+  sender: UserInfo;
+  date: string;
+  type : string;
+  invitation : OnlineMatchSettings2 | undefined;
+  target : string;
+}
+
+export enum MessageType{
+  Text = 'Text',
+  Invitation = 'InvitationOpen',
+  InvitationClosed = 'InvitationClosed'
+}
 
 export class Message {
-  message : string = '';
+  message : string;
   id : number;
-  sender: string = '';
-  date: string = '';
+  sender: UserInfo;
+  date: string;
+  type : MessageType;
+  invitation : OnlineMatchSettings2 | undefined;
+  target : string;
 
   toString(): string{
     return `message : ${this.message}, sender ${this.sender}`;
   }
 
-  constructor(message: string, id: number, sender: string, date: string) {
+  constructor(message: string, id: number, sender: UserInfo, date: string, type : MessageType, invitation : OnlineMatchSettings2 | undefined, target : string) {
     this.message = message;
     this.id = id;
     this.sender = sender;
     this.date = date;
+    this.type = type;
+    this.invitation = invitation;
+    this.target = target;
+  }
+
+  static fromI(values : MessageI) : Message | undefined{
+    const type = toEnum(MessageType, values.type);
+    if (!type)
+      return undefined;
+    const sender = UserInfo.fromI(values.sender)
+    if (!sender)
+      return undefined
+    if (type === MessageType.Invitation){
+      if (!values.invitation)
+        return undefined;
+      const matchSettings = OnlineMatchSettings2.fromI(values.invitation)
+      if (!matchSettings)
+        return undefined
+      return new Message(values.message, values.id, sender, values.date, type, matchSettings, values.target);
+    }
+    return new Message(values.message, values.id, sender, values.date, type, undefined, values.target);
   }
 }
 
@@ -31,8 +73,7 @@ export class ChatService {
   webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
   webSocket: WebSocket | undefined;
 
-  //chat
-  private connectedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  //chat 
   chatMessages: Map<string, Message[]> = new Map<string, Message[]>();
   current_chat_name: string = '#global';
   users: Set<string> = new Set<string>();
@@ -42,8 +83,8 @@ export class ChatService {
 
   constructor(private ngZone: NgZone, private authService: AuthService, private state: StateService) {
     this.chatMessages.set('#global', []);
-    this.authService.subscribe((loggedIn: any) => {
-      if (loggedIn && !this.isConnected()) {
+    this.authService.subscribe((loggedIn: PrivateUserInfo | undefined) => {
+      if (loggedIn && this.isClosed()) {
         this.connectToWebsocket();
       } else if (!loggedIn && this.isConnected()) {
         this.disconectFromWebsocket();
@@ -68,13 +109,13 @@ export class ChatService {
     this.webSocket.onopen = () => {
       console.log('Chat websocket connection opened');
       this.state.changeChatState(ChatState.Connected);
-      this.connectedSubject.next(true);
+      //this.connectedSubject.next(true);
     }
 
     this.webSocket.onclose = () => {
       console.log('Chat websocket connection closed');
       this.state.changeChatState(ChatState.Disconnected);
-      this.connectedSubject.next(false);
+      //this.connectedSubject.next(false);
     }
 
     this.webSocket.onerror = (error) => {
@@ -83,10 +124,8 @@ export class ChatService {
 
     this.webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      const actualHourDate = new Date();
-      const actualHour = `${actualHourDate.getHours()}:${actualHourDate.getMinutes()}`;
       let targetChannel = this.current_chat_name;
-      let message: string;
+      let messageI: MessageI;
 
       this.ngZone.run(() => {
         this.logger.info("Channel type: " + data.type);
@@ -96,15 +135,15 @@ export class ChatService {
               this.chatMessages.set(data.user, []);
             }
             targetChannel = data.user;
-            message = data.message;
+            messageI = data.message;
             break;
           case 'private_message_delivered':
             targetChannel = data.target;
-            message = data.message;
+            messageI = data.message;
             break;
           case 'global_message':
             targetChannel = '#global';
-            message = data.message;
+            messageI = data.message;
             break;
           case 'user_list':
             this.users = new Set(data.users);
@@ -120,10 +159,16 @@ export class ChatService {
             this.logger.error(data);
             return;
         }
-
-        const chatMessage = this.chatMessages.get(targetChannel);
-        if (chatMessage)
-          chatMessage.push({message: message, id: data.id, sender: data.sender, date: actualHour});
+        const chatMessages = this.chatMessages.get(targetChannel);
+        if (chatMessages){
+          const message = Message.fromI(messageI);
+          if (!message)
+            this.logger.error('failed to parse message')
+          else{
+            console.log('avatar: ', message.sender.avatarUrl)
+            chatMessages.push(message);
+          }
+        }
         else
           console.log('No target channel');
       });
@@ -134,24 +179,30 @@ export class ChatService {
     if (this.webSocket) {
       this.webSocket.close();
       this.webSocket = undefined;
+      this.state.changeChatState(ChatState.Disconnected)
     }
-    this.connectedSubject.next(false);
+    //this.connectedSubject.next(false);
   }
 
   isConnected(): boolean{
-    return this.connectedSubject.value;
+    return this.webSocket !== undefined && this.webSocket.readyState === this.webSocket.OPEN
+    //return this.connectedSubject.value;
+  }
+
+  isClosed() : boolean{
+    return this.webSocket === undefined || this.webSocket.readyState === this.webSocket.CLOSED
   }
 
   getKeys() : string[]{
     return Array.from(this.chatMessages.keys());
   }
 
-  sendMessage(message : string, target : string) {
+  sendMessage(message : Message) {
     let messageObject;
-    if (target == '#global')
+    if (message.target == '#global')
       messageObject = { type : '/global', message : message};
     else
-      messageObject = { type : '/pm', message : message, target : target };
+      messageObject = { type : '/pm', message : message, target : message.target };
     const jsonMessage = JSON.stringify(messageObject);
     this.webSocket?.send(jsonMessage);
   }
@@ -161,7 +212,8 @@ export class ChatService {
   }
   
   addChat(username : string){
-    this.chatMessages.set(username, []);
+    if (!this.chatMessages.get(username))
+      this.chatMessages.set(username, []);
   }
 
   getChatMessages(chat : string): Message[]{

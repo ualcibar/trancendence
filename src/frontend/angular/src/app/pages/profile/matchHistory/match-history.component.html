@@ -1,0 +1,36 @@
+<div class="sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
+    <h1 class="text-white text-bold">MATCHES</h1>
+    <div *ngIf="matches" class="flex flex-col items-center gap-1 w-full overflow-y-auto max-h-[500px] pr-4">
+        <div *ngFor="let match of matches; let i = index" class="w-full"[ngClass]="{ 'winEntry' : userId && match.win(userId), 'loseEntry' : userId && !match.win(userId) }">
+            <button (click)="toggleExpand(i)" class="flex items-center justify-between min-h-10 w-full p-2 rounded">
+                <h1 class="flex-1"> {{match.date }}</h1>
+                <h1 class="flex-1">{{match.score.score[0]}}:{{match.score.score[1]}}</h1>
+                <h1 class="flex-1">{{ match.teamSize }} vs {{ match.teamSize }}</h1>
+                <h1 [ngClass]="{ 'bi bi-chevron-double-down' : !expanded![i], 'bi bi-chevron-double-up' : expanded![i]}"></h1>
+            </button>
+            <div *ngIf="expanded![i]" class="flex justify-center gap-5 pr-20 pl-20">
+                <div class="flex-1">
+                    <div *ngFor="let user of match.teamA">
+                        <button (click)="goToProfile(user.id)" class="flex gap-1 align-items-center">
+                            <img src="{{user.avatarUrl}}" class="rounded-full w-10 h-10 ml-4 mt-4 mb-4 bg-neutral-400"
+                                alt="Foto de perfil del jugador">
+                            <div>{{user.username}}</div>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <div *ngFor="let user of match.teamB">
+                        <button (click)="goToProfile(user.id)" class="flex gap-1 align-items-center">
+                            <img src="{{user.avatarUrl}}" class="rounded-full w-10 h-10 ml-4 mt-4 mb-4  bg-neutral-400"
+                                alt="Foto de perfil del jugador">
+                            <div>{{user.username}}</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!matches">
+        <h1>loading</h1>
+    </div>
+</div>

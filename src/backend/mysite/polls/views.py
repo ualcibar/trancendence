@@ -1,5 +1,6 @@
 # Create your views here.
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+from django.http import JsonResponse
 
 from django.conf import settings
 
@@ -29,6 +30,8 @@ from rest_framework import status
 from .authenticate import CustomAuthentication
 from .serializers import UserInfoSerializer, LightUserInfoSerializer, PrivateUserInfoSerializer
 from .models import CustomUser, CustomUserManager
+from matchmaking.models import Match
+from matchmaking.serializers import MatchSerializer
 
 import requests
 import json
@@ -55,12 +58,12 @@ def getOauth2Token(code):
 def getInfo(request, user_id=None):
     '''
     Esta función acepta también el valor de ID.
-    Obtiene el endpoint para la información del usuario.
-
-    PARAMS:
-    - Se le puede pasar la Id del usuario en la URL
-    RETURN:
-    - 200, 401, 404
+    Por que?
+     - Nos permite gestionar los perfiles para mostrar su contenido en el frontend
+    Funciona con usuarios solamente?
+     - Para hacer llamadas para obtener solamente el usuario, también funciona.
+    unai aprende ha comentar codigo:
+    get endpoint for user information, user id passed on the url, codes : 200, 401,404,
     '''
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
@@ -170,6 +173,90 @@ def imLoggedIn(request):
     return JsonResponse({'message': 'You are logged in'}, status=201)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def setUserConfig(request, user_id=None):
+    data = json.loads(request.body)
+
+    if user_id is not None:
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'message': 'This user does not exist!'}, status=404)
+
+    updated_fields = []
+    valid_keys = ['user_color', 'user_language', 'username', 'email', 'avatarUrl','anonymise']
+
+    for key, value in data.items():
+        if key in valid_keys:
+            if key == 'password':
+                if not value:
+                    return JsonResponse({'message': 'The password cannot be empty'}, status=400)
+                if user.check_password(value):
+                    return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
+                user.set_password(value)
+                updated_fields.append(key)
+                logger.debug(f"Actualizada la key {key}")
+            elif key == 'anonymise':
+                if not user.is_anonymized:
+                    random_str = str(uuid.uuid4())
+                    hashed_username = hashlib.md5(random_str.encode()).hexdigest()[:8]
+                    user.username = f"user_{hashed_username}"
+                    user.email = f"{user.username}@spacepong.me"
+
+                    user.is_anonymized = True
+                    user.is_active = False
+                    user.anonymized_at = timezone.now()
+                    logger.debug(f"La cuenta {user.username} ha sido deshabilitada y anonimizada")
+                    updated_fields.append(key)
+                else:
+                    logger.debug(f"El usuario ya está anonimizado")
+            elif key == 'avatarUrl':
+                image_data = value
+                format, imgstr = image_data.split(';base64,') 
+                ext = format.split('/')[-1]  # Extract the image format
+                if not ext:
+                    return JsonResponse({'message': 'No image extension provided'}, status=400)
+
+                supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
+                if ext not in supported_formats:
+                    return JsonResponse({'error': 'Unsupported image format'}, status=400)
+                logger.debug(f"ext '{ext}', format '{format}'")
+
+                # Convert base64 string to image
+                img_data = base64.b64decode(imgstr)
+                img = Image.open(BytesIO(img_data))
+
+                # Generate a unique file name
+                file_name = f"{uuid.uuid4()}.{ext}"
+                avatars_dir = os.path.join('avatars', file_name)
+                file_path = os.path.join(settings.MEDIA_ROOT, avatars_dir)
+                try:
+                    os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
+                    with open(file_path, 'wb') as f:
+                        img.save(f, format=supported_formats[ext])
+                        #return JsonResponse({'message': 'Image uploaded successfully', 'file_name': avatars_dir})
+                        setattr(user,'avatar',avatars_dir)
+                except Exception as e:
+                    logger.error(f"Error saving image: {e}")
+                    return JsonResponse({'error': 'Failed to save image'}, status=500)
+            else:
+                setattr(user, key, value)
+                updated_fields.append(key)
+                logger.debug(f"Actualizada la key {key} a {value}")
+        else:
+            return JsonResponse({'message': 'No valid user settings provided'}, status=400)
+
+    try:
+        user.save()
+    except IntegrityError as e:
+        if 'duplicate key' in str(e):
+            return JsonResponse({'message': 'This username already exists!'}, status=400)
+        else:
+            return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=500)
+    privateUserInfo = PrivateUserInfoSerializer(user)
+    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields, 'privateUserInfo' : privateUserInfo.data}, status=201)
+
+@api_view(['POST'])
 def logout(request):
     response = JsonResponse({'message': 'See you later!'}, status=201)
     response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
@@ -217,6 +304,30 @@ def register(request):
     else:
         return JsonResponse({'reason': 'Username and password are required!'}, status=400)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def matches(request):
+    match_ids = request.query_params.get('ids')
+    if match_ids:
+        match_ids_list = match_ids.split(',')  # Split the comma-separated string into a list
+        matches = Match.objects.filter(id__in=match_ids_list)
+    else:
+        matches = Match.objects.none()
+
+    serializer = MatchSerializer(matches, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def userHistory(request, user_id):
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except Exception as e:
+        return Response({'message': 'cant find user'}, status=500)
+    matches = user.team_a_matches.all() + user.team_b_matches.all()
+    serializer = MatchSerializer(matches, True)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -265,6 +376,31 @@ def login(request):
             logger.debug('Login request failed: Invalid username or password')
             return Response({"message": "Invalid username or password!"}, status=400)
 
+# @csrf_exempt
+# @api_view(['POST'])
+# def user_login(request):
+#    if request.method == 'POST':
+#        data = json.loads(request.body)
+#        username = data.get('username')
+#        password = data.get('password')
+#        if username and password:
+#            user = authenticate(request, username=username, password=password)
+#            if user is not None:
+#                login(request, user)
+#                refresh = RefreshToken.for_user(user)
+#                data = {
+#                    'refresh': str(refresh),
+#                    'access': str(refresh.access_token),
+#                }
+#                return JsonResponse({'message': 'Login successful', 'data': data}, status=200)
+        # request.session["username"] = user.username
+        # return JsonResponse({'message': 'Login successful', 'sessionid': request.session.session_key}, status=200)
+#            else:
+#                return JsonResponse({'error': 'Invalid credentials'}, status=401)
+#        else:
+#            return JsonResponse({'error': 'Username and password are required'}, status=400)
+
+
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     return {
@@ -281,23 +417,7 @@ class CustomUserView(APIView):
         serializer = UserInfoSerializer(usuario)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class GameHistoryView(APIView):
-    def get(self, request, user_id):
-        player1_games = Game.objects.filter(player1_id=user_id)
-        player2_games = Game.objects.filter(player2_id=user_id)
-
-        all_games = player1_games | player2_games
-        #serialized_games = GameSerializer(all_games, many = True)
-        return Response(None, status=status.HTTP_200_OK)
-    
-    def post(self, request):
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
-        serializer = GameSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
-    
+ 
 class FriendsListView(APIView):
     def get(self, request, user_id):
         user = CustomUser.objects.get(id=user_id)
@@ -324,82 +444,13 @@ class FriendsListView(APIView):
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def setUserConfig(request, user_id=None):
-    '''
-    Esta función permite guardar la nueva configuración en un usuario.
-
-    Los parametros son la 'key' y su 'value' pasados como JSON
-    '''
-    data = json.loads(request.body)
-
-    if user_id is not None:
-        try:
-            user = CustomUser.objects.get(id=user_id)
-        except CustomUser.DoesNotExist:
-            return JsonResponse({'message': 'This user does not exist!'}, status=404)
-
-    updated_fields = []
-    valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise', 'avatarUrl']
-
-    for key, value in data.items():
-        if key not in valid_keys:
-            return JsonResponse({'message': 'No valid user settings provided'}, status=400)
-
-        if key == 'password':
-            response = password_set(user, value)
-            if response:
-                return response
-        elif key == 'anonymise':
-            response = anonymise_set(user)
-            if response:
-                return response
-        elif key == 'avatarUrl':
-            response = avatar_set(user, value)
-            if response:
-                return response
-        else:
-            setattr(user, key, value)
-        updated_fields.append(key)
-
-    try:
-        user.save()
-    except IntegrityError as e:
-        if 'duplicate key' in str(e):
-            return JsonResponse({'message': 'This username already exists!'}, status=400)
-        else:
-            return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=500)
-    privateUserInfo = PrivateUserInfoSerializer(user)
-    logger.debug(f"SETUSERCONFIG: Actualizada la key {key} a {value}")
-    return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields, 'privateUserInfo' : privateUserInfo.data}, status=201)
-
-def password_set(user, password):
-    '''
-    Guarda y actualiza la contraseña del usuario.
-    '''
-    if not password:
-        return JsonResponse({'message': 'The password cannot be empty'}, status=400)
-    if user.check_password(password):
-        return JsonResponse({'message': 'Your new password cannot be the same as the current password'}, status=400)
-    user.set_password(password)
-    logger.debug(f"SETUSERCONFIG: Actualizada la contraseña del usuario {user.username}")
-    return None
-
-def anonymise_set(user):
-    '''
-    Anonimiza los datos del usuario y desactiva la cuenta.
-    '''
-    if not user.is_anonymized:
-        random_str = str(uuid.uuid4())
-        hashed_username = hashlib.md5(random_str.encode()).hexdigest()[:8]
-        user.username = f"user_{hashed_username}"
-        user.email = f"{user.username}@spacepong.me"
-
-        user.is_anonymized = True
-        user.is_active = False
-        user.anonymized_at = timezone.now()
-        logger.debug(f"SETUSERCONFIG: La cuenta {user.username} ha sido deshabilitada y anonimizada")
+# File uploading management
+def upload_file(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(request.FILES["file"])
+            return HttpResponseRedirect("/success/url/")
     else:
         logger.debug(f"SETUSERCONFIG: El usuario ya está anonimizado")
         return JsonResponse({'message': 'The user is already anonymised'}, status=400)
@@ -413,15 +464,19 @@ def avatar_set(user, image_data):
         return JsonResponse({'message': 'No image provided'}, status=400)
 
     # Decode the base64 string
+    if (image_data == 'default'):
+        avatars_dir = os.path.join('avatars', 'default.jpg')
+        setattr(user,'avatar',avatars_dir)
+        return None
+
     format, imgstr = image_data.split(';base64,')
     ext = format.split('/')[-1]  # Extract the image format
     if not ext:
         return JsonResponse({'message': 'No image extension provided'}, status=400)
 
-    supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
+    supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG"}
     if ext not in supported_formats:
         return JsonResponse({'error': 'Unsupported image format'}, status=400)
-        logger.debug(f"ext '{ext}', format '{format}'")
 
     # Convert base64 string to image
     img_data = base64.b64decode(imgstr)
@@ -431,15 +486,15 @@ def avatar_set(user, image_data):
     file_name = f"{uuid.uuid4()}.{ext}"
     avatars_dir = os.path.join('avatars', file_name)
     file_path = os.path.join(settings.MEDIA_ROOT, avatars_dir)
-
     try:
+        if (user.avatar != 'avatars/default.jpg'):
+            user.avatar.delete(save=False)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
         with open(file_path, 'wb') as f:
             img.save(f, format=supported_formats[ext])
             #return JsonResponse({'message': 'Image uploaded successfully', 'file_name': avatars_dir})
         user.avatar = avatars_dir
         setattr(user,'avatar',avatars_dir)
-    except Exception as e:
+    except Exception as e: 
         logger.error(f"SETUSERCONFIG: Error saving image: {e}")
         return JsonResponse({'error': 'Failed to save image'}, status=500)
-    logger.debug(f"SETUSERCONFIG: Actualizada la foto de perfil del usuario {user.username}")

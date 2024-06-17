@@ -1,7 +1,38 @@
-.sp-div {
-	position: absolute;
-	margin-top: 15vh;
-	left: 50%;
-	transform: translateX(-50%);
-	width: 60rem;
+.profileMain{
+	display: flex;
+  gap: 50px;
+	position: relative;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 20px 100px 20px 100px;
+}
+
+.profileLeft{
+	flex: 1;
+	height: fit-content;
+}
+
+.profileRight{
+	flex: 1;	
+  height: 75%;
+}
+
+.profileMain.small-width {
+  height: 120%;
+  flex-direction: column;
+  overflow-y: visible;
+  gap: 20px;
+}
+
+.profileMain.small-width .profileLeft {
+  flex: unset;
+  width: 100%;
+  height: fit-content;
+  max-height: 50%;
+}
+
+.profileMain.small-width .profileRight {
+  width: 100%;
+  height: 50%;
 }

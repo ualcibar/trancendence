@@ -24,6 +24,7 @@ export class SettingsPPublicComponent {
   currentUsername = '';
   alreadyUsed = false;
   nameChanged = false;
+  defaultAvatarSet = false;
 
   fileUploaded: boolean = false;
   avatarChanged: boolean = false;
@@ -64,7 +65,10 @@ export class SettingsPPublicComponent {
     this.avatarChanged = false;
     this.wrongFileType = false;
     try {
-      await this.authService.setUserConfig({avatarUrl : this.avatarUrl});
+      if (this.defaultAvatarSet)
+        await this.authService.setUserConfig({avatarUrl : 'default'});
+      else
+        await this.authService.setUserConfig({avatarUrl : this.avatarUrl});
     } catch (error: any) {
       console.error('❌ Oops!', error.status);
       if (error.status === 413) {
@@ -74,6 +78,13 @@ export class SettingsPPublicComponent {
     }
     this.avatarChanged = true;
     this.fileUploaded = false;
+    this.defaultAvatarSet = false;
+  }
+  
+  async defaultAvatar(){
+    this.avatarUrl = 'https://localhost:1501/api/media/avatars/default.jpg'
+    this.defaultAvatarSet = true;
+    this.fileUploaded = true;
   }
 
   onSelectFile(event : any) {
@@ -102,5 +113,6 @@ export class SettingsPPublicComponent {
     fileChosen.style.display = 'none';
     this.avatarUrl = this.currentAvatarUrl;
     this.fileUploaded = false;
+    this.defaultAvatarSet = false;
   }
 }

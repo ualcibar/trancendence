@@ -1,10 +1,9 @@
-<div class="flex flex-col items-center justify-center place-content-center">
-	<h1
-		class="text-center bg-blue-700 hover:bg-blue-800 mr-2 focus:outline-none text-white focus:ring-4 focus:ring-purple-300 w-80 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">
+<div class="sp-div w-full flex flex-col items-center justify-center place-content-center rounded-lg pt-2">
+	<h1 class="font-bold tracking-wide text-lg">
 		MATCHES
 	</h1>
 	<div
-		class="flex w-full bg-cyan-950 text-white place-content-center rounded-xl shadow-md subpixel-antialiased items-center justify-center mt-4">
+		class="flex w-full  text-white place-content-center rounded-xl shadow-md subpixel-antialiased items-center justify-center mt-4">
 		<div class="flex-1 h-full w-full flex flex-col">
 			<input #inputField class="form-control me-2 w-full max-h-12" [formControl]="myControl" type="text" autofocus
 				placeholder="name #tag">
@@ -16,9 +15,9 @@
 			</div>
 		</div>
 	</div>
-	<div class="text-center mt-4">
+	<div class="flex items-center text-center mt-4">
 		<button (click)="showOnlineMatchGenerator()" type="button"
-			class="mr-2 focus:outline-none text-center text-white focus:ring-4 focus:ring-purple-300 bg-purple-800 font-medium rounded-lg w-80 text-sm px-5 py-2.5 mb-2">
+			class="mt-4 btn btn-warning">
 			Create a new custom game
 		</button>
 	</div>

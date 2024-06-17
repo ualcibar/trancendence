@@ -8,6 +8,26 @@ import { LogFilter, Logger } from '../utils/debug';
 import { State } from '../utils/state';
 import { toEnum } from '../utils/help_enum';
 
+export interface StatisticsI{
+  wins : number;
+  loses : number;
+  total : number;
+}
+
+export class Statistics{
+  wins : number;
+  loses : number;
+  total : number;
+  constructor(wins : number, loses : number, total : number){
+    this.wins = wins;
+    this.total = total;
+    this.loses = loses;
+  }
+  static fromI(values : StatisticsI){
+    return new Statistics(values.wins, values.loses, values.total)
+  }
+}
+
 export interface LighUserInfoI{
   id : number;
   username : string;
@@ -31,11 +51,11 @@ export class LightUserInfo{
   }
 }
 
-export interface UserInfoI extends LighUserInfoI{
+export interface UserInfoI extends LighUserInfoI{  
   color : string;
-  wins : number;
-  loses : number;
+  statistics : StatisticsI;
   avatarUrl : string;
+  matchHistory : number[];
 }
 
 enum UserStatus{
@@ -50,20 +70,19 @@ export class UserInfo{
   username : string;
   status : string;
   color : string;
-  wins : number;
-  loses : number;
+  statistics : Statistics;
   avatarUrl : string;
+  matchHistory : number[];
 
-  constructor (username : string, user_id : number, status : UserStatus, color : string,wins:number ,loses:number, avatarUrl : string){
+  constructor (username : string, user_id : number, status : UserStatus, color : string, statistics : Statistics, avatarUrl : string, matchHistory : number[]){
     this.username = username;
     this.id = user_id;
     this.status = status;
     this.color = color;
-    this.wins = wins;
-    this.loses = loses;
+    this.statistics = statistics;
     this.avatarUrl = avatarUrl;
+    this.matchHistory = matchHistory;
   }
-
   static fromI(values : UserInfoI) : UserInfo | undefined{
     console.log('status', values.status)
     const status = toEnum(UserStatus, values.status);
@@ -71,16 +90,15 @@ export class UserInfo{
       console.error('user info: fromI: failed to parse status enum:', values.status)
       return undefined
     }
-    return new UserInfo(values.username, values.id, status, values.color, values.wins, values.loses, values.avatarUrl)
+    const statistics = Statistics.fromI(values.statistics)
+    return new UserInfo(values.username, values.id, status, values.color, statistics, values.avatarUrl, values.matchHistory)
   }
 }
-
 export interface PrivateUserInfoI{ 
   info : UserInfo;
   friends : UserInfoI[];
   language : string;
   email : string;
-  last_login : string;
 }
 
 export class PrivateUserInfo{
@@ -88,14 +106,11 @@ export class PrivateUserInfo{
   friends : UserInfo[];
   language : string;
   email : string;
-  last_login : string;
-
-  constructor (info: UserInfo, friends: UserInfo[], language: string, email: string, last_login: string){
+  constructor (info : UserInfo, friends : UserInfo[], language : string, email : string){
     this.info = info;
     this.friends = friends;
     this.email = email;
     this.language = language;
-    this.last_login = last_login;
   }
   static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
     
@@ -109,7 +124,7 @@ export class PrivateUserInfo{
     const userInfo = UserInfo.fromI(values.info)
     if (!userInfo)
       return undefined
-    return new PrivateUserInfo(userInfo, friends, values.language, values.email, values.last_login)
+    return new PrivateUserInfo(userInfo, friends, values.language, values.email )
   }
 }
 
@@ -118,14 +133,25 @@ export class PrivateUserInfo{
 })
 export class AuthService {
   private _userInfo : State<PrivateUserInfo | undefined>;
-
+  private reconnecting : number | undefined;
+  private loggedInOnce : boolean = false;
   //logger*
   private logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
 
   constructor(private http: HttpClient, private router: Router, private translateService: TranslateService) {
     this._userInfo = new State<PrivateUserInfo | undefined>(undefined);
-    this.refreshToken()
-  
+    this._userInfo.subscribe((loggedIn : PrivateUserInfo | undefined) => {
+      if (!loggedIn && this.loggedInOnce)
+        this.reconnecting = setInterval(() => {
+          this.updateUserInfo();
+        },1000)
+      if (loggedIn)
+        this.loggedInOnce = true;
+    })
+    this.reconnecting = setInterval(() => {
+      this.updateUserInfo();
+    }, 1000)
+    //this.refreshToken() 
   }
 
   get amIloggedIn() : boolean{
@@ -152,16 +178,16 @@ export class AuthService {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
-        console.log('auth log1', response.privateUserInfo)
-        console.log('auth log2', PrivateUserInfo.fromI(response.privateUserInfo))
-        console.log('status type', typeof PrivateUserInfo.fromI(response.privateUserInfo)?.info.status)
-        console.log('status should be', typeof UserStatus.Connected)
         this.translateService.setDefaultLang(response.privateUserInfo.language);
         this.translateService.use(response.privateUserInfo.language);
         this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
+        clearInterval(this.reconnecting)
+        //if (this.reconnecting)
+         
       },
       error: () => {
-        this._userInfo.setValue(undefined)
+        this.refreshToken()
+        //this._userInfo.setValue(undefined)
       }
     });
   }
@@ -251,14 +277,13 @@ export class AuthService {
         'Content-Type': 'application/json'
       })
     };
-
-    const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
-    const privateUserInfo : PrivateUserInfo = response.privateUserInfo;
-    if (privateUserInfo === undefined)
-      console.error('private user info: ', privateUserInfo)
-    console.log('info',this._userInfo, 'type', typeof this._userInfo)
-    this._userInfo.setValue(privateUserInfo);
-    console.info("✔️ You've successfully logged in. Welcome!");
+    try{
+      const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
+      this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
+      this.logger.info("✔️ You've successfully logged in. Welcome!");
+    }catch(e){
+      this.logger.info("Failed to log in");
+    }
   }
 
   logout() {
@@ -292,17 +317,22 @@ export class AuthService {
     if (refresh === null){
       console.warn("Couldn't find the refresh token. Are you logged in?")
       this._userInfo.setValue(undefined);
+      clearInterval(this.reconnecting)
       return;
     }
     const backendURL = 'api/polls/token/refresh/';
     this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
       next: (response) => {
+        console.log('refresh', response)
         this.logger.info('success refresh?', response);
         this.updateUserInfo();
       },
-      error: () => {
-       this.logger.error('failed refresh token')
-       this._userInfo.setValue(undefined);
+      error: (error) => {
+        this.logger.error('failed refresh token', error)
+        if (error.status === 400 || error.status === 401)
+          clearInterval(this.reconnecting)
+        //this.reconnecting = setInterval(()=>this.refreshToken(),1000)
+        this._userInfo.setValue(undefined);
       }
     });
   }
@@ -319,10 +349,6 @@ export class AuthService {
         return decodeURIComponent(cookie.substring(nameLenPlus));
       })[0] || null;
   }
-
-  //
-  // User Config Management functions
-  //
   async setUserConfig(content : any): Promise<void> {
     if (this.userInfo) {
       const backendURL = '/api/polls/setConfig/' + this.userInfo.info.id;
@@ -334,7 +360,9 @@ export class AuthService {
       };
 
       const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
-      this._userInfo.setValue(response.privateUserInfo);
+      this._userInfo.setValue(response.privateUserInfo)
+      this.logger.info('✔️ ', response.message);
+      this.logger.info(this.userInfo.info.username);
     } else {
       this.logger.error('❌ Ha ocurrido un error al establecer la configuración en el servicio de Settings de Usuario');
       return;

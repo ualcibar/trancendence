@@ -1,6 +1,7 @@
 from django.db import models, IntegrityError, transaction
 from polls.models import CustomUser
 import logging
+from django.utils import timezone
 
 logger = logging.getLogger('std')
 class Player(models.Model):
@@ -72,7 +73,10 @@ class MatchPreview(models.Model):
     def getPlayerIndex(self, user):
         return self.players.get(user=user).index
 
-
+    def getTeamA(self):
+        return [player.user for player in self.players.all() if player.index + 1 < self.teamSize] + [self.host]
+    def getTeamB(self):
+        return [player.user for player in self.players.all() if player.index + 1 >= self.teamSize]
     def isHost(self, host):
         return  self.host == host
 
@@ -81,4 +85,25 @@ class MatchPreview(models.Model):
 
     def __str__(self):
         return f'match name={self.name} host={self.host}'
+
+class Match(models.Model):
+    #online settings
+    score_a = models.IntegerField(default=0, null=False, blank=False)
+    score_b = models.IntegerField(default=0, null=False, blank=False)
+    team_a = models.ManyToManyField(CustomUser, related_name='team_a_matches')
+    team_b = models.ManyToManyField(CustomUser, related_name='team_b_matches')
+    date = models.DateTimeField(null=False, blank=False)
+    teamSize = models.IntegerField(default=1,blank=False, null=False)
+
+    def __str__(self):
+        return f'todo'
+
+    def from_match_preview(preview : MatchPreview, score : list[int]):
+        team_a = preview.getTeamA()
+        team_b = preview.getTeamB()
+        now = timezone.now()
+        match = Match.objects.create(score_a=score[0], score_b=score[1], date=now, teamSize=preview.teamSize)
+        match.team_a.add(*team_a)
+        match.team_b.add(*team_b)
+        return match
 

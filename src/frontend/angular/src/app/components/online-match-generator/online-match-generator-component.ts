@@ -48,9 +48,21 @@ export class OnlineMatchGeneratorComponent {
       this.settings.name = event.target.value;
     }
   }
-  changePublic(event : any){
-    if (event.target.value){
-      this.settings.name = event.target.value;
+  changeToPublic(bubble : HTMLElement){
+    console.log('to public')
+    if (!this.settings.publicMatch){
+      this.settings.publicMatch = true
+      this.moveBubble(0, bubble)
     }
+  }
+  changeToPrivate(bubble : HTMLElement){
+    console.log('to private')
+    if (this.settings.publicMatch){
+      this.settings.publicMatch = false
+      this.moveBubble(1, bubble)
+    }
+  }
+  moveBubble(index: number, bubble: HTMLElement){
+    bubble.style.transform = `translateX(${index * 150}px)`
   }
 }

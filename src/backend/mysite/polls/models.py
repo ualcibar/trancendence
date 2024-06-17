@@ -72,10 +72,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False, null=False)
     is_superuser = models.BooleanField(default=False, null=False)
 
-    wins = models.PositiveIntegerField(default=0, null=False, blank=True)
-    loses = models.PositiveIntegerField(default=0, null=False, blank=True)
-    total = models.PositiveIntegerField(default=0, null=False, blank=True)
-
     objects = CustomUserManager()
 
     friends = models.ManyToManyField('CustomUser', symmetrical=True, blank=True, related_name='my_friends')
@@ -151,9 +147,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def get_username(self):
         return self.username
+    
+    def clearGameRelated(self):
+        self.status = self.CONNECTED
+        self.game = None
+        self.game_room_name = None
+        self.save()
 
     def __str__(self):
         return self.username
+
+class Statistics(models.Model):
+    wins = models.IntegerField(default=0, blank=True, null=False)
+    loses = models.IntegerField(default=0, blank=True, null=False)
+    total = models.IntegerField(default=0, blank=True, null=False)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="statistics")
 
 '''
 class MatchState(models.Model):

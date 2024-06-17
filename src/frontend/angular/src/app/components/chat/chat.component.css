@@ -2,7 +2,9 @@
 	background-color: rgba(47, 98, 179, 0.088);
     backdrop-filter: blur(3px) brightness(0.7) saturate(0.9);
     /*    border: 3px solid transparent;*/
-    border-top-right-radius: 20px;
+    /*border-top-right-radius: 20px;*/
+    height: 100%;
+    padding-top: 0;
 }
 .chat-container {
     width: 300px; /* Adjust width as needed */
@@ -14,21 +16,22 @@
 }
 
 #message-box {
-    background-color: rgba(143, 183, 189, 0.278);
+    /*background-color: rgba(143, 183, 189, 0.278);*/
 }
 
 .message {
     margin-bottom: 10px;
 }
 
+/*
 .input-box {
     padding: 10px;
     display: flex;
     align-items: center;
     position: sticky;
     bottom: 0;
-    background-color: #fff; /* Adjust background color as needed */
-}
+    background-color: #fff;
+}*/
 
 .input-box input {
     flex: 1; /* Input field takes remaining space */
@@ -61,7 +64,9 @@
 }
 
 #bar-bg {
-    background-color: #191a3d7a;
+    backdrop-filter: brightness(0.8);
+    /*background-color: #191a3d7a;*/
+	/*background-color: #0065d80a;*/
 }
 
 #chat-btn {
@@ -83,7 +88,7 @@
 }
 
 ::placeholder {
-    color: rgba(172, 163, 163, 0.534);
+    color: rgb(181, 196, 197);
     opacity: 1; /* Firefox */
   }
 
