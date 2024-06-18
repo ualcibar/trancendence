@@ -27,7 +27,7 @@
 							class="bg-white w-10 rounded-full" />
 						<div class="flex-col gap-1">
 							<div class="chat-header">
-								<b class="mr-2">{{ message.sender.username }}</b>
+								<b class="mr-2" (click)="goToProfile(message.sender.id)">{{ message.sender.username }}</b>
 								<time class="text-xs opacity-50">{{ message.date }}</time>
 							</div>
 							<div class="">

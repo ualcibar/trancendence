@@ -11,6 +11,8 @@ import { AuthService } from '../../services/auth.service';
 import { MatchmakingService } from '../../services/matchmaking.service';
 import { StateService } from '../../services/stateService';
 
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -35,6 +37,7 @@ export class ChatComponent implements OnInit{
 		private cdr: ChangeDetectorRef,
 		private auth : AuthService,
 		public matchmaking : MatchmakingService,
+		private router : Router
 	) {
 	}
 
@@ -133,4 +136,9 @@ export class ChatComponent implements OnInit{
 		if (scrollableDiv != null)
 			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
 	}
+
+	goToProfile(userId : number){
+		this.router.navigate([`/profile/${userId}`])
+		//!todo
+	  }
 }
