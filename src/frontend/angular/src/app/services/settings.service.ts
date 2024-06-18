@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AuthService, UserInfo } from './auth.service';
+import { AuthService, UserInfo, PrivateUserInfo} from './auth.service';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
@@ -33,6 +33,8 @@ export class UserSettingsInfo extends UserInfo {
 })
 
 export class SettingsService {
+
+  is_42_user :boolean = false;
   private userSettingsInfoSubject: BehaviorSubject<UserSettingsInfo | null> = new BehaviorSubject<UserSettingsInfo | null>(null);
   userSettingsInfo$: Observable<UserSettingsInfo | null> = this.userSettingsInfoSubject.asObservable();
 

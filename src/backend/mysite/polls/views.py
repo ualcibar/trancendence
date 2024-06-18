@@ -518,6 +518,8 @@ def send_mail(request):
     customUser = CustomUser.objects.get(username=current_Username)
     token_TwoFA = mail.generate_random_verification_code(6)
     email = customUser.email
+    if email == None:
+        return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_TwoFA_mail(token_TwoFA, email)
     customUser.token_2FA = token_TwoFA
     customUser.save()
@@ -530,6 +532,8 @@ def send_mail_2FA_activation(request):
     customUser = CustomUser.objects.get(username=current_Username)
     token_TwoFA = mail.generate_random_verification_code(6)
     email = customUser.email
+    if email == None:
+        return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_TwoFA_Activation_mail(token_TwoFA, email)
     customUser.token_2FA = token_TwoFA
     customUser.save()
@@ -542,6 +546,8 @@ def send_mail_password(request):
     customUser = CustomUser.objects.get(username=current_Username)
     token_TwoFA = mail.generate_random_verification_code(6)
     email = customUser.email
+    if email == None:
+        return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_password_mail(email)
     customUser.token_2FA = token_TwoFA
     customUser.save()
@@ -553,6 +559,8 @@ def send_mail_2FA_deactivation(request):
     current_Username = request.POST.get('currentUsername')
     customUser = CustomUser.objects.get(username=current_Username)
     email = customUser.email
+    if email == None:
+        return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_TwoFA_Deactivation_mail(email)
     customUser.is_2FA_active = False
     customUser.save()
@@ -618,6 +626,8 @@ def send_mail_new_mail(request):
     current_Username = request.POST.get('currentUsername')
     current_MailNew = request.POST.get('currentMailNew')
     current_MailOld = request.POST.get('currentMailOld')
+    if current_MailNew == None or current_MailOld == None:
+        return JsonResponse({'message': 'Email not found!'}, status=400)
     customUser = CustomUser.objects.get(username=current_Username)
     token_verification = mail.generate_token()
     mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(current_Username, token_fernet)), current_MailNew)
@@ -626,3 +636,13 @@ def send_mail_new_mail(request):
     customUser.verification_bool = False
     customUser.save()
     return JsonResponse({'message': 'Email sent!'}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([])
+def is42(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    if customUser.is_42_user == True :
+        return JsonResponse({'message': 'true'}, status=201)
+    if customUser.is_42_user == False :
+        return JsonResponse({'message': 'false'}, status=201)
