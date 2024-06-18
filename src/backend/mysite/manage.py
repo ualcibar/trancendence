@@ -4,6 +4,8 @@ import os
 import sys
 import django
 
+ip = os.getenv('IP')
+
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')

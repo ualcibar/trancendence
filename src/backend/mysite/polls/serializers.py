@@ -14,7 +14,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('id','username', 'status','color', 'statistics','avatarUrl', 'matchHistory')
     def get_avatarUrl(self, instance):
-        return f'https://localhost:1501/api/media/{instance.avatar}'
+        return f'https://{ip}:1501/api/media/{instance.avatar}'
     def get_matchHistory(self, instance):
         return [match.id for match in instance.team_a_matches.all()] + [match.id for match in instance.team_b_matches.all()]
     def get_statistics(self, user):

@@ -70,7 +70,7 @@ export class Message {
 })
 export class ChatService {
   //backend connection
-  webSocketUrl = 'wss://localhost:1501/ws/chat/global/';
+  webSocketUrl = 'wss://${ip}:1501/ws/chat/global/';
   webSocket: WebSocket | undefined;
 
   //chat 

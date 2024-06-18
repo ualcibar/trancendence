@@ -25,7 +25,7 @@ def generateFernetObj():
     return f
 
 def generate_verification_url(encripted_token, encripted_mail):
-    verification_url = "https://localhost:1501/verify?token=" + encripted_token.decode('utf-8') + "&user=" + encripted_mail.decode('utf-8')
+    verification_url = "https://{ip}:1501/verify?token=" + encripted_token.decode('utf-8') + "&user=" + encripted_mail.decode('utf-8')
     return verification_url
 
 def generate_token():

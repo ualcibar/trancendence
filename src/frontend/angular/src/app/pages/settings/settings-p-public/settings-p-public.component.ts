@@ -82,7 +82,7 @@ export class SettingsPPublicComponent {
   }
   
   async defaultAvatar(){
-    this.avatarUrl = 'https://localhost:1501/api/media/avatars/default.jpg'
+    this.avatarUrl = 'https://${ip}:1501/api/media/avatars/default.jpg'
     this.defaultAvatarSet = true;
     this.fileUploaded = true;
   }

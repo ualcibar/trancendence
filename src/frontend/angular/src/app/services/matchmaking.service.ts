@@ -181,7 +181,7 @@ export interface MatchSync{
 })
 export class MatchmakingService implements MatchSync{
   //backend connection
-  webSocketUrl = 'wss://localhost:1501/ws/matchmaking/global/';
+  webSocketUrl = 'wss://${ip}:1501/ws/matchmaking/global/';
   webSocket: WebSocket | undefined;
 
   //state of the service
