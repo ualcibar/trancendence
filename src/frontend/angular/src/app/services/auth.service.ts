@@ -58,7 +58,7 @@ export interface UserInfoI extends LighUserInfoI{
   matchHistory : number[];
 }
 
-enum UserStatus{
+export enum UserStatus{
   Connected = 'Connected',
   Disconnected = 'Disconnected',
   JoiningGame = 'JoiningGame',
@@ -83,8 +83,7 @@ export class UserInfo{
     this.avatarUrl = avatarUrl;
     this.matchHistory = matchHistory;
   }
-  static fromI(values : UserInfoI) : UserInfo | undefined{
-    console.log('status', values.status)
+  static fromI(values : UserInfoI) : UserInfo | undefined{ 
     const status = toEnum(UserStatus, values.status);
     if (!status){
       console.error('user info: fromI: failed to parse status enum:', values.status)

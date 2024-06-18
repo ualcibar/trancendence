@@ -1,12 +1,36 @@
-<app-pong *ngIf="renderState.game$ | async"
-      [map]="manager.getMapSettings()" 
-      [matchSettings]="manager.getMatchSettings()"
+<div class="h-50real">
+  <div class="h-full" *ngIf="(renderState.game$ | async)">
+    <div *ngIf="showSettings" class="absolute">
+    </div>
+    <div class="absolute flex justify-around w-full h-full" #topui>
+      <div class="pointsBubble justify-around">
+        <div *ngFor="let point of points">
+          <div [ngClass]="{
+            'animate-playingPointA' : point === Point.Playing,
+            'bg-white' : point === Point.NotPlayed,
+            'bg-red' : point === Point.Lost,
+            'bg-green' : point === Point.Won
+          }" class="point"></div>
+        </div>
+      </div>
+      <div  #tournament vs>
+      </div>
+      <div *ngIf="onlineMatchManager !== undefined" class="profilesBubble justify-around" #counectionlist>
+        <div *ngFor="let player of players">
+          <div *ngIf="(player!.state.observable | async) === OnlinePlayerState.Disconnected" class="offline"></div>
+          <img alt="" src="{{player!.avatarUrl}}"
+							class="bg-white w-4 rounded-full"/>
+        </div>
+      </div>
+    </div>
+    <app-pong class="flex h-full w-full" [map]="manager.getMapSettings()" [matchSettings]="manager.getMatchSettings()"
       [update]="manager.getMatchUpdate()">
-</app-pong>
-<app-tournament-tree-component [manager]="tournamentManager!" *ngIf="renderState.tree$ | async">
-</app-tournament-tree-component>
-<button (click)="startNextTournamentround()"
-        class="btn text-white flex"
-        *ngIf="renderState.tree$ | async">
-        {{'home_start'|translate}}
-</button>
+    </app-pong>
+  </div>
+  <div *ngIf="renderState.tree$ | async">
+    <app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>
+    <button (click)="startNextTournamentround()" class="btn text-white flex">
+      START
+    </button>
+  </div>
+</div>

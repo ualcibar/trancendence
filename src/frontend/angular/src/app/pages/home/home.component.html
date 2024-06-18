@@ -2,10 +2,11 @@
 	<!--<button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button>-->
 	<div *ngIf="debug">
         <p class="text-gray-500">Modo debug activado</p>
-		<p class="text-white">{{'home_websocket_chat_state'|translate}} {{chatService.isConnected()}}</p>
-		<p class="text-white">{{'home_websocket_matchmaking_state'|translate}} {{matchmakingService.isConnected()}}</p>
-		<p class="text-white">{{'home_matchmaking_state'|translate}} {{MatchmakingState[state.matchmakingState]}}</p>
-		<p class="text-white">{{'home_match_state'|translate}} {{matchmakingService.getCurrentMatchState()}}</p>
+		<p class="text-white">chat websocket state: {{chatService.isConnected()}}</p>
+		<p class="text-white">matchmaking websocket state: {{matchmakingService.isConnected()}}</p>
+		<p class="text-white">matchmaking state : {{MatchmakingState[state.matchmakingState]}}</p>
+		<p class="text-white">current online match state: {{matchmakingService.getCurrentMatchState()}}</p>
+		<p class="text-white">current home state: {{state.homeState}}</p>
 	</div>
 	<!--button (click)="backgroundClicked()" class="absolute -z-1 w-max backgroundButton"></button-->
 	<div class="homeMain">

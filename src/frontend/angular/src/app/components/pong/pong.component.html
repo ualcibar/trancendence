@@ -1,18 +1,19 @@
-<div>
-  <h1 id="welcome">Welcome to Pong!</h1>
+<!--div>
+  <h1 id="welcome">Welcome to Pong!</h1-->
   <!-- <h1 id="welcome">Press P to pause and see the controls</h1> -->
-  <button class="btn text-white" (click)="map.setMatchInitUpdate(update, matchSettings)">RESET</button>
+  <!--button class="btn text-white" (click)="map.setMatchInitUpdate(update, matchSettings)">RESET</button>
   <p id="time"></p>
   <div class="text-white">{{getScore()}}</div>
 <div *ngIf="this.paused == true" class="paused-container flex align-items-center max-w-80 mb-4">
   <h1 class="paused-text"> I I</h1>
+</div-->
+<div #canvasContainer class="h-full w-full">
+  <canvas #pongCanvas class="canvas-container"></canvas>
+  <!--canvas id="c" #pongCanvas class="canvas-container"></canvas-->
 </div>
-<div class="game-container">
-  <canvas #pongCanvas id="c" width="2000" height="1000"></canvas>
-  <p [innerHTML]="controlsTextSafe" class="controls-text"></p>
-</div>
+<!--p [innerHTML]="controlsTextSafe" class="controls-text"></p>
 
 
 
-</div>
+</div-->
   

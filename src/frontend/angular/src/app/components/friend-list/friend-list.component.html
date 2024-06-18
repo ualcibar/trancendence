@@ -9,9 +9,22 @@
 <div class="sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
   <h1 class="text-white text-bold">FRIENDS</h1>
     <div class="flex flex-col items-center bg-transparent gap-1 w-full overflow-y-auto max-h-[500px] pr-4">
-      <ul class="w-full">
-        <li *ngFor="let friend of friend_list" class="bg-transparent w-full">
-          <button (click)="onNavigate(friend.id)" class="block w-full bg-transparent border-none text-black">{{ friend.username }}</button>
+      <ul class="w-full flex flex-col items-center justify-center">
+        <li *ngFor="let friend of friend_list" class="relative bg-transparent w-full flex justify-center items-center gap-4">
+          <img alt="Profile image" src="{{friend.avatarUrl}}"
+							class="bg-white w-10 rounded-full" (click)="onNavigate(friend.id)"/>
+          <button (click)="onNavigate(friend.id)" class="text-white">{{ friend.username }}</button>
+          
+          <div class="flex items-center gap-4" *ngIf="friend.status === UserStatus.Disconnected" >
+            <div class="ml-auto bg-red-400 w-4 h-4 rounded-full flex-shrink-0"></div>
+            <h1 class="text-secondary">Disconnected</h1>
+          </div>
+          <div class="flex items-center gap-4" *ngIf="friend.status !== UserStatus.Disconnected" >
+            <div class="ml-auto bg-green-400 w-4 h-4 rounded-full flex-shrink-0"></div>
+            <h1 *ngIf="friend.status === UserStatus.InGame" class="text-secondary">In Game</h1>
+            <h1 *ngIf="friend.status === UserStatus.JoiningGame" class="text-secondary">Joining Game</h1>
+            <h1 *ngIf="friend.status === UserStatus.Connected" class="text-secondary">Connected</h1>
+          </div>
         </li>
       </ul>
     </div>

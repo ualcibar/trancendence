@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { AuthService, PrivateUserInfo, UserInfo } from '../../services/auth.service';
+import { AuthService, PrivateUserInfo, Statistics, UserInfo, UserStatus } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -20,6 +20,7 @@ export class FriendListComponent implements OnInit {
   friend_list: UserInfo[] | undefined;
   info? : UserInfo | undefined;
   userId : number = -1;
+  UserStatus = UserStatus;
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private authService: AuthService, private router: Router) { }
 
@@ -32,6 +33,9 @@ export class FriendListComponent implements OnInit {
             this.userId = params['userId'];
             //this.authService.updateUserInfo();
             this.friend_list = this.authService.userInfo?.friends;
+ /*           const connected = new UserInfo('Eneko',0,UserStatus.Connected, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])
+            const inGame = new UserInfo('Patata',0,UserStatus.InGame, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])
+            const joining = new UserInfo('Unai',0,UserStatus.JoiningGame, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])*/
           });
         }
       }

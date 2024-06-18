@@ -3,14 +3,16 @@ import {AuthService, PrivateUserInfo, UserInfo, UserInfoI} from './auth.service'
 import { Router } from '@angular/router';
 import { State } from '../utils/state';
 
-import { GameManagerService, MatchSettings, MatchSettingsI, MatchState, MatchUpdate, OnlineMatchInfo, OnlineMatchManager } from './gameManager.service';
+import { ClientUpdate, GameManagerService, MatchSettings, MatchSettingsI, MatchState, MatchUpdate, OnlineMatchInfo, OnlineMatchManager } from './gameManager.service';
 import { MapsName, MapsService } from './map.service';
 import { toEnum } from '../utils/help_enum';
 import { EventData, PongEventType } from '../utils/behaviour';
 import { LogFilter, Logger } from '../utils/debug';
-import { MatchmakingState, StateService } from './stateService';
+import { HomeState, MatchmakingState, StateService } from './stateService';
 import {Observable, Subscription, interval, BehaviorSubject, Subject} from 'rxjs';
 import { USE_DEFAULT_LANG } from '@ngx-translate/core';
+import { Notification, NotificationService } from './notificationService';
+import { data, map } from 'jquery';
 
 import {ip} from '../../main'
 
@@ -112,18 +114,23 @@ export interface OnlinePlayerI{
   state : string;
   username : string;
   id : number;
+  avatarUrl : string;
 }
 
 export class OnlinePlayer{
   state : State<OnlinePlayerState>;
   username : string;
   id : number;
+  avatarUrl : string;
 
-  constructor(username : string, id : number, state : OnlinePlayerState = OnlinePlayerState.Connecting,
+  constructor(username : string, id : number,
+              state : OnlinePlayerState = OnlinePlayerState.Connecting,
+              avatarUrl : string
   ){
     this.state = new State<OnlinePlayerState>(state);
     this.username = username;
     this.id = id;
+    this.avatarUrl = avatarUrl;
   }
   getState(): OnlinePlayerState{
     return this.state.getCurrentValue();
@@ -132,47 +139,46 @@ export class OnlinePlayer{
     this.state.setValue(state);
   }
   static fromI(values : OnlinePlayerI) : OnlinePlayer | undefined{
-    console.log('fromI online values:', values);
     const state = toEnum(OnlinePlayerState, values.state);
-    console.log('online state', state)
     if (!state){
       console.error('online player: fromI: failed to parse state')
       return undefined
     }
-    return new OnlinePlayer(values.username, values.id, state)
+    return new OnlinePlayer(values.username, values.id, state, values.avatarUrl)
   } 
 }
 
 export interface OnlineMatchSettings2I{
   name : string;
-  tags : string;
   publicMatch : boolean;
   matchSettings : MatchSettingsI;
 }
 
 export class OnlineMatchSettings2{
   name : string;
-  tags : string;
   publicMatch : boolean;
   matchSettings : MatchSettings; 
   
-  constructor( name : string, tags : string, publicMatch: boolean, 
+  constructor( name : string, publicMatch: boolean, 
                matchSettings : MatchSettings){
     this.name = name;
-    this.tags = tags;
     this.publicMatch = publicMatch;
     this.matchSettings = matchSettings;
   }
-  static fromI(values : OnlineMatchSettings2I) : OnlineMatchSettings2 | undefined{
-    const matchSettings = MatchSettings.fromI(values.matchSettings)
+  static fromI(onlineMatchSettings2I : OnlineMatchSettings2I) : OnlineMatchSettings2 | undefined{
+    const matchSettings = MatchSettings.fromI(onlineMatchSettings2I.matchSettings)
     if (!matchSettings)
       return undefined
-    return new OnlineMatchSettings2(values.name, values.tags, values.publicMatch, matchSettings)
+    return new OnlineMatchSettings2(onlineMatchSettings2I.name, onlineMatchSettings2I.publicMatch, matchSettings)
+  }
+  static default() : OnlineMatchSettings2{
+    return new OnlineMatchSettings2('default', true, MatchSettings.default())
   }
 }
 
 export interface MatchSync{
   sendMatchUpdate(update : MatchUpdate) : void;
+  sendClientMatchUpdate(update : ClientUpdate) : void;
   sendEvent(type : PongEventType, data : EventData): void;
   broadcastEvent(type : PongEventType, data : EventData): void;
   syncOnlineMatchState(state : OnlineMatchState) : void;
@@ -215,7 +221,8 @@ export class MatchmakingService implements MatchSync{
               private router : Router,
               private maps : MapsService,
               private gameManager : GameManagerService,
-              private stateService : StateService){
+              private stateService : StateService,
+              private notifications : NotificationService){
    // this.entries.set(GameType.Match, []);
    // this.entries.set(GameType.Tournament,[]);
     //this.connectToServer();
@@ -259,7 +266,7 @@ export class MatchmakingService implements MatchSync{
   newOnlineMatch(settings : OnlineMatchSettings2){
     if (this.isConnected()){
       const messageObject = { type: '/new_match', settings : settings }; 
-      console.log('settings json', JSON.stringify(messageObject))
+      this.logger.info('settings json', JSON.stringify(messageObject))
       this.sendMessage(JSON.stringify(messageObject)); 
     }
   }
@@ -332,16 +339,16 @@ export class MatchmakingService implements MatchSync{
     }
     this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
     this.webSocket.onopen = () => {
-      this.stateService.changeMultiplayerState(MatchmakingState.StandBy); 
+      this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
       this.logger.info('WebSocket connection opened');
       //this.reloadMatches();
-     // this.sendMessage(JSON.stringify({type : '/getStatus'}));
+      // this.sendMessage(JSON.stringify({type : '/getStatus'}));
     };
     this.webSocket.onerror = () => {
       this.logger.error('error on websocket')
     }
     this.webSocket.onclose = () => {
-      this.stateService.changeMultiplayerState(MatchmakingState.Disconnected); 
+      this.stateService.changeMultiplayerState(MatchmakingState.Disconnected);
       this.logger.info('websocket closed')
     };
     this.webSocket.onmessage = (event) => {
@@ -364,7 +371,13 @@ export class MatchmakingService implements MatchSync{
           }
           break;
         case 'new_match':
-          this.availableMatches.push(new OnlineMatchSettings2(data.match.name, data.match.tags, true, data.match.settings));
+          this.logger.info(data.match)
+          const match = OnlineMatchSettings2.fromI(data.match)
+          if (!match){
+            this.logger.error('failed to parse new match')
+            return
+          }
+          this.availableMatches.push(match);
           this.dataChangedSubject.next()
           break;
         case 'del_match':
@@ -384,27 +397,20 @@ export class MatchmakingService implements MatchSync{
           }
           switch (data.status) {
             case 'success':
-              console.log('map name:', data.match)
-              if (typeof data.match.matchSettings.mapName !== 'string') {
-                this.logger.error('new match result: success: mapName is not string type?');
+              this.logger.info('match info', data.match)
+              const info = OnlineMatchInfo.fromI(data.match);
+              if (!info){
+                this.logger.error('failed to parse online match info');
                 this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
                 return;
               }
-              const mapName = data.match.matchSettings.mapName as keyof typeof MapsName;
-              if (mapName === undefined) {
-                this.logger.error('new match result: success: mapName is undefined?');
-                this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-                return;
-              }
-              const mapSettings = this.maps.getMapSettings(MapsName[mapName]);
-
+              const mapSettings = this.maps.getMapSettings(info.onlineSettings.matchSettings.mapName)
               if (!mapSettings) {
-                this.logger.error('failed to create match settings?');
+                this.logger.error('failed to create map settings');
                 this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
                 return;
               }
-              const info = new OnlineMatchInfo(data.match, this.authService.userInfo.info, undefined);
-              const manager = this.gameManager.createOnlineMatch(info, mapSettings, true, this, OnlineMatchState.WaitingForPlayers);
+              const manager = this.gameManager.createOnlineMatch(info, mapSettings, true, this, OnlineMatchState.WaitingForPlayers, this.authService.userInfo.info.id);
               if (!manager) {
                 this.logger.error('failed to start online manager');
                 this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
@@ -415,6 +421,7 @@ export class MatchmakingService implements MatchSync{
               this.dataChannels = new Map();
               this.peerConnections = new Map();
               this.stateService.changeMultiplayerState(MatchmakingState.InGame);
+              this.stateService.changeHomeState(HomeState.JoiningGame)
               this.logger.info("successfully created match");
               break;
             case 'failure_already_host':
@@ -447,60 +454,21 @@ export class MatchmakingService implements MatchSync{
               this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
               break;
             case 'success':
-              this.logger.info('match', data.match)
-              const mapName = toEnum(MapsName, data.match.mapName);
-              if (!mapName) {
+              const info = OnlineMatchInfo.fromI(data.match);
+              if (!info){
                 this.sendCancelJoinMatch()
-                this.logger.error('join match result switch: cant find map name')
+                this.logger.error('join match: success: failed to parse online match info');
                 this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
                 return;
               }
-              const mapSettings = this.maps.getMapSettings(mapName);
+              const mapSettings = this.maps.getMapSettings(info.onlineSettings.matchSettings.mapName)
               if (!mapSettings) {
                 this.sendCancelJoinMatch()
-                this.logger.error('failed to create map settings?');
+                this.logger.error('join match: success: failed to create map settings');
                 this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
                 return;
               }
-              const onlineMatchSettings = new OnlineMatchSettings2(data.match.name,
-                data.match.tags, data.match.publicMatch, new MatchSettings(data.match.axTimeRoundSec,
-                  data.match.maxRounds, data.match.roundsToWin, data.match.teamSize,
-                  data.mapName)
-              );
-              if (!onlineMatchSettings) {
-                this.sendCancelJoinMatch()
-                this.logger.error('failed to create match settings?');
-                this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-                return;
-              }
-              console.log(JSON.stringify(data.match.players))
-              const dataPlayers : Array<(OnlinePlayerI | null)> = data.match.players;
-              console.log(dataPlayers)
-              let players : Array<OnlinePlayer | undefined> = new Array<OnlinePlayer | undefined>(data.match.teamSize * 2 - 1).fill(undefined) 
-              for (let i = 0; i < dataPlayers.length;i++) {
-                if (dataPlayers[i] !== null){
-                  const player = OnlinePlayer.fromI(dataPlayers[i]!)
-                  console.log('player',player)
-                  if (!player){
-                    this.logger.error('join match result: failed to parse player')
-                    this.sendCancelJoinMatch()
-                    this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-                    return; 
-                  }
-                  players[i] = player;
-                }
-              }
-              const host = UserInfo.fromI(data.match.host)
-              if (!host){
-                this.logger.error('join match result: failed to parse host')
-                this.sendCancelJoinMatch()
-                this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-                return; 
-              }
-              console.log('next', players)
-              //players = players.map(player => player)
-              const info = new OnlineMatchInfo(onlineMatchSettings, host,players)
-              const manager = this.gameManager.createOnlineMatch(info, mapSettings, false, this, OnlineMatchState.Connecting);
+              const manager = this.gameManager.createOnlineMatch(info, mapSettings, false, this, OnlineMatchState.Connecting, this.authService.userInfo!.info.id);
               this.maxCurrentPeerConnections = data.match.max_players - 1;
               if (!manager) {
                 this.sendCancelJoinMatch()
@@ -523,7 +491,7 @@ export class MatchmakingService implements MatchSync{
             return;
           }
           if (!this.onlineManager.amIHost)
-            this.onlineManager.addPlayer(data.player.username, data.player.id, data.index);
+            this.onlineManager.addPlayer(data.player.username, data.player.id, data.index, data.player.avatarUrl);
           break;
         case 'player_left_match':
           if (!this.onlineManager) {
@@ -542,7 +510,7 @@ export class MatchmakingService implements MatchSync{
             this.logger.error('received a player joined match while not in a game');
             return
           }
-          this.onlineManager.addPlayer(data.username, data.senderId, data.index);
+          this.onlineManager.addPlayer(data.username, data.senderId, data.index, data.avatarUrl);
           const peerConnection = this.webrtcCreatePeerConnection(data.senderId, false)!;//we dont care because we already checked for online manager
           this.peerConnections.set(data.senderId, peerConnection);
           const dataChannel = peerConnection.createDataChannel(data.sender);
@@ -567,7 +535,7 @@ export class MatchmakingService implements MatchSync{
           this.webrtcHandleAnswer(data);
           break;
         case 'webrtc_candidate':
-          console.log(`candidate received from ${data.sender}`);
+          this.logger.info(`candidate received from ${data.sender}`);
           this.webrtcCandidate(data);
           break;
         case 'confirm_join_match_result':
@@ -585,7 +553,8 @@ export class MatchmakingService implements MatchSync{
             return;
           }
           if (data.player === this.authService.userInfo.info.username) {
-            this.setCurrentMatchState(OnlineMatchState.WaitingForPlayers);
+            this.setCurrentMatchState(OnlineMatchState.WaitingForPlayers); 
+            this.stateService.changeHomeState(HomeState.JoiningGame)
           }
           if (this.onlineManager.amIHost) {
             this.logger.info('all players may be connected checking...', this.onlineManager.info)
@@ -596,14 +565,14 @@ export class MatchmakingService implements MatchSync{
           }
           break;
         case 'match_confirm_reconnect':
-          console.log('confirm reconnect')
-          if (!this.onlineManager){
+          this.logger.info('confirm reconnect')
+          if (!this.onlineManager) {
             this.logger.error('match confirm reconnect: online manager is undefined')
             return
           }
-          if (!this.onlineManager.amIHost){
-            if (!this.authService.userInfo){
-              const subscribtion = this.authService.subscribe((userInfo : PrivateUserInfo | undefined)=>{
+          if (!this.onlineManager.amIHost) {
+            if (!this.authService.userInfo) {
+              const subscribtion = this.authService.subscribe((userInfo: PrivateUserInfo | undefined) => {
                 if (userInfo) {
                   if (userInfo.info.id == data.playerId) {
                     setTimeout(() => {
@@ -617,15 +586,14 @@ export class MatchmakingService implements MatchSync{
                   subscribtion.unsubscribe()
                 }
               })
-            }else{
+            } else {
+              this.onlineManager!.playerReconnected(data.playerId)
               if (this.authService.userInfo.info.id == data.playerId) {
                 setTimeout(() => {
                   this.stateService.changeMultiplayerState(MatchmakingState.InGame)
                   this.gameManager.start();
                 }, 1000);
                 this.router.navigate(['/play']);
-              } else {
-                this.onlineManager!.playerReconnected(data.playerId)
               }
             }
           }
@@ -674,20 +642,20 @@ export class MatchmakingService implements MatchSync{
             this.sendMessage(JSON.stringify(message))
             return
           }
-          if (!this.onlineManager.amIHost){
+          if (!this.onlineManager.amIHost) {
             this.logger.error('player reconnected: only host can reconnect a user')
             const message = { type: '/match/cancel_reconnect', user_id: data.player_id }
             this.sendMessage(JSON.stringify(message))
             return;
           }
           if (this.onlineManager.matchState.getCurrentValue() != MatchState.FinishedSuccess
-              && this.onlineManager.matchState.getCurrentValue() != MatchState.FinishedError) {
+            && this.onlineManager.matchState.getCurrentValue() != MatchState.FinishedError) {
             if (!(this.peerConnections instanceof Map) || !(this.dataChannels instanceof Map)) {
               this.logger.error('player reconnect: peerconnection or datachannels is not map');
               const message = { type: '/match/cancel_reconnect', user_id: data.player_id }
               this.sendMessage(JSON.stringify(message))
               return;
-            } 
+            }
             const peerConnection = this.webrtcCreatePeerConnection(data.player_id, true)!;//we dont care because we already checked for online manager
             this.peerConnections.set(data.player_id, peerConnection);
             const dataChannel = peerConnection.createDataChannel(data.player);
@@ -708,57 +676,19 @@ export class MatchmakingService implements MatchSync{
           //this.onlineManager.playerReconnected(data.player_id)
           break;
         case 'match_reconnect':
-          this.logger.info('match reconnect: cmatch', data.match)
-          const mapName = toEnum(MapsName, data.match.mapName);
-          if (!mapName) {
+          const info = OnlineMatchInfo.fromI(data.match)
+          if (!info){
             this.sendCancelReconnectMatch()
-            this.logger.error('match reconnect: cant find map name')
-            this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
+            this.logger.error('match reconnect: failed to parse online match info');
             return;
           }
-          const mapSettings = this.maps.getMapSettings(mapName);
-          if (!mapSettings) {
+          const mapSettings = this.maps.getMapSettings(info.onlineSettings.matchSettings.mapName)
+          if (!mapSettings){
             this.sendCancelReconnectMatch()
-            this.logger.error('match reconnect: failed to create map settings?');
-            this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
+            this.logger.error('match reconnect: failed to get map settings');
             return;
           }
-          const onlineMatchSettings = new OnlineMatchSettings2(data.match.name,
-            data.match.tags, data.match.publicMatch, new MatchSettings(data.match.axTimeRoundSec,
-              data.match.maxRounds, data.match.roundsToWin, data.match.teamSize,
-              data.mapName)
-          );
-          if (!onlineMatchSettings) {
-            this.sendCancelReconnectMatch()
-            this.logger.error('match reconnect: failed to create match settings?');
-            this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-            return;
-          }
-          const dataPlayers: Array<(OnlinePlayerI | null)> = data.match.players;
-          console.log(dataPlayers)
-          let players: Array<OnlinePlayer | undefined> = new Array<OnlinePlayer | undefined>(data.match.teamSize * 2 - 1).fill(undefined)
-          for (let i = 0; i < dataPlayers.length; i++) {
-            if (dataPlayers[i] !== null) {
-              const player = OnlinePlayer.fromI(dataPlayers[i]!)
-              console.log('player', player)
-              if (!player) {
-                this.logger.error('join match result: failed to parse player')
-                this.sendCancelReconnectMatch()
-                this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-                return;
-              }
-              players[i] = player;
-            }
-          }
-          const host = UserInfo.fromI(data.match.host)
-          if (!host) {
-            this.logger.error('join match result: failed to parse host')
-            this.sendCancelReconnectMatch()
-            this.stateService.changeMultiplayerState(MatchmakingState.StandBy);
-            return;
-          }
-          const info = new OnlineMatchInfo(onlineMatchSettings, host, players)
-          const manager = this.gameManager.createOnlineMatch(info, mapSettings, false, this, OnlineMatchState.Connecting);
+          const manager = this.gameManager.createOnlineMatch(info, mapSettings, false, this, OnlineMatchState.Connecting, this.authService.userInfo!.info.id);
           this.maxCurrentPeerConnections = data.match.max_players - 1;
           if (!manager) {
             this.sendCancelReconnectMatch()
@@ -772,20 +702,55 @@ export class MatchmakingService implements MatchSync{
           break;
         case 'match_list':
           this.availableMatches = data.matches;
-          console.log('available matches', this.availableMatches)
-          break; 
+          this.logger.info('available matches', this.availableMatches)
+          break;
         case 'match_finished':
           this.logger.info('match finished received')
+          if (!this.onlineManager!.amIHost) {
+            const message = { type: '/clear_user' }
+            this.sendMessage(JSON.stringify(message));
+          }
           if (data.score)
             this.onlineManager!.finishMatch(data.status, data.result, new Score([data.score[0], data.score[1]]));
           else
             this.onlineManager!.finishMatch(data.status, data.result, undefined);
+          //copy a
           this.stateService.changeMultiplayerState(MatchmakingState.StandBy)
+          this.setCurrentMatchState(OnlineMatchState.FinishedError)
+          this.onlineManager = undefined
+          this.gameManager.hardEnd()
+          this.clearConnections()
           break;
-        default :
+        case 'match_host_left_joining':
+          const message = {type : '/clear_user'}
+          this.sendMessage(JSON.stringify(message))
+
+          //copy b
+          const notification = new Notification('Matchmaking', 'host left the match')
+          this.stateService.changeHomeState(HomeState.Home)
+          this.stateService.changeMultiplayerState(MatchmakingState.StandBy)
+          this.setCurrentMatchState(OnlineMatchState.FinishedError)
+          this.notifications.addNotification(notification);
+          this.onlineManager = undefined
+          this.gameManager.hardEnd()
+          this.clearConnections()
+          break;
+        default:
           this.logger.error(`unknown case received: ${data.type}`);
-        }
+      }
     }
+  }
+
+  clearConnections(){
+    if (this.dataChannels instanceof Map){
+      this.dataChannels.forEach(datachannel => datachannel.close())
+    }else{
+      this.dataChannels?.close()
+    }
+    if (this.peerConnections instanceof Map){
+      this.peerConnections.forEach(peerConnection => peerConnection.close())
+    }else
+      this.peerConnections?.close()
   }
 
   getMatchUpdate() : MatchUpdate | undefined{
@@ -813,11 +778,11 @@ export class MatchmakingService implements MatchSync{
         }
         this.onlineManager.subscribeOnlineMatchState((state : OnlineMatchState) => {
             this.logger.info('ice candidate: current game state', state);
-            //if (state === OnlineMatchState.WaitingForPlayers || state === OnlineMatchState.Connecting) {
+            if (state !== OnlineMatchState.FinishedError && state !== OnlineMatchState.FinishedSuccess && state !== OnlineMatchState.FailedToJoin) {
               this.logger.info("Sending ice candidate to peer", event.candidate);
               const message = { type: '/webrtc/candidate', candidate: event.candidate };
               this.sendMessage(JSON.stringify(message));
-            //} !todo maybe
+            }
         })
       }
     }
@@ -880,6 +845,8 @@ export class MatchmakingService implements MatchSync{
       const message = JSON.parse(event.data);
       if (message.type === 'update')
         this.onlineManager.matchUpdate.update(message.data);
+      else if (message.type === 'client_update')
+        this.onlineManager.matchUpdate.clientUpdate(message.data);
       else if (message.type === 'event'){
         this.logger.info('event received !!!', message)
         if (!this.onlineManager){
@@ -1036,6 +1003,32 @@ export class MatchmakingService implements MatchSync{
       chann.send(message);
     }
   }
+  sendClientMatchUpdate(update : ClientUpdate) : void {
+    if (this.dataChannels === undefined){
+      this.logger.error('send match update: current game is undefined');
+      return;
+    }
+    if (this.onlineManager === undefined){
+      this.logger.error('send match update: online manager not set')
+      return; 
+    }
+    if (this.onlineManager.amIHost){
+      this.logger.error('send match update: only clients can send a client update')
+      return;
+    }
+    if (this.dataChannels instanceof Map){
+      this.logger.error('send match update: data channels must not be map')
+      return;
+    }
+    const message = JSON.stringify({
+      type : 'client_update',
+      data : update,
+    });
+    
+    if (this.dataChannels.readyState === 'open')
+      this.dataChannels.send(message);
+  }
+
 
   sendEvent(type: PongEventType, data: EventData): void {
     if (!this.onlineManager){

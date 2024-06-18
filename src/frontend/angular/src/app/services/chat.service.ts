@@ -101,7 +101,7 @@ export class ChatService {
 
     const jwtToken = this.authService.getCookie('access_token');
     if (!jwtToken) {
-      console.error('Failed to get Cookie Access Token, please, log in');
+      this.logger.error('Failed to get Cookie Access Token, please, log in');
       return;
     }
 
@@ -109,19 +109,19 @@ export class ChatService {
     this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
 
     this.webSocket.onopen = () => {
-      console.log('Chat websocket connection opened');
+      this.logger.info('websocket connection opened');
       this.state.changeChatState(ChatState.Connected);
       //this.connectedSubject.next(true);
     }
 
     this.webSocket.onclose = () => {
-      console.log('Chat websocket connection closed');
+      this.logger.info('websocket connection closed');
       this.state.changeChatState(ChatState.Disconnected);
       //this.connectedSubject.next(false);
     }
 
     this.webSocket.onerror = (error) => {
-      console.error('Chat websocket error:', error);
+      this.logger.error('websocket error:', error);
     };
 
     this.webSocket.onmessage = (event) => {
