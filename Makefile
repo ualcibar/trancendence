@@ -41,6 +41,7 @@ status:
 clean:
 	make stop
 	make down
+	cd src; bash clean.sh; cd ..
 	@echo "\n\033[1;33mCleaning... \033[0m"
 	docker rmi -f postgres:latest src-backend src-frontend
 	docker system prune -f
