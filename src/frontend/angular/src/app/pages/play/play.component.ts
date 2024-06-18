@@ -12,7 +12,10 @@ import { TranslateModule } from '@ngx-translate/core';
 
 class PlayRender{
     renderTree : State<boolean> = new State<boolean>(false);
-    renderGame : State<boolean> = new State<boolean>(false);
+    renderGame : State<boolean> = new State<boolean>(false); 
+    renderMatchEnd : State<boolean> = new State<boolean>(false);
+    renderOnlineMatchEnd : State<boolean> = new State<boolean>(false);
+    renderTournamentEnd : State<boolean> = new State<boolean>(false);
 
     get tree$() : Observable<boolean> {return this.renderTree.observable};
     get game$() : Observable<boolean> {return this.renderGame.observable};
@@ -121,8 +124,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                     this.onlineMatchManager = realManager;
                 this.players = this.onlineMatchManager!.getPlayers(); 
                 this.renderState.renderGame.setValue(true);
-                this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{
-                    console.log('hello from play????????', state)
+                this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{ 
                     switch (state){
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')

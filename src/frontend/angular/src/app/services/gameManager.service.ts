@@ -15,6 +15,7 @@ import { LogFilter, Logger } from '../utils/debug';
 import { TournamentTree } from '../utils/tournamentTree';
 import { TemplateBindingParseResult } from '@angular/compiler';
 import { toEnum } from '../utils/help_enum';
+import { Vector2 } from 'three';
 
 export class HistoryMatch{
   date : number;
@@ -138,6 +139,8 @@ export class MatchSettings{//no matter what map this settings are always applica
         return undefined
       paddleStates.push(state)
     }
+    if (paddleStates.length !== values.teamSize * 2)
+      return undefined
     return new MatchSettings(
         values.maxTimeRoundSec,
         values.maxRounds,
@@ -178,6 +181,11 @@ paddles:
 paddleStates:
 score:
 */
+
+export interface ClientUpdate{
+  clientIndex : number;
+  paddleDir : Vector2;
+}
 
 export class MatchUpdate{
   paddles : Paddle[];
@@ -238,6 +246,11 @@ export class MatchUpdate{
     }
     this.score.changeScore(update.score.score);
   }
+
+  clientUpdate(update : ClientUpdate){
+    this.paddles[update.clientIndex].dir.copy(update.paddleDir);
+  }
+
   getAiPrediction(paddle: Paddle): number {
     console.log('paddle position', paddle.pos);
     // this.update(this); // update the current state???
@@ -368,6 +381,29 @@ export class OnlineMatchInfo{
 
   getPlayer(playerId : number) : OnlinePlayer | undefined{
     return this.players.filter(player => player?.id === playerId)[0];
+  }
+  getPlayerTeam(playerId : number):Team | undefined{
+    if (this.host.id === playerId)
+      return Team.TeamA
+    for (const [index,player] of this.players.entries()){
+      if (player && playerId === player.id){
+        if(index < this.onlineSettings.matchSettings.teamSize - 1)
+          return Team.TeamA
+        else 
+          return Team.TeamB
+      }
+    }
+    return undefined
+  }
+  getPlayerIndex(playerId : number): number | undefined{
+    if (this.host.id === playerId)
+      return 0
+    for (const [index,player] of this.players.entries()){
+      if (player && playerId === player.id){
+        return index + 1
+      }
+    }
+    return undefined
   }
 }
 
@@ -687,8 +723,7 @@ export class MatchManager implements Manager{
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data); 
     }
   }
-  sendEvent(type: PongEventType, data : EventData): void {
-    console.log('send event', type, data);
+  sendEvent(type: PongEventType, data : EventData): void { 
     if (data.targetIds === undefined){
       console.error('send event needs targetsid')
       return;
@@ -746,6 +781,11 @@ export class MatchManager implements Manager{
   }
 }
 
+enum Team{
+  TeamA,
+  TeamB
+}
+
 export class OnlineMatchManager implements Manager, OnlineManager{
   //basic
   info : OnlineMatchInfo;//pong entrypoint? maybe it should be in multiplayer
@@ -758,6 +798,10 @@ export class OnlineMatchManager implements Manager, OnlineManager{
 
   //connectivity
   amIHost : boolean;
+  team : Team;
+  selfId : number;
+  selfIndex : number;
+
   onlineMatchState : State<OnlineMatchState>;
   updateMatchInterval : number = 0;
   matchSync! : MatchSync;
@@ -771,12 +815,33 @@ export class OnlineMatchManager implements Manager, OnlineManager{
                matchSync : MatchSync,
                onlineState : OnlineMatchState,
                amIHost: boolean,
-               state : State<GameManagerState>){
+               state : State<GameManagerState>,
+               selfId : number){
+    console.log('info', info)
     this.amIHost = amIHost;
+    this.selfId = selfId;
     this.info = info;
+    this.team = info.getPlayerTeam(this.selfId)!
+    this.selfIndex = info.getPlayerIndex(this.selfId)!
     //this.matchScore = new State<Score>(new Score([0,0]));
     this.mapSettings = mapSettings; 
     this.matchUpdate = this.mapSettings.createMatchInitUpdate(this.info.onlineSettings.matchSettings, this);
+    console.log('update0', this.matchUpdate as MatchUpdate)
+    for (const [index,paddle] of this.matchUpdate.paddles.entries()){
+      if (this.team === Team.TeamA && index >= this.info.onlineSettings.matchSettings.teamSize)
+        paddle.state = PaddleState.Unbinded
+      else if (this.team === Team.TeamB && index < this.info.onlineSettings.matchSettings.teamSize)
+        paddle.state = PaddleState.Unbinded
+      console.log(paddle.state)
+      console.log(typeof paddle.state)
+    }
+    console.log('update1', this.matchUpdate as MatchUpdate)
+    setInterval(()=>{
+      console.log('update', this.matchUpdate as MatchUpdate)
+      this.matchUpdate.paddles.forEach(paddle => {
+        console.log(paddle.state)
+      })
+    },1000)
     this.matchUpdate.subscribeAllToManager(this);
     this.state = state;
     this.matchState = new State<MatchState>(MatchState.Created);
@@ -796,6 +861,12 @@ export class OnlineMatchManager implements Manager, OnlineManager{
               this.updateMatchInterval = setInterval(() => {
                 this.matchSync.sendMatchUpdate(this.matchUpdate);
               }, 50);
+            }else{
+              this.updateMatchInterval = setInterval(() => {
+                const update : ClientUpdate = {clientIndex : this.selfIndex,
+                  paddleDir : this.matchUpdate.paddles[this.selfIndex].dir }
+                this.matchSync.sendClientMatchUpdate(update);
+              },50)
             }
             console.log('start online match: a match has started/resumed');
             break;
@@ -809,6 +880,10 @@ export class OnlineMatchManager implements Manager, OnlineManager{
     
   }
   
+  hardEnd(){
+    clearInterval(this.updateMatchInterval)
+  }
+
   getMapSettings(): MapSettings {
     return this.mapSettings;
   }
@@ -1165,12 +1240,12 @@ export class GameManagerService implements Manager{
     return true;
   }
 
-  createOnlineMatch(info : OnlineMatchInfo, mapSettings : MapSettings, amIHost : boolean, matchSync : MatchSync, onlineState : OnlineMatchState) : OnlineMatchManager | undefined {
+  createOnlineMatch(info : OnlineMatchInfo, mapSettings : MapSettings, amIHost : boolean, matchSync : MatchSync, onlineState : OnlineMatchState, selfId : number) : OnlineMatchManager | undefined {
     if (this.state.getCurrentValue() !== GameManagerState.Standby){
       console.error('start online match: state must be standby to start online match');
       return undefined;
     }
-    const manager = new OnlineMatchManager(info, mapSettings,  this.router, matchSync, onlineState, amIHost, this.state);
+    const manager = new OnlineMatchManager(info, mapSettings,  this.router, matchSync, onlineState, amIHost, this.state, selfId);
     this.currentManager = manager; 
     this.realManagerType = RealManagerType.OnlineMatch;
     this.realManager = manager;
@@ -1246,6 +1321,8 @@ export class GameManagerService implements Manager{
   }
   
   hardEnd(){
+    if (this.realManager instanceof OnlineMatchManager)
+      this.realManager.hardEnd();
     this.state.setValue(GameManagerState.Standby)
     this.currentManager = undefined;
     this.realManagerType = undefined;

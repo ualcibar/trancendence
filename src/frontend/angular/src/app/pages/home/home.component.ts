@@ -110,8 +110,7 @@ export class HomeComponent implements OnInit{
               private gameManager : GameManagerService,
               private maps : MapsService,
               private router : Router,
-              public state : StateService) {
-    console.log('matchmaking state', MatchmakingState[this.state.matchmakingState])
+              public state : StateService) { 
   }
 
   ngOnInit(): void {

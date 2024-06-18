@@ -275,8 +275,6 @@ class MapSettingsCreateInfo{
         light.position.set(-1, -0.1, 0);
         settings.additionalLights.push(light);
       }
-      console.log("additional lights", this.additionalLights)
-
       return settings.additionalLights;
   }
 
@@ -444,6 +442,7 @@ export class MapSettings{
     for (let i = 0; i < paddles.length; i++){
       const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
       paddles[i] = new Paddle(this, i, manager);
+      paddles[i].state = info.initPaddleStates[i] as PaddleState;
       paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]))
       // paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key(paddles[i].upKey ,paddles[i].downKey)))
       //           .bindTick(createTickMove(paddles[i]));

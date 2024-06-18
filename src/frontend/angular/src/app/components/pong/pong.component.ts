@@ -24,9 +24,9 @@ export const colorPalette = {
 };
 
 export enum PaddleState{
-  Binded = 'binded', //must be keybinded moved by ourselfs
-  Unbinded = 'unbinded',
-  Bot = 'bot'
+  Binded = 'Binded', //must be keybinded moved by ourselfs
+  Unbinded = 'Unbinded',
+  Bot = 'Bot'
 }
 
 export enum BlockType{
@@ -698,7 +698,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  pause() {
+  pause() { 
     console.log('pausing');
     // this.paused = true;
     this.manager.pause();
@@ -850,8 +850,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       requestAnimationFrame(this.render.bind(this));
   }
 
+<<<<<<< HEAD
   logic(timeDifference : number){
     // console.log('pausing', this.paused); 
+=======
+  logic(timeDifference : number){ 
+>>>>>>> 75103e0 (paddle state undefined in matchupdate online client)
     if (!this.paused)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();

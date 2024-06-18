@@ -161,8 +161,7 @@ export function eventEventWallColision(type: PongEventType, data: EventData) {
 
 
 export function createEventPaddleColision<T extends EventObject & Dimmensions & Pos>(map : MapSettings, paddle : T){
-	return function eventPaddleColision(type: PongEventType, data: EventData) {
-		console.log('colision event called to paddle', paddle.getId());
+	return function eventPaddleColision(type: PongEventType, data: EventData) {	
 		if (type !== PongEventType.Colision)
 			return;
 		if (data.custom?.others.objectintersection === undefined && data.custom?.gameObjects.ball === undefined) {
@@ -193,7 +192,6 @@ export interface updateAIprediction {
 
 export function createEventIAprediction<T extends updateAIprediction>(object : T){
 	return function eventIAprediction(type: PongEventType, data: EventData) {
-		console.log('event called', type);
 		if (type !== PongEventType.IAPrediction)
 			return;
 		console.log('updating prediction (event)');
@@ -222,6 +220,7 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 			update = manager.getMatchUpdate()
 		// }
 		if (paddle.state === PaddleState.Binded) {
+			console.log('trying to move paddle')
 			// console.log('paddle binded, handling keys', paddle);
 			paddle.dir.y = 0;
 			if (key.isPressed(paddle.upKey)) {

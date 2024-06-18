@@ -109,9 +109,6 @@ export class MatchGeneratorComponent {
   }
 
   getMaps() : string[]{
-    console.log('this.settings.mapName', this.settings.mapName)
-    console.log('maps', getEnumStrings(MapsName)
-    .filter(val => val != this.settings.mapName) );
     return getEnumStrings(MapsName)
       .filter(val => val != this.settings.mapName) 
   }
