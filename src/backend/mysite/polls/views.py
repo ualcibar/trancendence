@@ -102,11 +102,11 @@ def loginWith42Token(request):
     code = request.data.get('code')
     if code is None:
         logger.debug('\tyou didn\'t pass a code')
-        return JsonResponse({'message': 'no code passed'}, status=500)
+        return JsonResponse({'message': 'no code passed'}, status=400)
     logger.debug(f"code is {code}")
     response = getOauth2Token(code)
     if response.status_code != 200:
-        return JsonResponse({'message': 'failed to get token'}, status=500)
+        return JsonResponse({'message': 'failed to get token'}, status=400)
     logger.debug('\tsuccess')
     logger.debug(response.json())
     token = response.json()['access_token']
@@ -115,7 +115,7 @@ def loginWith42Token(request):
     response42 = requests.get(url, headers=headers)
     if response42.status_code != 200:
         logger.debug(f"\tError getting me info: {response42.status_code}")
-        return JsonResponse({'message': 'failed to get me info'}, status=500)
+        return JsonResponse({'message': 'failed to get me info'}, status=400)
     logger.debug(f"\tcontent = {response42.json()}")
     response42Json = response42.json()
     try:
@@ -127,7 +127,7 @@ def loginWith42Token(request):
         if user.is_active:
             data = get_tokens_for_user(user)
             if data is None:
-                return Response({"message": "couldn't get token for user"}, status=500)
+                return Response({"message": "couldn't get token for user"}, status=400)
             response.set_cookie(
                 key=settings.SIMPLE_JWT['AUTH_COOKIE'],
                 value=data["access"],
@@ -229,11 +229,11 @@ def registerWith42Token(request):
     code = request.data.get('code')
     if code is None:
         logger.debug('\tyou didn\'t pass a code')
-        return JsonResponse({'message': 'no code passed'}, status=500)
+        return JsonResponse({'message': 'no code passed'}, status=400)
     logger.debug(f"code is {code}")
     response = getOauth2Token(code)
     if response.status_code != 200:
-        return JsonResponse({'message': f"failed to get token\n{response.json()}"}, status=500)
+        return JsonResponse({'message': f"failed to get token\n{response.json()}"}, status=400)
     logger.debug('\t42 register success')
     logger.debug(response.json())
     token = response.json()['access_token']
@@ -242,10 +242,10 @@ def registerWith42Token(request):
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         logger.debug(f"\tError getting me info: {response.status_code}")
-        return JsonResponse({'message': 'failed to get me info'}, status=500)
+        return JsonResponse({'message': 'failed to get me info'}, status=400)
     logger.debug(f"\tcontent = {response.json()}")
     if CustomUser.objects.create42user(response.json()) is None:
-        return JsonResponse({'message': 'failed to create user'}, status=500)
+        return JsonResponse({'message': 'failed to create user'}, status=400)
     return JsonResponse(response.json(), status=200)
 
 
@@ -296,7 +296,7 @@ def register(request):
             if 'duplicate key' in str(e):
                 return JsonResponse({'message': 'This username already exists!'}, status=400)
             else:
-                return JsonResponse({'message': 'An error occurred while registering the user.'}, status=500)
+                return JsonResponse({'message': 'An error occurred while registering the user.'}, status=400)
         update_last_login(None, user)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
@@ -322,7 +322,7 @@ def userHistory(request, user_id):
     try:
         user = CustomUser.objects.get(id=user_id)
     except Exception as e:
-        return Response({'message': 'cant find user'}, status=500)
+        return Response({'message': 'cant find user'}, status=400)
     matches = user.team_a_matches.all() + user.team_b_matches.all()
     serializer = MatchSerializer(matches, True)
     return Response(serializer.data)
@@ -429,7 +429,7 @@ def setUserConfig(request, user_id=None):
         if 'duplicate key' in str(e):
             return JsonResponse({'message': 'This username already exists!'}, status=400)
         else:
-            return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=500)
+            return JsonResponse({'message': 'An error occurred while updating user settings.'}, status=400)
     privateUserInfo = PrivateUserInfoSerializer(user)
     logger.debug(f"SETUSERCONFIG: Actualizada la key {key} a {value}")
     return JsonResponse({'message': 'User settings successfully updated!', 'updated_fields': updated_fields, 'privateUserInfo' : privateUserInfo.data}, status=201)
@@ -501,7 +501,7 @@ def avatar_set(user, image_data):
         setattr(user,'avatar',avatars_dir)
     except Exception as e:
         logger.error(f"SETUSERCONFIG: Error saving image: {e}")
-        return JsonResponse({'error': 'Failed to save image'}, status=500)
+        return JsonResponse({'error': 'Failed to save image'}, status=400)
     logger.debug(f"SETUSERCONFIG: Actualizada la foto de perfil del usuario {user.username}")
 
 @api_view(['POST'])
