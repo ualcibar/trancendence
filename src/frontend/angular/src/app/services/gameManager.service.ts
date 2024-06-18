@@ -638,6 +638,7 @@ export class MatchManager implements Manager{
     this.state = state;
 //    this.matchScore = new State<Score>(new Score([0,0]));
     this.matchUpdate = this.matchConfig.mapSettings.createMatchInitUpdate(this.matchConfig.matchSettings, this);
+    this.matchUpdate.paddles.forEach(paddle => console.log(paddle))
     this.matchUpdate.subscribeAllToManager(this);
     this.matchState = new State<MatchState>(MatchState.Created);
     this.matchState.subscribe(

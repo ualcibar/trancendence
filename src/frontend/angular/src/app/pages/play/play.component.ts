@@ -87,8 +87,21 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                     router.navigate(['/']);
                 }
                 this.renderState.renderGame.setValue(true);
-                if (realManager instanceof MatchManager)
+                if (realManager instanceof MatchManager) {
                     this.matchManager = realManager;
+                    realManager.matchState.subscribe((state : MatchState) => {
+                        switch(state){
+                            case MatchState.FinishedSuccess:
+                                this.renderState.renderGame.setValue(false);
+                                this.renderState.renderMatchEnd.setValue(true);
+                                break;
+                            case MatchState.FinishedError:
+                                this.renderState.renderGame.setValue(false);
+                                this.renderState.renderMatchEnd.setValue(true);
+                                break;
+                        }
+                    })
+                }
                 break;
             case RealManagerType.Tournament:
                 if (!(realManager instanceof TournamentManager)){

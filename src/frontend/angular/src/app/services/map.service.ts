@@ -443,17 +443,18 @@ export class MapSettings{
       const paddle = new Paddle(this, i,manager)
       //const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
       //paddles[i] = new Paddle(this, i, manager);
-      //paddle.state = info.initPaddleStates[i]; 
+      //paddle.state = info.initPaddleStates[i];
+      console.log('paddle state before asign', paddle, 'as number', info.initPaddleStates[i])
       if (info.initPaddleStates[i] == PaddleState.Binded){
         console.log('set binded')
         paddle.stateBinded = true;
       }
       else if (info.initPaddleStates[i] == PaddleState.Unbinded){
-        console.log('set binded')
+        console.log('set Unbinded')
         paddle.stateUnbinded = true;
       }
       else if (info.initPaddleStates[i] == PaddleState.Bot){
-        console.log('set binded')
+        console.log('set Bot')
         paddle.stateBot = true;
       }
       console.log('after asign', paddle, 'as number', info.initPaddleStates[i])
