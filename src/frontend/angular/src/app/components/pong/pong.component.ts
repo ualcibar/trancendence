@@ -855,12 +855,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       requestAnimationFrame(this.render.bind(this));
   }
 
-<<<<<<< HEAD
-  logic(timeDifference : number){
-    // console.log('pausing', this.paused); 
-=======
   logic(timeDifference : number){ 
->>>>>>> 75103e0 (paddle state undefined in matchupdate online client)
     if (!this.paused)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();
