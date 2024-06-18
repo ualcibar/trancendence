@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import CustomUser,Statistics
+import os
+ip = os.environ.get('IP')
 
 class LightUserInfoSerializer(serializers.ModelSerializer):
     class Meta:

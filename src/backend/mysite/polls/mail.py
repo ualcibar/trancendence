@@ -5,6 +5,10 @@ import random
 import string
 import hashlib
 from cryptography.fernet import Fernet
+import os
+
+ip = os.environ.get('IP')
+
 
 def generate_random_verification_code(length):
     characters = string.ascii_uppercase + string.digits
@@ -25,7 +29,7 @@ def generateFernetObj():
     return f
 
 def generate_verification_url(encripted_token, encripted_mail):
-    verification_url = "https://{ip}:1501/verify?token=" + encripted_token.decode('utf-8') + "&user=" + encripted_mail.decode('utf-8')
+    verification_url = "https://" + ip + ":1501/verify?token=" + encripted_token.decode('utf-8') + "&user=" + encripted_mail.decode('utf-8')
     return verification_url
 
 def generate_token():

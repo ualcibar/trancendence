@@ -43,6 +43,9 @@ from . import mail
 logger = logging.getLogger('std')
 token_fernet = mail.generateFernetObj()
 
+ip = os.environ.get('IP')
+
+
 def getOauth2Token(code):
     sendJson = {'code': code}
     sendJson ['client_id'] = 'u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87'
