@@ -145,88 +145,82 @@ def loginWith42Token(request):
         return Response({"Invalid": "Invalid username!"}, status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def friends_get(self, request):
-    friends = request.user.friends.all()
-    serializer = UserInfoSerializer(friends, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+@api_view(['GET', 'POST', 'DELETE'])
+@authentication_classes([CustomAuthentication])
+def friends(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+    if request.method == 'GET':
+        
+        friends = request.user.friends.all()
+        serializer = UserInfoSerializer(friends, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        friend_id = data.get('friend_id')
+        if friend_id is None:
+            return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
+        try:
+            friend = CustomUser.objects.get(id=friend_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def friends_post(self, request):
-    friend_id = request.data.get('friend_id')
-    if friend_id is None:
-        return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
-    try:
-        friend = CustomUser.objects.get(id=friend_id)
-    except CustomUser.DoesNotExist:
-        return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.friends.add(friend)
+        serializer = UserInfoSerializer(request.user.friends.all(), many=True)
+        return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
+    elif request.method == 'DELETE':
+        data = json.loads(request.body)
+        friend_id = data.get('friend_id')
+        if friend_id is None:
+            return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
+        try:
+            friend = request.user.friends.get(id=friend_id)
+            if friend is None:
+                return JsonResponse({'message': 'friend_id is not a friend'},  status=status.HTTP_400_BAD_REQUEST)
 
-    request.user.friends.add(friend)
-    serializer = UserInfoSerializer(user.friends.all(), many=True)
-    return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
 
+        request.user.friends.remove(friend)
+        serializer = UserInfoSerializer(request.user.friends.all(), many=True)
+        return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def friends_delete(self, request):
-    friend_id = request.data.get('friend_id')
-    if friend_id is None:
-        return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
-    try:
-        friend = request.user.friends.get(id=friend_id)
-        if friend is None:
-            return JsonResponse({'message': 'friend_id is not a friend'},  status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET', 'POST', 'DELETE'])
+@authentication_classes([CustomAuthentication])
+def blocked_users(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+    if request.method == 'GET':
+        friends = request.user.friends.all()
+        serializer = UserInfoSerializer(friends, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        blocked_user_id = request.POST.get('blocked_user_id')
+        if blocked_user_id is None:
+            return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
+        try:
+            blocked_user = CustomUser.objects.get(id=blocked_user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-    except CustomUser.DoesNotExist:
-        return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.blockedUsers.add(blocked_user)
+        serializer = UserInfoSerializer(request.user.blockedUsers.all(), many=True)
+        return Response({"message": "User blocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
+    elif request.method == 'DELETE':
+        blocked_user_id = request.DELETE.get('blocked_user_id')
+        if blocked_user_id is None:
+            return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
+        try:
+            blocked_user = request.user.blockedUsers.get(id=blocked_user_id)
+            if blocked_user is None:
+                return JsonResponse({'message': 'friend_id is not a friend'},  status=status.HTTP_400_BAD_REQUEST)
 
-    request.user.friends.remove(friend)
-    serializer = UserInfoSerializer(request.user.friends.all(), many=True)
-    return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "BlockedUser not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def blocked_users_get(self, request):
-    friends = request.user.friends.all()
-    serializer = UserInfoSerializer(friends, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def blocked_users_post(self, request):
-    blocked_user_id = request.data.get('blocked_user_id')
-    if blocked_user_id is None:
-        return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
-    try:
-        blocked_user = CustomUser.objects.get(id=blocked_user_id)
-    except CustomUser.DoesNotExist:
-        return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-
-    request.user.blockedUsers.add(blocked_user)
-    serializer = UserInfoSerializer(user.blockedUsers.all(), many=True)
-    return Response({"message": "User blocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
-
-
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def blocked_users_delete(self, request):
-    blocked_user_id = request.data.get('blocked_user_id')
-    if blocked_user_id is None:
-        return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
-    try:
-        blocked_user = request.user.blockedUsers.get(id=blocked_user_id)
-        if blocked_user is None:
-            return JsonResponse({'message': 'friend_id is not a friend'},  status=status.HTTP_400_BAD_REQUEST)
-
-    except CustomUser.DoesNotExist:
-        return Response({"error": "BlockedUser not found"}, status=status.HTTP_400_BAD_REQUEST)
-
-    request.user.blockedUsers.remove(blocked_user)
-    serializer = UserInfoSerializer(request.user.blockedUsers.all(), many=True)
-    return Response({"message": "User unblocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
-
+        request.user.blockedUsers.remove(blocked_user)
+        serializer = UserInfoSerializer(request.user.blockedUsers.all(), many=True)
+        return Response({"message": "User unblocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

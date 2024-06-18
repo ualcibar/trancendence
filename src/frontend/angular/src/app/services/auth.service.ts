@@ -246,14 +246,15 @@ export class AuthService {
     }
     const backendURL = `api/polls/friends/`;
     const jsonToSend = {
-      friend_id : id
+      'friend_id' : id
     };
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
-      })
+      }),
+      withCredentials : true,
     };
-    this.http.post<any>(backendURL, jsonToSend).subscribe({
+    this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
       next: (response) => {
         this.logger.info('response friend list', response);
       },
@@ -415,7 +416,7 @@ export class AuthService {
       next: (response) => {
         console.log('refresh', response)
         this.logger.info('success refresh?', response);
-        this.updateUserInfo();
+        //this.updateUserInfo();
       },
       error: (error) => {
         this.logger.error('failed refresh token', error)

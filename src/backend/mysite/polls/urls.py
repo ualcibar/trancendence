@@ -61,20 +61,12 @@ urlpatterns = [
     path("setConfig/", views.setUserConfig, name="set_user_config"),
     path("setConfig/<int:user_id>", views.setUserConfig, name="set_user_config_by_id"),
     
-    path('friends/', views.friends_get, name='friends_get'),
-    path('friends/', views.friends_post, name='friends_post'),
-    path('friends/', views.friends_delete, name='friends_del'),
-    #path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'),
-    
-    path('blockedUsers/', views.blocked_users_get, name='friends_get'),
-    path('blockedUsers/', views.blocked_users_post, name='friends_post'),
-    path('blockedUsers/', views.blocked_users_delete, name='friends_del'),
+    path('friends/', views.friends, name='friends'), 
+    path('blockedUsers/', views.blocked_users, name='friends'),
     
     path('matches/', views.matches, name='match-list'),
     path("history/<int:user_id>", views.userHistory, name="user_history"),
-
-    #path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),
-    #path('player_games/', GameHistoryView.as_view(), name='game_history'),
+    
     path('send_mail/', views.send_mail, name='send_mail'),
     path('check_token/', views.check_token, name='check_token'),
     path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool'),

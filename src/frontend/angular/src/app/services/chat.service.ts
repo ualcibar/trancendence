@@ -3,7 +3,6 @@ import { NgZone } from '@angular/core';
 import {AuthService, PrivateUserInfo, UserInfo} from './auth.service';
 import { LogFilter, Logger } from '../utils/debug';
 import { ChatState, StateService } from './stateService';
-import { MatchSettings, MatchSettingsI } from './gameManager.service';
 import { toEnum } from '../utils/help_enum';
 import { OnlineMatchSettings2 } from './matchmaking.service';
 
