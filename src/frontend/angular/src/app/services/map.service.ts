@@ -99,7 +99,7 @@ class MapSettingsCreateInfo{
       ),
       new Block(
         new Vector2(this.rightLimit + this.ballRadius * 4 +  width/2, 0),
-        new Vector3(width, this.dimmensions.height, width),
+        new Vector3(width, this.dimmensions.height * 2, 0.02),
         BlockType.Score,
         new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
         manager
