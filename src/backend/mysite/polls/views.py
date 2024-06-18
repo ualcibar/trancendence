@@ -195,7 +195,8 @@ def blocked_users(request):
         serializer = UserInfoSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        blocked_user_id = request.POST.get('blocked_user_id')
+        data = json.loads(request.body)
+        blocked_user_id = data.get('blocked_user_id')
         if blocked_user_id is None:
             return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -207,7 +208,8 @@ def blocked_users(request):
         serializer = UserInfoSerializer(request.user.blockedUsers.all(), many=True)
         return Response({"message": "User blocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
     elif request.method == 'DELETE':
-        blocked_user_id = request.DELETE.get('blocked_user_id')
+        data = json.loads(request.body)
+        blocked_user_id = data.get('friend_id')
         if blocked_user_id is None:
             return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
         try:

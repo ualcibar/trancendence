@@ -705,6 +705,13 @@ export class MatchManager implements Manager{
 
           //reset match and go for the next round if any
           this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings);
+          if (this.matchUpdate.score.score[data.custom!.others.team] >= this.matchConfig.matchSettings.roundsToWin){
+              //this.matchSync.sendEvent(PongEventType.Finish,{})
+              this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Finish),PongEventType.Finish, {})
+              this.matchState.setValue(MatchState.FinishedSuccess)
+              //this.onlineMatchState.setValue(OnlineMatchState.FinishedSuccess)
+              //this.matchSync.endMatch();
+          }
           /*this.broadcastEvent(PongEventType.Pause, {});
           this.matchState.setValue(MatchState.Paused);
           this.broadcastEvent(PongEventType.Reset, {});

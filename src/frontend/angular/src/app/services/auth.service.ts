@@ -208,11 +208,12 @@ export class AuthService {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
+        console.log(response.privateUserInfo)
         this.translateService.setDefaultLang(response.privateUserInfo.language);
         this.translateService.use(response.privateUserInfo.language);
         this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
-        clearInterval(this.reconnecting)
         //if (this.reconnecting)
+        clearInterval(this.reconnecting)
          
       },
       error: () => {
@@ -414,9 +415,10 @@ export class AuthService {
     const backendURL = 'api/polls/token/refresh/';
     this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
       next: (response) => {
-        console.log('refresh', response)
+        this.translateService.setDefaultLang(response.privateUserInfo.language);
+        this.translateService.use(response.privateUserInfo.language);
+        this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
         this.logger.info('success refresh?', response);
-        //this.updateUserInfo();
       },
       error: (error) => {
         this.logger.error('failed refresh token', error)

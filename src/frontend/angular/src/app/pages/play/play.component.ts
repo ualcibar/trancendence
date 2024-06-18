@@ -125,6 +125,10 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 this.players = this.onlineMatchManager!.getPlayers(); 
                 this.renderState.renderGame.setValue(true);
                 this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{ 
+                    console.log('STATE', state)
+                    console.log('STATE', state)
+                    console.log('STATE', state)
+                    console.log('STATE', state)
                     switch (state){
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')
@@ -134,6 +138,11 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                             console.log('match finish success')
                             this.renderState.renderGame.setValue(false)
                     }
+                })
+                this.onlineMatchManager!.onlineMatchState.subscribe((state : OnlineMatchState) => {
+                    console.log('MATCH ONLINE STATE', state)
+                    console.log('MATCH ONLINE STATE', state)
+                    console.log('MATCH ONLINE STATE', state)
                 })
                 break;
         } 

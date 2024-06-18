@@ -632,10 +632,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     this.configStateSubscription = this.manager.subscribeMatchState(//it was done befor it was set??
       (state: MatchState) => {
         switch (state) {
-          case MatchState.Initialized:
-            break;
           case MatchState.Running:
-            console.log('MATCH STARTING')
+            console.log('Match running')
             this.paused = false;
             this.pausedTime += Date.now() - this.pausingTime;
             this.run();
@@ -644,6 +642,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             console.log('MATCH PAUSED')
             this.paused = true;
             this.pausingTime = Date.now();
+            this.stop = true;
             break;
           case MatchState.FinishedSuccess:
             break;
@@ -816,18 +815,17 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
+    console.log('rendering', this.manager.getMatchState())
 
-    if (this.paused) {
-      // this.pausedTime += timeDifference;
-      // console.log('paused', this.pausedTime);
-      this.pastTime = time;
+    if (this.manager.getMatchState() !== MatchState.Running && this.manager.getMatchState() !== MatchState.Starting) {
+      requestAnimationFrame(this.render.bind(this));
       return;
     }
-    if (this.manager.getMatchState() !== MatchState.Running){
+    /*if (this.manager.getMatchState() !== MatchState.Running){
       return
-    }
+    }*/
 
-
+    console.log('running')
     // DISPLAY TIME
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -852,12 +850,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     if (after - before > 3)
       console.error('rende', after - before)
     this.pastTime = time;
-    if (!this.stop)
+    //if (!this.stop)
       requestAnimationFrame(this.render.bind(this));
   }
 
   logic(timeDifference : number){ 
-    if (!this.paused)
+    //if (this.manager.getMatchState() === MatchState.Running)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();
     //this.checkAI();
