@@ -21,6 +21,7 @@ stop:
 	@echo "\033[1;33mStopping containers...\033[0m"
 	docker compose -f $(COMPOSE_FILE) stop
 run:
+	cd src; bash ip_to_env.sh; cd ..
 	make build
 	make up
 	@echo "\033[1;32mAll has been made!\033[0m"
