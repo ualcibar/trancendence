@@ -9,6 +9,7 @@
     "username":"Erabiltzaile",
     "password":"Pasahitza",
     "email":"Posta elektroniko",
+
     "register_title":"SpacePong-era errejistratu!",
     "register_subtitle":"Erabiltzailea zara?",
     "register_subtitle_link":"Hasi saioa hemen",
@@ -88,6 +89,10 @@
     "match_gen_max_rounds":"gehieneko txanda",
     "match_gen_best_of":"zenbat txanda",
     "match_gen_team_size":"ekipoaren tamaina",
+    "match_gen_players":"jokalariak",
+    "match_gen_best_of_error": "Ezin da irabazteko behar diren txandak baino gutxiago egon",
+    "match_gen_choose_map":"Aukeratu mapa",
+    "match_gen_default":"Predeterminatu",
 
     "tournament_gen":"hemen ezartzen duzu txapelketaren konfigurazioa",
     "tournament_gen_numplayers":"jokalari kopurua",
@@ -95,6 +100,7 @@
     "tournament_next":"Hurrengo Partida",
 
     "home_websocket_chat_state":"txateko websocketen egoera: ",
+    "home_debug":"Debug modua aktibatuta",
     "home_websocket_matchmaking_state":"parekatzeko websocketen egoera: ",
     "home_matchmaking_state":"parekatzearen egoera: ",
     "home_match_state":"uneko lineako partidaren egoera: ",
@@ -105,6 +111,10 @@
     "home_match":"PARTIDA",
     "home_tournament":"TXAPELKETA",
     "home_start":"HASI",
+    "home_play":"Jolastu",
+    "home_play_online":"Jolastu Online",
+    "home_play_tournament_setting":"Txapelketaren doikuntzak",
+    "home_play_match_setting":"Partidaren doikuntzak",
 
     "login_loading":"Kargatzen",
     "login_user_unnexistent":"Erabiltzaile hori ez da existitzen!",
@@ -140,6 +150,9 @@
     "settings_public_choose" : "Aukeratu erabiltzaile bakar baten izena zu identifikatu ahal izateko",
     "settings_public_other" : "Erabiltzaile hau dagoeneko erabiltzen ari da! Aukeratu beste bat.",
     "settings_public_done" : "Eginda dago!",
+    "settings_public_reset" : "Berrasieratu",
+    "settings_public_archive_notpermited" : "Fitxategi mota hau ez dago baimenduta. Probatu beste batekin.",
+    "settings_public_pfp_success" : "Profileko argazkia ondo aldatu da!",
 
     "settings_update_email" : "Eguneratu zure kontuari lotutako posta elektronikoa",
     "settings_update_email_inuse" : "Posta hau dagoeneko erabiltzen ari da!",
@@ -156,5 +169,34 @@
 
     "verify_verification" : "Egiaztapen",
     "verify_verification_success" : "Egiaztapena ondo burutu da",
-    "verify_verification_error" : "Egiaztapen-errorea, zerbait gaizki joan da, saiatu zure posta elektronikora aldaketarik gabe bidali den URLa erabiltzen"
+    "verify_verification_error" : "Egiaztapen-errorea, zerbait gaizki joan da, saiatu zure posta elektronikora aldaketarik gabe bidali den URLa erabiltzen",
+
+    "chat_new" : "Txat berria",
+    "chat_join" : "PARTIDAREKIN BAT EGIN",
+
+    "friends_title" : "LAGUNAK",
+    "friends_load" : "Kargatzen...",
+
+    "online_name" : "Izena :",
+    "online_public" : "Publiko",
+    "online_private" : "Pribatua",
+
+    "pong_welcome" : "Ongi etorri Pongera!",
+    "pong_reset" : "BERRABIARAZI",
+
+    "tournament_round" : "Txanda ",
+    "tournament_match" : "Partida ",
+    "tournament_winner_match" : "Partidako Irabazlea",
+    "tournament_winner_semi" : "Semis Irabazlea",
+    "tournament_winner_round" : "Txanda Irabazlea",
+    "tournament_winner" : "Irabazlea",
+    "tournament_final" : "Finala",
+    "tournament_semifinal" : "Semifinala",
+    "tournament_tbd" : "ZG",
+
+    "postregister_title" : "Mesedez, begiratu zure posta kontua egiaztatzeko",
+    "postregister_subtitle" : "Zure posta egiaztatu ondoren saioa hasi ahal izango duzu!",
+
+    "user_profile_loading" : "Erabiltzaile-profila kargatzen...",
+    "user_profile_timeout" : "Gehiegi berandutzen ari da, mesedez egiaztatu saioa hasi duzula"
 }

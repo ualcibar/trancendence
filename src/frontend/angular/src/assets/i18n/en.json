@@ -12,6 +12,7 @@
     "username":"Username",
     "password":"Password",
     "email":"Email",
+
     "register_title":"Register to SpacePong!",
     "register_subtitle":"Already a user?",
     "register_subtitle_link":"Login here",
@@ -92,6 +93,10 @@
     "match_gen_max_rounds":"max rounds",
     "match_gen_best_of":"best of",
     "match_gen_team_size":"team size",
+    "match_gen_players":"players",
+    "match_gen_best_of_error": "There can't be less rounds than the ones needed to win",
+    "match_gen_choose_map":"Choose a map",
+    "match_gen_default":"Default",
 
     "tournament_gen":"this is where you set tournament settings",
     "tournament_gen_numplayers":"number of players",
@@ -99,6 +104,7 @@
     "tournament_next":"Next Match",
 
     "home_websocket_chat_state":"chat websocket state: ",
+    "home_debug":"Debug mode activated",
     "home_websocket_matchmaking_state":"matchmaking websocket state: ",
     "home_matchmaking_state":"matchmaking state: ",
     "home_match_state":"current online match state: ",
@@ -109,6 +115,10 @@
     "home_match":"MATCH",
     "home_tournament":"TOURNAMENT",
     "home_start":"START",
+    "home_play":"Play",
+    "home_play_online":"Play online",
+    "home_play_tournament_setting":"Tournament settings",
+    "home_play_match_setting":"Match settings",
 
     "login_loading":"Loading",
     "login_user_unnexistent":"This user doesn't exist!",
@@ -144,6 +154,9 @@
     "settings_public_choose" : "Choose a unique username to identify yourself",
     "settings_public_other" : "This username is already in use! Choose anotherone.",
     "settings_public_done" : "Done!",
+    "settings_public_reset" : "Reset",
+    "settings_public_archive_notpermited" : "This type of file is not permited. Try with another one.",
+    "settings_public_pfp_success" : "Profile picture succesfully changed!",
 
     "settings_update_email" : "Update the email associated with your account",
     "settings_update_email_inuse" : "This email is already in use!",
@@ -160,5 +173,35 @@
 
     "verify_verification" : "Verification",
     "verify_verification_success" : "Verification has been completed succesfully!",
-    "verify_verification_error" : "Verification error, something has gone wrong, try using the URL that has been sent to your email without modifications"
+    "verify_verification_error" : "Verification error, something has gone wrong, try using the URL that has been sent to your email without modifications",
+
+    "chat_new" : "New chat",
+    "chat_join" : "JOIN MATCH",
+
+    "friends_title" : "FRIENDS",
+    "friends_load" : "Loading...",
+
+    "online_name" : "Name :",
+    "online_public" : "Public",
+    "online_private" : "Private",
+
+    "pong_welcome" : "Welcome to Pong!",
+    "pong_reset" : "RESET",
+
+    "tournament_round" : "Round ",
+    "tournament_match" : "Match ",
+    "tournament_winner_match" : "Winner Match",
+    "tournament_winner_semi" : "Winner Semi",
+    "tournament_winner_round" : "Winner Round",
+    "tournament_winner" : "Winner",
+    "tournament_final" : "Final",
+    "tournament_semifinal" : "Semifinal",
+    "tournament_tbd" : "TBD",
+
+    "postregister_title" : "Please check you email account to verify your email",
+    "postregister_subtitle" : "Once you verify your email you'll be able to log in!",
+
+    "user_profile_loading" : "Loading user profile...",
+    "user_profile_timeout" : "If it is taking too long, please check that you are logged in"
+    
 }

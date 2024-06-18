@@ -12,6 +12,7 @@ import { MapSettings } from '../../services/map.service';
 import { CommonModule } from '@angular/common';
 
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import {TranslateModule} from '@ngx-translate/core';
 
 export const colorPalette = {
   darkestPurple: 0x1C0658,
@@ -556,7 +557,7 @@ function keyToEmoji(key : string) : string{
   selector: 'app-pong',
   standalone: true,
   templateUrl: './pong.component.html',
-  imports : [ CommonModule],
+  imports : [ CommonModule, TranslateModule],
   styleUrls: ['./pong.component.css']
 })
 export class PongComponent implements AfterViewInit, OnDestroy {

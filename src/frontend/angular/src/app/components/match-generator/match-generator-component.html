@@ -7,14 +7,14 @@
 
     <h1 class="my-1"><i class="bi bi-trophy-fill"></i> {{'match_gen_best_of'|translate}} {{ settings.roundsToWin }}</h1>
     <input [(ngModel)]="settings.roundsToWin" (change)="changeRoundsToWin($event)" (input)="changeRoundsToWin($event)" min="2" max="15" type="range" class="form-range">
-    <h1 *ngIf="winPointsNotPossible" class="text-red-500">No puede haber menos rondas que las necesarias para ganar</h1>
+    <h1 *ngIf="winPointsNotPossible" class="text-red-500">{{'match_gen_best_of_error'|translate}}</h1>
 
-    <h1 class="my-1"><i class="bi bi-person-raised-hand"></i> {{'match_gen_team_size'|translate}} {{ settings.teamSize }} jugadores</h1>
+    <h1 class="my-1"><i class="bi bi-person-raised-hand"></i> {{'match_gen_team_size'|translate}} {{ settings.teamSize }} {{'match_gen_players'|translate}}</h1>
     <input [(ngModel)]="settings.teamSize" (change)="changeTeamSize($event)" (input)="changeTeamSize($event)" min="1" max="2" type="range" class="form-range">
 
-    <h1 class="my-1"><i class="bi bi-map-fill"></i> Elige el mapa</h1>
+    <h1 class="my-1"><i class="bi bi-map-fill"></i>{{'match_gen_choose_map'|translate}}</h1>
     <select class="form-select shadow-none" aria-label="Default select example" [(ngModel)]="settings.mapName">
-      <option value="Default" selected>Default</option>
+      <option value="Default" selected>{{'match_gen_default'|translate}}</option>
       <option *ngFor="let item of maps" [value]="item">{{item}}</option>
     </select>
 </div>

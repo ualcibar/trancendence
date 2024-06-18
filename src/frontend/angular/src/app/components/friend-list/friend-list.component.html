@@ -7,7 +7,7 @@
 -->
   
 <div class="sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
-  <h1 class="text-white text-bold">FRIENDS</h1>
+  <h1 class="text-white text-bold">{{'friends_list'| translate}}</h1>
     <div class="flex flex-col items-center bg-transparent gap-1 w-full overflow-y-auto max-h-[500px] pr-4">
       <ul class="w-full">
         <li *ngFor="let friend of friend_list" class="bg-transparent w-full">
@@ -16,6 +16,6 @@
       </ul>
     </div>
     <div *ngIf="!this.friend_list">
-        <h1>loading</h1>
+        <h1>{{'friends_load' | translate}}</h1>
     </div>
   </div>

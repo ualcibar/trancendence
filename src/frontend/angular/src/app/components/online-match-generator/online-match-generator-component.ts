@@ -1,6 +1,7 @@
 import { Component, Output, Input, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 import { OnlineMatchSettings2 } from '../../services/matchmaking.service';
@@ -11,7 +12,7 @@ import { MatchGeneratorComponent } from '../match-generator/match-generator-comp
   imports: [
     CommonModule,
     FormsModule,
-    MatchGeneratorComponent
+    MatchGeneratorComponent, TranslateModule
   ],
   templateUrl: './online-match-generator-component.html',
   styleUrl: './online-match-generator-component.css'

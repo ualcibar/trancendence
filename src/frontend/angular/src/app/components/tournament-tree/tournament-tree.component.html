@@ -1,24 +1,24 @@
 <div *ngIf="tree.numberOfInitGroups == 4" class="container bracket">
     <div class="flex align-items-center">
         <div class="col-md-3 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
-            <h2>Round 1</h2>
+            <h2>{{'tournamet_round'|translate}}1</h2>
             <div class="match">
-                <p>Match 1: {{tree.data[0].groups[0]}} vs {{tree.data[0].groups[1]}}</p>
+                <p>{{'tournamet_match'|translate}}1: {{tree.data[0].groups[0]}} vs {{tree.data[0].groups[1]}}</p>
             </div>
             <div class="match">
-                <p>Match 2: {{tree.data[1].groups[0]}} vs {{tree.data[1].groups[1]}}</p>
+                <p>{{'tournamet_match'|translate}}2: {{tree.data[1].groups[0]}} vs {{tree.data[1].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-3 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
-            <h2>Final</h2>
+            <h2>{{'tournamet_final'|translate}}</h2>
             <div class="match">
-                <p *ngIf="!tree.data[2]">Winner Match1 vs Winner Match2</p>
+                <p *ngIf="!tree.data[2]">{{'tournamet_winner_match'|translate}}1 vs {{'tournamet_winner_match'|translate}}2</p>
                 <p *ngIf="tree.data[2]">{{tree.data[2].groups[0]}} vs {{tree.data[2].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-3 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
-            <h2>Winner</h2>
-            <p *ngIf="winner === undefined" id="winner">TBD</p>
+            <h2>{{'tournamet_winner'|translate}}</h2>
+            <p *ngIf="winner === undefined" id="winner">{{'tournamet_tbd'|translate}}</p>
             <p *ngIf="winner !== undefined" id="winner">{{ winner }}</p>
         </div>
     </div>
@@ -28,41 +28,41 @@
 <div *ngIf="tree.numberOfInitGroups == 8" class="container bracket">
     <div class="flex align-items-center ">
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
-            <h2>Round 1</h2>
+            <h2>{{'tournamet_round'|translate}}1</h2>
                 <div class="match">
-                    <p>Match 1: {{tree.data[0].groups[0]}} vs {{tree.data[0].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}1: {{tree.data[0].groups[0]}} vs {{tree.data[0].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 2: {{tree.data[1].groups[0]}} vs {{tree.data[1].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}2: {{tree.data[1].groups[0]}} vs {{tree.data[1].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 3: {{tree.data[2].groups[0]}} vs {{tree.data[2].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}3: {{tree.data[2].groups[0]}} vs {{tree.data[2].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 4: {{tree.data[3].groups[0]}} vs {{tree.data[3].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}4: {{tree.data[3].groups[0]}} vs {{tree.data[3].groups[1]}}</p>
                 </div>
             </div>
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
-            <h2>Semifinal</h2>
+            <h2>{{'tournamet_semifinal'|translate}}</h2>
             <div class="match">
-                <p *ngIf="!tree.data[4]">Winner Match1 vs Winner Match2</p>
+                <p *ngIf="!tree.data[4]">{{'tournamet_winner_match'|translate}}1 vs {{'tournamet_winner_match'|translate}}2</p>
                 <p *ngIf="tree.data[4]">{{tree.data[4].groups[0]}} vs {{tree.data[4].groups[1]}}</p>
             </div>
             <div class="match">
-                <p *ngIf="!tree.data[5]">Winner Match3 vs Winner Match4</p>
+                <p *ngIf="!tree.data[5]">{{'tournamet_winner_match'|translate}}3 vs {{'tournamet_winner_match'|translate}}4</p>
                 <p *ngIf="tree.data[5]">{{tree.data[5].groups[0]}} vs {{tree.data[5].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
-            <h2>Final</h2>
+            <h2>{{'tournamet_final'|translate}}</h2>
             <div class="match">
-                <p *ngIf="!tree.data[6]">Winner Semi1 vs Winner Semi2</p>
+                <p *ngIf="!tree.data[6]">{{'tournamet_winner_semi'|translate}}1 vs {{'tournamet_winner_semi'|translate}}2</p>
                 <p *ngIf="tree.data[6]">{{tree.data[6].groups[0]}} vs {{tree.data[6].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
-            <h2>Winner</h2>
-            <p id="winner">TBD</p>
+            <h2>{{'tournamet_winner'|translate}}</h2>
+            <p id="winner">{{'tournamet_tbd'|translate}}</p>
         </div>
     </div>
 </div>
@@ -70,80 +70,80 @@
 <div *ngIf="tree.numberOfInitGroups == 16" class="container bracket">
     <div class="flex align-items-center ">
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
-            <h2>Round 1</h2>
+            <h2>{{'tournamet_round'|translate}}1</h2>
                 <div class="match">
-                    <p>Match 1: {{tree.data[0].groups[0]}} vs {{tree.data[0].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}1: {{tree.data[0].groups[0]}} vs {{tree.data[0].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 2: {{tree.data[1].groups[0]}} vs {{tree.data[1].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}2: {{tree.data[1].groups[0]}} vs {{tree.data[1].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 3: {{tree.data[2].groups[0]}} vs {{tree.data[2].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}3: {{tree.data[2].groups[0]}} vs {{tree.data[2].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 4: {{tree.data[3].groups[0]}} vs {{tree.data[3].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}4: {{tree.data[3].groups[0]}} vs {{tree.data[3].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 5: {{tree.data[4].groups[0]}} vs {{tree.data[4].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}5: {{tree.data[4].groups[0]}} vs {{tree.data[4].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 6: {{tree.data[5].groups[0]}} vs {{tree.data[5].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}6: {{tree.data[5].groups[0]}} vs {{tree.data[5].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 7: {{tree.data[6].groups[0]}} vs {{tree.data[6].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}7: {{tree.data[6].groups[0]}} vs {{tree.data[6].groups[1]}}</p>
                 </div>
                 <div class="match">
-                    <p>Match 8: {{tree.data[7].groups[0]}} vs {{tree.data[7].groups[1]}}</p>
+                    <p>{{'tournamet_match'|translate}}8: {{tree.data[7].groups[0]}} vs {{tree.data[7].groups[1]}}</p>
                 </div>
             </div>
             <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl ">
-                <h2>Round 2</h2>
+                <h2>{{'tournamet_round'|translate}}2</h2>
                     <div class="match">
                         <div class="match">
-                            <p *ngIf="!tree.data[8]">Winner Match1 vs Winner Match2</p>
+                            <p *ngIf="!tree.data[8]">{{'tournamet_winner_match'|translate}}1 vs {{'tournamet_winner_match'|translate}}2</p>
                             <p *ngIf="tree.data[8]">{{tree.data[8].groups[0]}} vs {{tree.data[8].groups[1]}}</p>
                         </div>
                     </div>
                     <div class="match">
                         <div class="match">
-                            <p *ngIf="!tree.data[9]">Winner Match3 vs Winner Match4</p>
+                            <p *ngIf="!tree.data[9]">{{'tournamet_winner_match'|translate}}3 vs {{'tournamet_winner_match'|translate}}4</p>
                             <p *ngIf="tree.data[9]">{{tree.data[9].groups[0]}} vs {{tree.data[9].groups[1]}}</p>
                         </div>
                     </div>
                     <div class="match">
                         <div class="match">
-                            <p *ngIf="!tree.data[10]">Winner Match5 vs Winner Match6</p>
+                            <p *ngIf="!tree.data[10]">{{'tournamet_winner_match'|translate}}5 vs {{'tournamet_winner_match'|translate}}6</p>
                             <p *ngIf="tree.data[10]">{{tree.data[10].groups[0]}} vs {{tree.data[10].groups[1]}}</p>
                         </div>
                     </div>
                     <div class="match">
                         <div class="match">
-                            <p *ngIf="!tree.data[11]">Winner Match7 vs Winner Match8</p>
+                            <p *ngIf="!tree.data[11]">{{'tournamet_winner_match'|translate}}7 vs {{'tournamet_winner_match'|translate}}8</p>
                             <p *ngIf="tree.data[11]">{{tree.data[11].groups[0]}} vs {{tree.data[11].groups[1]}}</p>
                         </div>
                     </div>
                 </div>
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
-            <h2>Semifinal</h2>
+            <h2>{{'tournamet_semifinal'|translate}}</h2>
             <div class="match">
-                <p *ngIf="!tree.data[12]">Winner Round1 Match1 vs Winner Round1 Match2</p>
+                <p *ngIf="!tree.data[12]">{{'tournamet_winner_round'|translate}}1 {{'tournamet_round'|translate}}1 vs {{'tournamet_winner_round'|translate}}1 {{'tournamet_round'|translate}}2</p>
                 <p *ngIf="tree.data[12]">{{tree.data[12].groups[0]}} vs {{tree.data[12].groups[1]}}</p>
             </div>
             <div class="match">
-                <p *ngIf="!tree.data[13]">Winner Round1 Match3 vs Winner Round1 Match4</p>
+                <p *ngIf="!tree.data[13]">{{'tournamet_winner_round'|translate}}1 {{'tournamet_round'|translate}}3 vs {{'tournamet_winner_round'|translate}}1 {{'tournamet_round'|translate}}4</p>
                 <p *ngIf="tree.data[13]">{{tree.data[13].groups[0]}} vs {{tree.data[13].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
-            <h2>Final</h2>
+            <h2>{{'tournamet_final'|translate}}</h2>
             <div class="match">
-                <p *ngIf="!tree.data[14]">Winner Semi1 vs Winner Semi2</p>
+                <p *ngIf="!tree.data[14]">{{'tournamet_winner_semi'|translate}}1 vs {{'tournamet_winner_semi'|translate}}2</p>
                 <p *ngIf="tree.data[14]">{{tree.data[14].groups[0]}} vs {{tree.data[14].groups[1]}}</p>
             </div>
         </div>
         <div class="col-md-2 column sp-div h-full flex flex-col align-items-center  gap-2 p-2 max-w-xl md:max-w-4xl  mx-auto rounded-xl gap5 ">
-            <h2>Winner</h2>
-            <p id="winner">TBD</p>
+            <h2>{{'tournamet_winner'|translate}}</h2>
+            <p id="winner">{{'tournamet_tbd'|translate}}</p>
         </div>
     </div>
 </div>
