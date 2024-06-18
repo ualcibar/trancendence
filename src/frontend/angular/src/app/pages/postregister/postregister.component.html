@@ -1,8 +1,10 @@
-<div id="sp-div" class="md:flex items-center p-2 max-w-xl md:max-w-4xl mx-auto h-96 rounded-xl">
-	<div class="md:flex flex-col text-left p-8">
-		<h1 class="text-6xl font-bold">{{'postregister_title'|translate}}</h1>
+<div class="sp-div p-2 max-w-xl md:max-w-4xl mx-auto h-96 rounded-xl">
+	<div class="flex justify-center items-center w-full mt-2">
+		<i class="bi bi-exclamation-triangle-fill text-amber-600 md:text-9xl" style="margin: 0 auto;"></i>
+	</div>
+	<div class="w-full text-center mt-6">
+		<h1 class="text-3xl font-bold">{{'postregister_title'|translate}}</h1>
 		<p class="mt-2 text-2xl">{{'postregister_subtitle'|translate}}</p>
-        <div class="mt-4 ml-60">
-            <button (click)="to_login()" class="my-button flex mr-3 inline-block bg-yellow-400 rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-black transition duration-250 ease-in-out hover:bg-yellow-300 hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 motion-reduce:transition-none"> Go to login</button>        </div>
-    </div>
+		<button (click)="to_login()" class="btn btn-warning mt-4"><i class="bi bi-rocket-takeoff-fill"></i> {{'profile_login'|translate}}</button>
+	</div>
 </div>

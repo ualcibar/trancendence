@@ -1,8 +1,12 @@
-#sp-div h1, #sp-div p {
+.sp-div h1, .sp-div p {
     color: #EAE0C8;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-#sp-div .my-button {
+.sp-div {
+    margin-top: 15vh;
+}
+
+.sp-div .my-button {
     transform: scale(1.3);  /* Escala el botón y su texto al doble de su tamaño */
 }

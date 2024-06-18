@@ -87,7 +87,7 @@ class LocalGameHandler{
   animations: [fadeInOut, easeOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = true; //Al activar el modo debug, aparecerá un recuadro en la página
+  debug : boolean = false; //Al activar el modo debug, aparecerá un recuadro en la página
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;
@@ -114,6 +114,9 @@ export class HomeComponent implements OnInit{
   }
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.changeState(HomeState.JoiningGame);
+    }, 500);
   }
 
 /*  ngOnDestroy(): void {

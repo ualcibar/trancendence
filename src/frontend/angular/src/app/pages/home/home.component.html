@@ -10,7 +10,7 @@
 	</div>
 	<!--button (click)="backgroundClicked()" class="absolute -z-1 w-max backgroundButton"></button-->
 	<div class="homeMain">
-		<button (click)="backgroundClicked()" class="absolute -z-1 h-full backgroundButton"></button>
+		<button (click)="backgroundClicked()" class="absolute -z-1 h-full backgroundButton w-11/12"></button>
 <!--        <app-chat class="flex chat" [@fadeInOut]></app-chat>-->
 		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="homeLeft" [@fadeInOut]></app-chat>
 		<div class="homeRight flex-col justify-center items-center h-auto w-full">

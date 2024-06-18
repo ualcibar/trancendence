@@ -1,4 +1,4 @@
-<div id="sp-div" *ngIf="loading; else content" class="loading-tab flex flex-col items-center justify-center rounded" style="width: 20rem;">
+<div *ngIf="loading; else content" class="sp-div loading-tab flex flex-col items-center justify-center rounded" style="width: 20rem;">
 	<h1 class="m-4">{{'settings_dataload'|translate}}</h1>
 	<div class="spinner-border text-warning mb-4" role="status"></div>
     <p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>If it is taking too long, please check that you are logged in</p>
