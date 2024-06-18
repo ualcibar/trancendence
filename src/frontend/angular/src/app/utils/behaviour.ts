@@ -230,6 +230,7 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 				paddle.dir.y = -1;
 			}
 		}else if(paddle.state === PaddleState.Bot){
+			console.log('BOT ACTIVE')
 			lastUpdateSec += delta;
 			if (lastUpdateSec >= 1){
 				lastUpdateSec = 0;

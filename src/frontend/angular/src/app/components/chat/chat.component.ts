@@ -59,6 +59,7 @@ export class ChatComponent implements OnInit{
 		this.chatService.webSocket?.close();
 	}*/
 
+
 	fetchChatMessages(): void {
 		const chat = this.current_chat_name;
 		this.chatMessages = this.chatService.getChatMessages(chat);
@@ -126,7 +127,7 @@ export class ChatComponent implements OnInit{
 
 	canJoin(message : Message){
 		console.log('can join', message.sender.id !== this.auth.userInfo!.info.id)
-		return message.sender.id !== this.auth.userInfo!.info.id			
+		return message.sender.id !== this.auth.userInfo!.info.id && this.matchmaking.matchAvailable(message.invitation!.name)		
 	}
 	joinMatch(message : Message){
 		this.matchmaking.joinMatch(message.invitation!.name)

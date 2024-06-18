@@ -6,7 +6,7 @@ import { MapsName } from '../../services/map.service';
 import { MatchSettings } from '../../services/gameManager.service';
 import { getEnumStrings, getNextEnumValue} from '../../utils/help_enum';
 import { TranslateModule } from '@ngx-translate/core';
-import { PaddleState } from '../pong/pong.component';
+import { Paddle, PaddleState } from '../pong/pong.component';
 @Component({
   selector: 'app-match-generator-component',
   standalone: true,
@@ -113,9 +113,19 @@ export class MatchGeneratorComponent {
       .filter(val => val != this.settings.mapName) 
   }
   togglePaddle(team : number, index : number){
-    if (team === 0)
+    if (team === 0){
       this.paddlesBindedA[index] = !this.paddlesBindedA[index]
-    else
+      if (this.paddlesBindedA[index])
+        this.settings.initPaddleStates[index] = PaddleState.Binded
+      else
+        this.settings.initPaddleStates[index] = PaddleState.Bot
+    }
+    else{
       this.paddlesBindedB[index] = !this.paddlesBindedB[index]
+      if (this.paddlesBindedB[index])
+        this.settings.initPaddleStates[this.settings.teamSize + index] = PaddleState.Binded
+      else
+        this.settings.initPaddleStates[this.settings.teamSize + index] = PaddleState.Bot
+    }
   }
 }

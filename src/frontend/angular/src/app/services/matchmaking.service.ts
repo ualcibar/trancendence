@@ -261,6 +261,9 @@ export class MatchmakingService implements MatchSync{
     }
     
   }
+	matchAvailable(matchName : string): boolean{
+    return	this.availableMatches.some((match) => match.name === matchName && match.available)
+	}
 
   getMatches() : OnlineMatchSettings2[]{
     return this.availableMatches;
