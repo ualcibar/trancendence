@@ -94,11 +94,11 @@ class MapSettingsCreateInfo{
         new Vector2(this.leftLimit - this.ballRadius * 4  - width/2, 0),
         new Vector3(width, this.dimmensions.height * 2, 0.02),
         BlockType.Score,
-        new RenderMaterial(RenderMaterialType.colored, colorPalette.roseGarden),
+        new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
         manager
       ),
       new Block(
-        new Vector2(this.rightLimit + this.ballRadius +  width/2, 0),
+        new Vector2(this.rightLimit + this.ballRadius * 4 +  width/2, 0),
         new Vector3(width, this.dimmensions.height, width),
         BlockType.Score,
         new RenderMaterial(RenderMaterialType.colored, colorPalette.black),
