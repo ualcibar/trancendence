@@ -154,7 +154,6 @@ def friends(request):
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     if request.method == 'GET':
-        
         friends = request.user.friends.all()
         serializer = UserInfoSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

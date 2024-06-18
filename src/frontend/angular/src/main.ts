@@ -2,7 +2,7 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
 
 // this is going to be replaced by start.sh
-export var ip = "10.13.7.6";
+export var ip = "10.13.8.5";
 
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(error => console.error(error));

@@ -62,7 +62,7 @@ urlpatterns = [
     path("setConfig/<int:user_id>", views.setUserConfig, name="set_user_config_by_id"),
     
     path('friends/', views.friends, name='friends'), 
-    path('blockedUsers/', views.blocked_users, name='friends'),
+    path('blockedUsers/', views.blocked_users, name='blockedUsers'),
     
     path('matches/', views.matches, name='match-list'),
     path("history/<int:user_id>", views.userHistory, name="user_history"),
