@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { easeOut } from '../../../assets/animations/easeOut';
 import {ScrollingModule} from '@angular/cdk/scrolling';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   standalone: true,
@@ -13,7 +14,7 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
   templateUrl: './friend-list.component.html',
   styleUrls: ['./friend-list.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ScrollingModule]
+  imports: [CommonModule, ScrollingModule, TranslateModule]
 })
 
 export class FriendListComponent implements OnInit {

@@ -144,34 +144,83 @@ def loginWith42Token(request):
     else:
         return Response({"Invalid": "Invalid username!"}, status=status.HTTP_404_NOT_FOUND)
 
-class FriendsView(APIView):
-    def get(self, request, user_id, friend_id):
-        try:
-            user = CustomUser.objects.get(id=user_id)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-            friend = user.friends.get(id=friend_id)
-        except CustomUser.DoesNotExist:
-             return JsonResponse({'error': 'Friend not found (View)'}, status=404)
-        serializer = UserInfoSerializer(friend, many=False)
+@api_view(['GET', 'POST', 'DELETE'])
+@authentication_classes([CustomAuthentication])
+def friends(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+    if request.method == 'GET':
+        
+        friends = request.user.friends.all()
+        serializer = UserInfoSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, user_id, friend_id):
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        friend_id = data.get('friend_id')
+        if friend_id is None:
+            return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = CustomUser.objects.get(id=user_id)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user2 = CustomUser.objects.get(id=friend_id)
+            friend = CustomUser.objects.get(id=friend_id)
         except CustomUser.DoesNotExist:
             return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.friends.add(user2)
-
-        serializer = UserInfoSerializer(user.friends.all(), many=True)
+        request.user.friends.add(friend)
+        serializer = UserInfoSerializer(request.user.friends.all(), many=True)
         return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
+    elif request.method == 'DELETE':
+        data = json.loads(request.body)
+        friend_id = data.get('friend_id')
+        if friend_id is None:
+            return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
+        try:
+            friend = request.user.friends.get(id=friend_id)
+            if friend is None:
+                return JsonResponse({'message': 'friend_id is not a friend'},  status=status.HTTP_400_BAD_REQUEST)
+
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.friends.remove(friend)
+        serializer = UserInfoSerializer(request.user.friends.all(), many=True)
+        return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(['GET', 'POST', 'DELETE'])
+@authentication_classes([CustomAuthentication])
+def blocked_users(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+    if request.method == 'GET':
+        friends = request.user.friends.all()
+        serializer = UserInfoSerializer(friends, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        blocked_user_id = request.POST.get('blocked_user_id')
+        if blocked_user_id is None:
+            return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
+        try:
+            blocked_user = CustomUser.objects.get(id=blocked_user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.blockedUsers.add(blocked_user)
+        serializer = UserInfoSerializer(request.user.blockedUsers.all(), many=True)
+        return Response({"message": "User blocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
+    elif request.method == 'DELETE':
+        blocked_user_id = request.DELETE.get('blocked_user_id')
+        if blocked_user_id is None:
+            return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
+        try:
+            blocked_user = request.user.blockedUsers.get(id=blocked_user_id)
+            if blocked_user is None:
+                return JsonResponse({'message': 'friend_id is not a friend'},  status=status.HTTP_400_BAD_REQUEST)
+
+        except CustomUser.DoesNotExist:
+            return Response({"error": "BlockedUser not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.blockedUsers.remove(blocked_user)
+        serializer = UserInfoSerializer(request.user.blockedUsers.all(), many=True)
+        return Response({"message": "User unblocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -213,6 +262,7 @@ def logout(request):
     return response
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete(request):
     try:
         user = CustomUser.objects.get(username=request.user.username)
@@ -333,42 +383,7 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
-class CustomUserView(APIView):
-    def get(self, request, user_id):
-        try:
-            usuario = CustomUser.objects.get(id=user_id)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = UserInfoSerializer(usuario)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
  
-class FriendsListView(APIView):
-    def get(self, request, user_id):
-        user = CustomUser.objects.get(id=user_id)
-        friends = user.friends.all()
-        serializer = UserInfoSerializer(friends, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def post(self, request, user_id):
-        try:
-            user = CustomUser.objects.get(id=user_id)
-            usernames = request.data.get('usernames', [])
-            ids = []
-            for username in usernames:
-                id = CustomUser.objects.filter(username=username).values_list('id', flat=True).first()
-                if not id:
-                    continue
-                ids.append(id)
-            if len(ids) == 0: #or user2.DoesNotExist:
-                return Response({"error": "no matching users"}, status=status.HTTP_400_BAD_REQUEST)
-            user.friends.add(ids)
-            friends = user.friends.all()
-            serializer = UserInfoSerializer(friends, many=True)
-            return Response({"message": "Friends added successfully", "friends" : serializer.data}, status=status.HTTP_201_CREATED)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def setUserConfig(request, user_id=None):
@@ -450,6 +465,45 @@ def anonymise_set(user):
         return JsonResponse({'message': 'The user is already anonymised'}, status=400)
     return None
 
+def avatar_set(user, image_data):
+    '''
+    Guarda y actualiza una nueva foto de perfil para el usuario
+    '''
+    if not image_data:
+        return JsonResponse({'message': 'No image provided'}, status=400)
+
+    # Decode the base64 string
+    format, imgstr = image_data.split(';base64,')
+    ext = format.split('/')[-1]  # Extract the image format
+    if not ext:
+        return JsonResponse({'message': 'No image extension provided'}, status=400)
+
+    supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
+    if ext not in supported_formats:
+        return JsonResponse({'error': 'Unsupported image format'}, status=400)
+        logger.debug(f"ext '{ext}', format '{format}'")
+
+    # Convert base64 string to image
+    img_data = base64.b64decode(imgstr)
+    img = Image.open(BytesIO(img_data))
+
+    # Generate a unique file name
+    file_name = f"{uuid.uuid4()}.{ext}"
+    avatars_dir = os.path.join('avatars', file_name)
+    file_path = os.path.join(settings.MEDIA_ROOT, avatars_dir)
+
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
+        with open(file_path, 'wb') as f:
+            img.save(f, format=supported_formats[ext])
+            #return JsonResponse({'message': 'Image uploaded successfully', 'file_name': avatars_dir})
+        user.avatar = avatars_dir
+        setattr(user,'avatar',avatars_dir)
+    except Exception as e:
+        logger.error(f"SETUSERCONFIG: Error saving image: {e}")
+        return JsonResponse({'error': 'Failed to save image'}, status=500)
+    logger.debug(f"SETUSERCONFIG: Actualizada la foto de perfil del usuario {user.username}")
+
 @api_view(['POST'])
 @authentication_classes([])
 def send_mail(request):
@@ -459,6 +513,41 @@ def send_mail(request):
     email = customUser.email
     mail.send_TwoFA_mail(token_TwoFA, email)
     customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_2FA_activation(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_TwoFA = mail.generate_random_verification_code(6)
+    email = customUser.email
+    mail.send_TwoFA_Activation_mail(token_TwoFA, email)
+    customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_password(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_TwoFA = mail.generate_random_verification_code(6)
+    email = customUser.email
+    mail.send_password_mail(email)
+    customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_2FA_deactivation(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    email = customUser.email
+    mail.send_TwoFA_Deactivation_mail(email)
+    customUser.is_2FA_active = False
     customUser.save()
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
@@ -509,8 +598,24 @@ def verify_mail(request):
     current_Username = mail.desencript(request.POST.get('currentUsername'), token_fernet)
     customUser = CustomUser.objects.get(username=current_Username)
     if customUser.token_verification == current_Token:
+        customUser.token_verification = ''
         customUser.verification_bool = True
         customUser.save()
         return JsonResponse({'message': 'The Token is correct'}, status=201)
     else:
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
+    
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_new_mail(request):
+    current_Username = request.POST.get('currentUsername')
+    current_MailNew = request.POST.get('currentMailNew')
+    current_MailOld = request.POST.get('currentMailOld')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_verification = mail.generate_token()
+    mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(current_Username, token_fernet)), current_MailNew)
+    customUser.token_verification = token_verification
+    mail.send_NoLongerSpacepong_mail(current_MailOld)
+    customUser.verification_bool = False
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)

@@ -1,6 +1,6 @@
 <div class="sp-div w-full flex flex-col items-center justify-center place-content-center rounded-lg pt-2">
 	<h1 class="font-bold tracking-wide text-lg">
-		MATCHES
+		{{ 'lobby_search' | translate }}
 	</h1>
 	<div
 		class="flex w-full  text-white place-content-center rounded-xl shadow-md subpixel-antialiased items-center justify-center mt-4">
@@ -10,7 +10,7 @@
 			<div class="flex-1 items-start gap-2.5 p-2 min-h-80 max-h-80 overflow-y-scroll items-start gap-5">
 				<div *ngFor="let game of filtered_games$ | async" class="flex items-center font-bold">
 					<div class="flex-1">{{ game.name }}</div>
-					<button (click)="joinGame(game)" class="btn justify-end">join</button>
+					<button (click)="joinGame(game)" class="btn justify-end">{{'lobby_search_join'| translate}}</button>
 				</div>
 			</div>
 		</div>
@@ -18,7 +18,7 @@
 	<div class="flex items-center text-center mt-4">
 		<button (click)="showOnlineMatchGenerator()" type="button"
 			class="mt-4 btn btn-warning">
-			Create a new custom game
+			{{'lobby_search_create'| translate}}
 		</button>
 	</div>
 </div>

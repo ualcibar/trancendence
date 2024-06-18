@@ -1,16 +1,9 @@
-<!-- <div class="w-96 bg-gray-300 rounded shadow-md">
-	<div class="text-center pt-4">
-		<h1>Friends list</h1>
-	</div>
-	<p class="text-center pt-8 text-slate-400">You don't have any friends :(</p>
-</div> -->
 <div class="h-50real profileMain" #containerRef>
 	<div *ngIf="loading; else content" class="sp-div flex flex-col items-center justify-center rounded text-white"
 		style="width: 20rem;">
-		<h1 class="m-4">Loading user profile... </h1>
+		<h1 class="m-4">{{'user_profile_loading'|translate}}</h1>
 		<div class="spinner-border text-warning mb-4" role="status"></div>
-		<p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>If it is taking too long, please check
-			that you are logged in</p>
+		<p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>{{'user_profile_timeout'|translate}}</p>
 	</div>
 
 	<ng-template #content>
@@ -72,6 +65,8 @@
 								class="bi bi-chat-dots-fill"></i></button>
 						<button (click)="onMatchHistoryButton()" class="btn mb-2 btn-primary btn-sm"><i
 								class="bi bi-clock-fill"></i></button>
+						<button *ngIf="authService.isUserBlocked(userId)" class="btn mb-2 btn-primary btn-sm"><i
+									class="bi bi-ban"></i></button>
 
 						<button (click)="onFriendListButton()" *ngIf="(authService.userInfo!.info.id == userId)" class="btn mb-2 btn-primary btn-sm"><i
 									class="bi bi-people-fill"></i></button>
@@ -86,5 +81,4 @@
 		<app-not-found *ngIf="user_not_found"></app-not-found>
 		<app-unauthorized *ngIf="unauthorizedAccess && !loading"></app-unauthorized>
 	</ng-template>
-
 </div>

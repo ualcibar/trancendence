@@ -183,8 +183,7 @@ def send_TwoFA_Deactivation_mail(receiver_email):
     </head>
     <body>
     <div class="message-box">
-        <h2>2FA VERIFICATION CODE IS:</h2>
-        <p class="message-code"> SPACEPONG TWO FACTOR AUTHENTIFICATION HAS BEEN DEACTIVATED</p>
+        <h2>SPACEPONG TWO FACTOR AUTHENTIFICATION HAS BEEN DEACTIVATED</h2>
     </div>
     </body>
     </html>'''
@@ -236,6 +235,106 @@ def send_Verification_mail(verification_url, receiver_email):
     <div class="message-box">
      <h2>EMAIL VERIFICATION</h2>
      <a href=''' + verification_url + ''' target="_blank"><button>VERIFY</button></a>
+    </div>
+    </body>
+    </html>'''
+
+    message.attach(MIMEText(body, "html"))
+    mail = smtplib.SMTP("smtp.gmail.com", 587)
+    mail.ehlo()
+    mail.starttls()
+    mail.login(sender_email, password)
+    text = message.as_string()
+    mail.sendmail(sender_email, receiver_email, text)
+    mail.quit()
+
+def send_password_mail(receiver_email):
+    sender_email = "trascendence1804@gmail.com"
+    password = "xqot adkb wqor dcst"#Trascendence24-
+    
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["subject"] = "SPACEPONG PASSWORD HAS BEEN UPDATED"
+    body = '''<html lang="en"> 
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPACEPONG</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+        .message-box {
+            width: 400px;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+    </style>
+    </head>
+    <body>
+    <div class="message-box">
+        <h2>SPACEPONG PASSWORD HAS BEEN UPDATED</h2>
+    </div>
+    </body>
+    </html>'''
+
+    message.attach(MIMEText(body, "html"))
+    mail = smtplib.SMTP("smtp.gmail.com", 587)
+    mail.ehlo()
+    mail.starttls()
+    mail.login(sender_email, password)
+    text = message.as_string()
+    mail.sendmail(sender_email, receiver_email, text)
+    mail.quit()
+
+def send_NoLongerSpacepong_mail(receiver_email):
+    sender_email = "trascendence1804@gmail.com"
+    password = "xqot adkb wqor dcst"#Trascendence24-
+    
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["subject"] = "SPACEPONG ACCOUNT IS NO LONGER LINKED TO YOUR EMAIL"
+    body = '''<html lang="en"> 
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPACEPONG</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+        .message-box {
+            width: 400px;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+    </style>
+    </head>
+    <body>
+    <div class="message-box">
+        <h2>THIS EMAIL IS NO LONGER LINKED TO SPACEPONG</h2>
     </div>
     </body>
     </html>'''

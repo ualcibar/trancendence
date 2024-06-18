@@ -12,6 +12,7 @@
     "username":"Usuario",
     "password":"Contraseña",
     "email":"Correo",
+
     "register_title":"¡Regístrate a SpacePong!",
     "register_subtitle":"¿Ya eres usuario?",
     "register_subtitle_link":"Inicia sesión aquí",
@@ -91,6 +92,10 @@
     "match_gen_max_rounds":"máximo de rondas",
     "match_gen_best_of":"el mejor de",
     "match_gen_team_size":"tamaño del equipo",
+    "match_gen_players":"jugadores",
+    "match_gen_best_of_error": "No puede haber menos rondas que las necesarias para ganar",
+    "match_gen_choose_map":"Elige el mapa",
+    "match_gen_default":"Predeterminado",
 
     "tournament_gen":"aquí es donde estableces la configuración del torneo",
     "tournament_gen_numplayers":"numero de jugadores",
@@ -98,6 +103,7 @@
     "tournament_next":"Proxima Partida",
 
     "home_websocket_chat_state":"estado del websocket de chat: ",
+    "home_debug":"Modo debug activado",
     "home_websocket_matchmaking_state":"estado del websocket de emparejamiento: ",
     "home_matchmaking_state":"estado del emparejamiento: ",
     "home_match_state":"estado de la partida en línea actual: ",
@@ -108,6 +114,11 @@
     "home_match":"PARTIDA",
     "home_tournament":"TORNEO",
     "home_start":"EMPEZAR",
+    "home_play":"Jugar",
+    "home_play_online":"Jugar en línea",
+    "home_play_tournament_setting":"Ajustes del torneo",
+    "home_play_match_setting":"Ajustes de la partida",
+    "home_current":"estado actual de home: ",
 
     "login_loading":"Cargando",
     "login_user_unnexistent":"¡Este usuario no existe!",
@@ -143,6 +154,9 @@
     "settings_public_choose" : "Escoge un nombre de usuario único para poder identificarte",
     "settings_public_other" : "¡Este usuario ya está en uso! Elige otro.",
     "settings_public_done" : "¡Hecho!",
+    "settings_public_reset" : "Resetear",
+    "settings_public_archive_notpermited" : "Este tipo de archivo no está permitido. Prueba con otro.",
+    "settings_public_pfp_success" : "¡Foto de perfil cambiada con éxito!",
 
     "settings_update_email" : "Actualiza el correo electrónico asociado a tu cuenta",
     "settings_update_email_inuse" : "¡Este correo ya está en uso!",
@@ -159,5 +173,34 @@
 
     "verify_verification" : "Verificación",
     "verify_verification_success" : "¡La verificación se ha completado con éxito!",
-    "verify_verification_error" : "Error de verificación, algo ha ido mal, intenta usar la URL que se ha enviado a tu correo electrónico sin modificaciones"
+    "verify_verification_error" : "Error de verificación, algo ha ido mal, intenta usar la URL que se ha enviado a tu correo electrónico sin modificaciones",
+
+    "chat_new" : "Chat nuevo",
+    "chat_join" : "UNIRSE A LA PARTIDA",
+
+    "friends_title" : "AMIGOS",
+    "friends_load" : "Cargando...",
+
+    "online_name" : "Nombre :",
+    "online_public" : "Publico",
+    "online_private" : "Privado",
+
+    "pong_welcome" : "!Bienvenido a Pong!",
+    "pong_reset" : "REINICIAR",
+
+    "tournament_round" : "Ronda ",
+    "tournament_match" : "Partida ",
+    "tournament_winner_match" : "Ganador Partida",
+    "tournament_winner_semi" : "Ganador Semis",
+    "tournament_winner_round" : "Ganador Ronda",
+    "tournament_winner" : "Ganador",
+    "tournament_final" : "Final",
+    "tournament_semifinal" : "Semifinal",
+    "tournament_tbd" : "PD",
+
+    "postregister_title" : "Porfavor revisa tu correo para verificar tu cuenta",
+    "postregister_subtitle" : "¡Una vez verificado tu correo podrás iniciar sesión!",
+
+    "user_profile_loading" : "Cargando perfil de usuario...",
+    "user_profile_timeout" : "Esta tardando demasiado, por favor comprueba que has iniciado sesión"
 }

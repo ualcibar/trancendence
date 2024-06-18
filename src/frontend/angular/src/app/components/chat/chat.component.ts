@@ -9,6 +9,7 @@ import { ChatService, Message, MessageType } from '../../services/chat.service';
 import { easeOut } from '../../../assets/animations/easeOut';
 import { AuthService } from '../../services/auth.service';
 import { MatchmakingService } from '../../services/matchmaking.service';
+import { TranslateModule } from '@ngx-translate/core';
 import { StateService } from '../../services/stateService';
 
 import { Router } from '@angular/router';
@@ -16,7 +17,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchBarComponent],
+  imports: [CommonModule, FormsModule, SearchBarComponent, TranslateModule],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
   animations: [easeOut]

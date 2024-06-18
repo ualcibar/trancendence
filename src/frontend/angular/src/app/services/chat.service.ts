@@ -3,7 +3,6 @@ import { NgZone } from '@angular/core';
 import {AuthService, PrivateUserInfo, UserInfo} from './auth.service';
 import { LogFilter, Logger } from '../utils/debug';
 import { ChatState, StateService } from './stateService';
-import { MatchSettings, MatchSettingsI } from './gameManager.service';
 import { toEnum } from '../utils/help_enum';
 import { OnlineMatchSettings2 } from './matchmaking.service';
 
@@ -104,6 +103,7 @@ export class ChatService {
       this.logger.error('Failed to get Cookie Access Token, please, log in');
       return;
     }
+    console.log(this.webSocketUrl);
 
     // Gestion del Websocket
     this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
@@ -125,6 +125,8 @@ export class ChatService {
     };
 
     this.webSocket.onmessage = (event) => {
+      if (!this.authService.userInfo)
+        return
       const data = JSON.parse(event.data);
       let targetChannel = this.current_chat_name;
       let messageI: MessageI;
@@ -133,6 +135,8 @@ export class ChatService {
         this.logger.info("Channel type: " + data.type);
         switch (data.type) {
           case 'private_message':
+            if (this.authService.isUserBlocked(data.message.sender.id))
+              return
             if (!this.chatMessages.has(data.user)) {
               this.chatMessages.set(data.user, []);
             }
@@ -140,6 +144,8 @@ export class ChatService {
             messageI = data.message;
             break;
           case 'private_message_delivered':
+            if (this.authService.isUserBlocked(data.message.sender.id))
+              return
             targetChannel = data.target;
             messageI = data.message;
             break;

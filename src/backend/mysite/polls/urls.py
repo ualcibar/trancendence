@@ -44,8 +44,6 @@ class CustomTokenRefreshView(TokenRefreshView):
             logger.debug('ACCESS doesn\'t exist')
             return Response({'message': "access doesn't exist"}, status=400)
 
-from .views import CustomUserView, FriendsListView, FriendsView
-
 urlpatterns = [
     path("register/", views.register, name="register"),
     path("login/", views.login, name='token_obtain_pair'),
@@ -56,23 +54,24 @@ urlpatterns = [
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
+    
     path("getInfo/", views.getInfo, name="get_info"),
     path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),
     path("checkInfo/", views.checkInfo, name="check_info"),
     path("setConfig/", views.setUserConfig, name="set_user_config"),
     path("setConfig/<int:user_id>", views.setUserConfig, name="set_user_config_by_id"),
-    path('user/<int:user_id>/', CustomUserView.as_view(), name='user_info'),
-    path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'),
-    path('friendsID/<int:user_id>/<int:friend_id>/', FriendsView.as_view(), name='friends'),
+    
+    path('friends/', views.friends, name='friends'), 
+    path('blockedUsers/', views.blocked_users, name='friends'),
+    
     path('matches/', views.matches, name='match-list'),
-    path("history/<int:user_id>", views.userHistory, name="user_history")
-]
-
     path("history/<int:user_id>", views.userHistory, name="user_history"),
-    #path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),
-    #path('player_games/', GameHistoryView.as_view(), name='game_history'), 
-    path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'), 
+    
     path('send_mail/', views.send_mail, name='send_mail'),
+    path('send_mail_password/', views.send_mail_password, name='send_mail_password'),
+    path('send_mail_2FA_deactivation/', views.send_mail_2FA_deactivation, name='send_mail_2FA_deactivation'),
+    path('send_mail_2FA_activation/', views.send_mail_2FA_activation, name='send_mail_2FA_activation'),
+    path('send_mail_new_mail/', views.send_mail_new_mail, name='send_mail_new_mail'),
     path('check_token/', views.check_token, name='check_token'),
     path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool'),
     path('verify_mail/', views.verify_mail, name='verify_mail')
