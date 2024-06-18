@@ -177,6 +177,7 @@
 
     "chat_new" : "Chat nuevo",
     "chat_join" : "UNIRSE A LA PARTIDA",
+    "chat_invite" : "Invitar",
 
     "friends_title" : "AMIGOS",
     "friends_load" : "Cargando...",
