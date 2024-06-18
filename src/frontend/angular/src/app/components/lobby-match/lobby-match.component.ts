@@ -40,8 +40,6 @@ export class LobbyMatchComponent {
             return;
           }
           this.lobby = info;
-          console.log('lobby', this.lobby)
-          console.log('important', this.lobby.players)
           this.state = LobbyMatchState.Ok
           break;
         case MatchmakingState.StandBy:

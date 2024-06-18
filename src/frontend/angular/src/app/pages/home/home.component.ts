@@ -23,6 +23,7 @@ import { TournamentTreeComponent } from '../../components/tournament-tree/tourna
 import { OnlineMatchGeneratorComponent } from '../../components/online-match-generator/online-match-generator-component';
 import {TranslateModule} from "@ngx-translate/core";
 import { easeOut } from '../../../assets/animations/easeOut';
+import { PaddleState } from '../../components/pong/pong.component';
 /*
 enum HomeState {
   Home,
@@ -38,32 +39,22 @@ class LocalGameHandler{
   private tournamentSettings? : TournamentSettings | undefined;
   private onlineMatchSettings? : OnlineMatchSettings2 | undefined;
 
-  defaultMatch() : MatchSettings{//this should be somewhere else
-    return new MatchSettings(60,3,2,1,MapsName.Default);//!todo should be in settings
-  }
-  defaultTournament() : TournamentSettings{//this should be somewhere else
-    return new TournamentSettings(this.defaultMatch(),8);//!todo should be in settings
-  }
-  defaultOnlineMatch() : OnlineMatchSettings2{//this should be somewhere else
-    return new OnlineMatchSettings2('default', 'esp', true,this.defaultMatch());//!todo should be in settings
-  }
-
   getMatchSettings() : MatchSettings{
     if (!this.matchSettings){
       console.log('reseted match')
-      this.matchSettings = this.defaultMatch();
+      this.matchSettings = MatchSettings.default();
     }
     return this.matchSettings;
   }
 
   getTournamentSettings() : TournamentSettings{
     if (!this.tournamentSettings)
-      this.tournamentSettings = this.defaultTournament();//!todo should be in settings
+      this.tournamentSettings = TournamentSettings.default();//!todo should be in settings
     return this.tournamentSettings;
   }
   getOnlineMatchSettings() : OnlineMatchSettings2{
     if (!this.onlineMatchSettings)
-      this.onlineMatchSettings = this.defaultOnlineMatch();//!todo should be in settings
+      this.onlineMatchSettings = OnlineMatchSettings2.default();//!todo should be in settings
     return this.onlineMatchSettings;
   }
   resetMatchSettings(){
@@ -96,7 +87,7 @@ class LocalGameHandler{
   animations: [fadeInOut, easeOut]
 })
 export class HomeComponent implements OnInit{
-  debug : boolean = false; //Al activar el modo debug, aparecerá un recuadro en la página
+  debug : boolean = true; //Al activar el modo debug, aparecerá un recuadro en la página
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;
@@ -119,8 +110,7 @@ export class HomeComponent implements OnInit{
               private gameManager : GameManagerService,
               private maps : MapsService,
               private router : Router,
-              public state : StateService) {
-    console.log('matchmaking state', MatchmakingState[this.state.matchmakingState])
+              public state : StateService) { 
   }
 
   ngOnInit(): void {
@@ -150,12 +140,14 @@ export class HomeComponent implements OnInit{
   backgroundClicked(){
     this.logger.info('backgroud clicked');
     const state = this.state.homeState;
-    if (state === HomeState.MatchTournament || state === HomeState.SearchingOnlineGame)
+    if (state === HomeState.MatchTournament)
       this.changeState(HomeState.Home)
     else if (state === HomeState.MatchGenerator || state === HomeState.TournamentGenerator)
       this.changeState(HomeState.MatchTournament)
     else if (state === HomeState.OnlineMatchGenerator)
       this.changeState(HomeState.SearchingOnlineGame)
+    else if (state === HomeState.SearchingOnlineGame)
+      this.changeState(HomeState.Home)
   }
 
   getMatch() {

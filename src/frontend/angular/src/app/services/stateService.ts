@@ -3,13 +3,14 @@ import { Observable, Subject, Subscription } from "rxjs";
 import { LogFilter, Logger } from "../utils/debug";
 import { Injectable } from "@angular/core";
 export enum HomeState {
-  Home,
-  SearchingOnlineGame,
-  Community,
-  MatchTournament,
-  MatchGenerator,
-  TournamentGenerator,
-  OnlineMatchGenerator,
+  Home = 'Home',
+  SearchingOnlineGame = 'SearchingOnlineGame',
+  Community = 'Community',
+  MatchTournament = 'MatchTournament',
+  MatchGenerator = 'MatchGenerator',
+  TournamentGenerator = 'Tournament',
+  OnlineMatchGenerator = 'OnlineMatchGenerator',
+  JoiningGame = 'JoiningGame'
   //TournamentTree,
 }
 
@@ -155,6 +156,15 @@ class HomeRenderManager{//manages wether they are active or not
                 case HomeState.TournamentGenerator: {
                     const wantRender = this.createActiveArray()
                     wantRender[tournamentGenerator] = true;
+                    wantRender[chat] = this.active.chat;
+                    if (wantRender.length !== 11)
+                        console.error('state service: home switch: map length error');
+                    this.states.update(wantRender);
+                    break;
+                }
+                case HomeState.JoiningGame:{
+                    const wantRender = this.createActiveArray()
+                    wantRender[joiningOnlineMatch] = true;
                     wantRender[chat] = this.active.chat;
                     if (wantRender.length !== 11)
                         console.error('state service: home switch: map length error');

@@ -66,15 +66,15 @@
 						<div class="stat-value text-error">{{ info.statistics.loses }}</div>
 					</div>
 					<div class="stat">
-						<button [ngClass]="{'grayscale disabled opacity-25': selfInfo!.info.id === info.id}"
+						<button *ngIf="!friendService.friendExist(userId) && !friendADD" (click)="toggleAddFriend()" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
+						<button *ngIf="selfInfo!.info.id !== info.id"
 							(click)="onChatButton()" class="btn mb-2 btn-primary btn-sm"><i
 								class="bi bi-chat-dots-fill"></i></button>
-						<button (click)="onMatchHistoryButton()" class="btn btn-primary btn-sm"><i
+						<button (click)="onMatchHistoryButton()" class="btn mb-2 btn-primary btn-sm"><i
 								class="bi bi-clock-fill"></i></button>
 
-						<button *ngIf="!friendService.friendExist(userId) && !friendADD" (click)="toggleAddFriend()" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
-						<button (click)="onFriendListButton()" *ngIf="(authService.userInfo!.info.id == userId)" class="btn btn-primary btn-sm"><i
-									class="bi bi-person-fill-add"></i></button>
+						<button (click)="onFriendListButton()" *ngIf="(authService.userInfo!.info.id == userId)" class="btn mb-2 btn-primary btn-sm"><i
+									class="bi bi-people-fill"></i></button>
 					</div>
 				</div>
 			</div>

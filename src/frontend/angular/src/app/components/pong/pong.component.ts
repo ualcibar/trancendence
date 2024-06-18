@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Input } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Input, HostListener } from '@angular/core';
 import * as THREE from 'three';
 import { Vector2, Vector3} from 'three';
 import { Subscription } from 'rxjs';
@@ -24,9 +24,9 @@ export const colorPalette = {
 };
 
 export enum PaddleState{
-  Binded = 'binded', //must be keybinded moved by ourselfs
-  Unbinded = 'unbinded',
-  Bot = 'bot'
+  Binded, //must be keybinded moved by ourselfs
+  Unbinded,
+  Bot
 }
 
 export enum BlockType{
@@ -317,8 +317,10 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   downKey! : string;
   goinUp : boolean = false;
   goinDown : boolean = false;
-  localPlayer : boolean = false;
-  AIplayer : boolean = false;
+
+  stateBinded : boolean = false;
+  stateBot : boolean = false;
+  stateUnbinded : boolean = false;
   AIprediction : number = 0;
 
   tickBehaviour : TickBehaviour<Paddle>;
@@ -329,7 +331,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   dimmensions : Vector3;
   type : BlockType;
   color : number;
-  state : PaddleState;
+  state : number;//PaddleState
 
   lastIAupdate : number = 0;
 
@@ -355,10 +357,10 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.type = settings.paddleType;
     this.color = settings.paddleColor;
     this.speed = settings.paddleSpeed;
-    this.state = settings.paddleState[number];
+    this.state = PaddleState.Binded;
 
     if (this.state === PaddleState.Binded) {
-      this.madeLocalPlayer();
+    
       this.upKey = settings.paddleUpKey[number];
       this.downKey = settings.paddleDownKey[number];
     }
@@ -473,20 +475,23 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   madeLocalPlayer() {
-    this.localPlayer = true;
-    this.AIplayer = false;
+    this.stateBinded = true;
+    this.stateBot = false;
+    this.stateUnbinded = false;
     this.state = PaddleState.Binded;
   }
 
   madeAIPlayer() {
-    this.localPlayer = false;
-    this.AIplayer = true;
+    this.stateBinded = false;
+    this.stateBot = true;
+    this.stateUnbinded = false;
     this.state = PaddleState.Bot;
   }
 
   madeUnbinded() {
-    this.localPlayer = false;
-    this.AIplayer = false;
+    this.stateBinded = false;
+    this.stateBot = false;
+    this.stateUnbinded = true;
     this.state = PaddleState.Unbinded;
   }
 
@@ -498,14 +503,14 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   isAI() : boolean{
     if (this.state === PaddleState.Bot)
       this.madeAIPlayer();
-    return this.AIplayer;
+    return this.stateBot;
   }
 
   getId(): number {
     return this.id;
   }
 
-  getState() : PaddleState{
+  getState() : number{
     return this.state;
   }
 
@@ -560,8 +565,8 @@ function keyToEmoji(key : string) : string{
   styleUrls: ['./pong.component.css']
 })
 export class PongComponent implements AfterViewInit, OnDestroy {
-
-  @ViewChild('pongCanvas', { static: true }) pongCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('pongCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasContainer', { static: true }) canvasContainerRef!: ElementRef<HTMLDivElement>;
 
   public readonly fov = 75;
   public readonly aspect = 2; // the canvas default
@@ -571,7 +576,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   stop : boolean = false;
   renderer!: THREE.WebGLRenderer;
-  canvas: any;
+  //canvas: any;
   camera!: THREE.PerspectiveCamera;
   scene!: THREE.Scene;
   light!: THREE.Light;
@@ -590,23 +595,33 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   pauseKey : string = 'p';
   resetKey : string = 'r';
 
-  controlsText : string = `⏸️: ${this.pauseKey}\n🔁: ${this.resetKey}\n`;
-  controlsTextSafe: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(this.controlsText);
-
   pausedTime : number = 0; //time passed paused in ms
   pausingTime : number = 0; //time when pausing started in ms
 
   //currentGame!: MatchGame;//it should always exist when a game starts, even if not at construction
 
-  configStateSubscription!: Subscription;
+  configStateSubscription!: Subscription; 
 
   constructor(private manager: GameManagerService,
-    private router: Router,
-    private sanitizer: DomSanitizer) {
+    private router: Router) {
       this.pausingTime = Date.now();
   }
 
-  ngAfterViewInit(): void {
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    this.resizeCanvas();
+  }
+
+  private resizeCanvas() {
+    this.canvasRef.nativeElement.width = this.canvasContainerRef.nativeElement.clientWidth
+    this.canvasRef.nativeElement.height = this.canvasContainerRef.nativeElement.clientHeight
+    if (this.renderer)
+      this.renderer.setSize(this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height )
+      
+  }
+
+  ngAfterViewInit(): void { 
+    this.resizeCanvas();
     if (this.manager.getState() === GameManagerState.Standby) {
       console.error('pong, no game has been started');
       this.router.navigate(['/']);
@@ -632,7 +647,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
           case MatchState.FinishedSuccess:
             break;
           case MatchState.FinishedError:
-            this.pause();
             break;
         }
       }
@@ -689,7 +703,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  pause() {
+  pause() { 
     console.log('pausing');
     // this.paused = true;
     this.manager.pause();
@@ -751,16 +765,13 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.paddles[index] = new Paddle(this.map, index, this.manager);
       this.paddles[index].addToScene(this.scene);
 
-      if (this.paddles[index].localPlayer){
+      /*if (this.paddles[index].localPlayer){
         this.controlsText += `P${index + 1}:\n\t-👆${keyToEmoji(this.paddles[index].upKey)}\n\t-👇${keyToEmoji(this.paddles[index].downKey)}\n`;
-      }
-      this.paddles[index].goUp();
-      this.paddles[index].goDown();
-      this.paddles[index].stop();
+      }*/
     }
-    this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(
+    /*this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(
       this.controlsText.replace(/\n/g, '<br>').replace(/\t/g, '&emsp;')
-    );
+    );*/
 
     // INIT BLOCKS
     this.blocks = new Array<THREE.Mesh>(this.update.blocks.length);
@@ -784,13 +795,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   initValues() {
-    /*this.map = this.manager.getMapSettings();
-    this.matchSettings = this.manager.getMatchSettings();
-    this.update = this.manager.getMatchUpdate();//its a reference*/
-    //INITIALIZE THREE.JS
-    // INIT SCENE
-    this.canvas = this.pongCanvas.nativeElement;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this.canvas });
+    console.log(this.canvasRef.nativeElement)
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas : this.canvasRef.nativeElement}); 
 
     this.camera = new THREE.PerspectiveCamera(this.fov,
       this.aspect,
@@ -815,6 +821,9 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       // console.log('paused', this.pausedTime);
       this.pastTime = time;
       return;
+    }
+    if (this.manager.getMatchState() !== MatchState.Running){
+      return
     }
 
 
@@ -846,8 +855,12 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       requestAnimationFrame(this.render.bind(this));
   }
 
+<<<<<<< HEAD
   logic(timeDifference : number){
     // console.log('pausing', this.paused); 
+=======
+  logic(timeDifference : number){ 
+>>>>>>> 75103e0 (paddle state undefined in matchupdate online client)
     if (!this.paused)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();

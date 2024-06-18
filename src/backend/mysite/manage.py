@@ -18,6 +18,10 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     django.setup()
+#    from matchmaking.models import MatchPreview, Player, Paddle
+#    MatchPreview.objects.all().delete()
+#    Player.objects.all().delete()
+#    Paddle.objects.all().delete()
     execute_from_command_line(sys.argv)
 
 if __name__ == '__main__':

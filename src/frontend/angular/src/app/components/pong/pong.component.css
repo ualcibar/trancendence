@@ -1,55 +1,18 @@
-#time {
-    text-align: right;
-    color: black;
-    background-color: gray;
-}
-
-#welcome {
-    color: lime;
-    background-color: magenta;
-    font-family: 'Jokerhand', cursive;
-}
-
-html, body {
-   margin: 0;
-   height: 100%;
-}
 .canvas-container {
+    display: relative;
+    height: 100%;
+    width: 100%;
+}
+
+/*.canvas-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Ajusta esto según tus necesidades */
-}
+    height: 100vh;  Ajusta esto según tus necesidades 
+}*/
 
 #c {
     width: 50%;
     height: 50%;
     display: block;
 }
-
-.paused-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-}
-
-.paused-text {
-    font-size: 80px;
-    color: ivory;
-}
-
-.controls-text {
-    font-size: 1em;
-    color: #870000;
-    text-shadow: 1px 1px #000000;
-    text-align: left;
-    margin-top: 20px;
-}
-
-.game-container {
-    display: flex;
-    /* justify-content: space-between; */
-}
-
