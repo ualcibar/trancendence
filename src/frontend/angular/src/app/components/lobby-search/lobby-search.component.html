@@ -9,8 +9,10 @@
 				placeholder="name #tag">
 			<div class="flex-1 items-start gap-2.5 p-2 min-h-80 max-h-80 overflow-y-scroll items-start gap-5">
 				<div *ngFor="let game of filtered_games$ | async" class="flex items-center font-bold">
-					<div class="flex-1">{{ game.name }}</div>
-					<button (click)="joinGame(game)" class="btn justify-end">{{'lobby_search_join'| translate}}</button>
+					<div *ngIf="game.available" class="flex items-center font-bold">
+						<div class="flex-1">{{ game.name }}</div>
+						<button (click)="joinGame(game)" class="btn justify-end">{{'lobby_search_join'| translate}}</button>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -187,7 +187,8 @@ class MatchMakingConsumer(WebsocketConsumer):
                             'type': 'new_match_result',
                             'status': 'failure_duplicate_key',
                         }))
-                        self.user.game.delete()
+                        if self.user.game is not None:
+                            self.user.game.delete()
                     else:
                         # Handle other IntegrityError exceptions
                         logger.debug("Receive: new match: Another type of IntegrityError occurred:", e)
@@ -414,11 +415,11 @@ class MatchMakingConsumer(WebsocketConsumer):
                 for user in users:
                     user.status = CustomUser.IN_GAME
                     user.save()
-            case '/match/all_players_connected':
                 async_to_sync(self.channel_layer.group_send)(
-                    self.user.game_room_name,
+                    self.global_room_name,
                     {
-                        'type': 'match_all_players_connected',
+                        'type': 'match_unavailable',
+                        'match_name' : self.user.game.name
                     }
                 )
                 self.user.game.available = False
@@ -501,6 +502,8 @@ class MatchMakingConsumer(WebsocketConsumer):
     def match_finished(self, event):
         self.send(text_data=json.dumps(event))
     def del_match(self, event):
+        self.send(text_data=json.dumps(event))
+    def match_unavailable(self, event):
         self.send(text_data=json.dumps(event))
 
     def checking(self, event):

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { easeOut } from '../../../assets/animations/easeOut';
 import {AuthService, PrivateUserInfo} from '../../services/auth.service';
 import { ip } from '../../../main';
+
 @Component({
     selector: 'app-register',
     animations: [easeOut],
@@ -36,7 +37,7 @@ export class RegisterComponent {
     }
 
     register42Api() {
-        window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2F' + ip + '%3A4200&response_type=code&state=register';
+        window.location.href = `https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=https%3A%2F%2F${ip}%3A1501&response_type=code&state=register`;
     }
 
     registerAcc() {

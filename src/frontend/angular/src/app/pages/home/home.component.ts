@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 
 import { ChatComponent } from '../../components/chat/chat.component';
 import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
@@ -12,7 +12,7 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { fadeInOut, fadeInOuttimeout } from '../../../assets/animations/fadeInOut';
 import { GameManagerService, MatchConfig, MatchSettings, TournamentManager, TournamentSettings} from '../../services/gameManager.service';
 import { MapsName, MapsService } from '../../services/map.service';
-import {Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, ActivationEnd, Router, RouterLink} from '@angular/router';
 
 import { ChatService } from '../../services/chat.service';
 import { TournamentGeneratorComponent } from '../../components/tournament-gererator/tournament-generator-component';
@@ -24,6 +24,8 @@ import { OnlineMatchGeneratorComponent } from '../../components/online-match-gen
 import {TranslateModule} from "@ngx-translate/core";
 import { easeOut } from '../../../assets/animations/easeOut';
 import { PaddleState } from '../../components/pong/pong.component';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ip } from '../../../main';
 /*
 enum HomeState {
   Home,
@@ -86,7 +88,7 @@ class LocalGameHandler{
   styleUrl: './home.component.css',
   animations: [fadeInOut, easeOut]
 })
-export class HomeComponent implements OnInit{
+export class HomeComponent implements OnInit, AfterViewInit{
   debug : boolean = true; //Al activar el modo debug, aparecerá un recuadro en la página
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
@@ -110,12 +112,74 @@ export class HomeComponent implements OnInit{
               private gameManager : GameManagerService,
               private maps : MapsService,
               private router : Router,
-              public state : StateService) { 
+              public state : StateService,
+              private route : ActivatedRoute,
+              private http : HttpClient) { 
   }
 
   ngOnInit(): void {
   }
 
+  ngAfterViewInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const code = params['code']; // Extract authorization code from query parameters
+      // Now you can use the authorization code to obtain an access token
+      const state = params['state'];
+      if (code && state) {
+        // Handle the authorization code
+
+        const jsonToSend = {
+          code: code
+        };
+
+        console.log('Authorization code:', code);
+        if (state == 'login') {
+          const httpOptions = {
+            headers: new HttpHeaders({
+              'Content-Type': 'application/json'
+            }),
+            withCredentials: true
+          };
+          const backendURL = `https://${ip}:1501/api/polls/login42/`;
+
+          this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
+            next : (response) => { 
+              window.location.href = '/';
+              console.log('Sent data: ', response);
+            },
+            error : (error) => {
+              console.error('failed to login using 43', error);
+            }
+        });
+
+        } else if (state == 'register') {
+          const httpOptions = {
+            headers: new HttpHeaders({
+              'Content-Type': 'application/json'
+            })
+          };
+          const backendURL = `https://${ip}:1501/api/polls/register42/`;
+
+          this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe(
+            response => {
+              console.log('Sent data: ', response);
+            },
+            error => {
+              console.error('failed to register using 43', error);
+            }
+          );
+
+        } else {
+          console.log('State must be register or login');
+        }
+        // Proceed with token exchange or authentication process
+      } else {
+        // Handle the absence of authorization code
+        console.log('Authorization code or state not found');
+        // Handle error or redirect to an error page
+      }
+    });
+  }
 /*  ngOnDestroy(): void {
     this.matchmakingService.webSocket.close();
   }*/

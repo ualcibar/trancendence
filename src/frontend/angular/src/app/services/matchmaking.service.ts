@@ -152,27 +152,30 @@ export interface OnlineMatchSettings2I{
   name : string;
   publicMatch : boolean;
   matchSettings : MatchSettingsI;
+  available : boolean;
 }
 
 export class OnlineMatchSettings2{
   name : string;
   publicMatch : boolean;
   matchSettings : MatchSettings; 
+  available : boolean;
   
   constructor( name : string, publicMatch: boolean, 
-               matchSettings : MatchSettings){
+               matchSettings : MatchSettings, available : boolean){
     this.name = name;
     this.publicMatch = publicMatch;
     this.matchSettings = matchSettings;
+    this.available = available;
   }
   static fromI(onlineMatchSettings2I : OnlineMatchSettings2I) : OnlineMatchSettings2 | undefined{
     const matchSettings = MatchSettings.fromI(onlineMatchSettings2I.matchSettings)
     if (!matchSettings)
       return undefined
-    return new OnlineMatchSettings2(onlineMatchSettings2I.name, onlineMatchSettings2I.publicMatch, matchSettings)
+    return new OnlineMatchSettings2(onlineMatchSettings2I.name, onlineMatchSettings2I.publicMatch, matchSettings, onlineMatchSettings2I.available)
   }
   static default() : OnlineMatchSettings2{
-    return new OnlineMatchSettings2('default', true, MatchSettings.default())
+    return new OnlineMatchSettings2('default', true, MatchSettings.default(), true)
   }
 }
 
@@ -701,8 +704,22 @@ export class MatchmakingService implements MatchSync{
           this.logger.info('match reconnect: successfully reconnected, waiting for webrtc');
           break;
         case 'match_list':
-          this.availableMatches = data.matches;
+          const matches : OnlineMatchSettings2[] = []
+          for (const matchI of data.matches){
+            const match = OnlineMatchSettings2.fromI(matchI)
+            if (!match){
+              this.logger.error('failed to parse match')
+              continue;
+            }
+            matches.push(match)
+          }
+          this.availableMatches = matches
+          this.dataChangedSubject.next()
           this.logger.info('available matches', this.availableMatches)
+          break;
+        case 'match_unavailable':
+          this.availableMatches = this.availableMatches.filter(match => match.name !== data.match_name)
+          this.dataChangedSubject.next()
           break;
         case 'match_finished':
           this.logger.info('match finished received')
@@ -845,8 +862,10 @@ export class MatchmakingService implements MatchSync{
       const message = JSON.parse(event.data);
       if (message.type === 'update')
         this.onlineManager.matchUpdate.update(message.data);
-      else if (message.type === 'client_update')
+      else if (message.type === 'client_update'){
+        console.log('client update')
         this.onlineManager.matchUpdate.clientUpdate(message.data);
+      }
       else if (message.type === 'event'){
         this.logger.info('event received !!!', message)
         if (!this.onlineManager){

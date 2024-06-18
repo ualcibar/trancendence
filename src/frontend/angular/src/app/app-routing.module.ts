@@ -14,7 +14,6 @@ import { TwofaLoginComponent } from './pages/twofa-login/twofa-login.component';
 import { PlayComponent } from './pages/play/play.component';
 import { PostregisterComponent } from './pages/postregister/postregister.component';
 
-
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'play', component: PlayComponent },

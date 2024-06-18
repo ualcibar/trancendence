@@ -79,7 +79,7 @@ const debugConfig : Record<LogFilter, LogLevel> = {
     [LogFilter.ManagerTournamentLogger]: LogLevel.Error,
     [LogFilter.PongLogger]: LogLevel.Info,
     [LogFilter.ChatServiceLogger]: LogLevel.Error,
-    [LogFilter.MatchmakingServiceLogger]: LogLevel.Error,
+    [LogFilter.MatchmakingServiceLogger]: LogLevel.Info,
     [LogFilter.HomeLogger]: LogLevel.Error,
     [LogFilter.AuthServiceLogger]: LogLevel.Error,
     [LogFilter.LobbySearchLogger] : LogLevel.Error,
