@@ -249,7 +249,9 @@ def registerWith42Token(request):
         logger.debug(f"\tError getting me info: {response.status_code}")
         return JsonResponse({'message': 'failed to get me info'}, status=400)
     logger.debug(f"\tcontent = {response.json()}")
-    if CustomUser.objects.create42user(response.json()) is None:
+    try :
+        CustomUser.objects.create42user(response.json())
+    except Exception as e:
         return JsonResponse({'message': 'failed to create user'}, status=400)
     return JsonResponse(response.json(), status=200)
 
