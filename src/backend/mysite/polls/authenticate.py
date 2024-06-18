@@ -4,7 +4,7 @@ from django.conf import settings
 from rest_framework.authentication import CSRFCheck
 from rest_framework import exceptions
 from channels.generic.websocket import WebsocketConsumer
-
+from polls.models import CustomUser
 import logging
 
 logger = logging.getLogger('std')
@@ -24,8 +24,15 @@ class CustomAuthentication(JWTAuthentication):
         if raw_token is None:
             return None
         validated_token = self.get_validated_token(raw_token)
-
-        return self.get_user(validated_token), validated_token
+        return self.get_user(validated_token['user_id']), validated_token
+    
+    def get_user(self, id_):
+        try:
+            user = CustomUser.objects.get(pk=id_)
+            logger.debug(f'got the user {user} {type(user)}')
+            return user
+        except CustomUser.DoesNotExist:
+            return None
 
 from channels.middleware import BaseMiddleware
 from channels.auth import AuthMiddlewareStack
