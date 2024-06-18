@@ -10,6 +10,7 @@ build:
 	docker compose -f $(COMPOSE_FILE) build
 build_con:
 	@echo "\033[1;33mBuilding \033[1;32m$(c) \033[1;33mcontainer...\033[0m"
+	cd src; bash ip_to_env.sh; cd ..
 	docker compose -f $(COMPOSE_FILE) build $(c)
 	@echo "\033[1;33mRaising up \033[1;32m$(c) \033[1;33mcontainer...\033[0m"
 	docker compose -f $(COMPOSE_FILE) restart $(c)

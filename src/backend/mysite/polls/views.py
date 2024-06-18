@@ -465,6 +465,45 @@ def anonymise_set(user):
         return JsonResponse({'message': 'The user is already anonymised'}, status=400)
     return None
 
+def avatar_set(user, image_data):
+    '''
+    Guarda y actualiza una nueva foto de perfil para el usuario
+    '''
+    if not image_data:
+        return JsonResponse({'message': 'No image provided'}, status=400)
+
+    # Decode the base64 string
+    format, imgstr = image_data.split(';base64,')
+    ext = format.split('/')[-1]  # Extract the image format
+    if not ext:
+        return JsonResponse({'message': 'No image extension provided'}, status=400)
+
+    supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
+    if ext not in supported_formats:
+        return JsonResponse({'error': 'Unsupported image format'}, status=400)
+        logger.debug(f"ext '{ext}', format '{format}'")
+
+    # Convert base64 string to image
+    img_data = base64.b64decode(imgstr)
+    img = Image.open(BytesIO(img_data))
+
+    # Generate a unique file name
+    file_name = f"{uuid.uuid4()}.{ext}"
+    avatars_dir = os.path.join('avatars', file_name)
+    file_path = os.path.join(settings.MEDIA_ROOT, avatars_dir)
+
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
+        with open(file_path, 'wb') as f:
+            img.save(f, format=supported_formats[ext])
+            #return JsonResponse({'message': 'Image uploaded successfully', 'file_name': avatars_dir})
+        user.avatar = avatars_dir
+        setattr(user,'avatar',avatars_dir)
+    except Exception as e:
+        logger.error(f"SETUSERCONFIG: Error saving image: {e}")
+        return JsonResponse({'error': 'Failed to save image'}, status=500)
+    logger.debug(f"SETUSERCONFIG: Actualizada la foto de perfil del usuario {user.username}")
+
 @api_view(['POST'])
 @authentication_classes([])
 def send_mail(request):
