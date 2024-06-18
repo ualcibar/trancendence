@@ -5,7 +5,7 @@
 			<div class="w-full text-2xl font-bold text-center rounded-tl-lg">
 				<button (click)="togleSearchBar()" class="w-full text-2xl text-center text-white rounded-tl-xl"
 					style="min-width: 220px; min-height: 80px; backdrop-filter: brightness(0.7) saturate(0.7);"><i
-						class="bi bi-plus-circle-fill"></i> New Chat</button>
+						class="bi bi-plus-circle-fill"></i> {{'chat_new'|translate}}</button>
 			</div>
 			<div class="flex flex-col flex-1">
 				<div *ngFor="let userChat of getKeys()">
@@ -34,8 +34,7 @@
 								{{ message.message }}
 								<div *ngIf="message.type === MessageType.Invitation">
 									<button class="btn" (click)="joinMatch(message)"
-										[ngClass]="{'grayscale disabled opacity-50': !canJoin(message)}"> JOIN
-										MATCH</button>
+										[ngClass]="{'grayscale disabled opacity-50': !canJoin(message)}"> {{'chat_join | translate'}}</button>
 								</div>
 							</div>
 						</div>

@@ -516,6 +516,41 @@ def send_mail(request):
     customUser.save()
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_2FA_activation(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_TwoFA = mail.generate_random_verification_code(6)
+    email = customUser.email
+    mail.send_TwoFA_Activation_mail(token_TwoFA, email)
+    customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_password(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_TwoFA = mail.generate_random_verification_code(6)
+    email = customUser.email
+    mail.send_password_mail(email)
+    customUser.token_2FA = token_TwoFA
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_2FA_deactivation(request):
+    current_Username = request.POST.get('currentUsername')
+    customUser = CustomUser.objects.get(username=current_Username)
+    email = customUser.email
+    mail.send_TwoFA_Deactivation_mail(email)
+    customUser.is_2FA_active = False
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)
+
 
 @api_view(['POST'])
 def check_token(request):
@@ -563,8 +598,24 @@ def verify_mail(request):
     current_Username = mail.desencript(request.POST.get('currentUsername'), token_fernet)
     customUser = CustomUser.objects.get(username=current_Username)
     if customUser.token_verification == current_Token:
+        customUser.token_verification = ''
         customUser.verification_bool = True
         customUser.save()
         return JsonResponse({'message': 'The Token is correct'}, status=201)
     else:
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
+    
+@api_view(['POST'])
+@authentication_classes([])
+def send_mail_new_mail(request):
+    current_Username = request.POST.get('currentUsername')
+    current_MailNew = request.POST.get('currentMailNew')
+    current_MailOld = request.POST.get('currentMailOld')
+    customUser = CustomUser.objects.get(username=current_Username)
+    token_verification = mail.generate_token()
+    mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(current_Username, token_fernet)), current_MailNew)
+    customUser.token_verification = token_verification
+    mail.send_NoLongerSpacepong_mail(current_MailOld)
+    customUser.verification_bool = False
+    customUser.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)

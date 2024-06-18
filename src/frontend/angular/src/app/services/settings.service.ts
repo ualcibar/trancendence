@@ -128,8 +128,8 @@ export class SettingsService {
     console.log('✔️ ', response.message);
   }
 
-  async send_mail(user:string): Promise<void> {
-    const backendURL = 'api/polls/send_mail/';
+  async send_mail_2FA_activation(user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail_2FA_activation/';
     const httpReqBody = `currentUsername=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
@@ -140,6 +140,41 @@ export class SettingsService {
     console.log('✔️ ', response.message);
   }
 
+  async send_mail_2FA_deactivation(user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail_2FA_deactivation/';
+    const httpReqBody = `currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
+  async send_mail_password(user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail_password/';
+    const httpReqBody = `currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
+
+  async send_mail_new_mail(mailNew:string, mailOld:string, user:string): Promise<void> {
+    const backendURL = 'api/polls/send_mail_new_mail/';
+    const httpReqBody = `currentMailNew=${mailNew}&currentMailOld=${mailOld}&currentUsername=${user}`;
+    const httpHeader = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    };
+    const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
+    console.log('✔️ ', response.message);
+  }
   async check_token(token: string, user:string): Promise<void> {
     const backendURL = 'api/polls/check_token/';
     const httpReqBody = `currentToken=${token}&currentUsername=${user}`;

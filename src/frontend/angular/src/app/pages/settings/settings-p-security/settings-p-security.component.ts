@@ -75,6 +75,7 @@ export class SettingsPSecurityComponent {
     this.alreadyUsed = false;
 
     try {
+      await this.settingsService.send_mail_new_mail(this.email, this.currentEmail, this.username);
       await this.authService.setUserConfig({email : this.email});
       this.currentEmail = this.email;
     } catch (error: any) {
@@ -120,6 +121,7 @@ export class SettingsPSecurityComponent {
       this.formSent = false;
       return;
     }
+    this.settingsService.send_mail_password(this.username)
     this.success = true;
     this.formSent = false;
   }
@@ -134,8 +136,14 @@ export class SettingsPSecurityComponent {
   }
 
   async sendmail() {
-    await this.settingsService.send_mail(this.username);
+    await this.settingsService.send_mail_2FA_activation(this.username);
     this.buttonClicked2 = true;
+  }
+
+  async sendmail2() {
+    await this.settingsService.send_mail_2FA_deactivation(this.username);
+    this.is_2FA_active = false;
+    this.buttonClicked1 = false;
   }
 
   async compareTwoFAToken() {

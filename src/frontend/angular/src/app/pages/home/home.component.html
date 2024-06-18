@@ -1,12 +1,12 @@
 <div class="h-50real"><!--h-full da problemas con scroll-->
 	<!--<button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button>-->
 	<div *ngIf="debug">
-        <p class="text-gray-500">Modo debug activado</p>
-		<p class="text-white">chat websocket state: {{chatService.isConnected()}}</p>
-		<p class="text-white">matchmaking websocket state: {{matchmakingService.isConnected()}}</p>
-		<p class="text-white">matchmaking state : {{MatchmakingState[state.matchmakingState]}}</p>
-		<p class="text-white">current online match state: {{matchmakingService.getCurrentMatchState()}}</p>
-		<p class="text-white">current home state: {{state.homeState}}</p>
+        <p class="text-gray-500">{{'home_debug'|translate}}</p>
+		<p class="text-white">{{'home_websocket_chat_state'|translate}} {{chatService.isConnected()}}</p>
+		<p class="text-white">{{'home_websocket_matchmaking_state'|translate}} {{matchmakingService.isConnected()}}</p>
+		<p class="text-white">{{'home_matchmaking_state'|translate}} {{MatchmakingState[state.matchmakingState]}}</p>
+		<p class="text-white">{{'home_match_state'|translate}} {{matchmakingService.getCurrentMatchState()}}</p>
+		<p class="text-white">{{'home_current'|translate}}{{state.homeState}}</p>
 	</div>
 	<!--button (click)="backgroundClicked()" class="absolute -z-1 w-max backgroundButton"></button-->
 	<div class="homeMain">
@@ -17,13 +17,13 @@
             <!--img class="floating mb-12" ngSrc="assets/img/spacepong-blanco.svg" width="500" height="500" alt="SpacePong Logo" priority-->
 			<button *ngIf="(state.homeRenderState.local$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.MatchTournament)"
 				class="card mb-16" [@easeOut]>
-				<h2 class="uppercase">Jugar</h2>
+				<h2 class="uppercase">{{'home_play'|translate}}</h2>
 			</button>
 
             <!-- En el caso de que el usuario no haya iniciado sesión o no esté registrado -->
             <button *ngIf="!(state.homeRenderState.multiplayer$ | async) && (state.homeRenderState.local$ | async) && (state.homeRenderState.render$)"
                     routerLink="/login" class="card mb-16" [@easeOut]>
-                <h2 class="uppercase">Jugar Online</h2>
+                <h2 class="uppercase">{{'home_play_online'|translate}}</h2>
             </button>
 
             <!-- En el caso de que el usuario haya iniciado sesión -->
@@ -48,7 +48,7 @@
                     <!--button type="button" class="mr-2 btn btn-warning rounded-full" (click)="changeState(HomeState.MatchTournament)">
                         <i class="text-xl bi bi-arrow-left"></i>Volver
                     </button-->
-                    <h1 class="text-2xl font-bold">Ajustes del torneo</h1>
+                    <h1 class="text-2xl font-bold">{{'home_play_tournament_setting'|translate}}</h1>
                 </div>
 				<app-tournament-generator-component [settings]="getTournament()"></app-tournament-generator-component>
                 <div class="d-flex justify-content-center">
@@ -62,7 +62,7 @@
                     <!--button type="button" class="mr-2 btn btn-warning rounded-full" (click)="changeState(HomeState.MatchTournament)">
                         <i class="text-xl bi bi-arrow-left"></i>Volver
                     </button-->
-                    <h1 class="text-2xl font-bold">Ajustes de la partida</h1>
+                    <h1 class="text-2xl font-bold">{{'home_play_match_setting'|translate}}</h1>
                 </div>
 				<app-match-generator-component [settings]="getMatch()"></app-match-generator-component>
                 <div class="d-flex justify-content-center">

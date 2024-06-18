@@ -1,10 +1,9 @@
 <div class="h-50real profileMain" #containerRef>
 	<div *ngIf="loading; else content" class="sp-div flex flex-col items-center justify-center rounded text-white"
 		style="width: 20rem;">
-		<h1 class="m-4">Loading user profile... </h1>
+		<h1 class="m-4">{{'user_profile_loading'|translate}}</h1>
 		<div class="spinner-border text-warning mb-4" role="status"></div>
-		<p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>If it is taking too long, please check
-			that you are logged in</p>
+		<p *ngIf="tooLong" class="mx-4 mb-4 font-bold text-center" [@easeOut]>{{'user_profile_timeout'|translate}}</p>
 	</div>
 
 	<ng-template #content>

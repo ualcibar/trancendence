@@ -68,6 +68,10 @@ urlpatterns = [
     path("history/<int:user_id>", views.userHistory, name="user_history"),
     
     path('send_mail/', views.send_mail, name='send_mail'),
+    path('send_mail_password/', views.send_mail_password, name='send_mail_password'),
+    path('send_mail_2FA_deactivation/', views.send_mail_2FA_deactivation, name='send_mail_2FA_deactivation'),
+    path('send_mail_2FA_activation/', views.send_mail_2FA_activation, name='send_mail_2FA_activation'),
+    path('send_mail_new_mail/', views.send_mail_new_mail, name='send_mail_new_mail'),
     path('check_token/', views.check_token, name='check_token'),
     path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool'),
     path('verify_mail/', views.verify_mail, name='verify_mail')
