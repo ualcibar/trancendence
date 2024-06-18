@@ -44,8 +44,6 @@ class CustomTokenRefreshView(TokenRefreshView):
             logger.debug('ACCESS doesn\'t exist')
             return Response({'message': "access doesn't exist"}, status=400)
 
-from .views import CustomUserView, FriendsListView, FriendsView
-
 urlpatterns = [
     path("register/", views.register, name="register"),
     path("login/", views.login, name='token_obtain_pair'),
@@ -56,14 +54,21 @@ urlpatterns = [
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
+    
     path("getInfo/", views.getInfo, name="get_info"),
     path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),
     path("checkInfo/", views.checkInfo, name="check_info"),
     path("setConfig/", views.setUserConfig, name="set_user_config"),
     path("setConfig/<int:user_id>", views.setUserConfig, name="set_user_config_by_id"),
-    path('user/<int:user_id>/', CustomUserView.as_view(), name='user_info'),
-    path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'),
-    path('friendsID/<int:user_id>/<int:friend_id>/', FriendsView.as_view(), name='friends'),
+    
+    path('friends/', views.friends_get, name='friends_get'),
+    path('friends/', views.friends_post, name='friends_post'),
+    path('friends/', views.friends_del, name='friends_del'),
+    
+    path('blockedUsers/', views.blocked_users_get, name='friends_get'),
+    path('blockedUsers/', views.blocked_users_post, name='friends_post'),
+    path('blockedUsers/', views.blocked_users_delete, name='friends_del'),
+    
     path('matches/', views.matches, name='match-list'),
     path("history/<int:user_id>", views.userHistory, name="user_history")
 ]
