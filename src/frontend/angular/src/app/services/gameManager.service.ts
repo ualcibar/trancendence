@@ -880,6 +880,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
             console.log('start online match: a match has finished');
             console.log('start online match result : ');
             this.state.setValue(GameManagerState.Standby)
+            router.navigate(['/']);
             break;
         }
     });
