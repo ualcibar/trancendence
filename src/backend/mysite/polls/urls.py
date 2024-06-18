@@ -53,18 +53,21 @@ urlpatterns = [
     path('register42/', views.registerWith42Token, name='register42'),
     path("logout/", views.logout, name='logout'),
     path("delete/", views.delete, name='delete'),
+    path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+
     path("imLoggedIn/", views.imLoggedIn, name="im_logged_in"),
     path("getInfo/", views.getInfo, name="get_info"),
     path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),
     path("checkInfo/", views.checkInfo, name="check_info"),
     path("setConfig/", views.setUserConfig, name="set_user_config"),
     path("setConfig/<int:user_id>", views.setUserConfig, name="set_user_config_by_id"),
-    #path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('user/<int:user_id>/', CustomUserView.as_view(), name='user_info'),
     path('friends/<int:user_id>/', FriendsListView.as_view(), name='friends_list'),
     path('friendsID/<int:user_id>/<int:friend_id>/', FriendsView.as_view(), name='friends'),
-    path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('matches/', views.matches, name='match-list'),
+    path("history/<int:user_id>", views.userHistory, name="user_history")
+]
+
     path("history/<int:user_id>", views.userHistory, name="user_history"),
     #path('player_games/<int:user_id>/', GameHistoryView.as_view(), name='game_history'),
     #path('player_games/', GameHistoryView.as_view(), name='game_history'), 
