@@ -104,6 +104,7 @@ export class ChatService {
       this.logger.error('Failed to get Cookie Access Token, please, log in');
       return;
     }
+    console.log(this.webSocketUrl);
 
     // Gestion del Websocket
     this.webSocket = new WebSocket(`${this.webSocketUrl}?token=${jwtToken}`);
