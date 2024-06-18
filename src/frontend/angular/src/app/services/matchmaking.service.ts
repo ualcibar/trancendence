@@ -12,6 +12,8 @@ import { MatchmakingState, StateService } from './stateService';
 import {Observable, Subscription, interval, BehaviorSubject, Subject} from 'rxjs';
 import { USE_DEFAULT_LANG } from '@ngx-translate/core';
 
+import {ip} from '../../main'
+
 export enum OnlineMatchState{
   Joining = 'Joining', 
   Connecting = 'Connecting',
@@ -181,7 +183,7 @@ export interface MatchSync{
 })
 export class MatchmakingService implements MatchSync{
   //backend connection
-  webSocketUrl = 'wss://${ip}:1501/ws/matchmaking/global/';
+  webSocketUrl = 'wss://' + ip + ':1501/ws/matchmaking/global/';
   webSocket: WebSocket | undefined;
 
   //state of the service

@@ -7,6 +7,8 @@ import { MatchSettings, MatchSettingsI } from './gameManager.service';
 import { toEnum } from '../utils/help_enum';
 import { OnlineMatchSettings2 } from './matchmaking.service';
 
+import { ip } from '../../main';
+
 export interface MessageI{
   message : string;
   id : number;
@@ -70,7 +72,7 @@ export class Message {
 })
 export class ChatService {
   //backend connection
-  webSocketUrl = 'wss://${ip}:1501/ws/chat/global/';
+  webSocketUrl = 'wss://' + ip + ':1501/ws/chat/global/';
   webSocket: WebSocket | undefined;
 
   //chat 
