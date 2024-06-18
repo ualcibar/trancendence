@@ -61,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
 #    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
-#    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
@@ -120,8 +120,8 @@ DATABASES = {
 
 # CORS
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ['http://{ip}:4200', 'http://0.0.0.0:4200', 'https://{ip}:1501']
-CSRF_TRUSTED_ORIGINS = ['http://{ip}:4200', 'http://0.0.0.0:4200', 'https://{ip}:1501']
+CORS_ALLOWED_ORIGINS = ['http://{ip}:4200', 'http://0.0.0.0:4200', 'https://localhost:1501']
+CSRF_TRUSTED_ORIGINS = ['http://{ip}:4200', 'http://0.0.0.0:4200', 'https://localhost:1501']
 
 
 SIMPLE_JWT = {
