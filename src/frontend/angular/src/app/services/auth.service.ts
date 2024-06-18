@@ -208,7 +208,7 @@ export class AuthService {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
-        console.log(response.privateUserInfo)
+        //console.log(response.privateUserInfo)
         this.translateService.setDefaultLang(response.privateUserInfo.language);
         this.translateService.use(response.privateUserInfo.language);
         this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
@@ -278,9 +278,10 @@ export class AuthService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
-      })
+      }),
+      with_credentials: true
     };
-    this.http.post<any>(backendURL, jsonToSend).subscribe({
+    this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
       next: (response) => {
         this.logger.info('response friend list', response);
       },

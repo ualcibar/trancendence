@@ -150,6 +150,8 @@ export class ChatService {
             messageI = data.message;
             break;
           case 'global_message':
+            if (this.authService.isUserBlocked(data.message.sender.id))
+              return
             targetChannel = '#global';
             messageI = data.message;
             break;
