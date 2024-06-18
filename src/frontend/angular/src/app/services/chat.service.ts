@@ -125,6 +125,8 @@ export class ChatService {
     };
 
     this.webSocket.onmessage = (event) => {
+      if (!this.authService.userInfo)
+        return
       const data = JSON.parse(event.data);
       let targetChannel = this.current_chat_name;
       let messageI: MessageI;
@@ -133,6 +135,8 @@ export class ChatService {
         this.logger.info("Channel type: " + data.type);
         switch (data.type) {
           case 'private_message':
+            if (this.authService.isUserBlocked(data.message.sender.id))
+              return
             if (!this.chatMessages.has(data.user)) {
               this.chatMessages.set(data.user, []);
             }
@@ -140,6 +144,8 @@ export class ChatService {
             messageI = data.message;
             break;
           case 'private_message_delivered':
+            if (this.authService.isUserBlocked(data.message.sender.id))
+              return
             targetChannel = data.target;
             messageI = data.message;
             break;

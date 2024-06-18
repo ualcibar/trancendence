@@ -96,6 +96,7 @@ export class UserInfo{
 export interface PrivateUserInfoI{ 
   info : UserInfo;
   friends : UserInfoI[];
+  blockedUsers : UserInfoI[];
   language : string;
   email : string;
   twofa : boolean | null;
@@ -105,17 +106,19 @@ export interface PrivateUserInfoI{
 export class PrivateUserInfo{
   info : UserInfo;
   friends : UserInfo[];
+  blockedUsers : UserInfo[];
   language : string;
   email : string;
   twofa : boolean | undefined;
   tokentwofa : string | undefined;
-  constructor (info : UserInfo, friends : UserInfo[], language : string, email : string, twofa : boolean | undefined, tokentwofa : string | undefined){
+  constructor (info : UserInfo, friends : UserInfo[], blockedUsers : UserInfo[] ,language : string, email : string, twofa : boolean | undefined, tokentwofa : string | undefined){
     this.info = info;
     this.friends = friends;
     this.email = email;
     this.language = language;
     this.twofa = twofa;
     this.tokentwofa = tokentwofa;
+    this.blockedUsers = blockedUsers;
   }
   static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
     
@@ -126,12 +129,19 @@ export class PrivateUserInfo{
         return undefined
       friends.push(info)
     }
+    const blockedUsers : UserInfo[] = [];
+    for (const blockedUser of values.blockedUsers){
+      const info = UserInfo.fromI(blockedUser)
+      if (!info)
+        return undefined
+      blockedUsers.push(info)
+    }
     const userInfo = UserInfo.fromI(values.info)
     if (!userInfo)
       return undefined
     if (values.twofa === null || values.tokentwofa === null)
-      return new PrivateUserInfo(userInfo, friends, values.language, values.email, undefined, undefined)
-    return new PrivateUserInfo(userInfo, friends, values.language, values.email, values.twofa, values.tokentwofa)
+      return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, undefined, undefined)
+    return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, values.twofa, values.tokentwofa)
   }
 }
 
@@ -234,9 +244,9 @@ export class AuthService {
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const backendURL = `api/polls/friendsID/${this.userInfo!.info.id}/${id}/`;
+    const backendURL = `api/polls/friends/`;
     const jsonToSend = {
-      usernames : ['nice']
+      friend_id : id
     };
     const httpOptions = {
       headers: new HttpHeaders({
@@ -252,6 +262,35 @@ export class AuthService {
         this.updateUserInfo()
       }
     });
+  }
+
+  blockUser(id : number){
+    if (!this.amIloggedIn){
+      this.logger.error('update user info: userinfo is undefined')
+      return
+    }
+    const backendURL = `api/polls/blockedUsers/`;
+    const jsonToSend = {
+      blocked_user_id : id
+    };
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    this.http.post<any>(backendURL, jsonToSend).subscribe({
+      next: (response) => {
+        this.logger.info('response friend list', response);
+      },
+      error: () => {
+        this.logger.error('update friend list: error fetching data')
+        this.updateUserInfo()
+      }
+    });
+  }
+
+  isUserBlocked(id : number) : boolean | undefined{
+    return this.userInfo?.blockedUsers.some(blocked_user=>blocked_user.id === id)
   }
 
   getUpdateUserInfo(): UserInfo | undefined {

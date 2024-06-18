@@ -80,6 +80,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     friends = models.ManyToManyField('CustomUser', symmetrical=True, blank=True, related_name='my_friends')
+    blockedUsers = models.ManyToManyField('CustomUser', blank=True, related_name='blocked_users')
 
     USERNAME_FIELD = 'username'
     # Add any additional required fields
