@@ -438,24 +438,40 @@ export class MapSettings{
   }
 
   createMatchInitUpdate(info : MatchSettings, manager : Manager) : MatchUpdate{
-    const paddles : Paddle[] = new Array<Paddle>(info.teamSize * 2);
-    for (let i = 0; i < paddles.length; i++){
-      const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
-      paddles[i] = new Paddle(this, i, manager);
-      paddles[i].state = info.initPaddleStates[i] as PaddleState;
-      paddles[i].bindEvent(createEventPaddleColision(this, paddles[i]))
+    const paddles : Paddle[] = [];
+    for (let i = 0; i < info.teamSize * 2; i++){
+      const paddle = new Paddle(this, i,manager)
+      //const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
+      //paddles[i] = new Paddle(this, i, manager);
+      //paddle.state = info.initPaddleStates[i]; 
+      if (info.initPaddleStates[i] == PaddleState.Binded){
+        console.log('set binded')
+        paddle.stateBinded = true;
+      }
+      else if (info.initPaddleStates[i] == PaddleState.Unbinded){
+        console.log('set binded')
+        paddle.stateUnbinded = true;
+      }
+      else if (info.initPaddleStates[i] == PaddleState.Bot){
+        console.log('set binded')
+        paddle.stateBot = true;
+      }
+      console.log('after asign', paddle, 'as number', info.initPaddleStates[i])
+      paddle.bindEvent(createEventPaddleColision(this, paddle))
       // paddles[i].bindTick(createTickKeyboardInputPaddle(paddles[i], new Key(paddles[i].upKey ,paddles[i].downKey)))
       //           .bindTick(createTickMove(paddles[i]));
-  
   //    paddles[i].bindTick(createTickUpdate(paddles[i], () => manager.getMatchState()));
-      paddles[i].bindTick(createPaddleUpdate(paddles[i], manager))
-        .bindTick(createTickMove(paddles[i]))
+      paddle.bindTick(createPaddleUpdate(paddle, manager))
+        .bindTick(createTickMove(paddle))
       // if (paddles[i].state === PaddleState.Bot){
       //   paddles[i].bindTick(createTickMove(paddles[i]));
       // }
       // emmm
-      paddles[i].bindEvent(createEventIAprediction(paddles[i]));
+      paddle.bindEvent(createEventIAprediction(paddle));
+      paddles.push(paddle)
     }
+    console.log('paddle state afte FOR', paddles[0].state)
+    console.log('paddles for', paddles)
     const balls : Ball[] = new Array<Ball>(1);
     balls[0] = new Ball(this, manager);
     balls[0].bindTick(createTickMove(balls[0]));

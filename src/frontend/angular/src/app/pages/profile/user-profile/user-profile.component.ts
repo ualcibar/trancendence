@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, HostListener, NgZone, Renderer2 } from '@angular/core';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 import { AuthService, PrivateUserInfo, UserInfo } from '../../../services/auth.service';
 
@@ -49,12 +49,31 @@ export class UserProfileComponent implements OnInit{
   friendADD: boolean = false;
   showFriendList: boolean =false;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, public authService: AuthService, private elRef: ElementRef, private ngZone: NgZone,  private renderer: Renderer2, public friendService: FriendsService) {
+  constructor(private http: HttpClient, private route: ActivatedRoute, public authService: AuthService, private elRef: ElementRef, private ngZone: NgZone, private router : Router, private renderer: Renderer2, public friendService: FriendsService) {
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void {/*
     this.authService.subscribe({
       next: (userInfo : PrivateUserInfo) => {
+        if (userInfo) {
+          this.selfInfo = userInfo;
+          const subscription = this.route.params.subscribe(params => {
+            console.log(params)
+            this.userId = params['userId'];
+            this.getUserInfo(this.userId);
+            this.editProfile = this.userId === userInfo.info.id
+            subscription.unsubscribe()
+          });
+        }
+      }
+    })
+    if (this.loading) {
+      setTimeout(() => {
+        this.tooLong = true;
+      }, 7000);
+    }*/
+
+    const subscribtion = this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
         if (userInfo) {
           this.selfInfo = userInfo;
           this.route.params.subscribe(params => {
@@ -64,8 +83,12 @@ export class UserProfileComponent implements OnInit{
             this.editProfile = this.userId === userInfo.info.id
           });
         }
+        else{
+          subscribtion.unsubscribe()
+          this.router.navigate(['/'])
+        }
       }
-    })
+    );
     if (this.loading) {
       setTimeout(() => {
         this.tooLong = true;

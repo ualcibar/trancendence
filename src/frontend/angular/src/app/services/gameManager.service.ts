@@ -108,7 +108,7 @@ export interface MatchSettingsI{
   roundsToWin : number;
   teamSize : number;
   mapName : string;
-  initPaddleStates : string[];
+  initPaddleStates : number[];
 }
 
 export class MatchSettings{//no matter what map this settings are always applicable
@@ -133,10 +133,7 @@ export class MatchSettings{//no matter what map this settings are always applica
     if (!mapName)
       return undefined
     const paddleStates : PaddleState[] = []
-    for (const stateString of values.initPaddleStates){
-      const state = toEnum(PaddleState, stateString)
-      if (state === undefined)
-        return undefined
+    for (const state of values.initPaddleStates){
       paddleStates.push(state)
     }
     if (paddleStates.length !== values.teamSize * 2)
@@ -827,6 +824,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
     this.mapSettings = mapSettings; 
     this.matchUpdate = this.mapSettings.createMatchInitUpdate(this.info.onlineSettings.matchSettings, this);
     console.log('update0', this.matchUpdate as MatchUpdate)
+    console.log('update0 state', this.matchUpdate.paddles[0].state)
     for (const [index,paddle] of this.matchUpdate.paddles.entries()){
       if (this.team === Team.TeamA && index >= this.info.onlineSettings.matchSettings.teamSize)
         paddle.state = PaddleState.Unbinded

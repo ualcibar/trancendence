@@ -20,7 +20,7 @@ class Player(models.Model):
     index = models.PositiveIntegerField(default=0, null=False)
 
 class Paddle(models.Model):
-    binded = models.CharField(default="Binded",max_length=128, blank=False, null=False)
+    binded = models.IntegerField(default="0",blank=False, null=False)
     index = models.PositiveIntegerField(default=0, null=False)
 
 class MatchPreview(models.Model):

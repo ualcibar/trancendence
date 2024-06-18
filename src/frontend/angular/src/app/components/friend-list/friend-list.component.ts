@@ -33,15 +33,9 @@ export class FriendListComponent implements OnInit {
             this.userId = params['userId'];
             //this.authService.updateUserInfo();
             this.friend_list = this.authService.userInfo?.friends;
-            const connected = new UserInfo('Eneko',0,UserStatus.Connected, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])
+ /*           const connected = new UserInfo('Eneko',0,UserStatus.Connected, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])
             const inGame = new UserInfo('Patata',0,UserStatus.InGame, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])
-            const joining = new UserInfo('Unai',0,UserStatus.JoiningGame, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])
-            this.friend_list?.push(this.friend_list[0])
-            this.friend_list?.push(this.friend_list[0])
-            this.friend_list?.push(this.friend_list[0])
-            this.friend_list?.push(connected)
-            this.friend_list?.push(inGame)
-            this.friend_list?.push(joining)
+            const joining = new UserInfo('Unai',0,UserStatus.JoiningGame, 'red', new Statistics(0,0,0),this.friend_list![0].avatarUrl,[0])*/
           });
         }
       }

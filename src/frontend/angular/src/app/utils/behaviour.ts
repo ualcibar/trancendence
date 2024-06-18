@@ -218,8 +218,8 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 	return function paddleUpdate(delta: number) {
 		// if (!update){
 			update = manager.getMatchUpdate()
-		// }
-		if (paddle.state === PaddleState.Binded) {
+			console.log('paddle satte paddle update', paddle.state)
+		if (paddle.stateBinded) {
 			console.log('trying to move paddle')
 			// console.log('paddle binded, handling keys', paddle);
 			paddle.dir.y = 0;

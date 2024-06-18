@@ -24,9 +24,9 @@ export const colorPalette = {
 };
 
 export enum PaddleState{
-  Binded = 'Binded', //must be keybinded moved by ourselfs
-  Unbinded = 'Unbinded',
-  Bot = 'Bot'
+  Binded, //must be keybinded moved by ourselfs
+  Unbinded,
+  Bot
 }
 
 export enum BlockType{
@@ -317,8 +317,10 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   downKey! : string;
   goinUp : boolean = false;
   goinDown : boolean = false;
-  localPlayer : boolean = false;
-  AIplayer : boolean = false;
+
+  stateBinded : boolean = false;
+  stateBot : boolean = false;
+  stateUnbinded : boolean = false;
   AIprediction : number = 0;
 
   tickBehaviour : TickBehaviour<Paddle>;
@@ -329,7 +331,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   dimmensions : Vector3;
   type : BlockType;
   color : number;
-  state : PaddleState;
+  state : number;//PaddleState
 
   lastIAupdate : number = 0;
 
@@ -355,10 +357,10 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.type = settings.paddleType;
     this.color = settings.paddleColor;
     this.speed = settings.paddleSpeed;
-    this.state = settings.paddleState[number];
+    this.state = PaddleState.Binded;
 
     if (this.state === PaddleState.Binded) {
-      this.madeLocalPlayer();
+    
       this.upKey = settings.paddleUpKey[number];
       this.downKey = settings.paddleDownKey[number];
     }
@@ -473,20 +475,23 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   madeLocalPlayer() {
-    this.localPlayer = true;
-    this.AIplayer = false;
+    this.stateBinded = true;
+    this.stateBot = false;
+    this.stateUnbinded = false;
     this.state = PaddleState.Binded;
   }
 
   madeAIPlayer() {
-    this.localPlayer = false;
-    this.AIplayer = true;
+    this.stateBinded = false;
+    this.stateBot = true;
+    this.stateUnbinded = false;
     this.state = PaddleState.Bot;
   }
 
   madeUnbinded() {
-    this.localPlayer = false;
-    this.AIplayer = false;
+    this.stateBinded = false;
+    this.stateBot = false;
+    this.stateUnbinded = true;
     this.state = PaddleState.Unbinded;
   }
 
@@ -498,14 +503,14 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   isAI() : boolean{
     if (this.state === PaddleState.Bot)
       this.madeAIPlayer();
-    return this.AIplayer;
+    return this.stateBot;
   }
 
   getId(): number {
     return this.id;
   }
 
-  getState() : PaddleState{
+  getState() : number{
     return this.state;
   }
 
