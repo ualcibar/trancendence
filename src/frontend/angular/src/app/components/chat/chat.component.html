@@ -34,7 +34,7 @@
 								{{ message.message }}
 								<div *ngIf="message.type === MessageType.Invitation">
 									<button class="btn" (click)="joinMatch(message)"
-										[ngClass]="{'grayscale disabled opacity-50': !canJoin(message)}"> {{'chat_join | translate'}}</button>
+										[ngClass]="{'grayscale disabled opacity-50': !canJoin(message)}"> {{'chat_join'|translate}}</button>
 								</div>
 							</div>
 						</div>
@@ -47,7 +47,7 @@
 				<button (click)="sendMessageText()" class="btn btn-success rounded-full mr-4"><i
 						class="bi bi-send-fill"></i></button>
 				<button *ngIf="matchmaking.canInvite.observable | async" (click)="sendMessageInvitation()"
-					class="btn btn-success rounded-full mr-4"><i> Invite</i></button>
+					class="btn btn-success rounded-full mr-4"><i> {{'chat_invite'|translate}}</i></button>
 			</div>
 		</div>
 	</div>

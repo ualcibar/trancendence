@@ -74,5 +74,6 @@ urlpatterns = [
     path('send_mail_new_mail/', views.send_mail_new_mail, name='send_mail_new_mail'),
     path('check_token/', views.check_token, name='check_token'),
     path('get_2FA_bool/', views.get_2FA_bool, name='get_2FA_bool'),
-    path('verify_mail/', views.verify_mail, name='verify_mail')
+    path('verify_mail/', views.verify_mail, name='verify_mail'),
+    path('is42/', views.is42, name='is42')
 ]

@@ -23,7 +23,7 @@
 					<ul class="pl-4 mr-4 mt-2 w-44 rounded-md md:mb-0 h-fit divide-x divide-slate-500">
 						<h2 class="text-2xl text-sp-text font-bold">{{'settings_tab_title_acc'|translate}}</h2>
 						<li (click)="activeTab = 'public'" [ngClass]="{'selected': activeTab === 'public'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-square"></i> {{'settings_tab_content_public'|translate}}</a></li>
-						<li (click)="activeTab = 'security'" [ngClass]="{'selected': activeTab === 'security'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> {{'settings_tab_content_security'|translate}}</a></li>
+						<li *ngIf="account42 == false" (click)="activeTab = 'security'" [ngClass]="{'selected': activeTab === 'security'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-person-fill-lock"></i> {{'settings_tab_content_security'|translate}}</a></li>
 						<li (click)="activeTab = 'privacy'" [ngClass]="{'selected': activeTab === 'privacy'}" class="transition pl-4 py-2 text-zinc-300 hover:text-slate-400"><a><i class="bi bi-shield-shaded"></i> {{'settings_tab_content_security'|translate}}</a></li>
 					</ul>
 				</div>

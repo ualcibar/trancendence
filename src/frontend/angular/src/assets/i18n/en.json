@@ -178,6 +178,7 @@
 
     "chat_new" : "New chat",
     "chat_join" : "JOIN MATCH",
+    "chat_invite" : "Invite",
 
     "friends_title" : "FRIENDS",
     "friends_load" : "Loading...",

@@ -12,7 +12,10 @@ import { SettingsPPrivacyComponent } from './settings-p-privacy/settings-p-priva
 import { UnauthorizedComponent } from '../../components/errors/unauthorized/unauthorized.component';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { SettingsService } from '../../services/settings.service';
+
 import { easeOut } from "../../../assets/animations/easeOut";
+import { Logger, LogFilter } from '../../utils/debug';
 
 @Component({
   selector: 'app-settings',
@@ -29,8 +32,9 @@ export class SettingsComponent {
   activeTab: string | null = 'color';
 
   userId: number = 0;
+  account42 = false;
 
-  constructor (public authService: AuthService) { }
+  constructor (public authService: AuthService, private settingsService: SettingsService) { }
 
   ngOnInit() {
     this.authService.subscribe({
@@ -38,7 +42,8 @@ export class SettingsComponent {
         if (userInfo) {
           this.tooLong = false;
           this.loading = false;
-          this.userId = userInfo!.info.id;
+          this.userId = userInfo.info.id;
+          this.account42 = userInfo.is_42_user;
         }
       },
     })
@@ -47,5 +52,6 @@ export class SettingsComponent {
         this.tooLong = true;
       }, 7000);
     }
+    console.log('accoutn42: ', this.account42);
   }
 }

@@ -101,6 +101,7 @@ export interface PrivateUserInfoI{
   email : string;
   twofa : boolean | null;
   tokentwofa : string | null;
+  is_42_user : boolean
 }
 
 export class PrivateUserInfo{
@@ -111,13 +112,15 @@ export class PrivateUserInfo{
   email : string;
   twofa : boolean | undefined;
   tokentwofa : string | undefined;
-  constructor (info : UserInfo, friends : UserInfo[], blockedUsers : UserInfo[] ,language : string, email : string, twofa : boolean | undefined, tokentwofa : string | undefined){
+  is_42_user : boolean;
+  constructor (info : UserInfo, friends : UserInfo[], blockedUsers : UserInfo[] ,language : string, email : string, twofa : boolean | undefined, tokentwofa : string | undefined, is_42_user : boolean){
     this.info = info;
     this.friends = friends;
     this.email = email;
     this.language = language;
     this.twofa = twofa;
     this.tokentwofa = tokentwofa;
+    this.is_42_user = is_42_user
     this.blockedUsers = blockedUsers;
   }
   static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
@@ -140,8 +143,8 @@ export class PrivateUserInfo{
     if (!userInfo)
       return undefined
     if (values.twofa === null || values.tokentwofa === null)
-      return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, undefined, undefined)
-    return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, values.twofa, values.tokentwofa)
+      return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, undefined, undefined, values.is_42_user)
+    return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, values.twofa, values.tokentwofa, values.is_42_user)
   }
 }
 
