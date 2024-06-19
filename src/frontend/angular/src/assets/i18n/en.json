@@ -202,7 +202,7 @@
     "tournament_semifinal" : "Semifinal",
     "tournament_tbd" : "TBD",
 
-    "postregister_title" : "Please check you email account to verify your email",
+    "postregister_title" : "Please check your email account to verify your account",
     "postregister_subtitle" : "Once you verify your email you'll be able to log in!",
 
     "user_profile_loading" : "Loading user profile...",

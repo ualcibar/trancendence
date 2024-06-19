@@ -1,7 +1,7 @@
 /* Error div */
-#sp-div {
+.sp-div {
 	position: absolute;
-	top: 30%;
+	margin-top: 15vh;
 	left: 50%;
 	transform: translateX(-50%);
 	width: 60rem;

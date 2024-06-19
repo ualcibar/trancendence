@@ -10,7 +10,7 @@
 	</div>
 	<!--button (click)="backgroundClicked()" class="absolute -z-1 w-max backgroundButton"></button-->
 	<div class="homeMain">
-		<button (click)="backgroundClicked()" class="absolute -z-1 h-full backgroundButton"></button>
+		<button (click)="backgroundClicked()" class="absolute -z-1 h-full backgroundButton w-11/12"></button>
 <!--        <app-chat class="flex chat" [@fadeInOut]></app-chat>-->
 		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="homeLeft" [@fadeInOut]></app-chat>
 		<div class="homeRight flex-col justify-center items-center h-auto w-full">
@@ -71,11 +71,11 @@
                     </button>
                 </div>
 			</div>
-			<div *ngIf="(state.homeRenderState.onlineMatchGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded p-4 w-96">
+			<div *ngIf="(state.homeRenderState.onlineMatchGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded p-4 w-96" style="width: 30rem;">
 				<app-online-match-generator-component [settings]="getOnlineMatch()"></app-online-match-generator-component>
 				<button (click)="createOnlineMatch()" class="btn text-white">CREATE</button>
 			</div>
-			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded p-4 w-96">
+			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded p-4 w-96" style="width: 30rem;">
 				<app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>
 			</div>
 			<app-lobby-match class="z-1 w-full" *ngIf="(state.homeRenderState.joiningOnlineMatch$ | async) && (state.homeRenderState.render$)"></app-lobby-match>

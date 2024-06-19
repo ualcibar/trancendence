@@ -1,12 +1,11 @@
 <div class="mt-2 text-white">
-	<div class="mb-1 flex gap-2 items-center w-1/2">
-		<h1>{{'online_name'|translate}}</h1>
-		<input class="textInput" [ngModel]="settings.name" (change)="changeName($event)" type="text">
+	<div class="mb-1 flex items-center">
+		<h1 class="mr-4"> {{'online_name'|translate}}: </h1>
+		<input class="shadow-none form-control" [ngModel]="settings.name" (change)="changeName($event)" type="text">
 	</div>
-	<div class="flex gap-2 pt-2">
-		<div class="privacy-bubble" #privacy_bubble></div>
-		<h1 class="privacyChoice mb-1" (click)="changeToPublic(privacy_bubble)">{{'online_public'|translate}}</h1>
-		<h1 class="privacyChoice mb-1" (click)="changeToPrivate(privacy_bubble)">{{'online_private'|translate}}</h1>
+	<div class="btn-group flex w-full my-4">
+        <a href="#" (click)="changeToPublic()" [ngClass]="{'active': settings.publicMatch}" class="btn btn-primary flex-grow text-center">{{'online_public'|translate}}</a>
+        <a href="#" (click)="changeToPrivate()" [ngClass]="{'active': !settings.publicMatch}" class="btn btn-primary flex-grow text-center">{{'online_private'|translate}}</a>
 	</div>
 	<app-match-generator-component [settings]="settings.matchSettings"></app-match-generator-component>
 </div>

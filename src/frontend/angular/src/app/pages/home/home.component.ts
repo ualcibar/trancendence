@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 
 import { ChatComponent } from '../../components/chat/chat.component';
-import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
+import { LobbySearchComponent } from '../../components/lobby-search/lobby-search.component';
 import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.component';
 import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 
@@ -11,8 +11,8 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { fadeInOut, fadeInOuttimeout } from '../../../assets/animations/fadeInOut';
 import { GameManagerService, MatchConfig, MatchSettings, TournamentManager, TournamentSettings} from '../../services/gameManager.service';
-import { MapsName, MapsService } from '../../services/map.service';
-import {ActivatedRoute, ActivationEnd, Router, RouterLink} from '@angular/router';
+import { MapsService } from '../../services/map.service';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 import { ChatService } from '../../services/chat.service';
 import { TournamentGeneratorComponent } from '../../components/tournament-gererator/tournament-generator-component';
@@ -23,7 +23,6 @@ import { TournamentTreeComponent } from '../../components/tournament-tree/tourna
 import { OnlineMatchGeneratorComponent } from '../../components/online-match-generator/online-match-generator-component';
 import {TranslateModule} from "@ngx-translate/core";
 import { easeOut } from '../../../assets/animations/easeOut';
-import { PaddleState } from '../../components/pong/pong.component';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ip } from '../../../main';
 /*
@@ -88,6 +87,7 @@ class LocalGameHandler{
   styleUrl: './home.component.css',
   animations: [fadeInOut, easeOut]
 })
+
 export class HomeComponent implements OnInit, AfterViewInit{
   debug : boolean = false; //Al activar el modo debug, aparecerá un recuadro en la página
   chatUnwrapped: boolean = false;
@@ -118,6 +118,9 @@ export class HomeComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.changeState(HomeState.MatchTournament);
+    }, 1200);
   }
 
   ngAfterViewInit(): void {
