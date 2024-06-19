@@ -20,6 +20,7 @@ export class LoginComponent {
   };
 
   formSent: boolean = false;
+  invalidForm: boolean = false;
 
   error: boolean = false;
 
@@ -53,10 +54,12 @@ export class LoginComponent {
       this.formSent = false;
       window.location.href = "/";
     } catch (error: any) {
+      this.error = true;
+      this.invalidForm = false;
       console.error('❌ Ha ocurrido un error al intentar iniciar sesión');
 
       const errorMsg = error.error.message;
-      if (errorMsg.includes("does not exist")) {
+      if (errorMsg.includes("does not exist") || errorMsg.includes("doesn")) {
         this.userWrongCredentials = false;
         this.userDoesntExist = true;
       } else if (errorMsg.includes("account is not active")) {
@@ -64,8 +67,9 @@ export class LoginComponent {
       } else if (errorMsg.includes("Invalid username or password")) {
         this.userDoesntExist = false;
         this.userWrongCredentials = true;
+      } else if (errorMsg.includes("invalid form")) {
+        this.invalidForm = true;
       }
-      this.error = true;
       this.formSent = false;
       return;
     }

@@ -3,7 +3,7 @@
     <div *ngIf="matches" class="flex flex-col items-center gap-1 w-full overflow-y-auto max-h-[500px] pr-4">
         <div *ngFor="let match of matches; let i = index" class="w-full"[ngClass]="{ 'winEntry' : userId && match.win(userId), 'loseEntry' : userId && !match.win(userId) }">
             <button (click)="toggleExpand(i)" class="flex items-center justify-between min-h-10 w-full p-2 rounded">
-                <h1 class="flex-1"> {{match.date }}</h1>
+                <h1 class="flex-1"> {{match.date | date:'dd/MM/yyyy HH:mm' }}</h1>
                 <h1 class="flex-1">{{match.score.score[0]}}:{{match.score.score[1]}}</h1>
                 <h1 class="flex-1">{{ match.teamSize }} vs {{ match.teamSize }}</h1>
                 <h1 [ngClass]="{ 'bi bi-chevron-double-down' : !expanded![i], 'bi bi-chevron-double-up' : expanded![i]}"></h1>

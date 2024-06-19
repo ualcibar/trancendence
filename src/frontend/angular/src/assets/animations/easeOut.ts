@@ -1,6 +1,6 @@
 import { trigger, style, transition, animate } from '@angular/animations';
 
-export const easeOutTime = '0ms'//200ms befor
+export const easeOutTime = '200ms'//200ms befor
 
 export const easeOut = trigger (
     'easeOut', [

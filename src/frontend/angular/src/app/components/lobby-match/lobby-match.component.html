@@ -1,55 +1,26 @@
-<!-- <div class="sp-div rounded-xl mx-auto px-4">
-	<div *ngIf="state === LobbyMatchState.Ok">
-		<h1 class="text-white text-4xl mb-8 text-center">{{'lobby_match_searching'|translate}}</h1>
-		<div class="flex place-content-center">
-			<div class="flex flex-col items-center justify-center">
-				<div class="flex min-w-96 max-h-20 mr-12 m-4">
-					<img src="{{lobby.host.avatarUrl}}" class="rounded-full w-28 h-28 bg-white ml-4">
-					<h1 class="text-secondary text-white text-4xl flex-grow text-center">{{ lobby.host.username }}</h1>
-				</div>
-				<div *ngFor="let player of lobby.players; let i = index"
-					class="flex min-w-96 max-h-20 mr-12 m-4">
-					<div *ngIf="i < lobby.onlineSettings.matchSettings.teamSize - 1">
-						<img src="{{player.avatarUrl}}"
-							class="rounded-full w-28 h-28 bg-white ml-4"
-							*ngIf="player !== undefined"
-						>
-						<div *ngIf="player === undefined" class="spinner-border text-secondary" role="status">
-							<span class="visually-hidden">{{'lobby_match_searching'|translate}}</span>
-						</div>
-						<div *ngIf="player !== undefined" class="text-secondary" role="status">
-							<h1 class="text-white text-4xl flex-grow text-center">{{ player.username}} {{i}}</h1>
-						</div>
-					</div>
-				</div>
-			</div>
-			<img src="../../../assets/img/lobby-doublesword.svg" width="170" height="170">
-			<div class="flex flex-col items-center justify-center">
-				<div *ngFor="let player of lobby.players; let i = index" class="flex items-center min-w-96 max-h-20 mr-12 m-4">
-					<div *ngIf="i >= lobby.onlineSettings.matchSettings.teamSize - 1">
-						<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-28 h-28 bg-white ml-4">
-						<div *ngIf="player === undefined" class="spinner-border text-secondary" role="status">
-							<span class="visually-hidden">{{'lobby_match_searching'|translate}}</span>
-						</div>
-						<div *ngIf="player !== undefined" class="text-secondary" role="status">
-							<h1 class="text-white text-4xl flex-grow text-center">{{ player.username }}</h1>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div *ngIf="state === LobbyMatchState.Error" class="text-white">
-		{{'lobby_match_state_error'|translate}}
-	</div>
-</div> -->
-
 <div *ngIf="state === LobbyMatchState.Ok" class="sp-div rounded-xl mx-auto max-w-3xl px-4">
-    <h1 class="text-orange-100 text-4xl mb-8 mt-4 text-center font-bold">{{'lobby_match_searching'|translate}}</h1>
+	<div class="flex items-center">
+		<button (click)="cancelGame()" class="transition-colors text-white bg-red-700 hover:bg-red-800 rounded-lg text-sm px-2 py-2.5 me-2"><i class="bi bi-door-open-fill"></i> Salir de la partida</button>
+		<h1 class="text-orange-100 text-4xl mb-8 mt-4 ml-6 text-center font-bold">{{'lobby_match_searching'|translate}}</h1>
+	</div>
     <div class="flex align-items-center justify-content-center position-relative my-4">
-        <div class="flex items-center justify-start mr-auto">
-            <img src="{{lobby.host.avatarUrl}}" class="rounded-full w-28 h-28 bg-white mr-4">
-            <h1 class="text-white text-4xl flex-grow text-center">{{ lobby.host.username }}</h1>
+		<div class="flex mr-auto flex-col">
+			<div [ngClass]="{'mb-5': lobby.players.length > 1}" class="flex items-center min-w-64 max-h-20">
+				<img src="{{lobby.host.avatarUrl}}" class="rounded-full w-28 h-28 bg-white mr-4">
+				<h1 class="text-white text-4xl flex-grow text-center">{{ lobby.host.username }}</h1>
+			</div>
+			<div *ngFor="let player of lobby.players | slice:0:(lobby.onlineSettings.matchSettings.teamSize / 2); let i = index" class="flex items-center min-w-64 max-h-20">
+				<ng-container *ngIf="i < lobby.onlineSettings.matchSettings.teamSize - 1">
+					<ng-container *ngIf="player === undefined">
+						<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-28 h-28 bg-white mr-4">
+						<span class="loading loading-dots loading-lg mr-auto ml-auto" role="status"></span>
+					</ng-container>
+					<ng-container *ngIf="player !== undefined">
+						<img src="{{player.avatarUrl}}" class="rounded-full w-28 h-28 bg-white mr-4">
+						<h1 class="text-white text-4xl flex-grow text-center">{{ player.username }}</h1>
+					</ng-container>
+				</ng-container>
+			</div>
         </div>
 
         <img src="../../../assets/img/lobby-doublesword.svg" width="100" height="50" class="justify-self-center">
@@ -57,9 +28,14 @@
         <div class="flex ml-auto flex-col justify-end">
             <div *ngFor="let player of lobby.players; let i = index" [ngClass]="{'mb-5': lobby.players.length > 1}" class="flex items-center min-w-64 max-h-20">
                 <ng-container *ngIf="i >= lobby.onlineSettings.matchSettings.teamSize - 1">
-                    <span *ngIf="player === undefined" class="loading loading-dots loading-lg mr-auto ml-auto" role="status"></span>
-                    <h1 *ngIf="player !== undefined" class="text-white text-4xl flex-grow text-center" role="status">{{ player.username }}</h1>
-                    <img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-28 h-28 bg-white ml-4">
+					<ng-container *ngIf="player === undefined">
+						<span class="loading loading-dots loading-lg mr-auto ml-auto" role="status"></span>
+						<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-28 h-28 bg-white ml-4">
+					</ng-container>
+					<ng-container *ngIf="player !== undefined">
+						<h1 class="text-white text-4xl flex-grow text-center" role="status">{{ player.username }}</h1>
+						<img src="{{ player.avatarUrl }}" class="rounded-full w-28 h-28 bg-white ml-4">
+					</ng-container>
                 </ng-container>
             </div>
         </div>

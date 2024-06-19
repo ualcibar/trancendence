@@ -17,6 +17,9 @@
     "register_password_tip":"Aukeratu pasahitz luzea eta hainbat karaktere dituena",
     "register_finish_tip":"o regístrate con",
     "register_redirect":"Saioaren hasieran birbideratuz...",
+    "register_privacy":"Aceptas la",
+    "register_privacy_2":"de SpacePong",
+    "register_privacy_link":"Politica de Privacidad",
 
     "login_title":"Pozten naiz zu berriz ikusteaz!",
     "login_subtitle":"SpacePong-en berria?",

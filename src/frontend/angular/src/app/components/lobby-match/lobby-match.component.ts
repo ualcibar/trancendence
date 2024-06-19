@@ -25,6 +25,7 @@ export class LobbyMatchComponent {
 
   LobbyMatchState = LobbyMatchState;
   MatchmakingState = MatchmakingState;
+
   constructor(private matchmaking: MatchmakingService, state : StateService) {
     this.state = LobbyMatchState.Waiting;
     state.matchmakingState$.subscribe(state => {
@@ -48,6 +49,11 @@ export class LobbyMatchComponent {
           break;
       }
     })
+  }
+
+  cancelGame() {
+    this.matchmaking.sendCancelJoinMatch();
+    console.log("a");
   }
 }
 

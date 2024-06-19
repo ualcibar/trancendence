@@ -13,3 +13,7 @@
 .form-text {
 	color: #cfe1e6;
 }
+
+.scrollable-container {
+	border: 1px solid #ccc;
+}
