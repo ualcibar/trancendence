@@ -229,7 +229,8 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 			if (key.isPressed(paddle.downKey)) {
 				paddle.dir.y = -1;
 			}
-		}else if(paddle.state === PaddleState.Bot){
+		}else if(paddle.stateBot){
+			console.log('BOT ACTIVE')
 			lastUpdateSec += delta;
 			if (lastUpdateSec >= 1){
 				lastUpdateSec = 0;

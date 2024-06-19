@@ -125,6 +125,8 @@
     "register_choose_email":"Aukeratu mezu elektroniko bat identifikazio pertsonal gisa",
     "register_username_inuse":"Erabiltzaile-izen hori dagoeneko erabiltzen da, aukeratu beste bat.",
     "register_email_notvalid":"Mezu honek ez du balio. Egiaztatu ondo idatzi duzula.",
+    "register_username_notvalid":"Erabiltzaile-izen horrek ez du balio. Egiaztatu 6 eta 20 karaktere arteko luzera duen.",
+    "register_make_sure":"Egiaztatu pasahitzak 6 karaktere baino gehiago dituela.",
     "register_unexpected":"Ustekabeko akatsa gertatu da! Saiatu berriro.",
 
     "settings_dataload":"Datuak kargatzen...",
@@ -174,6 +176,7 @@
 
     "chat_new" : "Txat berria",
     "chat_join" : "PARTIDAREKIN BAT EGIN",
+    "chat_invite" : "Gonbidatu",
 
     "friends_title" : "LAGUNAK",
     "friends_load" : "Kargatzen...",

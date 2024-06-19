@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 
 import { easeOut } from '../../../assets/animations/easeOut';
 import {AuthService, PrivateUserInfo} from '../../services/auth.service';
+import { ip } from '../../../main';
+import { NotificationService, Notification } from '../../services/notificationService';
 
 @Component({
     selector: 'app-register',
@@ -23,7 +25,7 @@ export class RegisterComponent {
     success: boolean = false;
     error: boolean = false;
 
-    constructor(private authService : AuthService, private router: Router) {}
+    constructor(private authService : AuthService, private router: Router, private notificaction : NotificationService) {}
 
     ngOnInit() {
         this.authService.subscribe({
@@ -36,7 +38,8 @@ export class RegisterComponent {
     }
 
     register42Api() {
-        window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2F${ip}%3A4200&response_type=code&state=register';
+//        console.log(`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=https%3A%2F%2F${ip}%3A1501&response_type=code&state=register`)
+        window.location.href = `https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=https%3A%2F%2F${ip}%3A1501&response_type=code&state=register`;
     }
 
     registerAcc() {
@@ -48,15 +51,18 @@ export class RegisterComponent {
                 this.formSent = false;
                 },
             error: (error) => {
+                console.log(error)
                 this.success = false;
-                const errorMsg = error.error.message;
+                this.formSent = false;
+                const errorMsg = error.message;
                 if (errorMsg.includes("already exists")) { //El nombre de usuario ya está en uso
                     this.usernameUsed = true;
-                } else if (errorMsg.includes("Internal Server Error")) { // Error interno
+                } else if (errorMsg.includes("invalid form")) { // Error interno
+                    this.internalError = true;
+                } else { // Error interno
+                    this.error = true;
                     this.internalError = true;
                 }
-                this.error = true;
-                this.formSent = false;
             }
         })
     }

@@ -22,7 +22,7 @@ stop:
 	@echo "\033[1;33mStopping containers...\033[0m"
 	docker compose -f $(COMPOSE_FILE) stop
 run:
-	cd src; bash ip_to_env.sh; cd ..
+	make ip_to_env
 	make build
 	make up
 	@echo "\033[1;32mAll has been made!\033[0m"
@@ -42,7 +42,7 @@ status:
 clean:
 	make stop
 	make down
-	cd src; bash clean.sh; cd ..
+	make clean_ip
 	@echo "\n\033[1;33mCleaning... \033[0m"
 	docker rmi -f postgres:latest src-backend src-frontend
 	docker system prune -f
@@ -56,4 +56,14 @@ re:
 	make run
 	make status
 
-.PHONY: build build_con up stop run down dwst prune status clean cleanVolumes re
+ip_to_env:
+	cd src; bash ip_to_env.sh; cd ..
+
+clean_ip:
+	cd src; bash clean.sh; cd ..
+
+reip:
+	make clean_ip
+	make ip_to_env
+
+.PHONY: build build_con up stop run down dwst prune status clean cleanVolumes re ip_to_env clean_ip reip

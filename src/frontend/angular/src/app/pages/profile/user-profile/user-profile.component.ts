@@ -49,6 +49,8 @@ export class UserProfileComponent implements OnInit{
   friendADD: boolean = false;
   showFriendList: boolean =false;
 
+  userBlocked = false;
+
   constructor(private http: HttpClient, private route: ActivatedRoute, public authService: AuthService, private elRef: ElementRef, private ngZone: NgZone, private router : Router, private renderer: Renderer2, public friendService: FriendsService) {
   }
 
@@ -111,6 +113,11 @@ export class UserProfileComponent implements OnInit{
     } else {
       this.renderer.removeClass(containerElement, 'small-width');
     }
+  }
+
+  blockUser(){
+    this.authService.blockUser(this.userId)
+    this.userBlocked = true
   }
 
   getUserInfo(userId: number): void {

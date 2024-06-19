@@ -91,7 +91,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
 
 
   addToScene(scene: THREE.Scene) {
-    console.log('adding ball to scene');
+    //console.log('adding ball to scene');
     scene.add(this.mesh);
     if (this.lightOn)
       scene.add(this.light);
@@ -375,6 +375,9 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.pos.set(paddle.pos.x, paddle.pos.y);
     this.mesh.position.set(paddle.pos.x, paddle.pos.y, 0);
     this.dir = paddle.dir;
+    this.stateBinded = paddle.stateBinded;
+    this.stateBot = paddle.stateBot;
+    this.stateUnbinded = paddle.stateUnbinded;
   }
 
   goUp() {
@@ -497,13 +500,12 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   toJSON() : any{
-    const {pos, dimmensions,type, color, speed, dir, AIprediction} = this;
-    return {pos, dimmensions,type, color, speed, dir, AIprediction}; 
+    const {pos, dimmensions,type, color, speed, dir, AIprediction, stateBinded, stateBot, stateUnbinded} = this;
+    return {pos, dimmensions,type, color, speed, dir, AIprediction, stateBinded, stateBot, stateUnbinded}; 
   }
 
   isAI() : boolean{
-    if (this.state === PaddleState.Bot)
-      this.madeAIPlayer();
+
     return this.stateBot;
   }
 
@@ -632,10 +634,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     this.configStateSubscription = this.manager.subscribeMatchState(//it was done befor it was set??
       (state: MatchState) => {
         switch (state) {
-          case MatchState.Initialized:
-            break;
           case MatchState.Running:
-            console.log('MATCH STARTING')
+            console.log('Match running')
             this.paused = false;
             this.pausedTime += Date.now() - this.pausingTime;
             this.run();
@@ -644,6 +644,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             console.log('MATCH PAUSED')
             this.paused = true;
             this.pausingTime = Date.now();
+            this.stop = true;
             break;
           case MatchState.FinishedSuccess:
             break;
@@ -816,18 +817,17 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
+    console.log('rendering', this.manager.getMatchState())
 
-    if (this.paused) {
-      // this.pausedTime += timeDifference;
-      // console.log('paused', this.pausedTime);
-      this.pastTime = time;
+    if (this.manager.getMatchState() !== MatchState.Running && this.manager.getMatchState() !== MatchState.Starting) {
+      requestAnimationFrame(this.render.bind(this));
       return;
     }
-    if (this.manager.getMatchState() !== MatchState.Running){
+    /*if (this.manager.getMatchState() !== MatchState.Running){
       return
-    }
+    }*/
 
-
+    console.log('running')
     // DISPLAY TIME
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -852,15 +852,14 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     if (after - before > 3)
       console.error('rende', after - before)
     this.pastTime = time;
-    if (!this.stop)
+    //if (!this.stop)
       requestAnimationFrame(this.render.bind(this));
   }
 
   logic(timeDifference : number){ 
-    if (!this.paused)
+    //if (this.manager.getMatchState() === MatchState.Running)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();
-    //this.checkAI();
     this.updateScene();
   }
 
@@ -915,8 +914,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   sendIAprediction(paddle : Paddle, prediction : number){
-    // console.log(paddle);
-    // console.log(paddle.getId());
+    console.log("mira eneko es aaqui");
+    console.log(paddle.getId());
     const eventData : EventData = {
       senderId : paddle.getId(),// not sure about what is what
       targetIds : paddle.getId(),
@@ -928,17 +927,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     };
     // console.log('sending event IA prediction', eventData);
     this.manager.sendEvent(PongEventType.IAPrediction, eventData);
-  }
-
-  checkAI(){
-    for (const paddle of this.paddles){
-      // console.log('checking AI');
-      // console.log('paddle', paddle);
-      if (paddle.isAI() && paddle.isIAupdateable()) {
-        // console.log('IA¡!');
-        this.makePrediction(paddle);
-      }
-    }
   }
 
   allColisions(){

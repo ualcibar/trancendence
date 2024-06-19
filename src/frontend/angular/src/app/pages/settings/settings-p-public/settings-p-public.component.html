@@ -26,8 +26,17 @@
     <h1 class="font-bold text-2xl"><i class="bi bi-person-vcard-fill"></i> {{'settings_public_userusername'|translate}}</h1>
     <p class="text-zinc-300 mb-2">{{'settings_public_choose'|translate}}</p>
     <div class="flex align-items-center max-w-80 mb-2">
-        <input [(ngModel)]="username" type="text" name="username" class="form-control shadow-none" id="floatingInput" required>
+        <input [(ngModel)]="username" type="username" name="username" class="form-control shadow-none" id="floatingInput" required pattern="^.{6,20}$" #usernameInput="ngModel">
         <button (click)="savePublic()" [ngClass]="{'grayscale-0': currentUsername !== username,'grayscale disabled opacity-50': currentUsername === username}" class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
+    </div>
+
+    <div *ngIf="(usernameInput.invalid && usernameInput.touched)" class="pt-6 flex items-center" [@easeOut]>
+        <div class="alert alert-error alert-dismissible fade show max-auto max-w-xl">
+		<i class="bi bi-x-circle text-black"></i>
+            <div>
+                <p *ngIf="usernameInput.invalid && usernameInput.touched">{{'register_username_notvalid'|translate}}</p>
+            </div>
+        </div>
     </div>
 
     <!-- Error -->

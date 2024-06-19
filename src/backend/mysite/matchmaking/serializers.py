@@ -30,7 +30,7 @@ class MatchPreviewToOnlineMatchSettings2Serializer(serializers.ModelSerializer):
     matchSettings = MatchPreviewToMatchSettingsSerializer(source='*')
     class Meta:
         model = MatchPreview 
-        fields = ('name', 'publicMatch', 'matchSettings')
+        fields = ('name', 'publicMatch', 'matchSettings', 'available')
 
 class MatchPreviewToOnlineMatchInfoSerializer(serializers.ModelSerializer):
     onlineSettings = MatchPreviewToOnlineMatchSettings2Serializer(source='*')

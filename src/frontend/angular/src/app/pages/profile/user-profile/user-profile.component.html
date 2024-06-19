@@ -60,6 +60,7 @@
 					</div>
 					<div class="stat">
 						<button *ngIf="!friendService.friendExist(userId) && !friendADD" (click)="toggleAddFriend()" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-person-heart"></i></button>
+						<button *ngIf="selfInfo!.info.id !== info.id! && !authService.isUserBlocked(userId) && !userBlocked" (click)="blockUser()" class="btn mb-2 btn-warning btn-sm"><i class="bi bi-ban"></i></button>
 						<button *ngIf="selfInfo!.info.id !== info.id"
 							(click)="onChatButton()" class="btn mb-2 btn-primary btn-sm"><i
 								class="bi bi-chat-dots-fill"></i></button>

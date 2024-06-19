@@ -118,6 +118,7 @@ export class MatchSettings{//no matter what map this settings are always applica
   teamSize : number;
   mapName : MapsName;
   initPaddleStates : PaddleState[];
+  isLocal : boolean = true;
 
   constructor( maxTimeRoundSec : number, maxRounds : number,
     roundsToWin : number, teamSize : number, mapName : MapsName, initPaddleStates : PaddleState[]){
@@ -288,12 +289,12 @@ export class MatchUpdate{
     }
 
     // randomize a bit the prediction (makes it more human like)
-    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius)/2 ;
+    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius) ;
 
     // if the ball is going to the left, make the prediction less extreme
-    if (!(ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2)) {
-      predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
-    }
+    // if (!(ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2)) {
+    //   predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
+    // }
     return predictedBallY
   }
 }
@@ -638,6 +639,7 @@ export class MatchManager implements Manager{
     this.state = state;
 //    this.matchScore = new State<Score>(new Score([0,0]));
     this.matchUpdate = this.matchConfig.mapSettings.createMatchInitUpdate(this.matchConfig.matchSettings, this);
+    this.matchUpdate.paddles.forEach(paddle => console.log(paddle))
     this.matchUpdate.subscribeAllToManager(this);
     this.matchState = new State<MatchState>(MatchState.Created);
     this.matchState.subscribe(
@@ -705,6 +707,13 @@ export class MatchManager implements Manager{
 
           //reset match and go for the next round if any
           this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings);
+          if (this.matchUpdate.score.score[data.custom!.others.team] >= this.matchConfig.matchSettings.roundsToWin){
+              //this.matchSync.sendEvent(PongEventType.Finish,{})
+              this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Finish),PongEventType.Finish, {})
+              this.matchState.setValue(MatchState.FinishedSuccess)
+              //this.onlineMatchState.setValue(OnlineMatchState.FinishedSuccess)
+              //this.matchSync.endMatch();
+          }
           /*this.broadcastEvent(PongEventType.Pause, {});
           this.matchState.setValue(MatchState.Paused);
           this.broadcastEvent(PongEventType.Reset, {});
@@ -872,6 +881,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
             console.log('start online match: a match has finished');
             console.log('start online match result : ');
             this.state.setValue(GameManagerState.Standby)
+            //router.navigate(['/']);
             break;
         }
     });

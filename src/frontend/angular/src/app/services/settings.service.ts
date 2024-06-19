@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AuthService, UserInfo } from './auth.service';
+import { AuthService, UserInfo, PrivateUserInfo} from './auth.service';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
@@ -33,6 +33,8 @@ export class UserSettingsInfo extends UserInfo {
 })
 
 export class SettingsService {
+
+  is_42_user :boolean = false;
   private userSettingsInfoSubject: BehaviorSubject<UserSettingsInfo | null> = new BehaviorSubject<UserSettingsInfo | null>(null);
   userSettingsInfo$: Observable<UserSettingsInfo | null> = this.userSettingsInfoSubject.asObservable();
 
@@ -116,8 +118,8 @@ export class SettingsService {
   }
   //Esta función permite comprobar que la contraseña actual sea la correcta
   async verifyPassword(value: string): Promise<void> {
-    const backendURL = '/api/polls/checkInfo/';
-    const httpReqBody = `currentPass=${value}`;
+    const backendURL = '/api/polls/checkPassword/';
+    const httpReqBody = `password=${value}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -130,7 +132,7 @@ export class SettingsService {
 
   async send_mail_2FA_activation(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_2FA_activation/';
-    const httpReqBody = `currentUsername=${user}`;
+    const httpReqBody = `username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -142,7 +144,7 @@ export class SettingsService {
 
   async send_mail_2FA_deactivation(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_2FA_deactivation/';
-    const httpReqBody = `currentUsername=${user}`;
+    const httpReqBody = `username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -154,7 +156,7 @@ export class SettingsService {
 
   async send_mail_password(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_password/';
-    const httpReqBody = `currentUsername=${user}`;
+    const httpReqBody = `username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -166,7 +168,7 @@ export class SettingsService {
 
   async send_mail_new_mail(mailNew:string, mailOld:string, user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_new_mail/';
-    const httpReqBody = `currentMailNew=${mailNew}&currentMailOld=${mailOld}&currentUsername=${user}`;
+    const httpReqBody = `new_mail=${mailNew}&old_mail=${mailOld}&username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -177,7 +179,7 @@ export class SettingsService {
   }
   async check_token(token: string, user:string): Promise<void> {
     const backendURL = 'api/polls/check_token/';
-    const httpReqBody = `currentToken=${token}&currentUsername=${user}`;
+    const httpReqBody = `token=${token}&username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'

@@ -87,8 +87,21 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                     router.navigate(['/']);
                 }
                 this.renderState.renderGame.setValue(true);
-                if (realManager instanceof MatchManager)
+                if (realManager instanceof MatchManager) {
                     this.matchManager = realManager;
+                    realManager.matchState.subscribe((state : MatchState) => {
+                        switch(state){
+                            case MatchState.FinishedSuccess:
+                                this.renderState.renderGame.setValue(false);
+                                this.renderState.renderMatchEnd.setValue(true);
+                                break;
+                            case MatchState.FinishedError:
+                                this.renderState.renderGame.setValue(false);
+                                this.renderState.renderMatchEnd.setValue(true);
+                                break;
+                        }
+                    })
+                }
                 break;
             case RealManagerType.Tournament:
                 if (!(realManager instanceof TournamentManager)){
@@ -125,6 +138,10 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 this.players = this.onlineMatchManager!.getPlayers(); 
                 this.renderState.renderGame.setValue(true);
                 this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{ 
+                    console.log('STATE', state)
+                    console.log('STATE', state)
+                    console.log('STATE', state)
+                    console.log('STATE', state)
                     switch (state){
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')
@@ -134,6 +151,11 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                             console.log('match finish success')
                             this.renderState.renderGame.setValue(false)
                     }
+                })
+                this.onlineMatchManager!.onlineMatchState.subscribe((state : OnlineMatchState) => {
+                    console.log('MATCH ONLINE STATE', state)
+                    console.log('MATCH ONLINE STATE', state)
+                    console.log('MATCH ONLINE STATE', state)
                 })
                 break;
         } 

@@ -101,6 +101,7 @@ export interface PrivateUserInfoI{
   email : string;
   twofa : boolean | null;
   tokentwofa : string | null;
+  is_42_user : boolean
 }
 
 export class PrivateUserInfo{
@@ -111,13 +112,15 @@ export class PrivateUserInfo{
   email : string;
   twofa : boolean | undefined;
   tokentwofa : string | undefined;
-  constructor (info : UserInfo, friends : UserInfo[], blockedUsers : UserInfo[] ,language : string, email : string, twofa : boolean | undefined, tokentwofa : string | undefined){
+  is_42_user : boolean;
+  constructor (info : UserInfo, friends : UserInfo[], blockedUsers : UserInfo[] ,language : string, email : string, twofa : boolean | undefined, tokentwofa : string | undefined, is_42_user : boolean){
     this.info = info;
     this.friends = friends;
     this.email = email;
     this.language = language;
     this.twofa = twofa;
     this.tokentwofa = tokentwofa;
+    this.is_42_user = is_42_user
     this.blockedUsers = blockedUsers;
   }
   static fromI(values : PrivateUserInfoI) : PrivateUserInfo | undefined{
@@ -140,8 +143,8 @@ export class PrivateUserInfo{
     if (!userInfo)
       return undefined
     if (values.twofa === null || values.tokentwofa === null)
-      return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, undefined, undefined)
-    return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, values.twofa, values.tokentwofa)
+      return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, undefined, undefined, values.is_42_user)
+    return new PrivateUserInfo(userInfo, friends, blockedUsers, values.language, values.email, values.twofa, values.tokentwofa, values.is_42_user)
   }
 }
 
@@ -208,11 +211,12 @@ export class AuthService {
     const backendURL = 'api/polls/getInfo';
     this.http.get<any>(backendURL, { withCredentials: true }).subscribe({
       next: (response) => {
+        //console.log(response.privateUserInfo)
         this.translateService.setDefaultLang(response.privateUserInfo.language);
         this.translateService.use(response.privateUserInfo.language);
         this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
-        clearInterval(this.reconnecting)
         //if (this.reconnecting)
+        clearInterval(this.reconnecting)
          
       },
       error: () => {
@@ -277,9 +281,10 @@ export class AuthService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
-      })
+      }),
+      with_credentials: true
     };
-    this.http.post<any>(backendURL, jsonToSend).subscribe({
+    this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
       next: (response) => {
         this.logger.info('response friend list', response);
       },
@@ -332,7 +337,7 @@ export class AuthService {
 
   async get_2FA_bool(user: string): Promise<boolean> {
     const backendURL = 'api/polls/get_2FA_bool/';
-    const httpReqBody = `currentUsername=${user}`;
+    const httpReqBody = `username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -414,9 +419,10 @@ export class AuthService {
     const backendURL = 'api/polls/token/refresh/';
     this.http.post<any>(backendURL, {refresh : refresh},{}).subscribe({
       next: (response) => {
-        console.log('refresh', response)
+        this.translateService.setDefaultLang(response.privateUserInfo.language);
+        this.translateService.use(response.privateUserInfo.language);
+        this._userInfo.setValue(PrivateUserInfo.fromI(response.privateUserInfo))
         this.logger.info('success refresh?', response);
-        //this.updateUserInfo();
       },
       error: (error) => {
         this.logger.error('failed refresh token', error)
@@ -461,8 +467,8 @@ export class AuthService {
   }
 
   async verifyPassword(value: string): Promise<void> {
-    const backendURL = '/api/polls/checkInfo/';
-    const httpReqBody = `currentPass=${value}`;
+    const backendURL = '/api/polls/checkPassword/';
+    const httpReqBody = `password=${value}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -479,7 +485,7 @@ export class AuthService {
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const httpReqBody = `currentToken=${token}&currentUsername=${this.user_info.username}`;
+    const httpReqBody = `token=${token}&username=${this.user_info.username}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -491,7 +497,7 @@ export class AuthService {
 
   async send_mail(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail/';
-    const httpReqBody = `currentUsername=${user}`;
+    const httpReqBody = `username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'

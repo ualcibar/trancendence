@@ -30,7 +30,7 @@ class PrivateUserInfoSerializer(serializers.ModelSerializer):
     tokentwofa = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ('info', 'friends', 'blockedUsers', 'language', 'email', 'twofa', 'tokentwofa')
+        fields = ('info', 'friends', 'blockedUsers', 'language', 'email', 'twofa', 'tokentwofa', 'is_42_user')
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
         if password:

@@ -39,7 +39,7 @@ const  tournamentTree: number = 10;
 
 
 
-class HomeRenderState{
+export class HomeRenderState{
     private activity : State<boolean>[];
     private _render : Subject<void> = new Subject<void>();
     private _render$ : Observable<void> = this._render.asObservable();
