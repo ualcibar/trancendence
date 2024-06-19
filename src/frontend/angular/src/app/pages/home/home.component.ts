@@ -118,9 +118,9 @@ export class HomeComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.changeState(HomeState.MatchTournament);
-    }, 1200);
+    //setTimeout(() => {
+     // this.changeState(HomeState.MatchTournament);
+    //}, 1200);
   }
 
   ngAfterViewInit(): void {

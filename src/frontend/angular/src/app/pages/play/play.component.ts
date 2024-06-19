@@ -119,10 +119,12 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                             case MatchState.FinishedSuccess:
                                 this.renderState.renderGame.setValue(false);
                                 this.renderState.renderMatchEnd.setValue(true);
+                                router.navigate(['/'])
                                 break;
                             case MatchState.FinishedError:
                                 this.renderState.renderGame.setValue(false);
                                 this.renderState.renderMatchEnd.setValue(true);
+                                router.navigate(['/'])
                                 break;
                         }
                     })
@@ -171,16 +173,14 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')
                             this.renderState.renderGame.setValue(false)
+                            router.navigate(['/'])
                             break;
                         case MatchState.FinishedSuccess:
                             console.log('match finish success')
                             this.renderState.renderGame.setValue(false)
+                            router.navigate(['/'])
+                            break;
                     }
-                })
-                this.onlineMatchManager!.onlineMatchState.subscribe((state : OnlineMatchState) => {
-                    console.log('MATCH ONLINE STATE', state)
-                    console.log('MATCH ONLINE STATE', state)
-                    console.log('MATCH ONLINE STATE', state)
                 })
                 break;
         } 
@@ -188,6 +188,14 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
     ngAfterViewInit(): void {
         
     }
+    
+    isBot(id : number) : boolean{
+        const index = this.onlineMatchManager?.info.getPlayerIndex(id)
+        if (index== undefined)
+            return false;
+        return this.matchUpdate.paddles[index].stateBot
+    }
+
     ngOnDestroy(): void {
         if (this.manager.getState() === GameManagerState.InGame){
             if (this.currentManagerType == RealManagerType.OnlineMatch){

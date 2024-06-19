@@ -793,7 +793,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
     this.updateScene();
     this.manager.setMatchState(MatchState.Initialized);
-    this.map.setMatchInitUpdate(this.update, this.matchSettings);
+    this.manager.restart();
+//    this.map.setMatchInitUpdate(this.update, this.matchSettings);
   }
 
   initValues() {
@@ -819,7 +820,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     this.lastUpdate += timeDifference;
     //console.log('rendering', this.manager.getMatchState())
 
-    if (this.manager.getMatchState() !== MatchState.Running && this.manager.getMatchState() !== MatchState.Starting) {
+    if (this.manager.getMatchState() !== MatchState.Running) {
       requestAnimationFrame(this.render.bind(this));
       return;
     }
@@ -857,7 +858,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   logic(timeDifference : number){ 
     //if (this.manager.getMatchState() === MatchState.Running)
     this.update.runTickBehaviour(timeDifference);
-    // console.log('paddle client dir',this.update.paddles[1].dir)
     this.allColisions();
     this.updateScene();
   }
