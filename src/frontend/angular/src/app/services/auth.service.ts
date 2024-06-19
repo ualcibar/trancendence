@@ -306,7 +306,14 @@ export class AuthService {
   }
 
   isUserBlocked(id : number) : boolean | undefined{
-    return this.userInfo!.blockedUsers.some(blocked_user=>blocked_user.id === id)
+    if (!this.userInfo)
+      return undefined
+    for (const blocked_user of this.userInfo.blockedUsers){
+      if (blocked_user.id == id){
+        return true
+      }
+    }
+    return false
   }
 
   getUpdateUserInfo(): UserInfo | undefined {
