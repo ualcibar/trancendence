@@ -1,5 +1,9 @@
 <div class="h-50real">
   <div class="h-full" *ngIf="(renderState.game$ | async)">
+    <!-- Agregar el reloj aquí -->
+    <div class="absolute" style="bottom: 10%; left: 50%; transform: translateX(-50%);">
+      <h1 class="game-clock">{{manager.getMatchUpdate().clock}}</h1>
+    </div>
     <div *ngIf="showSettings" class="absolute">
     </div>
     <div class="absolute flex justify-around w-full h-full" #topui>
@@ -19,7 +23,7 @@
         <div *ngFor="let player of players">
           <div *ngIf="(player!.state.observable | async) === OnlinePlayerState.Disconnected" class="offline"></div>
           <img alt="" src="{{player!.avatarUrl}}"
-							class="bg-white w-4 rounded-full"/>
+                            class="bg-white w-4 rounded-full"/>
         </div>
       </div>
     </div>

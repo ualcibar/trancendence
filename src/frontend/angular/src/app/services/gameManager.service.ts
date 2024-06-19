@@ -191,6 +191,9 @@ export class MatchUpdate{
   blocks : Block[];
   score : Score;
   id : number;
+
+  time : number = 0;
+
   constructor(paddles : Paddle[], balls : Ball[], blocks : Block[], score : Score, id : number){
     this.paddles = paddles;
     this.balls = balls;
@@ -208,6 +211,8 @@ export class MatchUpdate{
   runTickBehaviour(delta : number){
     // console.log('running tick behaviour')
     // console.log('delta', delta)
+    this.time += delta;
+
     for (let i = 0; i < this.paddles.length; i++){
       this.paddles[i].tickBehaviour.runTick(delta);
     }
@@ -296,6 +301,17 @@ export class MatchUpdate{
     //   predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
     // }
     return predictedBallY
+  }
+
+  get clock() : string{
+    const time = this.time; // in seconds
+    const m = Math.floor(time / 60);
+    const s = Math.floor(time % 60);
+  
+    const minutes : string = m < 10 ? '0' + m : m.toString();
+    const seconds : string = s < 10 ? '0' + s : s.toString();
+
+    return minutes + ':' + seconds;
   }
 }
 
