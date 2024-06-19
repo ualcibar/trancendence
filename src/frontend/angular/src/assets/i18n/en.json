@@ -129,6 +129,8 @@
     "register_choose_email":"Choose an email account as personal identification",
     "register_username_inuse":"This username is already in use, choose another.",
     "register_email_notvalid":"This email is not valid. Check that you have written it correctly.",
+    "register_username_notvalid":"This username is not valid. Check that it's length is between 6 and 20 characters.",
+    "register_make_sure":"Make sure the password has more than 6 characters.",
     "register_unexpected":"An unexpected error has occurred! Try again.",
 
     "settings_dataload":"Loading data...",
