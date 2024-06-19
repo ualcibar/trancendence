@@ -129,10 +129,10 @@ export class MatchGeneratorComponent {
     else{
       this.paddlesBindedB[index] = !this.paddlesBindedB[index]
       if (this.paddlesBindedB[index])
-        this.settings.initPaddleStates[1 + index] = PaddleState.Binded
+        this.settings.initPaddleStates[this.settings.teamSize + index] = PaddleState.Binded
       else
-        this.settings.initPaddleStates[1 + index] = PaddleState.Bot
-    }
+        this.settings.initPaddleStates[this.settings.teamSize + index] = PaddleState.Bot
+      }
     console.log('team size', this.settings.teamSize, '+', index, '=', this.settings.teamSize + index)  
     console.log('paddle states', this.settings.initPaddleStates)
   }

@@ -1,8 +1,5 @@
 <div *ngIf="state === LobbyMatchState.Ok" class="sp-div rounded-xl mx-auto max-w-3xl px-4">
-	<div class="flex items-center">
-		<button (click)="cancelGame()" class="transition-colors text-white bg-red-700 hover:bg-red-800 rounded-lg text-sm px-2 py-2.5 me-2"><i class="bi bi-door-open-fill"></i> Salir de la partida</button>
-		<h1 class="text-orange-100 text-4xl mb-8 mt-4 ml-6 text-center font-bold">{{'lobby_match_searching'|translate}}</h1>
-	</div>
+	<h1 class="text-orange-100 text-4xl mb-8 mt-4 ml-6 text-center font-bold">{{'lobby_match_searching'|translate}}</h1>
     <div class="flex align-items-center justify-content-center position-relative my-4">
 		<div class="flex mr-auto flex-col">
 			<div [ngClass]="{'mb-5': lobby.players.length > 1}" class="flex items-center min-w-64 max-h-20">

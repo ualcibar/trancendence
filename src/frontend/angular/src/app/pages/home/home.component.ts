@@ -240,6 +240,7 @@ export class HomeComponent implements OnInit, AfterViewInit{
     }
     this.router.navigate(['/play']);
   }
+  
   createOnlineMatch(){
     this.matchmakingService.newOnlineMatch(this.localGameHandler.getOnlineMatchSettings());
   }

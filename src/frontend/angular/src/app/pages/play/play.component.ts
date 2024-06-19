@@ -82,8 +82,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
         if (manager.getState() !== GameManagerState.InGame){
             if (this.debug) {
                 console.log('creating match');
-                const matchSettings = new MatchSettings(60,3,2,1, MapsName.Default, [PaddleState.Binded,PaddleState.Binded, PaddleState.Binded, PaddleState.Binded]);
-               
+                const matchSettings = new MatchSettings(60,3,2,1, MapsName.Default, [PaddleState.Binded,PaddleState.Binded]);               
                 const mapSettings = this.maps.getMapSettings(matchSettings.mapName);
                 if (!mapSettings){
                     console.error('map not found');

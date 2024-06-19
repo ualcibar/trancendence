@@ -407,7 +407,8 @@ export class MapSettings{
   public readonly paddleDepth! : number;
   public readonly paddleColor! : number;
   public readonly paddleType! : BlockType;
-  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded, PaddleState.Binded, PaddleState.Binded];
+  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
+  // public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded, PaddleState.Binded, PaddleState.Binded];
 
   public readonly paddleUpKey : string[] = ['w', 'o','up', '-'];
   public readonly paddleDownKey : string[] = ['s', 'l','down', '+'];
