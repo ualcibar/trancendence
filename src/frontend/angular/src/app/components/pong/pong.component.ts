@@ -345,7 +345,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
 
     let paddleColor = settings.paddleColor;
     if (match_settings.teamSize > 1)
-      paddleColor = Math.random() * 0x777777;
+      paddleColor = Math.random() * 0xFFFFFF / 2 + 0xFFFFFF / 2;
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
 
