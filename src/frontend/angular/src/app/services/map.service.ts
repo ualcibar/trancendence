@@ -409,8 +409,8 @@ export class MapSettings{
   public readonly paddleType! : BlockType;
   public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
 
-  public readonly paddleUpKey : string[] = ['w', 'o','up', '5'];
-  public readonly paddleDownKey : string[] = ['s', 'l','down', '2'];
+  public readonly paddleUpKey : string[] = ['w', 'o','up', '-'];
+  public readonly paddleDownKey : string[] = ['s', 'l','down', '+'];
 
   // Paddle position
   public readonly leftPaddlePos: Vector2 = new Vector2(-1,0);
