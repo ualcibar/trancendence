@@ -48,4 +48,22 @@ export class TournamentGeneratorComponent {
       this.escapeKeyPressed.emit();
     }
   }
+
+  /* onNumberOfPlayersChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const newNumberOfPlayers = parseInt(selectElement.value, 10);
+    console.log('new number of players', newNumberOfPlayers);
+    this.settings.numberOfPlayers = newNumberOfPlayers;
+    this.changeTeamSize(newNumberOfPlayers);
+  } */
+
+  onNumberOfPlayersChange(numPlayers: number) {
+    console.log('new number of players', numPlayers);
+    this.settings.numberOfPlayers = numPlayers;
+    this.changeTeamSize(numPlayers);
+  }
+
+  trackByFn(index: number, item: string) {
+    return index;
+  }
 }
