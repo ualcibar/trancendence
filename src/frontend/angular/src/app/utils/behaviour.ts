@@ -230,7 +230,7 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 			if (key.isPressed(paddle.downKey)) {
 				paddle.dir.y = -1;
 			}
-			console.log('paddle', paddle.id, 'dir', paddle.dir.y);
+		//	console.log('paddle', paddle.id, 'dir', paddle.dir.y);
 		}else if(paddle.stateBot){
 			console.log('BOT ACTIVE')
 			lastUpdateSec += delta;

@@ -499,18 +499,24 @@ export class TournamentManager implements Manager{
       this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this))
     //this.currentMatchUpdate = ;
     this.state = state;
+    this.update.currentMatchUpdate.score = new Score([0,0])
     this.update.currentMatchUpdate.subscribeAllToManager(this);
     this.currentMatchState = new State<MatchState>(MatchState.Created);
     this.currentMatchState.subscribe(
       (state : MatchState) => {
         switch (state){
+          case MatchState.Created:
+            console.log('FRIM CREATED', this.update.currentMatchUpdate.score)
+            break;
           case MatchState.Initialized:
+            console.log(this.update.currentMatchUpdate)
             this.setMatchState(MatchState.Running);
             break;
           case MatchState.FinishedError:
             console.error('start tournament: there was an error while running a match');
             break;
           case MatchState.Running:
+            this.update.currentMatchUpdate.score = new Score([0,0])
             console.log('start tournament: a match has started');
             break;
           case MatchState.FinishedSuccess:
@@ -521,8 +527,10 @@ export class TournamentManager implements Manager{
             }
             this.tournamentState.setValue(TournamentState.InTree)
             this.update.currentMatchUpdate = this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this)
+            this.gameObjects = new GameObjectMap() 
             this.update.currentMatchUpdate.subscribeAllToManager(this);
             this.update.currentMatchUpdate.score = new Score([0,0]);
+            console.log(this.update.currentMatchUpdate.score)
             this.currentMatchState.setValue(MatchState.Created)
             break;
         }

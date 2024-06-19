@@ -62,6 +62,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
   lightOn : boolean;
 
   constructor(settings : MapSettings, manager : Manager) {
+    console.log('SETTINGS', settings)
     this.radius = settings.ballRadius;
     const widthSegments = settings.ballWidthSegments;
     const heightSegments = settings.ballHeightSegments;
@@ -70,7 +71,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     const ballMaterial = new THREE.MeshPhongMaterial({color: ballColor});
     this.mesh = new THREE.Mesh(ballGeometry, ballMaterial);
 
-    this.pos = settings.ballInitPos;
+    this.pos = settings.ballInitPos.clone();
     this.dir = new Vector2(settings.ballInitDir.x, settings.ballInitDir.y);
     this.speed = settings.ballInitSpeed;
     this.aceleration = settings.ballInitAcceleration;
@@ -615,6 +616,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   constructor(private manager: GameManagerService,
     private router: Router) {
+      console.log('PONG CREATED')
       this.pausingTime = Date.now();
   }
 
@@ -664,6 +666,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    console.log('PONG DeLETED')
     this.configStateSubscription.unsubscribe()
     // Dispose renderer if exists
     if (this.renderer) {
@@ -804,8 +807,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.scene.add(this.blocks[index]);
     }
     this.updateScene();
-    this.manager.setMatchState(MatchState.Initialized);
     this.manager.restart();
+    this.manager.setMatchState(MatchState.Initialized);
 //    this.map.setMatchInitUpdate(this.update, this.matchSettings);
   }
 
