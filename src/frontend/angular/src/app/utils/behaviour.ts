@@ -206,7 +206,7 @@ export function createTickMove<T extends Pos & Speed & Dir>(object : T){
 }
 
 export function createTickMovePaddle<T extends Pos & Speed & Dir>(object : T){
-	return function move(delta: number) {
+	return function move(delta: number) {		
     	object.pos.add(object.dir.clone().multiplyScalar(object.speed * delta));
 	}
 }
@@ -218,9 +218,9 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 	return function paddleUpdate(delta: number) {
 		// if (!update){
 			update = manager.getMatchUpdate()
-			console.log('paddle satte paddle update', paddle.state)
+			//console.log('paddle satte paddle update', paddle.state)
 		if (paddle.stateBinded) {
-			console.log('trying to move paddle')
+			//console.log('trying to move paddle')
 			// console.log('paddle binded, handling keys', paddle);
 			paddle.dir.y = 0;
 			if (key.isPressed(paddle.upKey)) {

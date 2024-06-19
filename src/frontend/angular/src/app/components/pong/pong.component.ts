@@ -817,7 +817,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
       this.pastTime = time - 0.001;
     const timeDifference = time - this.pastTime;
     this.lastUpdate += timeDifference;
-    console.log('rendering', this.manager.getMatchState())
+    //console.log('rendering', this.manager.getMatchState())
 
     if (this.manager.getMatchState() !== MatchState.Running && this.manager.getMatchState() !== MatchState.Starting) {
       requestAnimationFrame(this.render.bind(this));
@@ -826,8 +826,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     /*if (this.manager.getMatchState() !== MatchState.Running){
       return
     }*/
-
-    console.log('running')
     // DISPLAY TIME
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -858,7 +856,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   logic(timeDifference : number){ 
     //if (this.manager.getMatchState() === MatchState.Running)
-      this.update.runTickBehaviour(timeDifference);
+    this.update.runTickBehaviour(timeDifference);
+    console.log('paddle client dir',this.update.paddles[1].dir)
     this.allColisions();
     this.updateScene();
   }

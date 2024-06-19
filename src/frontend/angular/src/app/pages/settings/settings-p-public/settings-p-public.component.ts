@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgClass, NgIf, NgOptimizedImage } from "@angular/common";
 import { AuthService, PrivateUserInfo } from '../../../services/auth.service';
 import { easeOut } from "../../../../assets/animations/easeOut";
+import { ip } from '../../../../main';
 
 @Component({
   selector: 'app-settings-p-public',
@@ -82,7 +83,7 @@ export class SettingsPPublicComponent {
   }
   
   async defaultAvatar(){
-    this.avatarUrl = 'https://${ip}:1501/api/media/avatars/default.jpg'
+    this.avatarUrl = `https://${ip}:1501/api/media/avatars/default.jpg`
     this.defaultAvatarSet = true;
     this.fileUploaded = true;
   }

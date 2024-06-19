@@ -191,6 +191,9 @@ export class MatchUpdate{
   blocks : Block[];
   score : Score;
   id : number;
+
+  time : number = 0;
+
   constructor(paddles : Paddle[], balls : Ball[], blocks : Block[], score : Score, id : number){
     this.paddles = paddles;
     this.balls = balls;
@@ -208,6 +211,8 @@ export class MatchUpdate{
   runTickBehaviour(delta : number){
     // console.log('running tick behaviour')
     // console.log('delta', delta)
+    this.time += delta;
+
     for (let i = 0; i < this.paddles.length; i++){
       this.paddles[i].tickBehaviour.runTick(delta);
     }
@@ -246,16 +251,20 @@ export class MatchUpdate{
   }
 
   clientUpdate(update : ClientUpdate){
-    this.paddles[update.clientIndex].dir.copy(update.paddleDir);
+    console.log('updating paddle', update.clientIndex, 'to', update.paddleDir)
+    this.paddles[update.clientIndex].dir = new Vector2(update.paddleDir.x, update.paddleDir.y);
+    console.log('after', this.paddles[update.clientIndex].dir.y)
+    console.log('after', this.paddles[update.clientIndex].dir)
+    console.log('after', this.paddles[update.clientIndex])
   }
 
   getAiPrediction(paddle: Paddle): number {
-    console.log('paddle position', paddle.pos);
+    //console.log('paddle position', paddle.pos);
     // this.update(this); // update the current state???
     const ball = this.balls[0];
-    console.log('getAiPrediction ball', ball);
-    console.log('getAiPrediction paddle', paddle);
-    console.log('getAiPrediction this.paddle', this.paddles[1]);
+    //console.log('getAiPrediction ball', ball);
+    //console.log('getAiPrediction paddle', paddle);
+    //console.log('getAiPrediction this.paddle', this.paddles[1]);
     let predictedBallY = 0;
 
     // IA PREDICTION
@@ -296,6 +305,17 @@ export class MatchUpdate{
     //   predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
     // }
     return predictedBallY
+  }
+
+  get clock() : string{
+    const time = this.time; // in seconds
+    const m = Math.floor(time / 60);
+    const s = Math.floor(time % 60);
+  
+    const minutes : string = m < 10 ? '0' + m : m.toString();
+    const seconds : string = s < 10 ? '0' + s : s.toString();
+
+    return minutes + ':' + seconds;
   }
 }
 

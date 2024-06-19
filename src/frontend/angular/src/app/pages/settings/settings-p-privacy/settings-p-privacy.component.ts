@@ -27,7 +27,7 @@ export class SettingsPPrivacyComponent {
   async deleteUser() {
     try {
       await this.authService.delete();
-      window.location.href = "/";
+      //window.location.href = "/";
     } catch (error: any) {
       console.error('❌ Oops!', error.message);
     }

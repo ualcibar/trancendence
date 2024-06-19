@@ -287,6 +287,16 @@ export class AuthService {
     this.http.post<any>(backendURL, jsonToSend, httpOptions).subscribe({
       next: (response) => {
         this.logger.info('response friend list', response);
+        if (this.userInfo){
+          const blockedUsersI : UserInfoI[]= response['blockedUsers']
+          const blockedUsers : UserInfo [] = [];
+          for (const blockedUserI of blockedUsersI){
+            const blockedUser = UserInfo.fromI(blockedUserI)
+            if (blockedUser)
+              blockedUsers.push(blockedUser)
+          }
+          this.userInfo.blockedUsers = blockedUsers;
+        }
       },
       error: () => {
         this.logger.error('update friend list: error fetching data')
@@ -296,7 +306,7 @@ export class AuthService {
   }
 
   isUserBlocked(id : number) : boolean | undefined{
-    return this.userInfo?.blockedUsers.some(blocked_user=>blocked_user.id === id)
+    return this.userInfo!.blockedUsers.some(blocked_user=>blocked_user.id === id)
   }
 
   getUpdateUserInfo(): UserInfo | undefined {
@@ -337,10 +347,12 @@ export class AuthService {
 
   async get_2FA_bool(user: string): Promise<boolean> {
     const backendURL = 'api/polls/get_2FA_bool/';
-    const httpReqBody = `username=${user}`;
+    const httpReqBody = {
+      username : user
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
@@ -446,9 +458,10 @@ export class AuthService {
         return decodeURIComponent(cookie.substring(nameLenPlus));
       })[0] || null;
   }
+
   async setUserConfig(content : any): Promise<void> {
     if (this.userInfo) {
-      const backendURL = '/api/polls/setConfig/' + this.userInfo.info.id;
+      const backendURL = '/api/polls/setConfig/';
       const httpReqBody = content;
       const httpHeader = {
         headers: new HttpHeaders({
@@ -468,10 +481,12 @@ export class AuthService {
 
   async verifyPassword(value: string): Promise<void> {
     const backendURL = '/api/polls/checkPassword/';
-    const httpReqBody = `password=${value}`;
+    const httpReqBody = {
+      password : value
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
 
@@ -485,10 +500,13 @@ export class AuthService {
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const httpReqBody = `token=${token}&username=${this.user_info.username}`;
+    const httpReqBody = {
+      token :token,
+      username : this.user_info.username
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
@@ -497,10 +515,12 @@ export class AuthService {
 
   async send_mail(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail/';
-    const httpReqBody = `username=${user}`;
+    const httpReqBody = {
+      username : user
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));

@@ -55,3 +55,8 @@
     border-radius: 50%;
     background-color: rgba(7, 4, 31, 0.232);
 }
+
+.game-clock {
+    font-size: 2em;
+    color: lime; /* color de texto verde */
+}

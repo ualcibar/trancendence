@@ -73,6 +73,9 @@ def getInfo(request, user_id=None):
     unai aprende ha comentar codigo:
     get endpoint for user information, user id passed on the url, codes : 200, 401,404,
     '''
+    if request.user is None:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
 
@@ -93,6 +96,8 @@ def getInfo(request, user_id=None):
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 def checkPassword(request):
+    if request.user is None:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     try:
@@ -160,6 +165,8 @@ def loginWith42Token(request):
 @api_view(['GET', 'POST', 'DELETE'])
 @authentication_classes([CustomAuthentication])
 def friends(request):
+    if request.user is None:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     if request.method == 'GET': 
@@ -205,6 +212,8 @@ def friends(request):
 @api_view(['GET', 'POST', 'DELETE'])
 @authentication_classes([CustomAuthentication])
 def blocked_users(request):
+    if request.user is None:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     if request.method == 'GET':
@@ -340,6 +349,10 @@ def register(request):
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
 def matches(request):
+    if request.user is None:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     match_ids = request.query_params.get('ids')
     if match_ids:
         match_ids_list = match_ids.split(',')  # Split the comma-separated string into a list
@@ -431,6 +444,8 @@ def setUserConfig(request):
 
     Los parametros son la 'key' y su 'value' pasados como JSON
     '''
+    if request.user is None:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     try:
@@ -438,7 +453,10 @@ def setUserConfig(request):
     except json.JSONDecodeError:
         return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
 
-    user = request.user
+    user : CustomUser = request.user
+
+    if user.status != CustomUser.CONNECTED:
+        return JsonResponse({'message': 'user must be connected. not ingame, joining or disconnected'},  status=status.HTTP_400_BAD_REQUEST)
 
     form = UserConfigForm(data)
     if not form.is_valid():
@@ -509,12 +527,20 @@ def anonymise_set(user):
         return JsonResponse({'message': 'The user is already anonymised'}, status=400)
     return None
 
+
 def avatar_set(user, image_data):
     '''
     Guarda y actualiza una nueva foto de perfil para el usuario
     '''
     if not image_data:
         return JsonResponse({'message': 'No image provided'}, status=400)
+    if image_data == 'default':
+        del_user_image(user)
+        #user.avatar =  'avatars/default.jpg'
+        avatars_dir = os.path.join('avatars', 'default.jpg')
+        setattr(user,'avatar',avatars_dir)
+        return
+
 
     # Decode the base64 string
     format, imgstr = image_data.split(';base64,')
@@ -522,10 +548,9 @@ def avatar_set(user, image_data):
     if not ext:
         return JsonResponse({'message': 'No image extension provided'}, status=400)
 
-    supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "webp": "WEBP", "ico": "ICO"}
+    supported_formats = {"jpeg": "JPEG", "jpg": "JPEG", "png": "PNG"}
     if ext not in supported_formats:
         return JsonResponse({'error': 'Unsupported image format'}, status=400)
-        logger.debug(f"ext '{ext}', format '{format}'")
 
     # Convert base64 string to image
     img_data = base64.b64decode(imgstr)
@@ -541,12 +566,19 @@ def avatar_set(user, image_data):
         with open(file_path, 'wb') as f:
             img.save(f, format=supported_formats[ext])
             #return JsonResponse({'message': 'Image uploaded successfully', 'file_name': avatars_dir})
-        user.avatar = avatars_dir
+        del_user_image(user)
+        #user.avatar = avatars_dir
         setattr(user,'avatar',avatars_dir)
     except Exception as e:
         logger.error(f"SETUSERCONFIG: Error saving image: {e}")
         return JsonResponse({'error': 'Failed to save image'}, status=400)
     logger.debug(f"SETUSERCONFIG: Actualizada la foto de perfil del usuario {user.username}")
+
+def del_user_image(user : CustomUser) -> bool:
+    if user.avatar == 'avatars/default.jpg':
+        return False
+    user.avatar.delete(save=False)
+    return True
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -670,8 +702,6 @@ def check_token(request):
         user = CustomUser.objects.get(username=username)
     except CustomUser.DoesNotExist:
         return JsonResponse({'message': 'User doesn\' exist'}, status=400)
-    if not user.is_2FA_active:
-        return JsonResponse({'message': 'User doesn\'t have 2FA active'}, status=400)
     if user.token_2FA == token:
         user.token_2FA = ''
         if user.is_2FA_active == True :
@@ -745,8 +775,12 @@ def verify_mail(request):
     if not form.is_valid():
         return JsonResponse({'message': 'invalid form', 'errors' : form.errors},  status=status.HTTP_400_BAD_REQUEST)
 
-    token = mail.desencript(data['encripted_token'], token_fernet)
-    username = mail.desencript(data['encripted_username'], token_fernet)
+    try:
+        token = mail.desencript(data['encripted_token'], token_fernet)
+        username = mail.desencript(data['encripted_username'], token_fernet)
+    except Exception as e:
+        return JsonResponse({'message': 'invalid encription'},  status=status.HTTP_400_BAD_REQUEST)
+
     try:
         user = CustomUser.objects.get(username=username)
     except CustomUser.DoesNotExist:
