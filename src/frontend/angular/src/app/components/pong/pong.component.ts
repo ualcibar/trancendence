@@ -341,7 +341,11 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.height = settings.paddleHeight;
     const paddleDepth = settings.paddleDepth;
     const paddleGeometry = new THREE.BoxGeometry(this.width, this.height, paddleDepth);
-    const paddleColor = settings.paddleColor;
+    const match_settings = manager.getMatchSettings()
+
+    let paddleColor = settings.paddleColor;
+    if (match_settings.teamSize > 1)
+      paddleColor = Math.random() * 0x777777;
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
 
@@ -353,7 +357,6 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     // this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
-    const match_settings = manager.getMatchSettings()
     if (number < match_settings.teamSize)
       this.pos.copy((settings.paddleInitPos[0]));
     else
