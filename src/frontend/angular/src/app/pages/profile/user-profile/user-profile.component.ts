@@ -75,18 +75,18 @@ export class UserProfileComponent implements OnInit{
       }, 7000);
     }*/
 
-    const subscribtion = this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
+    this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
         if (userInfo) {
           this.selfInfo = userInfo;
           this.route.params.subscribe(params => {
             console.log(params)
             this.userId = params['userId'];
+            console.log('blocked',this.authService.isUserBlocked(this.userId), 'id', this.userId)
             this.getUserInfo(this.userId);
             this.editProfile = this.userId === userInfo.info.id
           });
         }
         else{
-          subscribtion.unsubscribe()
           this.router.navigate(['/'])
         }
       }
