@@ -407,10 +407,10 @@ export class MapSettings{
   public readonly paddleDepth! : number;
   public readonly paddleColor! : number;
   public readonly paddleType! : BlockType;
-  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded];
+  public readonly paddleState : PaddleState[] = [PaddleState.Binded, PaddleState.Binded, PaddleState.Binded, PaddleState.Binded];
 
-  public readonly paddleUpKey : string[] = ['w','up'];
-  public readonly paddleDownKey : string[] = ['s','down'];
+  public readonly paddleUpKey : string[] = ['w', 'o','up', '-'];
+  public readonly paddleDownKey : string[] = ['s', 'l','down', '+'];
 
   // Paddle position
   public readonly leftPaddlePos: Vector2 = new Vector2(-1,0);

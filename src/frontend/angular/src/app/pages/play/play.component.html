@@ -1,8 +1,22 @@
 <div class="h-50real">
   <div class="h-full" *ngIf="(renderState.game$ | async)">
-    <!-- Agregar el reloj aquí -->
-    <div class="absolute" style="bottom: 10%; left: 50%; transform: translateX(-50%);">
+    <div *ngIf="isMenuOpen" class="absolute" style="top: 20%; left: 0;">
+      <div class="flex flex-col">
+        <div *ngFor="let paddle of matchUpdate.paddles; let i = index" class="w-12">
+            <h1 class="text-white">{{i + 1}} : </h1>
+            <h1 class="text-white w-full flex justify-evenly">{{paddle.upKey}} <h1 class="bi bi-arrow-up-square"></h1></h1>
+            <h1 class="text-white w-full flex justify-evenly">{{paddle.downKey}} <h1 class="bi bi-arrow-down-square"></h1></h1>
+        </div>
+      </div>
+      <div class="flex flex-col">
+      </div>
+    </div>
+    <div *ngIf="isPaused" class="absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3em;">
+      ⏸
+    </div>
+    <div class="absolute" style="bottom: 10%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <h1 class="game-clock">{{manager.getMatchUpdate().clock}}</h1>
+      <h2 class="game-score">{{manager.getMatchUpdate().scoreBoard}}</h2>
     </div>
     <div *ngIf="showSettings" class="absolute">
     </div>
@@ -21,9 +35,9 @@
       </div>
       <div *ngIf="onlineMatchManager !== undefined" class="profilesBubble justify-around" #counectionlist>
         <div *ngFor="let player of players">
-          <div *ngIf="(player!.state.observable | async) === OnlinePlayerState.Disconnected" class="offline"></div>
-          <img alt="" src="{{player!.avatarUrl}}"
-                            class="bg-white w-4 rounded-full"/>
+          <div *ngIf="(player!.state.observable | async) === OnlinePlayerState.Disconnected && !isBot(player!.id)" class="offline"></div>
+          <div *ngIf="(player!.state.observable | async) === OnlinePlayerState.Disconnected && isBot(player!.id)" class="bi bi-robot offline text-white"></div>
+          <img alt="" src="{{player!.avatarUrl}}" class="bg-white w-4 rounded-full"/>
         </div>
       </div>
     </div>

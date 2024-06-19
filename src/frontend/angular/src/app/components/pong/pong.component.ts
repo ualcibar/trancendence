@@ -71,7 +71,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     this.mesh = new THREE.Mesh(ballGeometry, ballMaterial);
 
     this.pos = settings.ballInitPos;
-    this.dir = settings.ballInitDir;
+    this.dir = new Vector2(settings.ballInitDir.x, settings.ballInitDir.y);
     this.speed = settings.ballInitSpeed;
     this.aceleration = settings.ballInitAcceleration;
 
@@ -327,7 +327,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   tickBehaviour : TickBehaviour<Paddle>;
   eventBehaviour : EventBehaviour<Paddle>;
   id! : number;
-  pos : Vector2;
+  pos : Vector2 = new Vector2(0,0);
   dir : Vector2 = new Vector2(0,0);
   dimmensions : Vector3;
   type : BlockType;
@@ -341,7 +341,11 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.height = settings.paddleHeight;
     const paddleDepth = settings.paddleDepth;
     const paddleGeometry = new THREE.BoxGeometry(this.width, this.height, paddleDepth);
-    const paddleColor = settings.paddleColor;
+    const match_settings = manager.getMatchSettings()
+
+    let paddleColor = settings.paddleColor;
+    if (match_settings.teamSize > 1)
+      paddleColor = Math.random() * 0xFFFFFF / 2 + 0xFFFFFF / 2;
     const paddleMaterial = new THREE.MeshPhongMaterial({color: paddleColor});
     this.mesh = new THREE.Mesh(paddleGeometry, paddleMaterial);
 
@@ -353,7 +357,11 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     // this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
-    this.pos = settings.paddleInitPos[number];
+    if (number < match_settings.teamSize)
+      this.pos.copy((settings.paddleInitPos[0]));
+    else
+      this.pos.copy((settings.paddleInitPos[1]));
+
     this.dimmensions = settings.paddleDimmensions;
     this.type = settings.paddleType;
     this.color = settings.paddleColor;
@@ -374,7 +382,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   sincronize(paddle : Paddle){
     this.pos.set(paddle.pos.x, paddle.pos.y);
     this.mesh.position.set(paddle.pos.x, paddle.pos.y, 0);
-    this.dir = paddle.dir;
+    this.dir.copy(paddle.dir);
     this.stateBinded = paddle.stateBinded;
     this.stateBot = paddle.stateBot;
     this.stateUnbinded = paddle.stateUnbinded;
@@ -757,20 +765,24 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
     // INIT PADDLES
     this.paddles = new Array<Paddle>(this.update.paddles.length);
+    console.log('paddles',this.update.paddles)
     for (const [index, paddle] of this.update.paddles.entries()){
+      
       const paddleGeometry = new THREE.BoxGeometry(
         paddle.dimmensions.x,
         paddle.dimmensions.y,
         paddle.dimmensions.z
       );
       const paddleMaterial = new THREE.MeshPhongMaterial({ color: paddle.color });
+      
       this.paddles[index] = new Paddle(this.map, index, this.manager);
       this.paddles[index].addToScene(this.scene);
-
+      console.log('new paddle')
       /*if (this.paddles[index].localPlayer){
         this.controlsText += `P${index + 1}:\n\t-👆${keyToEmoji(this.paddles[index].upKey)}\n\t-👇${keyToEmoji(this.paddles[index].downKey)}\n`;
       }*/
     }
+    console.log('after', this.paddles)
     /*this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(
       this.controlsText.replace(/\n/g, '<br>').replace(/\t/g, '&emsp;')
     );*/
@@ -793,7 +805,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     }
     this.updateScene();
     this.manager.setMatchState(MatchState.Initialized);
-    this.map.setMatchInitUpdate(this.update, this.matchSettings);
+    this.manager.restart();
+//    this.map.setMatchInitUpdate(this.update, this.matchSettings);
   }
 
   initValues() {
@@ -810,7 +823,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   
 
-  render(time: number) {
+  render(time: number) { 
     time *= 0.001; // convert time to seconds
     time -= this.pausedTime *  0.001;
     if (this.pastTime === 0)
@@ -819,7 +832,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     this.lastUpdate += timeDifference;
     //console.log('rendering', this.manager.getMatchState())
 
-    if (this.manager.getMatchState() !== MatchState.Running && this.manager.getMatchState() !== MatchState.Starting) {
+    if (this.manager.getMatchState() !== MatchState.Running) {
       requestAnimationFrame(this.render.bind(this));
       return;
     }
@@ -857,7 +870,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   logic(timeDifference : number){ 
     //if (this.manager.getMatchState() === MatchState.Running)
     this.update.runTickBehaviour(timeDifference);
-    console.log('paddle client dir',this.update.paddles[1].dir)
     this.allColisions();
     this.updateScene();
   }

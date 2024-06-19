@@ -149,7 +149,7 @@ export class MatchSettings{//no matter what map this settings are always applica
     )
   }
   static default() : MatchSettings{
-    return new MatchSettings(60,3,2,1,MapsName.Default,[PaddleState.Binded,PaddleState.Binded]);//!todo should be in settings
+    return new MatchSettings(60,3,2,1,MapsName.Default,[PaddleState.Binded,PaddleState.Binded, PaddleState.Binded, PaddleState.Binded]);//!todo should be in settings
   }
 }
 
@@ -181,8 +181,9 @@ score:
 */
 
 export interface ClientUpdate{
+
   clientIndex : number;
-  paddleDir : Vector2;
+  paddleDirY : number;
 }
 
 export class MatchUpdate{
@@ -248,13 +249,12 @@ export class MatchUpdate{
       block.speed = update.blocks[index].speed;
     }
     this.score.changeScore(update.score.score);
+    this.time = update.time
   }
 
   clientUpdate(update : ClientUpdate){
-    console.log('updating paddle', update.clientIndex, 'to', update.paddleDir)
-    this.paddles[update.clientIndex].dir = new Vector2(update.paddleDir.x, update.paddleDir.y);
-    console.log('after', this.paddles[update.clientIndex].dir.y)
-    console.log('after', this.paddles[update.clientIndex].dir)
+    console.log('number', update.paddleDirY)
+    this.paddles[update.clientIndex].dir.setY(update.paddleDirY as number);
     console.log('after', this.paddles[update.clientIndex])
   }
 
@@ -316,6 +316,10 @@ export class MatchUpdate{
     const seconds : string = s < 10 ? '0' + s : s.toString();
 
     return minutes + ':' + seconds;
+  }
+
+  get scoreBoard() : string{
+    return this.score.score[0] + ' - ' + this.score.score[1];
   }
 }
 
@@ -461,6 +465,7 @@ export interface Manager{
   bindEvent(id : number, type : PongEventType) : boolean;
   getState() : GameManagerState;
   start() : void;
+  restart() : void;
   pause() : void;
   resume() : void;
 }
@@ -522,7 +527,9 @@ export class TournamentManager implements Manager{
         }
     }); 
   }
-
+  restart(): void {
+    this.mapSettings.setMatchInitUpdate(this.update.currentMatchUpdate, this.settings.matchSettings)
+  }
   nextRound(){
     if (this.tournamentState.getCurrentValue() === TournamentState.InTree)
       this.tournamentState.setValue(TournamentState.InGame);
@@ -592,7 +599,7 @@ export class TournamentManager implements Manager{
             this.currentMatchState.setValue(MatchState.FinishedSuccess);
           }
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
-          this.mapSettings.setMatchInitUpdate(this.update.currentMatchUpdate, this.settings.matchSettings);
+          this.restart()// this.mapSettings.setMatchInitUpdate(this.update.currentMatchUpdate, this.settings.matchSettings);
           break;
         }
       case PongEventType.Pause:
@@ -659,6 +666,7 @@ export class MatchManager implements Manager{
     this.state = state;
 //    this.matchScore = new State<Score>(new Score([0,0]));
     this.matchUpdate = this.matchConfig.mapSettings.createMatchInitUpdate(this.matchConfig.matchSettings, this);
+    console.log('paddles', this.matchUpdate.paddles)
     this.matchUpdate.paddles.forEach(paddle => console.log(paddle))
     this.matchUpdate.subscribeAllToManager(this);
     this.matchState = new State<MatchState>(MatchState.Created);
@@ -683,9 +691,12 @@ export class MatchManager implements Manager{
     })
     
   }
+  restart(): void {
+    this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings)
+  }
 
   startMatch(){
-    this.matchState.setValue(MatchState.Starting);
+    this.matchState.setValue(MatchState.Running);
   }
 
   getMapSettings(): MapSettings {
@@ -726,7 +737,7 @@ export class MatchManager implements Manager{
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
 
           //reset match and go for the next round if any
-          this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings);
+          this.restart()//this.matchConfig.mapSettings.setMatchInitUpdate(this.matchUpdate, this.matchConfig.matchSettings);
           if (this.matchUpdate.score.score[data.custom!.others.team] >= this.matchConfig.matchSettings.roundsToWin){
               //this.matchSync.sendEvent(PongEventType.Finish,{})
               this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Finish),PongEventType.Finish, {})
@@ -788,7 +799,7 @@ export class MatchManager implements Manager{
     return this.state.getCurrentValue();
   }
   start(): void {
-    this.matchState.setValue(MatchState.Starting);
+    this.matchState.setValue(MatchState.Running);
   }
 
   pause(): void {
@@ -814,6 +825,8 @@ enum Team{
 
 export class OnlineMatchManager implements Manager, OnlineManager{
   //basic
+  disconnectTrials = 1;
+  disconnections : {number : number, callback : number}[] | undefined;
   info : OnlineMatchInfo;//pong entrypoint? maybe it should be in multiplayer
   mapSettings : MapSettings;
   matchState : State<MatchState>;//pong exitpoint
@@ -849,26 +862,17 @@ export class OnlineMatchManager implements Manager, OnlineManager{
     this.info = info;
     this.team = info.getPlayerTeam(this.selfId)!
     this.selfIndex = info.getPlayerIndex(this.selfId)!
+    if (this.amIHost)
+      this.disconnections = new Array<{number : number , callback : number}>(this.info.onlineSettings.matchSettings.teamSize * 2 - 1).fill({ number : this.disconnectTrials, callback : 0})
     //this.matchScore = new State<Score>(new Score([0,0]));
     this.mapSettings = mapSettings; 
     this.matchUpdate = this.mapSettings.createMatchInitUpdate(this.info.onlineSettings.matchSettings, this);
-    console.log('update0', this.matchUpdate as MatchUpdate)
-    console.log('update0 state', this.matchUpdate.paddles[0].state)
     for (const [index,paddle] of this.matchUpdate.paddles.entries()){
       if (this.team === Team.TeamA && index >= this.info.onlineSettings.matchSettings.teamSize)
-        paddle.state = PaddleState.Unbinded
+        paddle.stateBinded = false;
       else if (this.team === Team.TeamB && index < this.info.onlineSettings.matchSettings.teamSize)
-        paddle.state = PaddleState.Unbinded
-      console.log(paddle.state)
-      console.log(typeof paddle.state)
+        paddle.stateBinded = false;
     }
-    console.log('update1', this.matchUpdate as MatchUpdate)
-    setInterval(()=>{
-      console.log('update', this.matchUpdate as MatchUpdate)
-      this.matchUpdate.paddles.forEach(paddle => {
-        console.log(paddle.state)
-      })
-    },1000)
     this.matchUpdate.subscribeAllToManager(this);
     this.state = state;
     this.matchState = new State<MatchState>(MatchState.Created);
@@ -878,7 +882,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
       (state : MatchState) => {
         switch (state){
           case MatchState.Initialized:
-            this.setMatchState(MatchState.Running);//wrong
+            //this.setMatchState(MatchState.Running);//wrong
             break;
           case MatchState.FinishedError:
             console.error('start online match: there was an error while running a match');
@@ -891,7 +895,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
             }else{
               this.updateMatchInterval = setInterval(() => {
                 const update : ClientUpdate = {clientIndex : this.selfIndex,
-                  paddleDir : this.matchUpdate.paddles[this.selfIndex].dir }
+                  paddleDirY : this.matchUpdate.paddles[this.selfIndex].dir.y }
                 this.matchSync.sendClientMatchUpdate(update);
               },50)
             }
@@ -906,6 +910,16 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         }
     });
     
+  }
+  
+  restart(): void {
+    this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings)
+    for (const [index,paddle] of this.matchUpdate.paddles.entries()){
+      if (this.team === Team.TeamA && index >= this.info.onlineSettings.matchSettings.teamSize)
+        paddle.stateBinded = false
+      else if (this.team === Team.TeamB && index < this.info.onlineSettings.matchSettings.teamSize)
+        paddle.stateBinded = false
+    }
   }
   
   hardEnd(){
@@ -958,7 +972,8 @@ export class OnlineMatchManager implements Manager, OnlineManager{
             this.matchUpdate.score.score[data.custom!.others.team] += 1;
             this.logger.info('score increated host', this.matchUpdate.score.score)
             this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
-            this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings);
+            this.restart()
+            //this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings);
             if (this.matchUpdate.score.score[data.custom!.others.team] >= this.info.onlineSettings.matchSettings.roundsToWin){
               //this.matchSync.sendEvent(PongEventType.Finish,{})
               this.runEvents( this.gameObjects.getEventObjectsByType(PongEventType.Finish),PongEventType.Finish, {})
@@ -1064,7 +1079,7 @@ export class OnlineMatchManager implements Manager, OnlineManager{
           this.matchUpdate.score.score[data.custom?.others.team] += 1;
           this.logger.info('score increated client', this.matchUpdate.score)
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, this.syncEventDataToEventData(data));
-          this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings); 
+          this.restart()//this.mapSettings.setMatchInitUpdate(this.matchUpdate, this.info.onlineSettings.matchSettings); 
         }
         break;
       case PongEventType.Pause:
@@ -1131,11 +1146,22 @@ export class OnlineMatchManager implements Manager, OnlineManager{
       this.onlineMatchState.getCurrentValue() != OnlineMatchState.WaitingForPlayers) {
       const player = this.info.getPlayer(playerId);
       if (player === undefined) {
-        console.error('on ice connection state change: player wasnt set');
-        console.error('sender id: ', playerId, ' current match:', this.info.onlineSettings.matchSettings);
+        this.logger.error('on ice connection state change: player wasnt set');
+        this.logger.error('sender id: ', playerId, ' current match:', this.info.onlineSettings.matchSettings);
         return undefined;
       }
-      player.changeState(OnlinePlayerState.Connected);
+      player.changeState(OnlinePlayerState.Connected); 
+      if (this.amIHost){
+        const index = this.info.getPlayerIndex(playerId)
+        if (!index) {
+          this.logger.error('cant get player index')
+          return undefined
+        }
+        this.matchUpdate.paddles[index].stateBot = false;
+        clearTimeout(this.disconnections![index - 1].callback)
+        if (this.matchState.getCurrentValue() === MatchState.Paused)
+          this.matchState.setValue(MatchState.Running)
+      }
       return player;
     }
     return undefined
@@ -1157,6 +1183,33 @@ export class OnlineMatchManager implements Manager, OnlineManager{
         return
       }
       player.state.setValue(OnlinePlayerState.Disconnected);
+      if (this.amIHost){
+        const index = this.info.getPlayerIndex(playerId);
+        if (index === undefined) {
+          console.error('not player')
+          return
+        }
+        if (!this.disconnections) {
+          console.error('disconnections not initialized')
+          return
+        }
+        console.log(this.disconnections)
+        if (this.disconnections[index - 1].number >= 1) {
+          this.disconnections[index - 1].callback = setTimeout(() => {
+            this.matchState.setValue(MatchState.Running)
+            this.matchUpdate.paddles[index].stateBot = true
+            this.matchUpdate.paddles[index].stateBinded = false
+            this.matchUpdate.paddles[index].stateUnbinded = false
+          }, 10_000)
+          this.pause()
+        } else {
+          this.matchUpdate.paddles[index].stateBot = true;
+        }
+        if (this.disconnections[index - 1]) {
+          this.disconnections[index - 1].number -= 1;
+        } 
+
+      }
     }
   }
 
@@ -1174,13 +1227,13 @@ export class OnlineMatchManager implements Manager, OnlineManager{
     return this.info.onlineSettings;
   }
   start(): void {
-    this.matchState.setValue(MatchState.Starting);
-    this.onlineMatchState.setValue(OnlineMatchState.Running)
+    this.matchState.setValue(MatchState.Running);
+    this.matchSync.syncOnlineMatchState(OnlineMatchState.Running);
   }
 
   pause(): void {
     this.matchState.setValue(MatchState.Paused);
-    this.onlineMatchState.setValue(OnlineMatchState.Paused);
+    this.matchSync.syncOnlineMatchState(OnlineMatchState.Paused);
     if (this.amIHost)
       this.broadcastEvent(PongEventType.Pause, {});
   }
@@ -1229,7 +1282,9 @@ export class GameManagerService implements Manager{
   constructor (private router : Router){
     this.state = new State<GameManagerState>(GameManagerState.Standby);
   }
-   
+  restart(): void {
+    this.currentManager!.restart()
+  } 
   start(): void {
     this.currentManager!.start();
   }

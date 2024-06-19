@@ -608,7 +608,7 @@ export class MatchmakingService implements MatchSync{
         case 'match_all_players_connected':
           setTimeout(() => {
             this.stateService.changeMultiplayerState(MatchmakingState.InGame)
-            this.onlineManager!.onlineMatchState.setValue(OnlineMatchState.Running)
+            //this.onlineManager!.onlineMatchState.setValue(OnlineMatchState.Running)
             this.gameManager.start();
           }, 1000);
           this.router.navigate(['/play']);

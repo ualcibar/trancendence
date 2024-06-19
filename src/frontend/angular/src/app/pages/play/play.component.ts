@@ -52,12 +52,37 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
     onlineMatchManager? : OnlineMatchManager  | undefined;
     players? : (OnlinePlayer | undefined)[]
     matchUpdate! : MatchUpdate;
+
+    isMenuOpen = false;
+    openMenuKey = 'Escape';
+
+    flipMenu(){
+        console.log('flip menu')
+        this.isMenuOpen = !this.isMenuOpen;
+    }
+
+    isPaused = false;
+    pauseKey = 'p';
+
+    flipPause(){
+        this.isPaused = !this.isPaused;
+    }
+
     constructor(public manager : GameManagerService, private router : Router, private maps : MapsService) {
+        //menu keyhook
+        document.addEventListener('keydown', (e) => {
+            if (e.key === this.openMenuKey){
+                this.flipMenu();
+            }
+            if (e.key === this.pauseKey){
+                this.flipPause();
+            }
+        })
         this.currentManagerType = manager.getRealManagerType();
         if (manager.getState() !== GameManagerState.InGame){
             if (this.debug) {
                 console.log('creating match');
-                const matchSettings = new MatchSettings(60,3,2,1, MapsName.Default, [PaddleState.Binded,PaddleState.Binded]);
+                const matchSettings = new MatchSettings(60,3,2,1, MapsName.Default, [PaddleState.Binded,PaddleState.Binded, PaddleState.Binded, PaddleState.Binded]);
                
                 const mapSettings = this.maps.getMapSettings(matchSettings.mapName);
                 if (!mapSettings){
@@ -94,10 +119,12 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                             case MatchState.FinishedSuccess:
                                 this.renderState.renderGame.setValue(false);
                                 this.renderState.renderMatchEnd.setValue(true);
+                                window.location.href = '/'
                                 break;
                             case MatchState.FinishedError:
                                 this.renderState.renderGame.setValue(false);
                                 this.renderState.renderMatchEnd.setValue(true);
+                                window.location.href = '/'
                                 break;
                         }
                     })
@@ -121,7 +148,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                                 this.renderState.renderTree.setValue(true);
                                 break;
                             case TournamentState.FinishedSuccess:
-                                this.router.navigate(['/'])    
+                                window.location.href = '/'
                                 break;
                         }
                     })
@@ -138,24 +165,18 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 this.players = this.onlineMatchManager!.getPlayers(); 
                 this.renderState.renderGame.setValue(true);
                 this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{ 
-                    console.log('STATE', state)
-                    console.log('STATE', state)
-                    console.log('STATE', state)
-                    console.log('STATE', state)
                     switch (state){
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')
                             this.renderState.renderGame.setValue(false)
+                            setTimeout(() => window.location.href = '/', 500)
                             break;
                         case MatchState.FinishedSuccess:
                             console.log('match finish success')
                             this.renderState.renderGame.setValue(false)
+                            setTimeout(() => window.location.href = '/', 500)
+                            break;
                     }
-                })
-                this.onlineMatchManager!.onlineMatchState.subscribe((state : OnlineMatchState) => {
-                    console.log('MATCH ONLINE STATE', state)
-                    console.log('MATCH ONLINE STATE', state)
-                    console.log('MATCH ONLINE STATE', state)
                 })
                 break;
         } 
@@ -163,6 +184,14 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
     ngAfterViewInit(): void {
         
     }
+    
+    isBot(id : number) : boolean{
+        const index = this.onlineMatchManager?.info.getPlayerIndex(id)
+        if (index== undefined)
+            return false;
+        return this.matchUpdate.paddles[index].stateBot
+    }
+
     ngOnDestroy(): void {
         if (this.manager.getState() === GameManagerState.InGame){
             if (this.currentManagerType == RealManagerType.OnlineMatch){
