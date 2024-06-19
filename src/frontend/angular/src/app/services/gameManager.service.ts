@@ -149,7 +149,7 @@ export class MatchSettings{//no matter what map this settings are always applica
     )
   }
   static default() : MatchSettings{
-    return new MatchSettings(60,3,2,1,MapsName.Default,[PaddleState.Binded,PaddleState.Binded]);//!todo should be in settings
+    return new MatchSettings(60,3,2,1,MapsName.Default,[PaddleState.Binded,PaddleState.Binded, PaddleState.Binded, PaddleState.Binded]);//!todo should be in settings
   }
 }
 

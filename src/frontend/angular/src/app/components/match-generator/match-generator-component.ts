@@ -116,8 +116,10 @@ export class MatchGeneratorComponent {
     return getEnumStrings(MapsName)
       .filter(val => val != this.settings.mapName) 
   }
+
   togglePaddle(team : number, index : number){
-    if (team === 0){
+    console.log('toggle paddle', team, index)
+    if (team == 0){
       this.paddlesBindedA[index] = !this.paddlesBindedA[index]
       if (this.paddlesBindedA[index])
         this.settings.initPaddleStates[index] = PaddleState.Binded
@@ -127,9 +129,11 @@ export class MatchGeneratorComponent {
     else{
       this.paddlesBindedB[index] = !this.paddlesBindedB[index]
       if (this.paddlesBindedB[index])
-        this.settings.initPaddleStates[this.settings.teamSize + index] = PaddleState.Binded
+        this.settings.initPaddleStates[1 + index] = PaddleState.Binded
       else
-        this.settings.initPaddleStates[this.settings.teamSize + index] = PaddleState.Bot
+        this.settings.initPaddleStates[1 + index] = PaddleState.Bot
     }
+    console.log('team size', this.settings.teamSize, '+', index, '=', this.settings.teamSize + index)  
+    console.log('paddle states', this.settings.initPaddleStates)
   }
 }
