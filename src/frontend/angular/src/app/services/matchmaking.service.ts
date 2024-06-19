@@ -86,10 +86,23 @@ export class MatchUpdate{
   }
 }*/
 
+function* id_gen() {
+  let id = 0;
+  while (true) {
+      yield id++;
+  }
+}
+
+const generator = id_gen();
+
 export class Score{
+  id : number;
   score : [number, number];
   constructor(score : [number, number]){
+    const now = Date.now()
     this.score = [score[0], score[1]];
+    this.id = generator.next().value!;
+    console.log('new score', score, 'id',this.id, 'time', now)
   }
   scoreA(points : number){
     this.score[0] += points;

@@ -16,7 +16,7 @@
     </div>
     <div class="absolute" style="bottom: 10%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <h1 class="game-clock">{{manager.getMatchUpdate().clock}}</h1>
-      <h2 class="game-score">{{manager.getMatchUpdate().scoreBoard}}</h2>
+      <!--h2 class="game-score">{{manager.getMatchUpdate().scoreBoard}}</h2-->
     </div>
     <div *ngIf="showSettings" class="absolute">
     </div>
@@ -47,7 +47,7 @@
   </div>
   <div *ngIf="renderState.tree$ | async">
     <app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>
-    <button (click)="startNextTournamentround()" class="btn text-white flex">
+    <button *ngIf="displayNext" (click)="startNextTournamentround()" class="btn text-white flex">
       START
     </button>
     <button (click)="printScore()" class="btn text-white flex">

@@ -494,8 +494,7 @@ export class MapSettings{
       ball.dir.copy(this.ballInitDir);
       ball.lightOn = this.ballLightIsOn;
     }
-
-
+    
   }
 }
 

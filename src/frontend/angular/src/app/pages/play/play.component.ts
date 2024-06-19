@@ -41,6 +41,7 @@ enum Point{
 })
 export class PlayComponent implements AfterViewInit, OnDestroy {
     Point = Point;
+    MatchState = MatchState;
     OnlinePlayerState = OnlinePlayerState;
     points! : Point[];
     debug = true;
@@ -52,6 +53,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
     onlineMatchManager? : OnlineMatchManager  | undefined;
     players? : (OnlinePlayer | undefined)[]
     matchUpdate! : MatchUpdate;
+    displayNext : boolean = false;
 
     isMenuOpen = false;
     openMenuKey = 'Escape';
@@ -153,11 +155,14 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                         }
                     })
                     realManager.currentMatchState.subscribe((state : MatchState) => {
+                        if (state === MatchState.Created)
+                            setTimeout(() => this.displayNext = true,1000)
                         const now = Date.now()
                         console.log('STATE', state, 'score', realManager.update.currentMatchUpdate.score, 'now', now)
                     })
                 }
                 this.renderState.renderTree.setValue(true);
+                setTimeout(() => this.displayNext = true, 1000)
                 break;
             case RealManagerType.OnlineMatch:
                 if (!(realManager instanceof OnlineMatchManager)){
@@ -216,7 +221,9 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
         console.log(this.tournamentManager!.update.currentMatchUpdate.score)
         console.log('PLAY HIT')
         console.log('score', this.tournamentManager!.update.currentMatchUpdate.score)
-        this.tournamentManager!.nextRound();
+        this.displayNext = false;
+        setTimeout(() => this.tournamentManager!.nextRound(), 1000);
+
         //this.tournamentManager!.tournamentState.setValue(TournamentState.InGame)
         //setTimeout(()=>this.tournamentManager?.start(), 1000);
         

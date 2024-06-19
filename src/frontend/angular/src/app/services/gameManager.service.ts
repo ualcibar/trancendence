@@ -52,6 +52,7 @@ export enum MatchState{
   Reset = 'Reset',
   FinishedSuccess = 'FinishedSuccess',
   FinishedError = 'FinishedError',
+  Deleted = 'Deleted'
 }
 /*
 export class Tournament{
@@ -319,7 +320,7 @@ export class MatchUpdate{
   }
 
   get scoreBoard() : string{
-    return this.score.score[0] + ' - ' + this.score.score[1];
+    return `${this.score.score[0]} - ${this.score.score[1]}`;
   }
 }
 
@@ -468,6 +469,7 @@ export interface Manager{
   restart() : void;
   pause() : void;
   resume() : void;
+
 }
 
 export interface OnlineManager{
@@ -519,20 +521,23 @@ export class TournamentManager implements Manager{
             console.log('start tournament: a match has started');
             break;
           case MatchState.FinishedSuccess:
-            console.log('tournament: match finished, updating tree');
+            console.log('tournament: match finished, updating tree', this.update.currentMatchUpdate.score);
             if (!this.update.tree.next(this.update.currentMatchUpdate.score)){//tournament finished
               this.tournamentState.setValue(TournamentState.FinishedSuccess)
               return;
             }
             this.tournamentState.setValue(TournamentState.InTree)
-            this.update.currentMatchUpdate = this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this)
-            this.gameObjects = new GameObjectMap() 
-            this.update.currentMatchUpdate.subscribeAllToManager(this);
-            this.update.currentMatchUpdate.score = new Score([0,0]);
-            console.log(this.update.currentMatchUpdate.score)
-            this.currentMatchState.setValue(MatchState.Created)
+            this.gameObjects = new GameObjectMap()
+            setTimeout(() => {
+              this.update.currentMatchUpdate = this.mapSettings.createMatchInitUpdate(this.settings.matchSettings, this)
+              this.update.currentMatchUpdate.subscribeAllToManager(this);
+              this.update.currentMatchUpdate.score = new Score([0, 0]);
+              console.log(this.update.currentMatchUpdate.score)
+              this.currentMatchState.setValue(MatchState.Created)
+            }, 1000)
             break;
         }
+
     }); 
   }
   restart(): void {
@@ -604,7 +609,10 @@ export class TournamentManager implements Manager{
           const score : Score = this.update.currentMatchUpdate.score;
           score.score[data.custom!.others.team] += 1;
           if (score.score[data.custom!.others.team] >= this.settings.matchSettings.roundsToWin){
+            //this.update.tree.next(score)
             this.currentMatchState.setValue(MatchState.FinishedSuccess);
+            console.log('final score',score)
+            return
           }
           this.runEvents(this.gameObjects.getEventObjectsByType(type), type, data);
           this.restart()// this.mapSettings.setMatchInitUpdate(this.update.currentMatchUpdate, this.settings.matchSettings);

@@ -586,6 +586,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   public readonly far = 5;
   public readonly cameraZ = 2;
 
+  deleted : boolean = false;
+
   stop : boolean = false;
   renderer!: THREE.WebGLRenderer;
   //canvas: any;
@@ -617,7 +619,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   constructor(private manager: GameManagerService,
     private router: Router) {
       console.log('PONG CREATED')
-      this.pausingTime = Date.now();
+      const now =  Date.now();
+      this.pausingTime = now
+      console.log(manager.getMatchUpdate())
+      console.log('now', now)
   }
 
   @HostListener('window:resize', ['$event'])
@@ -657,16 +662,21 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             this.stop = true;
             break;
           case MatchState.FinishedSuccess:
+            this.configStateSubscription.unsubscribe()
+            this.deleted = true
             break;
-          case MatchState.FinishedError:
+          case MatchState.FinishedError:  
+            this.configStateSubscription.unsubscribe()
+            this.deleted = true
             break;
         }
       }
     );
+    console.log('ng after view update', this.manager.getMatchUpdate())
   }
 
-  ngOnDestroy(): void {
-    console.log('PONG DeLETED')
+  cleanUpResources(){
+    console.log('PONG DeLETED', this.manager.getMatchScore())
     this.configStateSubscription.unsubscribe()
     // Dispose renderer if exists
     if (this.renderer) {
@@ -680,6 +690,10 @@ export class PongComponent implements AfterViewInit, OnDestroy {
         this.scene.remove(this.scene.children[0]);
       }
     }
+
+  }
+  ngOnDestroy(): void {
+    this.deleted = true;
     //this.manager.setMatchState(MatchState.FinishedSuccess);
   }
 
@@ -827,6 +841,11 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   
 
   render(time: number) { 
+    if (this.deleted){
+      this.cleanUpResources()
+      return
+    }
+
     time *= 0.001; // convert time to seconds
     time -= this.pausedTime *  0.001;
     if (this.pastTime === 0)
