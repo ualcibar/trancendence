@@ -88,10 +88,10 @@
     "lobby_search_join":"unirse",
     "lobby_search_refresh":"Recargar",
 
-    "match_gen_max_time":"tiempo máximo por ronda segundos",
-    "match_gen_max_rounds":"máximo de rondas",
-    "match_gen_best_of":"el mejor de",
-    "match_gen_team_size":"tamaño del equipo",
+    "match_gen_max_time":"Tiempo máximo por ronda",
+    "match_gen_max_rounds":"Máximo de rondas",
+    "match_gen_best_of":"Rondas para ganar",
+    "match_gen_team_size":"Tamaño del equipo",
     "match_gen_players":"jugadores",
     "match_gen_best_of_error": "No puede haber menos rondas que las necesarias para ganar",
     "match_gen_choose_map":"Elige el mapa",
@@ -181,7 +181,7 @@
     "friends_title" : "AMIGOS",
     "friends_load" : "Cargando...",
 
-    "online_name" : "Nombre :",
+    "online_name" : "Nombre",
     "online_public" : "Publico",
     "online_private" : "Privado",
 

@@ -115,8 +115,8 @@ export class HomeComponent implements OnInit{
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.changeState(HomeState.JoiningGame);
-    }, 500);
+      this.changeState(HomeState.MatchTournament);
+    }, 1200);
   }
 
 /*  ngOnDestroy(): void {

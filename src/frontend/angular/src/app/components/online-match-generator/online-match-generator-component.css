@@ -8,24 +8,3 @@ i {
 	backdrop-filter: brightness(0.9);
 	width: 100%;
 }
-
-.privacyChoice{
-	flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-    cursor: pointer;
-}
-
-.privacy-bubble {
-    position: absolute;
-    width: 150px;
-    height: 20px;
-    background-color: rgba(58, 35, 171, 0.262);
-	border: 2px solid rgba(0, 157, 255, 0.262);
-	border-radius: 8px; /* Adjust the radius as needed */
-    padding: 10px; /* Adjust padding as needed */
-    transition: transform 0.3s ease;
-    z-index: 0;
-}

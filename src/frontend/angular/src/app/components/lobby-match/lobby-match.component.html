@@ -44,28 +44,27 @@
 	</div>
 </div> -->
 
-
 <div *ngIf="state === LobbyMatchState.Ok" class="sp-div rounded-xl mx-auto max-w-3xl px-4">
-	<h1 class="text-orange-100 text-4xl mb-8 mt-4 text-center font-bold">{{'lobby_match_searching'|translate}}</h1>
-	<div class="flex items-center justify-between my-4">
-		<div class="flex items-center">
-			<img src="{{lobby.host.avatarUrl}}" class="rounded-full w-28 h-28 bg-white ml-4">
-			<h1 class="text-white text-4xl flex-grow text-center">{{ lobby.host.username }}</h1>
-		</div>
+    <h1 class="text-orange-100 text-4xl mb-8 mt-4 text-center font-bold">{{'lobby_match_searching'|translate}}</h1>
+    <div class="flex align-items-center justify-content-center position-relative my-4">
+        <div class="flex items-center justify-start mr-auto">
+            <img src="{{lobby.host.avatarUrl}}" class="rounded-full w-28 h-28 bg-white mr-4">
+            <h1 class="text-white text-4xl flex-grow text-center">{{ lobby.host.username }}</h1>
+        </div>
 
-		<img src="../../../assets/img/lobby-doublesword.svg" width="100" height="50" class="justify-self-center">
+        <img src="../../../assets/img/lobby-doublesword.svg" width="100" height="50" class="justify-self-center">
 
-		<div class="flex justify-items-end">
-			<div *ngFor="let player of lobby.players; let i = index" class="flex items-center min-w-96 max-h-20 mr-12 m-4">
-				<ng-container *ngIf="i >= lobby.onlineSettings.matchSettings.teamSize - 1">
-					<span *ngIf="player === undefined" class="loading loading-dots loading-lg" role="status"></span>
-					<h1 *ngIf="player !== undefined"class="text-white text-4xl flex-grow text-center" role="status">{{ player.username }}</h1>
-					<img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-28 h-28 bg-white ml-4">
-				</ng-container>
-			</div>
-		</div>
-	</div>
+        <div class="flex ml-auto flex-col justify-end">
+            <div *ngFor="let player of lobby.players; let i = index" [ngClass]="{'mb-5': lobby.players.length > 1}" class="flex items-center min-w-64 max-h-20">
+                <ng-container *ngIf="i >= lobby.onlineSettings.matchSettings.teamSize - 1">
+                    <span *ngIf="player === undefined" class="loading loading-dots loading-lg mr-auto ml-auto" role="status"></span>
+                    <h1 *ngIf="player !== undefined" class="text-white text-4xl flex-grow text-center" role="status">{{ player.username }}</h1>
+                    <img src="../../../assets/img/transcendence_logo.png" class="rounded-full w-28 h-28 bg-white ml-4">
+                </ng-container>
+            </div>
+        </div>
+    </div>
 </div>
 <div *ngIf="state === LobbyMatchState.Error" class="text-white">
-	{{'lobby_match_state_error'|translate}}
+    {{'lobby_match_state_error'|translate}}
 </div>
