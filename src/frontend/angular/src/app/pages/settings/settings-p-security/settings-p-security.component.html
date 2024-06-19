@@ -5,7 +5,7 @@
 	<h1 class="font-bold text-2xl"><i class="bi bi-at"></i> {{'email'|translate}}</h1>
 	<p class="text-zinc-300">{{'settings_update_email'|translate}}</p>
 	<div class="flex align-items-center max-w-80 mb-4">
-		<input [(ngModel)]="email" type="text" name="email" class="form-control shadow-none" id="floatingInput" required>
+		<input [(ngModel)]="email" type="text" name="email" class="form-control shadow-none" id="floatingInput" required pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" #emailInput="ngModel">
 		<button (click)="saveMailSecurity()" [ngClass]="{'grayscale-0': currentEmail !== email,'grayscale disabled opacity-50': currentEmail === email}" class="btn btn-warning btn-sm ml-4"><i class="bi bi-floppy-fill"></i></button>
 	</div>
 
@@ -32,7 +32,7 @@
         <input [(ngModel)]="oldPassword" [class.is-invalid]="wrongPassword" [class.is-valid]="!wrongPassword && formSent" type="password" name="oldPassword" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
 
         <div class="form-text text-zinc-300">{{'settings_update_password_new'|translate}}</div>
-        <input [(ngModel)]="newPassword" [class.is-invalid]="!passwordsMatch" [class.is-valid]="passwordsMatch && formSent" type="password" name="newPassword1" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required>
+        <input [(ngModel)]="newPassword" [class.is-invalid]="!passwordsMatch" [class.is-valid]="passwordsMatch && formSent" type="password" name="newPassword1" class="form-control shadow-none" style="max-width: 16.5rem" id="floatingInput" required pattern=".{6,}" #passwordInput="ngModel">
 
         <div class="form-text text-zinc-300">{{'settings_update_password_repeat'|translate}}</div>
         <div class="flex align-items-center max-w-80 mb-4">
@@ -49,6 +49,16 @@
         <p *ngIf="passwordsMatchEmpty"><i class="bi bi-x-circle-fill mr-2"></i>{{'settings_update_password_new_empty'|translate}}</p>
         <p *ngIf="passwordsMatchDuplicate"><i class="bi bi-x-circle-fill mr-2"></i>{{'settings_update_password_same'|translate}}</p>
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div *ngIf="(passwordInput.invalid && passwordInput.touched) || (emailInput.invalid && emailInput.touched) " class="pt-6 flex items-center" [@easeOut]>
+        <div class="alert alert-error alert-dismissible fade show max-auto max-w-xl">
+		<i class="bi bi-x-circle text-black"></i>
+            <div>
+                <p *ngIf="passwordInput.invalid && passwordInput.touched">{{'register_make_sure'|translate}}</p>
+                <p *ngIf="emailInput.invalid && emailInput.touched">{{'register_email_notvalid'|translate}}</p>
+            </div>
+        </div>
     </div>
     
     <!-- OK -->

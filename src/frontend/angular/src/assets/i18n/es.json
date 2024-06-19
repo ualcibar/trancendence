@@ -128,6 +128,8 @@
     "register_choose_email":"Elige un correo electrónico como identificación personal",
     "register_username_inuse":"Este nombre de usuario ya está en uso, elige otro.",
     "register_email_notvalid":"Este correo no es válido. Comprueba que lo hayas escrito bien.",
+    "register_username_notvalid":"Este nombre de usuario no es válido. Comprueba su longitud se comprenda entre 6 y 20 carácteres.",
+    "register_make_sure":"Comprueba que la contraseña tenga más de 6 caracteres.",
     "register_unexpected":"¡Ha ocurrido un error inesperado! Prueba otra vez.",
 
     "settings_dataload":"Cargando datos...",
