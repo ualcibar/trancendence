@@ -144,8 +144,6 @@ export class ChatService {
             messageI = data.message;
             break;
           case 'private_message_delivered':
-            if (this.authService.isUserBlocked(data.message.sender.id))
-              return
             targetChannel = data.target;
             messageI = data.message;
             break;

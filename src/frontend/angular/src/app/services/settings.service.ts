@@ -119,10 +119,12 @@ export class SettingsService {
   //Esta función permite comprobar que la contraseña actual sea la correcta
   async verifyPassword(value: string): Promise<void> {
     const backendURL = '/api/polls/checkPassword/';
-    const httpReqBody = `password=${value}`;
+    const httpReqBody = {
+      password : value
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
 
@@ -132,10 +134,12 @@ export class SettingsService {
 
   async send_mail_2FA_activation(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_2FA_activation/';
-    const httpReqBody = `username=${user}`;
+    const httpReqBody = {
+      username : user
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
@@ -144,10 +148,12 @@ export class SettingsService {
 
   async send_mail_2FA_deactivation(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_2FA_deactivation/';
-    const httpReqBody = `username=${user}`;
+    const httpReqBody = {
+      username : user
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
@@ -156,10 +162,12 @@ export class SettingsService {
 
   async send_mail_password(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_password/';
-    const httpReqBody = `username=${user}`;
+    const httpReqBody = {
+      username : user
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
@@ -168,10 +176,14 @@ export class SettingsService {
 
   async send_mail_new_mail(mailNew:string, mailOld:string, user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail_new_mail/';
-    const httpReqBody = `new_mail=${mailNew}&old_mail=${mailOld}&username=${user}`;
+    const httpReqBody = {
+      new_mail : mailNew,
+      old_mail : mailOld,
+      username : user
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));
@@ -179,10 +191,13 @@ export class SettingsService {
   }
   async check_token(token: string, user:string): Promise<void> {
     const backendURL = 'api/polls/check_token/';
-    const httpReqBody = `token=${token}&username=${user}`;
+    const httpReqBody = {
+      token : token,
+      username : user
+    };
     const httpHeader = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       })
     };
     const response = await firstValueFrom(this.http.post<any>(backendURL, httpReqBody, httpHeader));

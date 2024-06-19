@@ -251,16 +251,20 @@ export class MatchUpdate{
   }
 
   clientUpdate(update : ClientUpdate){
-    this.paddles[update.clientIndex].dir.copy(update.paddleDir);
+    console.log('updating paddle', update.clientIndex, 'to', update.paddleDir)
+    this.paddles[update.clientIndex].dir = new Vector2(update.paddleDir.x, update.paddleDir.y);
+    console.log('after', this.paddles[update.clientIndex].dir.y)
+    console.log('after', this.paddles[update.clientIndex].dir)
+    console.log('after', this.paddles[update.clientIndex])
   }
 
   getAiPrediction(paddle: Paddle): number {
-    console.log('paddle position', paddle.pos);
+    //console.log('paddle position', paddle.pos);
     // this.update(this); // update the current state???
     const ball = this.balls[0];
-    console.log('getAiPrediction ball', ball);
-    console.log('getAiPrediction paddle', paddle);
-    console.log('getAiPrediction this.paddle', this.paddles[1]);
+    //console.log('getAiPrediction ball', ball);
+    //console.log('getAiPrediction paddle', paddle);
+    //console.log('getAiPrediction this.paddle', this.paddles[1]);
     let predictedBallY = 0;
 
     // IA PREDICTION

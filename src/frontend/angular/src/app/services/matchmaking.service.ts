@@ -867,7 +867,9 @@ export class MatchmakingService implements MatchSync{
       if (message.type === 'update')
         this.onlineManager.matchUpdate.update(message.data);
       else if (message.type === 'client_update'){
-        console.log('client update')
+        const update : ClientUpdate = message.data
+        //console.log('client update')
+        //console.log(update)
         this.onlineManager.matchUpdate.clientUpdate(message.data);
       }
       else if (message.type === 'event'){

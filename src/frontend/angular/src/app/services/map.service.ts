@@ -444,7 +444,7 @@ export class MapSettings{
       //const pos : Vector2 = i < info.teamSize ? this.leftPaddlePos.clone() : this.rightPaddlePos.clone();
       //paddles[i] = new Paddle(this, i, manager);
       //paddle.state = info.initPaddleStates[i];
-      console.log('paddle state before asign', paddle, 'as number', info.initPaddleStates[i])
+      //console.log('paddle state before asign', paddle, 'as number', info.initPaddleStates[i])
       if (info.initPaddleStates[i] == PaddleState.Binded){
         console.log('set binded')
         paddle.stateBinded = true;
@@ -471,8 +471,8 @@ export class MapSettings{
       paddle.bindEvent(createEventIAprediction(paddle));
       paddles.push(paddle)
     }
-    console.log('paddle state afte FOR', paddles[0].state)
-    console.log('paddles for', paddles)
+    //console.log('paddle state afte FOR', paddles[0].state)
+    //console.log('paddles for', paddles)
     const balls : Ball[] = new Array<Ball>(1);
     balls[0] = new Ball(this, manager);
     balls[0].bindTick(createTickMove(balls[0]));

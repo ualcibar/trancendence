@@ -28,7 +28,7 @@ def clean_using_form(value_str : str, form, self_ref):
     value_form = form(value_data)
     if not value_form.is_valid():
         raise ValidationError(value_form.errors[value_str])
-    return value_data['username']
+    return value_data[value_str]
 
 class UsernameForm(forms.Form):
     username = g_username_form
@@ -135,31 +135,32 @@ class UserConfigForm(forms.Form):
     color = g_color_form_opt
     language = g_language_form_opt
     username = g_username_form_opt
-    passoword = g_password_form_opt
+    password = g_password_form_opt
     email = g_email_form_opt 
     anonymise = g_anonymise_form_opt
 
-    def clean(self, value_str : str, form):
+    def my_clean(self, value_str : str, form):
         value = self.cleaned_data.get(value_str)
-        value_data = {value_str: value}
-        if value_data: 
+        if value: 
+            value_data = {value_str: value}
             value_form = form(value_data)
             if not value_form.is_valid():
                 raise ValidationError(value_form.errors[value_str])
             return value_data[value_str]
+        return value
 
     def clean_color(self):
-        return self.clean('color', ColorForm)
+        return self.my_clean(value_str='color', form=ColorForm)
 
     def clean_language(self):
-        return self.clean('language', LanguageForm)
+        return self.my_clean(value_str='language', form=LanguageForm)
     
     def clean_username(self):
-        return self.clean('username', UsernameForm)
+        return self.my_clean(value_str='username', form=UsernameForm)
     
     def clean_password(self):
-        return self.clean('password', PasswordForm)
+        return self.my_clean(value_str='password', form=PasswordForm)
     
     def clean_email(self):
-        return self.clean('email', EmailForm)
+        return self.my_clean(value_str='email', form=EmailForm)
     
