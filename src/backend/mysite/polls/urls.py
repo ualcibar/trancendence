@@ -57,7 +57,7 @@ urlpatterns = [
     
     path("getInfo/", views.getInfo, name="get_info"),
     path("getInfo/<int:user_id>", views.getInfo, name="get_info_by_id"),
-    path("checkInfo/", views.checkInfo, name="check_info"),
+    path("checkPassword/", views.checkPassword, name="check_password"),
     path("setConfig/", views.setUserConfig, name="set_user_config"),
     path("setConfig/<int:user_id>", views.setUserConfig, name="set_user_config_by_id"),
     

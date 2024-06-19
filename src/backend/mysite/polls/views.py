@@ -32,6 +32,7 @@ from .serializers import UserInfoSerializer, LightUserInfoSerializer, PrivateUse
 from .models import CustomUser, CustomUserManager
 from matchmaking.models import Match
 from matchmaking.serializers import MatchSerializer
+from .forms import UserConfigForm, UserLoginForm, UserRegisterForm, UsernameForm,PasswordForm,EmailForm,LanguageForm,ColorForm, EmailTokenForm, EmailVerificationTokenForm,VerifyEmailViewForm, SendMailNewMailViewForm
 
 import requests
 import json
@@ -90,11 +91,19 @@ def getInfo(request, user_id=None):
     return response
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def checkInfo(request):
-    current_password = request.POST.get('currentPass')
+@authentication_classes([CustomAuthentication])
+def checkPassword(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+    password_form = PasswordForm(data)
+    if not password_form.is_valid():
+        return JsonResponse({'message': 'invalid form', 'errors token' : password_form.errors},  status=status.HTTP_400_BAD_REQUEST)
     user = request.user
-    if user.check_password(current_password):
+    if user.check_password(data['password']):
         return JsonResponse({'message': 'The password is correct'}, status=201)
     else:
         return JsonResponse({'status': 'error', 'message': 'The password its not the same'}, status=400)
@@ -153,13 +162,15 @@ def loginWith42Token(request):
 def friends(request):
     if not request.user.is_authenticated:
         return JsonResponse({'message': 'You must login to see this page!'}, status=401)
-    if request.method == 'GET':
-        
+    if request.method == 'GET': 
         friends = request.user.friends.all()
         serializer = UserInfoSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
         friend_id = data.get('friend_id')
         if friend_id is None:
             return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
@@ -172,7 +183,10 @@ def friends(request):
         serializer = UserInfoSerializer(request.user.friends.all(), many=True)
         return Response({"message": "Friends added successfully", "friends": serializer.data}, status=status.HTTP_200_OK)
     elif request.method == 'DELETE':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
         friend_id = data.get('friend_id')
         if friend_id is None:
             return JsonResponse({'message': 'no friend_id passed'},  status=status.HTTP_400_BAD_REQUEST)
@@ -198,7 +212,10 @@ def blocked_users(request):
         serializer = UserInfoSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
         blocked_user_id = data.get('blocked_user_id')
         if blocked_user_id is None:
             return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
@@ -211,7 +228,10 @@ def blocked_users(request):
         serializer = UserInfoSerializer(request.user.blockedUsers.all(), many=True)
         return Response({"message": "User blocked successfully", "blockedUsers": serializer.data}, status=status.HTTP_200_OK)
     elif request.method == 'DELETE':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
         blocked_user_id = data.get('friend_id')
         if blocked_user_id is None:
             return JsonResponse({'message': 'no blocked_user_id passed'},  status=status.HTTP_400_BAD_REQUEST)
@@ -268,9 +288,12 @@ def logout(request):
     response.delete_cookie('refresh_token')
     return response
 
+#todo
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
     try:
         user = CustomUser.objects.get(username=request.user.username)
 
@@ -288,16 +311,20 @@ def delete(request):
 @api_view(['POST'])
 @authentication_classes([])
 def register(request):
-    logger.debug('Registration request received')
-    data = json.loads(request.body)
-    username = data.get('username', '')
-    password = data.get('password', '')
-    email = data.get('email', '')
-    if username and password and email:
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+    
+    form = UserRegisterForm(data)
+    if form.is_valid():
         try:
+            username = data.get('username', '')
+            password = data.get('password', '')
+            email = data.get('email', '')
             token_verification = mail.generate_token()
             user = CustomUser.objects.create_user(
-            username=username, email=email, password=password, token_verification=token_verification)
+                username=username, email=email, password=password, token_verification=token_verification)
             mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(username, token_fernet)), email)
         except IntegrityError as e:
             if 'duplicate key' in str(e):
@@ -307,10 +334,11 @@ def register(request):
         update_last_login(None, user)
         return JsonResponse({'message': 'User successfully registered!'}, status=201)
     else:
-        return JsonResponse({'reason': 'Username and password are required!'}, status=400)
+        return JsonResponse({'message': 'Invalid form!'}, status=400)
 
+#!todo
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([CustomAuthentication])
 def matches(request):
     match_ids = request.query_params.get('ids')
     if match_ids:
@@ -337,16 +365,20 @@ def userHistory(request, user_id):
 @api_view(['POST'])
 @authentication_classes([])
 def login(request):
-        logger.debug('Login request received')
-        data = request.data
-        response = Response()
-        username = data.get('username', None)
-        password = data.get('password', None)
-        user = authenticate(username=username, password=password)
-        privateUserInfo = PrivateUserInfoSerializer(user).data
-        response = JsonResponse({'privateUserInfo' : privateUserInfo})
-
+        
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+        form = UserLoginForm(data) 
+        if not form.is_valid():
+            return JsonResponse({'message': 'invalid form', 'errors' : form.errors},  status=status.HTTP_400_BAD_REQUEST)
+        username = data.get('username', '')
+        password = data.get('password', '')
+        user = authenticate(username=username,password=password)
         if user is not None:
+            privateUserInfo = PrivateUserInfoSerializer(user).data
+            response = JsonResponse({'privateUserInfo' : privateUserInfo})
             if user.is_active:
                 refresh = RefreshToken.for_user(user)
                 response.set_cookie(
@@ -392,20 +424,25 @@ def get_tokens_for_user(user):
 
  
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def setUserConfig(request, user_id=None):
+@authentication_classes([CustomAuthentication])
+def setUserConfig(request):
     '''
     Esta función permite guardar la nueva configuración en un usuario.
 
     Los parametros son la 'key' y su 'value' pasados como JSON
     '''
-    data = json.loads(request.body)
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You must login to see this page!'}, status=401)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
 
-    if user_id is not None:
-        try:
-            user = CustomUser.objects.get(id=user_id)
-        except CustomUser.DoesNotExist:
-            return JsonResponse({'message': 'This user does not exist!'}, status=404)
+    user = request.user
+
+    form = UserConfigForm(data)
+    if not form.is_valid():
+        return JsonResponse({'message': 'invalid form', 'errors' : form.errors},  status=status.HTTP_400_BAD_REQUEST)
 
     updated_fields = []
     valid_keys = ['color', 'language', 'username', 'password', 'email', 'anonymise', 'avatarUrl']
@@ -514,84 +551,163 @@ def avatar_set(user, image_data):
 @api_view(['POST'])
 @authentication_classes([])
 def send_mail(request):
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+
+    username_form = UsernameForm(data)
+    if not username_form:
+        return JsonResponse({'message': 'invalid form', 'errors username' : username_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+    username = data['username']
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\'t exist'}, status=400)
+    
     token_TwoFA = mail.generate_random_verification_code(6)
-    email = customUser.email
+    email = user.email
     if email == None:
         return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_TwoFA_mail(token_TwoFA, email)
-    customUser.token_2FA = token_TwoFA
-    customUser.save()
+    user.token_2FA = token_TwoFA
+    user.save()
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
 @api_view(['POST'])
 @authentication_classes([])
 def send_mail_2FA_activation(request):
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+
+    username_form = UsernameForm(data)
+    if not username_form:
+        return JsonResponse({'message': 'invalid form', 'errors username' : username_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+    username = data['username']
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\'t exist'}, status=400)
+    
     token_TwoFA = mail.generate_random_verification_code(6)
-    email = customUser.email
+    email = user.email
     if email == None:
         return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_TwoFA_Activation_mail(token_TwoFA, email)
-    customUser.token_2FA = token_TwoFA
-    customUser.save()
+    user.token_2FA = token_TwoFA
+    user.save()
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
 @api_view(['POST'])
 @authentication_classes([])
 def send_mail_password(request):
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
-    token_TwoFA = mail.generate_random_verification_code(6)
-    email = customUser.email
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+    
+    username_form = UsernameForm(data)
+    if not username_form:
+        return JsonResponse({'message': 'invalid form', 'errors username' : username_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+    username = data['username']
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\'t exist'}, status=400)
+    
+    email = user.email
     if email == None:
         return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_password_mail(email)
-    customUser.token_2FA = token_TwoFA
-    customUser.save()
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
 @api_view(['POST'])
 @authentication_classes([])
 def send_mail_2FA_deactivation(request):
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
-    email = customUser.email
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+    
+    username_form = UsernameForm(data)
+    if not username_form:
+        return JsonResponse({'message': 'invalid form', 'errors username' : username_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+    username = data['username']
+    
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\'t exist'}, status=400)
+    email = user.email
     if email == None:
         return JsonResponse({'message': 'Email not found!'}, status=400)
     mail.send_TwoFA_Deactivation_mail(email)
-    customUser.is_2FA_active = False
-    customUser.save()
+    user.is_2FA_active = False
+    user.save()
     return JsonResponse({'message': 'Email sent!'}, status=201)
 
 
 @api_view(['POST'])
 def check_token(request):
-    current_Token = request.POST.get('currentToken')
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
-    if customUser.token_2FA == current_Token:
-        customUser.token_2FA = ''
-        if customUser.is_2FA_active == True :
-            customUser.is_2FA_active = False
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+    
+    token_form = EmailTokenForm(data)
+    username_form = UsernameForm(data)
+    if not token_form:
+        return JsonResponse({'message': 'invalid form', 'errors token' : token_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+    if not username_form:
+        return JsonResponse({'message': 'invalid form', 'errors username' : username_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+    
+    username = data['username']
+    token = data['token']
+
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\' exist'}, status=400)
+    if not user.is_2FA_active:
+        return JsonResponse({'message': 'User doesn\'t have 2FA active'}, status=400)
+    if user.token_2FA == token:
+        user.token_2FA = ''
+        if user.is_2FA_active == True :
+            user.is_2FA_active = False
         else :
-            customUser.is_2FA_active = True
-        customUser.save()
+            user.is_2FA_active = True
+        user.save()
         return JsonResponse({'message': 'The Token is correct'}, status=201)
     else:
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
-    
+ 
 @api_view(['POST'])
 @authentication_classes([])
 def check_token_login(request):
-    current_Token = request.POST.get('currentToken')
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
-    if customUser.token_2FA == current_Token:
-        customUser.token_2FA = ''
-        customUser.save()
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+
+    token_form = EmailTokenForm(data)
+    username_form = UsernameForm(data)
+    if not token_form:
+        return JsonResponse({'message': 'invalid form', 'errors token' : token_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+    if not username_form:
+        return JsonResponse({'message': 'invalid form', 'errors username' : username_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+
+    username = data['username']
+    token = data['token']
+
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\' exist'}, status=400)
+    if user.token_2FA == token:
+        user.token_2FA = ''
+        user.save()
         return JsonResponse({'message': 'The Token is correct'}, status=201)
     else:
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
@@ -599,8 +715,19 @@ def check_token_login(request):
 @api_view(['POST'])
 @authentication_classes([])
 def get_2FA_bool(request):
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+
+    form = UsernameForm(data)
+    if not form.is_valid():
+        return JsonResponse({'message': 'invalid form', 'errors' : form.errors},  status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        customUser = CustomUser.objects.get(username=data['username'])
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\' exist'}, status=400)
     if customUser.is_2FA_active == True :
         return JsonResponse({'message': 'true'}, status=201)
     if customUser.is_2FA_active == False :
@@ -609,13 +736,25 @@ def get_2FA_bool(request):
 @api_view(['POST'])
 @authentication_classes([])
 def verify_mail(request):
-    current_Token = mail.desencript(request.POST.get('currentToken'), token_fernet)
-    current_Username = mail.desencript(request.POST.get('currentUsername'), token_fernet)
-    customUser = CustomUser.objects.get(username=current_Username)
-    if customUser.token_verification == current_Token:
-        customUser.token_verification = ''
-        customUser.verification_bool = True
-        customUser.save()
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+
+    form = VerifyEmailViewForm(data)
+    if not form.is_valid():
+        return JsonResponse({'message': 'invalid form', 'errors' : form.errors},  status=status.HTTP_400_BAD_REQUEST)
+
+    token = mail.desencript(data['encripted_token'], token_fernet)
+    username = mail.desencript(data['encripted_username'], token_fernet)
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\' exist'}, status=400)
+    if user.token_verification == token:
+        user.token_verification = ''
+        user.verification_bool = True
+        user.save()
         return JsonResponse({'message': 'The Token is correct'}, status=201)
     else:
         return JsonResponse({'status': 'error', 'message': 'The token its not the same'}, status=400)
@@ -623,26 +762,25 @@ def verify_mail(request):
 @api_view(['POST'])
 @authentication_classes([])
 def send_mail_new_mail(request):
-    current_Username = request.POST.get('currentUsername')
-    current_MailNew = request.POST.get('currentMailNew')
-    current_MailOld = request.POST.get('currentMailOld')
-    if current_MailNew == None or current_MailOld == None:
-        return JsonResponse({'message': 'Email not found!'}, status=400)
-    customUser = CustomUser.objects.get(username=current_Username)
-    token_verification = mail.generate_token()
-    mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(current_Username, token_fernet)), current_MailNew)
-    customUser.token_verification = token_verification
-    mail.send_NoLongerSpacepong_mail(current_MailOld)
-    customUser.verification_bool = False
-    customUser.save()
-    return JsonResponse({'message': 'Email sent!'}, status=201)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'invalid json'},  status=status.HTTP_400_BAD_REQUEST)
+    form = SendMailNewMailViewForm(data)
+    if not form.is_valid():
+        return JsonResponse({'message': 'invalid form', 'errors' : form.errors},  status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-@authentication_classes([])
-def is42(request):
-    current_Username = request.POST.get('currentUsername')
-    customUser = CustomUser.objects.get(username=current_Username)
-    if customUser.is_42_user == True :
-        return JsonResponse({'message': 'true'}, status=201)
-    if customUser.is_42_user == False :
-        return JsonResponse({'message': 'false'}, status=201)
+    username = data['username']
+    old_mail = data['old_mail']
+    new_mail = data['new_mail']
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'message': 'User doesn\' exist'}, status=400)
+    token_verification = mail.generate_token()
+    mail.send_Verification_mail(mail.generate_verification_url(mail.encript(token_verification, token_fernet), mail.encript(username, token_fernet)), new_mail)
+    user.token_verification = token_verification
+    mail.send_NoLongerSpacepong_mail(old_mail)
+    user.verification_bool = False
+    user.save()
+    return JsonResponse({'message': 'Email sent!'}, status=201)

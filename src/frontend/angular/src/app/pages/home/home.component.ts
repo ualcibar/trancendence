@@ -89,7 +89,7 @@ class LocalGameHandler{
   animations: [fadeInOut, easeOut]
 })
 export class HomeComponent implements OnInit, AfterViewInit{
-  debug : boolean = true; //Al activar el modo debug, aparecerá un recuadro en la página
+  debug : boolean = false; //Al activar el modo debug, aparecerá un recuadro en la página
   chatUnwrapped: boolean = false;
   isAnimating: boolean = false;
   //state: HomeState;
