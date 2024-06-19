@@ -317,6 +317,10 @@ export class MatchUpdate{
 
     return minutes + ':' + seconds;
   }
+
+  get scoreBoard() : string{
+    return this.score.score[0] + ' - ' + this.score.score[1];
+  }
 }
 
 export class TournamentUpdate{

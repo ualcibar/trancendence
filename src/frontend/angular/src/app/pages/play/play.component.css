@@ -57,6 +57,12 @@
 }
 
 .game-clock {
-    font-size: 2em;
+    font-size: 1.5em;
     color: lime; /* color de texto verde */
+}
+
+.game-score {
+    font-size: 2em; /* Ajusta el tamaño según tus necesidades */
+    color: red;
+    font-family: 'Digital-7', sans-serif; /* Asegúrate de tener esta fuente o usa una similar */
 }

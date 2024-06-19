@@ -1,8 +1,8 @@
 <div class="h-50real">
   <div class="h-full" *ngIf="(renderState.game$ | async)">
-    <!-- Agregar el reloj aquí -->
-    <div class="absolute" style="bottom: 10%; left: 50%; transform: translateX(-50%);">
+    <div class="absolute" style="bottom: 10%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <h1 class="game-clock">{{manager.getMatchUpdate().clock}}</h1>
+      <h2 class="game-score">{{manager.getMatchUpdate().scoreBoard}}</h2>
     </div>
     <div *ngIf="showSettings" class="absolute">
     </div>
