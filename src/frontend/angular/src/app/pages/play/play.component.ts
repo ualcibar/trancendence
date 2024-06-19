@@ -169,12 +169,12 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')
                             this.renderState.renderGame.setValue(false)
-                            //window.location.href = '/'
+                            setTimeout(() => window.location.href = '/', 500)
                             break;
                         case MatchState.FinishedSuccess:
                             console.log('match finish success')
                             this.renderState.renderGame.setValue(false)
-                            //window.location.href = '/'
+                            setTimeout(() => window.location.href = '/', 500)
                             break;
                     }
                 })
