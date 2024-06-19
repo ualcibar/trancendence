@@ -91,7 +91,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
 
 
   addToScene(scene: THREE.Scene) {
-    console.log('adding ball to scene');
+    //console.log('adding ball to scene');
     scene.add(this.mesh);
     if (this.lightOn)
       scene.add(this.light);

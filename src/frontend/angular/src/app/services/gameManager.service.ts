@@ -288,12 +288,12 @@ export class MatchUpdate{
     }
 
     // randomize a bit the prediction (makes it more human like)
-    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius)/2 ;
+    predictedBallY  += (Math.random() - Math.random()) * (paddle.width - ball.radius) ;
 
     // if the ball is going to the left, make the prediction less extreme
-    if (!(ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2)) {
-      predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
-    }
+    // if (!(ball.angle < Math.PI / 2 || ball.angle > 3 * Math.PI / 2)) {
+    //   predictedBallY = (predictedBallY) / 4.2; // 4.2 is a magic number
+    // }
     return predictedBallY
   }
 }
