@@ -375,6 +375,9 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.pos.set(paddle.pos.x, paddle.pos.y);
     this.mesh.position.set(paddle.pos.x, paddle.pos.y, 0);
     this.dir = paddle.dir;
+    this.stateBinded = paddle.stateBinded;
+    this.stateBot = paddle.stateBot;
+    this.stateUnbinded = paddle.stateUnbinded;
   }
 
   goUp() {
@@ -497,13 +500,12 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   }
 
   toJSON() : any{
-    const {pos, dimmensions,type, color, speed, dir, AIprediction} = this;
-    return {pos, dimmensions,type, color, speed, dir, AIprediction}; 
+    const {pos, dimmensions,type, color, speed, dir, AIprediction, stateBinded, stateBot, stateUnbinded} = this;
+    return {pos, dimmensions,type, color, speed, dir, AIprediction, stateBinded, stateBot, stateUnbinded}; 
   }
 
   isAI() : boolean{
-    if (this.state === PaddleState.Bot)
-      this.madeAIPlayer();
+
     return this.stateBot;
   }
 
@@ -858,7 +860,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     //if (this.manager.getMatchState() === MatchState.Running)
       this.update.runTickBehaviour(timeDifference);
     this.allColisions();
-    //this.checkAI();
     this.updateScene();
   }
 
@@ -913,8 +914,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   }
 
   sendIAprediction(paddle : Paddle, prediction : number){
-    // console.log(paddle);
-    // console.log(paddle.getId());
+    console.log("mira eneko es aaqui");
+    console.log(paddle.getId());
     const eventData : EventData = {
       senderId : paddle.getId(),// not sure about what is what
       targetIds : paddle.getId(),
@@ -926,17 +927,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
     };
     // console.log('sending event IA prediction', eventData);
     this.manager.sendEvent(PongEventType.IAPrediction, eventData);
-  }
-
-  checkAI(){
-    for (const paddle of this.paddles){
-      // console.log('checking AI');
-      // console.log('paddle', paddle);
-      if (paddle.isAI() && paddle.isIAupdateable()) {
-        // console.log('IA¡!');
-        this.makePrediction(paddle);
-      }
-    }
   }
 
   allColisions(){
