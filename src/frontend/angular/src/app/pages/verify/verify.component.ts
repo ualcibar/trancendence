@@ -31,7 +31,7 @@ export class VerifyComponent {
 
   async verify_mail(token: string, user:string): Promise<void> {
     const backendURL = 'api/polls/verify_mail/';
-    const httpReqBody = `currentToken=${token}&currentUsername=${user}`;
+    const httpReqBody = `encripted_token=${token}&encripted_username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'

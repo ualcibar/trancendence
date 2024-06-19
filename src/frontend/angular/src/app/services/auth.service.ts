@@ -337,7 +337,7 @@ export class AuthService {
 
   async get_2FA_bool(user: string): Promise<boolean> {
     const backendURL = 'api/polls/get_2FA_bool/';
-    const httpReqBody = `currentUsername=${user}`;
+    const httpReqBody = `username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -467,8 +467,8 @@ export class AuthService {
   }
 
   async verifyPassword(value: string): Promise<void> {
-    const backendURL = '/api/polls/checkInfo/';
-    const httpReqBody = `currentPass=${value}`;
+    const backendURL = '/api/polls/checkPassword/';
+    const httpReqBody = `password=${value}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -485,7 +485,7 @@ export class AuthService {
       this.logger.error('update user info: userinfo is undefined')
       return
     }
-    const httpReqBody = `currentToken=${token}&currentUsername=${this.user_info.username}`;
+    const httpReqBody = `token=${token}&username=${this.user_info.username}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -497,7 +497,7 @@ export class AuthService {
 
   async send_mail(user:string): Promise<void> {
     const backendURL = 'api/polls/send_mail/';
-    const httpReqBody = `currentUsername=${user}`;
+    const httpReqBody = `username=${user}`;
     const httpHeader = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
