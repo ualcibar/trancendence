@@ -71,7 +71,7 @@ export class Ball implements GameObject, EventObject,  TickObject, toJson{
     this.mesh = new THREE.Mesh(ballGeometry, ballMaterial);
 
     this.pos = settings.ballInitPos;
-    this.dir = settings.ballInitDir;
+    this.dir = new Vector2(settings.ballInitDir.x, settings.ballInitDir.y);
     this.speed = settings.ballInitSpeed;
     this.aceleration = settings.ballInitAcceleration;
 
@@ -327,7 +327,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   tickBehaviour : TickBehaviour<Paddle>;
   eventBehaviour : EventBehaviour<Paddle>;
   id! : number;
-  pos : Vector2;
+  pos : Vector2 = new Vector2(0,0);
   dir : Vector2 = new Vector2(0,0);
   dimmensions : Vector3;
   type : BlockType;
@@ -355,9 +355,9 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
     const match_settings = manager.getMatchSettings()
     if (number < match_settings.teamSize)
-      this.pos = settings.paddleInitPos[0];
+      this.pos.copy((settings.paddleInitPos[0]));
     else
-      this.pos = settings.paddleInitPos[1];
+      this.pos.copy((settings.paddleInitPos[1]));
 
     this.dimmensions = settings.paddleDimmensions;
     this.type = settings.paddleType;
@@ -379,7 +379,7 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
   sincronize(paddle : Paddle){
     this.pos.set(paddle.pos.x, paddle.pos.y);
     this.mesh.position.set(paddle.pos.x, paddle.pos.y, 0);
-    this.dir = paddle.dir;
+    this.dir.copy(paddle.dir);
     this.stateBinded = paddle.stateBinded;
     this.stateBot = paddle.stateBot;
     this.stateUnbinded = paddle.stateUnbinded;
@@ -821,7 +821,6 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   
 
   render(time: number) { 
-    this.paddles[0].pos.y += 0.5
     time *= 0.001; // convert time to seconds
     time -= this.pausedTime *  0.001;
     if (this.pastTime === 0)
