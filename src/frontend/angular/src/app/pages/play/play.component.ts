@@ -119,12 +119,12 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                             case MatchState.FinishedSuccess:
                                 this.renderState.renderGame.setValue(false);
                                 this.renderState.renderMatchEnd.setValue(true);
-                                router.navigate(['/'])
+                                window.location.href = '/'
                                 break;
                             case MatchState.FinishedError:
                                 this.renderState.renderGame.setValue(false);
                                 this.renderState.renderMatchEnd.setValue(true);
-                                router.navigate(['/'])
+                                window.location.href = '/'
                                 break;
                         }
                     })
@@ -148,7 +148,7 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                                 this.renderState.renderTree.setValue(true);
                                 break;
                             case TournamentState.FinishedSuccess:
-                                this.router.navigate(['/'])    
+                                window.location.href = '/'
                                 break;
                         }
                     })
@@ -165,20 +165,16 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 this.players = this.onlineMatchManager!.getPlayers(); 
                 this.renderState.renderGame.setValue(true);
                 this.onlineMatchManager!.matchState.subscribe((state : MatchState)=>{ 
-                    console.log('STATE', state)
-                    console.log('STATE', state)
-                    console.log('STATE', state)
-                    console.log('STATE', state)
                     switch (state){
                         case MatchState.FinishedError:
                             console.log('there was an error during the match')
                             this.renderState.renderGame.setValue(false)
-                            router.navigate(['/'])
+                            setTimeout(() => window.location.href = '/', 500)
                             break;
                         case MatchState.FinishedSuccess:
                             console.log('match finish success')
                             this.renderState.renderGame.setValue(false)
-                            router.navigate(['/'])
+                            setTimeout(() => window.location.href = '/', 500)
                             break;
                     }
                 })

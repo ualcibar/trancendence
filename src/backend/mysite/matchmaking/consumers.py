@@ -27,7 +27,6 @@ class MatchMakingConsumer(WebsocketConsumer):
         self.auth = JWTAuthentication()
         self.isInit = False
     def connect(self):
-        logger.debug('Request to connect to matchmaking')
         jwt_token = self.scope['query_string'].decode().split('=')[1]
         try:
             token = self.auth.get_validated_token(jwt_token)
@@ -40,12 +39,10 @@ class MatchMakingConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_add)(self.user_inbox, self.channel_name)
         async_to_sync(self.channel_layer.group_add)(self.global_room_name, self.channel_name)
         self.accept()
-        logger.debug('Accepted matchmaking connection')
         if self.user.previous_status == CustomUser.IN_GAME:
             if self.user.game == None or self.user.game_room_name == None:
                 self.user.game = None
                 self.user.game_room_name = None
-                logger.debug(f'game {self.user.game} room {self.user.game_room_name}, match was deleted')
                 self.user.status = CustomUser.CONNECTED
                 try:
                     player = Player.objects.get(user=self.user)
@@ -59,7 +56,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                     'type': 'match_reconnect',
                     'match' : serialized_match
                 }))
-                logger.debug(f'sending to {self.user.game.getHostUsername()} player reconnected')
                 async_to_sync(self.channel_layer.group_send)(
                     f'inbox_{self.user.game.getHostUsername()}_matchmaking',
                     {
@@ -79,7 +75,6 @@ class MatchMakingConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         if self.isInit:
             self.user.refresh_from_db()
-            logger.debug(f'player disconnected {self.user.username} status {self.user.status}')
             self.user.previous_status = CustomUser.STAND_BY
             if self.user.status == CustomUser.JOINING_GAME:
                 try:
@@ -95,9 +90,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                         }
                     )
                     self.deleteMatchPreview(self.user.game)
-                    logger.debug('Disconnect: deleting game')
                 else:
-                    logger.debug('Disconnect: player disconnected while in or joing match')
                     self.user.game.playerLeft(self.user.id)
                     async_to_sync(self.channel_layer.group_send)(
                         self.user.game_room_name,
@@ -120,7 +113,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                             'player': self.user.username,
                         }
                     )
-            logger.debug(f'Disconnect: status: {self.user.status}, previous: {self.user.previous_status}')
             self.user.status = CustomUser.DISCONNECTED
             self.user.save()
             async_to_sync(self.channel_layer.group_discard)(self.global_room_name, self.channel_name)
@@ -128,7 +120,6 @@ class MatchMakingConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
-        logger.debug(f"receive {data['type']}")
         self.user.refresh_from_db()
         match data['type']:
             case "/getState":
@@ -140,7 +131,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                 self.user.status = CustomUser.CONNECTED
                 self.user.save()
             case "/new_match":
-                logger.debug('Receive: new match: new match requested')
                 if self.user.status != CustomUser.CONNECTED:
                     self.send(json.dumps({
                         'type': 'new_match_result',
@@ -148,7 +138,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                     }))
                     return 
                 try:
-                    logger.debug(f'Receive: new match: new match teamSize = {data['settings']['matchSettings']['teamSize']} type {type(data['settings']['matchSettings']['teamSize'])}')
                     self.user.game = MatchPreview.objects.create(
                         name=data['settings']['name'],
                         publicMatch=data['settings']['publicMatch'],
@@ -161,7 +150,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                     )
                     self.user.game.add_paddles(data['settings']['matchSettings']['initPaddleStates'])
                     serialized_match = MatchPreviewToOnlineMatchInfoSerializer(self.user.game).data
-                    logger.debug('SERIALIZED')
                     async_to_sync(self.channel_layer.group_send)(
                         self.global_room_name,
                         {
@@ -178,7 +166,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                     self.user.status = CustomUser.JOINING_GAME
                     self.user.save()
                     async_to_sync(self.channel_layer.group_add)(self.user.game_room_name, self.channel_name)
-                    logger.debug('Receive: new match: new match success')
                 except IntegrityError as e:
                     if "duplicate key value violates unique constraint" in str(e):
                         # Handle the specific case of duplicate key violation
@@ -202,7 +189,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'type': 'new_match_result',
                         'status': 'failure',
                     }))
-                    logger.debug(f'Receive: new match: Error creating match, {e}')
                     self.user.game.delete()
             case '/match_list':
                 self.send_match_list_to_self()
@@ -241,7 +227,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'status': 'success',
                         'match' : serialized_match
                     }))
-                    logger.debug('Receive: join match: succes joining')
                     async_to_sync(self.channel_layer.group_send)(
                         self.user.game_room_name,
                         {
@@ -250,7 +235,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                             'index' : index 
                         }
                     )
-                    logger.debug('Receive: join match: succes sendign joined match')
                     avatarUrl =  f'https://localhost:1501/api/media/{self.user.avatar}'
                     async_to_sync(self.channel_layer.group_send)(
                         f'inbox_{self.user.game.getHostUsername()}_matchmaking',
@@ -263,7 +247,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                             'index' : self.user.game.getPlayerIndex(self.user)
                         }
                     )
-                    logger.debug('Receive: join match: join match success')
                 except Exception as e:
                     self.user.game = None 
                     self.user.game_room_name = None 
@@ -273,10 +256,8 @@ class MatchMakingConsumer(WebsocketConsumer):
                         'type': 'join_match_result',
                         'status': 'failure',
                     }))
-                    logger.debug(f'Receive: join match: failed to join match {e}')
                     return
             case '/match/cancel_join':
-                logger.debug(f'Receive: match cancel join: room name == {self.user.game_room_name}')
                 room_name = self.user.game_room_name
                 async_to_sync(self.channel_layer.group_send)(
                     room_name,
@@ -297,7 +278,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                 #leave match chat
                 pass
             case 'match_player_left':
-                logger.debug(f'Receive: match player left: RECEIVED THE FUCKING MESSAGE DIRECTLY {self.user.username}')
                 if (self.user.id == data.player_id):
                     return
                 if (self.user.username == self.game.getHostUsername()):
@@ -308,7 +288,6 @@ class MatchMakingConsumer(WebsocketConsumer):
             case '/match/end':
                 match(data['state']):
                     case 'FinishedSuccess':
-                        logger.debug('match finished success')
                         users = self.user.game.getTeamA() + self.user.game.getTeamB()
                         logger.debug(f'teamA{[user.username for user in self.user.game.getTeamA()]}')
                         logger.debug(f'teamB{[user.username for user in self.user.game.getTeamB()]}')
@@ -332,8 +311,8 @@ class MatchMakingConsumer(WebsocketConsumer):
                                     'result' : 'draw',
                                 }
                             )
+                        logger.debug(f'creating match from{self.user.game}')
                         Match.from_match_preview(self.user.game, score)
-                        self.deleteMatchPreview(self.user.game)
                         for user in users:
                             statistics = user.statistics
                             statistics.total += 1
@@ -349,8 +328,10 @@ class MatchMakingConsumer(WebsocketConsumer):
                                     else: 
                                         statistics.loses += 1
                             statistics.save()
+                            logger.debug(f'statistics updated for user {user.username}')
                             async_to_sync(self.channel_layer.group_discard)(self.global_room_name, self.channel_name)
                             clearUserMatchRelated(user)
+                        self.deleteMatchPreview(self.user.game)
                     case _:
                         logger.error(f'unhandled state{data['state']}')
 
@@ -364,7 +345,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                     user.status = CustomUser.JOINING_GAME
                     user.save()
                     user = CustomUser.objects.get(id=data['playerId']) 
-                    logger.debug(f'changed state {user, user.status}')
                     async_to_sync(self.channel_layer.group_send)(
                         self.user.game_room_name,
                         {
@@ -516,7 +496,6 @@ class MatchMakingConsumer(WebsocketConsumer):
         }))
 
     def handleHostLeftMatch(self):
-        logger.debug('host left match')
         Match.from_match_preview(self.user.game, [0,self.user.game.roundsToWin])
         async_to_sync(self.channel_layer.group_send)(
             self.user.game_room_name,
@@ -533,13 +512,14 @@ class MatchMakingConsumer(WebsocketConsumer):
 
     def deleteMatchPreview(self, matchPreview : MatchPreview):
         async_to_sync(self.channel_layer.group_send)(
-            self.user.game_room_name,
+            self.global_room_name,
             {
                 'type': 'del_match',
                 'del_match_name' : matchPreview.name,
             }
         ) 
-        matchPreview.delete()
+        if matchPreview is not None:
+            matchPreview.delete()
 
 def clearUserMatchRelated(user : CustomUser): 
     user.clearGameRelated()
