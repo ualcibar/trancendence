@@ -224,6 +224,7 @@ export function createPaddleUpdate(paddle: Paddle, manager : Manager) {
 			// console.log('paddle binded, handling keys', paddle);
 			paddle.dir.y = 0;
 			if (key.isPressed(paddle.upKey)) {
+				console.log('paddle',paddle.id, 'moving up');
 				paddle.dir.y = 1;
 			}
 			if (key.isPressed(paddle.downKey)) {

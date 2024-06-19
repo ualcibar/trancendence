@@ -353,7 +353,12 @@ export class Paddle implements GameObject, EventObject, TickObject, toJson{
     // this.id = manager.subscribeGameObject(this);
     this.tickBehaviour = new TickBehaviour<Paddle>(this);
     this.eventBehaviour = new EventBehaviour<Paddle>(this, manager);
-    this.pos = settings.paddleInitPos[number];
+    const match_settings = manager.getMatchSettings()
+    if (number < match_settings.teamSize)
+      this.pos = settings.paddleInitPos[0];
+    else
+      this.pos = settings.paddleInitPos[1];
+
     this.dimmensions = settings.paddleDimmensions;
     this.type = settings.paddleType;
     this.color = settings.paddleColor;
@@ -757,20 +762,24 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
     // INIT PADDLES
     this.paddles = new Array<Paddle>(this.update.paddles.length);
+    console.log('paddles',this.update.paddles)
     for (const [index, paddle] of this.update.paddles.entries()){
+      
       const paddleGeometry = new THREE.BoxGeometry(
         paddle.dimmensions.x,
         paddle.dimmensions.y,
         paddle.dimmensions.z
       );
       const paddleMaterial = new THREE.MeshPhongMaterial({ color: paddle.color });
+      
       this.paddles[index] = new Paddle(this.map, index, this.manager);
       this.paddles[index].addToScene(this.scene);
-
+      console.log('new paddle')
       /*if (this.paddles[index].localPlayer){
         this.controlsText += `P${index + 1}:\n\t-👆${keyToEmoji(this.paddles[index].upKey)}\n\t-👇${keyToEmoji(this.paddles[index].downKey)}\n`;
       }*/
     }
+    console.log('after', this.paddles)
     /*this.controlsTextSafe = this.sanitizer.bypassSecurityTrustHtml(
       this.controlsText.replace(/\n/g, '<br>').replace(/\t/g, '&emsp;')
     );*/
@@ -811,7 +820,8 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   
 
-  render(time: number) {
+  render(time: number) { 
+    this.paddles[0].pos.y += 0.5
     time *= 0.001; // convert time to seconds
     time -= this.pausedTime *  0.001;
     if (this.pastTime === 0)
