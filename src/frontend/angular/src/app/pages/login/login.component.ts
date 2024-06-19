@@ -3,6 +3,7 @@ import {AuthService, PrivateUserInfo, UserInfo} from '../../services/auth.servic
 import { Router } from '@angular/router';
 import { easeOut } from '../../../assets/animations/easeOut';
 import { ip } from '../../../main';
+import { id42 } from '../../../main';
 
 @Component({
   selector: 'app-login',
@@ -41,8 +42,7 @@ export class LoginComponent {
   }
 
   login42Api() {
-    //window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=http%3A%2F%2F${ip}%3A4200&response_type=code&state=login';
-    window.location.href = `https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87&redirect_uri=https%3A%2F%2F${ip}%3A1501&response_type=code&state=login`;
+    window.location.href = `https://api.intra.42.fr/oauth/authorize?client_id=${id42}&redirect_uri=https%3A%2F%2F${ip}%3A1501&response_type=code&state=login`;
   }
 
   async loginAcc() {
