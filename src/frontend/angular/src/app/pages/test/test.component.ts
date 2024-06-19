@@ -3,13 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { ChatComponent } from '../../components/chat/chat.component';
 import {LobbySearchComponent} from '../../components/lobby-search/lobby-search.component';
 import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.component';
-import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-test',
   standalone: true,
-  imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyMatchComponent, LobbyTournamentComponent],
+  imports: [ChatComponent, LobbySearchComponent, CommonModule, LobbyMatchComponent],
   templateUrl: './test.component.html',
   styleUrl: './test.component.css'
 })

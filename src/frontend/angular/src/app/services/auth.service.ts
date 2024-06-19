@@ -346,7 +346,7 @@ export class AuthService {
         }, 1000);
       },
       error: (error) => {
-        this.logger.error('An error ocurred registering this account:', error.message);
+        this.logger.error('An error ocurred registering this account:', error.error.message);
       }
     })
     return register$;

@@ -18,6 +18,9 @@ export class RegisterComponent {
         password: '',
         email: ''
     };
+    privacyText: boolean = false;
+    privacyAccepted: boolean = false;
+
     usernameUsed: boolean = false;
     formSent: boolean = false;
     internalError: boolean = false;
@@ -43,27 +46,37 @@ export class RegisterComponent {
     }
 
     registerAcc() {
+        this.error = false;
         this.formSent = true;
         this.authService.registerAcc(this.user.username, this.user.password, this.user.email).subscribe({
             next: () => {
                 this.error = false;
                 this.success = true;
                 this.formSent = false;
-                },
+            },
             error: (error) => {
-                console.log(error)
+                this.error = true;
                 this.success = false;
                 this.formSent = false;
-                const errorMsg = error.message;
+                const errorMsg = error.error.message;
                 if (errorMsg.includes("already exists")) { //El nombre de usuario ya está en uso
                     this.usernameUsed = true;
                 } else if (errorMsg.includes("invalid form")) { // Error interno
                     this.internalError = true;
                 } else { // Error interno
-                    this.error = true;
                     this.internalError = true;
                 }
             }
         })
+    }
+
+    togglePrivacy(event: Event) {
+        this.privacyAccepted = (event.target as HTMLInputElement).checked;
+    }
+
+    closePrivacy() {
+        setTimeout(() => {
+            this.privacyText = false;
+        }, 700);
     }
 }

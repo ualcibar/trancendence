@@ -19,8 +19,14 @@
 				<label for="passwordInput" class="form-label"><i class="bi bi-incognito"></i> {{'password'|translate}}</label>
 				<div id="passwordHelp" class="form-text"><i class="bi bi-info-circle-fill"></i> {{'register_password_tip'|translate}}</div>
 			</div>
+			<div class="form-check mb-4">
+				<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required (change)="togglePrivacy($event)">
+				<label class="form-check-label" for="flexCheckDefault">
+					Aceptas la <a (click)="privacyText = true" class="text-white underline underline-offset-2">Politica de Privacidad</a> de SpacePong
+				</label>
+			</div>
             <div class="flex flex-col sm:flex-row items-center">
-                <button *ngIf="!formSent" [ngClass]="{'grayscale-0': !email.invalid && !password.invalid && !username.invalid,'grayscale disabled opacity-50': email.invalid || password.invalid || username.invalid}" type="submit" class="btn btn-warning">
+                <button *ngIf="!formSent" [ngClass]="{'grayscale-0': !email.invalid && !password.invalid && !username.invalid && privacyAccepted,'grayscale disabled opacity-50': email.invalid || password.invalid || username.invalid || !privacyAccepted}" type="submit" class="btn btn-warning">
                     <p class="mx-6 text-xs font-medium uppercase text-black">{{'profile_register'|translate}}</p>
 				</button>
                 <button *ngIf="formSent" type="submit" class="btn btn-warning grayscale disabled opacity-50">
@@ -36,6 +42,33 @@
 				</button>
 			</div>
 		</form>
+	</div>
+	<div *ngIf="privacyText" class="bg-indigo-950 alert alert-dark alert-dismissible fade show flex flex-col justify-start items-start z-20 absolute inset-0 my-8 mx-auto" style="width: 60%;">
+		<p class="text-2xl ml-2"><i class="bi bi-shield-lock-fill"></i> Política de Privacidad</p>
+		<div class="scrollable-container bg-slate-800 rounded m-2 p-2.5 h-fit w-full overflow-y-auto box-border">
+			<p class="mb-2">
+				<b>SpacePong</b> se compromete a <b>proteger los datos de los usuarios</b>.
+			</p>
+			<p class="mb-2">
+				Al registrarte en <b>SpacePong</b>, tus datos <b>serán encriptados</b> con un <b>avanzado sistema de encriptación</b> que mantendrá tus
+				datos <b>protegidos</b> frente a atacantes externos.
+			</p>
+			<p class="mb-2">
+				A la par con lo anteriormente mencionado, <b>SpacePong</b> se compromete a cumplir con las <b>Regulaciones de Protección de Datos Europea (GDPR en Inglés)</b>.
+			</p>
+			<ul>
+				<li>
+					<i class="bi bi-dot"></i> Podrás pedir el <b>borrado de tus datos</b> desde el panel de Ajustes de SpacePong.
+				</li>
+				<li>
+					<i class="bi bi-dot"></i> Podrás pedir la <b>pseudoanonimización de tus datos</b> desde el panel de Ajustes de SpacePong.
+				</li>
+				<li>
+					<i class="bi bi-dot"></i> En el caso de querer <b>pedir, borrar, editar o reclamar</b> tus datos, puedes mandar un correo a <a href="mailto:trascendence1804@gmail.com" class="link-light">trascendence1804&#64;gmail.com</a>
+				</li>
+			</ul>
+		</div>
+		<button (click)="closePrivacy()" type="button" class="btn-close shadow-none btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div>
 </div>
 

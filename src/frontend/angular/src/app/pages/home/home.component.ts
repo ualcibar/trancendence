@@ -3,7 +3,6 @@ import {AfterViewInit, Component, OnInit} from '@angular/core';
 import { ChatComponent } from '../../components/chat/chat.component';
 import { LobbySearchComponent } from '../../components/lobby-search/lobby-search.component';
 import { LobbyMatchComponent } from '../../components/lobby-match/lobby-match.component';
-import { LobbyTournamentComponent } from '../../components/lobby-tournament/lobby-tournament.component';
 
 import { AuthService } from '../../services/auth.service';
 import { MatchmakingService, OnlineMatchSettings2, OnlineMatchState} from '../../services/matchmaking.service';
@@ -77,7 +76,6 @@ class LocalGameHandler{
     LobbySearchComponent,
     CommonModule,
     LobbyMatchComponent,
-    LobbyTournamentComponent,
     TournamentGeneratorComponent,
     MatchGeneratorComponent,
     TournamentTreeComponent,

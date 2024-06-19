@@ -3,6 +3,7 @@ import { Component, ElementRef, OnInit, HostListener, NgZone, Renderer2 } from '
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 import { AuthService, PrivateUserInfo, UserInfo } from '../../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 import { easeOut } from "../../../../assets/animations/easeOut";
 import { UnauthorizedComponent } from '../../../components/errors/unauthorized/unauthorized.component';
@@ -50,31 +51,12 @@ export class UserProfileComponent implements OnInit{
   showFriendList: boolean =false;
 
   userBlocked = false;
+  private subscription: Subscription | undefined;
 
   constructor(private http: HttpClient, private route: ActivatedRoute, public authService: AuthService, private elRef: ElementRef, private ngZone: NgZone, private router : Router, private renderer: Renderer2, public friendService: FriendsService) {
   }
 
-  ngOnInit(): void {/*
-    this.authService.subscribe({
-      next: (userInfo : PrivateUserInfo) => {
-        if (userInfo) {
-          this.selfInfo = userInfo;
-          const subscription = this.route.params.subscribe(params => {
-            console.log(params)
-            this.userId = params['userId'];
-            this.getUserInfo(this.userId);
-            this.editProfile = this.userId === userInfo.info.id
-            subscription.unsubscribe()
-          });
-        }
-      }
-    })
-    if (this.loading) {
-      setTimeout(() => {
-        this.tooLong = true;
-      }, 7000);
-    }*/
-
+  ngOnInit(): void {
     this.authService.subscribe((userInfo : PrivateUserInfo | undefined) => {
         if (userInfo) {
           this.selfInfo = userInfo;
@@ -135,7 +117,7 @@ export class UserProfileComponent implements OnInit{
         if (this.authService.userInfo!.info.username === this.info?.username) {
           this.editProfile = true;
         } else if (this.info?.username === "admin") {
-          this.user_not_found = true;
+            this.user_not_found = true;
         } else {
           this.user_not_found = false;
         }

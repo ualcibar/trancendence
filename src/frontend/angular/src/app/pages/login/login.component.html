@@ -39,7 +39,7 @@
             <h4 class="font-bold text-black">{{'error'|translate}}</h4>
             <p *ngIf="userDoesntExist">{{'login_user_unnexistent'|translate}}</p>
             <p *ngIf="userInactive">{{'login_account_notactivated'|translate}}</p>
-            <p *ngIf="userWrongCredentials">{{'login_incorrect'|translate}}</p>
+            <p *ngIf="userWrongCredentials || invalidForm">{{'login_incorrect'|translate}}</p>
         </div>
         <button (click)="error = false; userDoesntExist = false; userInactive = false; userWrongCredentials = false;" type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>

@@ -1,5 +1,4 @@
-<div class="h-50real"><!--h-full da problemas con scroll-->
-	<!--<button (click)="backgroundClicked()" class="absolute -z-1 backgroundButton"></button>-->
+<div class="h-50real">
 	<div *ngIf="debug">
         <p class="text-gray-500">{{'home_debug'|translate}}</p>
 		<p class="text-white">{{'home_websocket_chat_state'|translate}} {{chatService.isConnected()}}</p>
@@ -8,46 +7,40 @@
 		<p class="text-white">{{'home_match_state'|translate}} {{matchmakingService.getCurrentMatchState()}}</p>
 		<p class="text-white">{{'home_current'|translate}}{{state.homeState}}</p>
 	</div>
-	<!--button (click)="backgroundClicked()" class="absolute -z-1 w-max backgroundButton"></button-->
 	<div class="homeMain">
 		<button (click)="backgroundClicked()" class="absolute -z-1 h-full backgroundButton w-11/12"></button>
-<!--        <app-chat class="flex chat" [@fadeInOut]></app-chat>-->
-		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="homeLeft" [@fadeInOut]></app-chat>
+		<app-chat *ngIf="state.homeRenderState.chat$ | async" class="homeLeft"></app-chat>
 		<div class="homeRight flex-col justify-center items-center h-auto w-full">
-            <!--img class="floating mb-12" ngSrc="assets/img/spacepong-blanco.svg" width="500" height="500" alt="SpacePong Logo" priority-->
 			<button *ngIf="(state.homeRenderState.local$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.MatchTournament)"
-				class="card mb-16" [@easeOut]>
+				class="card mb-16">
 				<h2 class="uppercase">{{'home_play'|translate}}</h2>
 			</button>
 
             <!-- En el caso de que el usuario no haya iniciado sesión o no esté registrado -->
             <button *ngIf="!(state.homeRenderState.multiplayer$ | async) && (state.homeRenderState.local$ | async) && (state.homeRenderState.render$)"
-                    routerLink="/login" class="card mb-16" [@easeOut]>
+                    routerLink="/login" class="card mb-16">
                 <h2 class="uppercase">{{'home_play_online'|translate}}</h2>
             </button>
 
             <!-- En el caso de que el usuario haya iniciado sesión -->
 			<button *ngIf="(state.homeRenderState.multiplayer$ | async) && (state.homeRenderState.render$)"
-				(click)="changeState(HomeState.SearchingOnlineGame)" class="card mb-16" [@fadeInOut]>
+				(click)="changeState(HomeState.SearchingOnlineGame)" class="card mb-16">
 				<h2>{{'home_multiplayer'|translate}}</h2>
 			</button>
 			<button *ngIf="(state.homeRenderState.community$ | async) && (state.homeRenderState.render$)" (click)="changeState(HomeState.Community)"
-				class="card mb-16" [@fadeInOut]>
+				class="card mb-16">
 				<h2>{{'home_community'|translate}}</h2>
 			</button>
 			<div *ngIf="(state.homeRenderState.match_tournament$ | async) && (state.homeRenderState.render$)" class="flex flex-col w-full justify-center items-center">
-				<button (click)="changeState(HomeState.MatchGenerator)" class="card mb-16" [@fadeInOut]>
+				<button (click)="changeState(HomeState.MatchGenerator)" class="card mb-16">
 					<h2>{{'home_match'|translate}}</h2>
 				</button>
-				<button (click)="changeState(HomeState.TournamentGenerator)" class="card mb-16" [@fadeInOut]>
+				<button (click)="changeState(HomeState.TournamentGenerator)" class="card mb-16">
 					<h2>{{'home_tournament'|translate}}</h2>
 				</button>
 			</div>
-			<div *ngIf="(state.homeRenderState.tournamentGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded-xl p-4"  style="width: 30rem;">
+			<div *ngIf="(state.homeRenderState.tournamentGenerator$ | async) && (state.homeRenderState.render$)" class="sp-div rounded-xl p-4"  style="width: 30rem;">
                 <div class="flex items-center mb-4">
-                    <!--button type="button" class="mr-2 btn btn-warning rounded-full" (click)="changeState(HomeState.MatchTournament)">
-                        <i class="text-xl bi bi-arrow-left"></i>Volver
-                    </button-->
                     <h1 class="text-2xl font-bold">{{'home_play_tournament_setting'|translate}}</h1>
                 </div>
 				<app-tournament-generator-component [settings]="getTournament()"></app-tournament-generator-component>
@@ -57,11 +50,8 @@
                     </button>
                 </div>
 			</div>
-			<div *ngIf="(state.homeRenderState.matchGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="z-0 sp-div rounded-xl p-4" style="width: 30rem;">
+			<div *ngIf="(state.homeRenderState.matchGenerator$ | async) && (state.homeRenderState.render$)" class="z-0 sp-div rounded-xl p-4" style="width: 30rem;">
                 <div class="flex items-center mb-4">
-                    <!--button type="button" class="mr-2 btn btn-warning rounded-full" (click)="changeState(HomeState.MatchTournament)">
-                        <i class="text-xl bi bi-arrow-left"></i>Volver
-                    </button-->
                     <h1 class="text-2xl font-bold">{{'home_play_match_setting'|translate}}</h1>
                 </div>
 				<app-match-generator-component [settings]="getMatch()"></app-match-generator-component>
@@ -71,11 +61,11 @@
                     </button>
                 </div>
 			</div>
-			<div *ngIf="(state.homeRenderState.onlineMatchGenerator$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded p-4 w-96" style="width: 30rem;">
+			<div *ngIf="(state.homeRenderState.onlineMatchGenerator$ | async) && (state.homeRenderState.render$)" class="sp-div rounded p-4 w-96" style="width: 30rem;">
 				<app-online-match-generator-component [settings]="getOnlineMatch()"></app-online-match-generator-component>
 				<button (click)="createOnlineMatch()" class="btn text-white">CREATE</button>
 			</div>
-			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" [@fadeInOut] class="sp-div rounded p-4 w-96" style="width: 30rem;">
+			<div *ngIf="(state.homeRenderState.tournamentTree$ | async) && (state.homeRenderState.render$)" class="sp-div rounded p-4 w-96" style="width: 30rem;">
 				<app-tournament-tree-component [manager]="tournamentManager!"></app-tournament-tree-component>
 			</div>
 			<app-lobby-match class="z-1 w-full" *ngIf="(state.homeRenderState.joiningOnlineMatch$ | async) && (state.homeRenderState.render$)"></app-lobby-match>
