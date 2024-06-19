@@ -66,3 +66,8 @@
     color: red;
     font-family: 'Digital-7', sans-serif; /* Asegúrate de tener esta fuente o usa una similar */
 }
+
+h3 {
+    font-size: 5em; /* Ajusta el tamaño según tus necesidades */
+    color: #F5EFEF; /* Este es un color blanco perla aproximado */
+}

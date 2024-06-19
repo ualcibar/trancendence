@@ -52,7 +52,22 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
     onlineMatchManager? : OnlineMatchManager  | undefined;
     players? : (OnlinePlayer | undefined)[]
     matchUpdate! : MatchUpdate;
+
+    isMenuOpen = false;
+    openMenuKey = 'Escape';
+
+    flipMenu(){
+        console.log('flip menu')
+        this.isMenuOpen = !this.isMenuOpen;
+    }
+
     constructor(public manager : GameManagerService, private router : Router, private maps : MapsService) {
+        //menu keyhook
+        document.addEventListener('keydown', (e) => {
+            if (e.key === this.openMenuKey){
+                this.flipMenu();
+            }
+        })
         this.currentManagerType = manager.getRealManagerType();
         if (manager.getState() !== GameManagerState.InGame){
             if (this.debug) {

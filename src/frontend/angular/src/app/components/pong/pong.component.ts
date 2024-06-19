@@ -857,7 +857,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   logic(timeDifference : number){ 
     //if (this.manager.getMatchState() === MatchState.Running)
     this.update.runTickBehaviour(timeDifference);
-    console.log('paddle client dir',this.update.paddles[1].dir)
+    // console.log('paddle client dir',this.update.paddles[1].dir)
     this.allColisions();
     this.updateScene();
   }
