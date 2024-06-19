@@ -24,7 +24,6 @@ export class OnlineMatchGeneratorComponent {
   
 
   constructor(){
-    
   } 
   toggleDefault(){
     this.default = !this.default;

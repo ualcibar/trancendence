@@ -118,6 +118,7 @@ export class MatchSettings{//no matter what map this settings are always applica
   teamSize : number;
   mapName : MapsName;
   initPaddleStates : PaddleState[];
+  isLocal : boolean = true;
 
   constructor( maxTimeRoundSec : number, maxRounds : number,
     roundsToWin : number, teamSize : number, mapName : MapsName, initPaddleStates : PaddleState[]){

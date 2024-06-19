@@ -7,6 +7,7 @@ import { MatchSettings } from '../../services/gameManager.service';
 import { getEnumStrings, getNextEnumValue} from '../../utils/help_enum';
 import { TranslateModule } from '@ngx-translate/core';
 import { Paddle, PaddleState } from '../pong/pong.component';
+
 @Component({
   selector: 'app-match-generator-component',
   standalone: true,
@@ -33,7 +34,10 @@ export class MatchGeneratorComponent {
   }
 
   constructor(){
-    
+  }
+
+  get isLocalGame() : boolean {
+    return this.settings.isLocal;
   }
 
   toggleDefault(){

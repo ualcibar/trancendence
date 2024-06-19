@@ -12,17 +12,19 @@
     <h1 class="my-1"><i class="bi bi-person-raised-hand"></i> {{'match_gen_team_size'|translate}} {{ settings.teamSize }} {{'match_gen_players'|translate}}</h1>
     <input [(ngModel)]="settings.teamSize" (change)="changeTeamSize($event)" (input)="changeTeamSize($event)" min="1" max="2" type="range" class="form-range">
     
-    <h1 class="my-1"><i class="bi bi-robot"></i> Select player or bot</h1>
+    <div *ngIf="isLocalGame">
+      <h1 class="my-1"><i class="bi bi-robot"></i> Select player or bot</h1>
 
-    <div class="flex my-1  justify-evenly">
-      <div class="flex-col gap-4">
-        <div *ngFor="let paddle of paddlesBindedA; let i = index">
-          <button class="text-lg"(click)="togglePaddle(0,i)" [ngClass]="{'bi bi-controller' : paddle, 'bi bi-robot' : !paddle}"></button>
+      <div class="flex my-1  justify-evenly">
+        <div class="flex-col gap-4">
+          <div *ngFor="let paddle of paddlesBindedA; let i = index">
+            <button class="text-lg"(click)="togglePaddle(0,i)" [ngClass]="{'bi bi-controller' : paddle, 'bi bi-robot' : !paddle}"></button>
+          </div>
         </div>
-      </div>
-      <div class="flex-col gap-4">
-        <div *ngFor="let paddle of paddlesBindedB; let i = index">
-          <button class="text-lg" (click)="togglePaddle(1,i)" [ngClass]="{'bi bi-controller' : paddle, 'bi bi-robot' : !paddle}"></button>
+        <div class="flex-col gap-4">
+          <div *ngFor="let paddle of paddlesBindedB; let i = index">
+            <button class="text-lg" (click)="togglePaddle(1,i)" [ngClass]="{'bi bi-controller' : paddle, 'bi bi-robot' : !paddle}"></button>
+          </div>
         </div>
       </div>
     </div>

@@ -166,6 +166,7 @@ export class OnlineMatchSettings2{
     this.name = name;
     this.publicMatch = publicMatch;
     this.matchSettings = matchSettings;
+    this.matchSettings.isLocal = false;
     this.available = available;
   }
   static fromI(onlineMatchSettings2I : OnlineMatchSettings2I) : OnlineMatchSettings2 | undefined{
