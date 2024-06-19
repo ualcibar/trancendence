@@ -61,11 +61,21 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
         this.isMenuOpen = !this.isMenuOpen;
     }
 
+    isPaused = false;
+    pauseKey = 'p';
+
+    flipPause(){
+        this.isPaused = !this.isPaused;
+    }
+
     constructor(public manager : GameManagerService, private router : Router, private maps : MapsService) {
         //menu keyhook
         document.addEventListener('keydown', (e) => {
             if (e.key === this.openMenuKey){
                 this.flipMenu();
+            }
+            if (e.key === this.pauseKey){
+                this.flipPause();
             }
         })
         this.currentManagerType = manager.getRealManagerType();
