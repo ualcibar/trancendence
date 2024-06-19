@@ -89,7 +89,7 @@ export class MatchUpdate{
 export class Score{
   score : [number, number];
   constructor(score : [number, number]){
-    this.score = score;
+    this.score = [score[0], score[1]];
   }
   scoreA(points : number){
     this.score[0] += points;

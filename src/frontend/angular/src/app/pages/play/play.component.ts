@@ -140,8 +140,8 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                     realManager.tournamentState.subscribe((state : TournamentState) => {
                         switch(state) {
                             case TournamentState.InGame:
-                                this.renderState.renderGame.setValue(true);
                                 this.renderState.renderTree.setValue(false);
+                                this.renderState.renderGame.setValue(true);
                                 break;
                             case TournamentState.InTree:
                                 this.renderState.renderGame.setValue(false);
@@ -151,6 +151,10 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                                 window.location.href = '/'
                                 break;
                         }
+                    })
+                    realManager.currentMatchState.subscribe((state : MatchState) => {
+                        const now = Date.now()
+                        console.log('STATE', state, 'score', realManager.update.currentMatchUpdate.score, 'now', now)
                     })
                 }
                 this.renderState.renderTree.setValue(true);
@@ -205,11 +209,17 @@ export class PlayComponent implements AfterViewInit, OnDestroy {
                 this.manager.setMatchState(MatchState.FinishedSuccess)*/
         }
     }
+    printScore(){ 
+        console.log(this.tournamentManager!.update.currentMatchUpdate.score)
+    }
     startNextTournamentround(){
+        console.log(this.tournamentManager!.update.currentMatchUpdate.score)
         console.log('PLAY HIT')
         console.log('score', this.tournamentManager!.update.currentMatchUpdate.score)
         this.tournamentManager!.nextRound();
+        //this.tournamentManager!.tournamentState.setValue(TournamentState.InGame)
+        //setTimeout(()=>this.tournamentManager?.start(), 1000);
+        
         //this.renderState.renderGame.setValue(true);
-        setTimeout(()=>this.tournamentManager!.start(), 1000);
     }
 }
