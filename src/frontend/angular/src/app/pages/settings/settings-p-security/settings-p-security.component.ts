@@ -68,6 +68,7 @@ export class SettingsPSecurityComponent {
         }
       }
     })
+    console.log(this.currentEmail);
   }
 
   async saveMailSecurity() {

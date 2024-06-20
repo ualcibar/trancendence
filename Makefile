@@ -1,5 +1,5 @@
 NAME=Dockerfile
-COMPOSE_FILE=src/docker-compose.yml
+COMPOSE_FILE=docker-compose.yml
 
 $(NAME):
 	make run
@@ -57,10 +57,10 @@ re:
 	make status
 
 ip_to_env:
-	cd src; bash ip_to_env.sh; cd ..
+	bash ip_to_env.sh
 
 clean_ip:
-	cd src; bash clean.sh; cd ..
+	bash clean.sh
 
 reip:
 	make clean_ip

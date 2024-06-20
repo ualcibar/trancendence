@@ -51,8 +51,8 @@ def getOauth2Token(code : str):
     logger.debug(f'ip is {ip} {type(code)}')
     sendJson = {}
     sendJson['code'] = str(code)
-    sendJson['client_id'] = 'u-s4t2ud-8aae85ebafbe4fc02b48f3c831107662074a15fe99a907cac148d3e42db1cd87'
-    sendJson['client_secret'] = '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'
+    sendJson['client_id'] = os.getenv('ID42')
+    sendJson['client_secret'] = os.getenv('SECRET42')
     sendJson['redirect_uri'] = f'https://{ip}:1501'
     sendJson['grant_type'] = 'authorization_code'
     url = 'https://api.intra.42.fr/oauth/token'

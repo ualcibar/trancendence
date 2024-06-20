@@ -586,6 +586,7 @@ export class PongComponent implements AfterViewInit, OnDestroy {
   public readonly far = 5;
   public readonly cameraZ = 2;
 
+  deleted : boolean = false;
   stop : boolean = false;
   renderer!: THREE.WebGLRenderer;
   //canvas: any;
@@ -657,29 +658,31 @@ export class PongComponent implements AfterViewInit, OnDestroy {
             this.stop = true;
             break;
           case MatchState.FinishedSuccess:
+            this.deleted = true
             break;
           case MatchState.FinishedError:
+            this.deleted = true
             break;
         }
       }
     );
   }
 
-  ngOnDestroy(): void {
-    console.log('PONG DeLETED')
+  cleanUpResources(){
     this.configStateSubscription.unsubscribe()
-    // Dispose renderer if exists
     if (this.renderer) {
       this.renderer.dispose();
       this.stop = true;
     }
-
-    // Clear scene
     if (this.scene) {
       while (this.scene.children.length > 0) {
         this.scene.remove(this.scene.children[0]);
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    this.deleted = true
     //this.manager.setMatchState(MatchState.FinishedSuccess);
   }
 
@@ -826,7 +829,11 @@ export class PongComponent implements AfterViewInit, OnDestroy {
 
   
 
-  render(time: number) { 
+  render(time: number) {
+    if (this.deleted){
+      this.cleanUpResources()
+      return
+    }
     time *= 0.001; // convert time to seconds
     time -= this.pausedTime *  0.001;
     if (this.pastTime === 0)

@@ -78,7 +78,7 @@ export class MatchGeneratorComponent {
 
   changeTeamSize(event: any) {
     if (event.target.value) {
-      this.settings.teamSize = event.target.value;
+      this.settings.teamSize = Number(event.target.value);
       if (this.paddlesBindedA.length < this.settings.teamSize){
         this.paddlesBindedA.push(true)
         this.paddlesBindedB.push(true)

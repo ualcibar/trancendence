@@ -145,6 +145,7 @@ class MatchMakingConsumer(WebsocketConsumer):
                         maxRounds = data['settings']['matchSettings']['maxRounds'],
                         roundsToWin = data['settings']['matchSettings']['roundsToWin'],
                         teamSize = int(data['settings']['matchSettings']['teamSize']),
+                        mapName = data['settings']['matchSettings']['mapName'],
                         host=self.user,
                         available=True
                     )

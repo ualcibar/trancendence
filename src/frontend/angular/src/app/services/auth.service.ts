@@ -159,9 +159,10 @@ export class AuthService {
   //logger*
   private logger : Logger = new Logger(LogFilter.AuthServiceLogger, 'auth service:')
   twofa_bool : boolean = false;
-  private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  user_info? : UserInfo;
-  isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  //private isLoggedInSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  //user_info? : UserInfo;
+  //isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  _user_info : State<PrivateUserInfo | undefined> = new State<PrivateUserInfo | undefined>(undefined)
   friends? : UserInfo[];
 
   private twofaCompleteSubject = new Subject<boolean>();
@@ -317,7 +318,7 @@ export class AuthService {
   }
 
   getUpdateUserInfo(): UserInfo | undefined {
-    return this.user_info;
+    return this._userInfo.getCurrentValue()?.info;
   }
 
   registerAcc(username : string, password : string, email : string) : Observable<any> {
@@ -390,8 +391,10 @@ export class AuthService {
       this.router.navigate(['/twofa-login']);
       await firstValueFrom(this.twofaComplete$);
     }
-    await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
-    this.isLoggedInSubject.next(true);
+    const response = await firstValueFrom(this.http.post<any>(backendURL, jsonToSend, httpOptions));
+    const infoI : PrivateUserInfoI = response.privateUserInfo; 
+    const info = PrivateUserInfo.fromI(infoI)
+    this._userInfo.setValue(info);
     console.log("✔️ You've successfully logged in. Welcome!");
   }
 
@@ -503,13 +506,13 @@ export class AuthService {
 
   async check_token_login(token: string): Promise<void> {
     const backendURL = 'api/polls/check_token_login/';
-    if (!this.user_info){
+    if (!this.userInfo){
       this.logger.error('update user info: userinfo is undefined')
       return
     }
     const httpReqBody = {
       token :token,
-      username : this.user_info.username
+      username : this.userInfo!.info.username
     };
     const httpHeader = {
       headers: new HttpHeaders({
